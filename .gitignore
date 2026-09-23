@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# 배치 생성 스냅샷은 재생성 가능한 산출물이라 커밋하지 않는다.
+# (데모용으로 실제 모델로 만든 스냅샷을 굳혀 커밋하기로 하면 이 줄을 지운다)
+data/snapshots/*.json
