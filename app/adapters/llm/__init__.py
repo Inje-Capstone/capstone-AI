@@ -1,6 +1,7 @@
 """LLM 백엔드 선택. 키가 없으면 조용히 mock으로 내려가서 화면은 계속 산다."""
 
 import logging
+from typing import Optional
 
 from app.adapters.llm.base import LLMClient, LLMError, LLMResult
 from app.adapters.llm.mock import FailingLLMClient, MockLLMClient
@@ -11,7 +12,8 @@ log = logging.getLogger(__name__)
 __all__ = ["LLMClient", "LLMError", "LLMResult", "build_llm_client"]
 
 
-def build_llm_client() -> LLMClient:
+def build_llm_client(model: Optional[str] = None) -> LLMClient:
+    """`model`을 주면 그 모델로(예: 한 줄 요약용 Haiku), 아니면 ROOKIE_LLM_MODEL."""
     settings = get_settings()
     backend = settings.resolved_backend
 
@@ -23,7 +25,7 @@ def build_llm_client() -> LLMClient:
         from app.adapters.llm.claude import ClaudeClient
 
         try:
-            client = ClaudeClient()
+            client = ClaudeClient(model=model)
             log.info("LLM 백엔드=claude (%s)", client.model)
             return client
         except LLMError as exc:

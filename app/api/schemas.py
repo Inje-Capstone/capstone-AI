@@ -250,3 +250,15 @@ class QuizItemOut(BaseModel):
 class QuizOut(BaseModel):
     level: int
     items: list[QuizItemOut]
+
+
+class MomentOut(BaseModel):
+    """S4 방금 장면 한 줄 요약."""
+
+    event_id: Optional[str] = Field(description="근거 중계 이벤트. 경기 시작 전이면 null")
+    t: Optional[int] = Field(description="그 장면의 영상 타임코드(초)")
+    text: str
+    source: str = Field(
+        description="llm | snapshot | template(중계 원문 조립 — 모델 없이도 항상 나온다)"
+    )
+    scoreboard: str

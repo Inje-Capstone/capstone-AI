@@ -8,10 +8,11 @@ from app.adapters.relay.base import RelaySourceError
 from app.api.deps import (
     get_card_service,
     get_matchup_service,
+    get_moment_service,
     get_relay_source,
     profile_params,
 )
-from app.api.schemas import CardOut, CardsOut, GameOut, MatchupOut, StateOut
+from app.api.schemas import CardOut, CardsOut, GameOut, MatchupOut, MomentOut, StateOut
 from app.domain.game_state import replay
 from app.domain.models import ExplainProfile
 from app.domain.timeline import Timeline
@@ -74,6 +75,20 @@ def simplify_card(
             detail="더 쉽게 설명할 수 없는 카드입니다 (이미 가장 쉬운 단계이거나 존재하지 않음)",
         )
     return CardOut.of(card)
+
+
+@router.get(
+    "/{game_id}/moment", response_model=MomentOut, summary="방금 장면 한 줄 요약 (S4)"
+)
+def game_moment(
+    game_id: str = Path(...),
+    t: Optional[int] = _T_QUERY,
+    profile: ExplainProfile = Depends(profile_params),
+):
+    """t 직전의 결과성 장면 하나. LLM이 없거나 죽어도 중계 원문 조립으로 항상 응답한다."""
+    feed = _load(game_id)
+    moment = get_moment_service().moment(feed.meta.id, t, profile.level)
+    return MomentOut(**moment.model_dump())
 
 
 @router.get(
