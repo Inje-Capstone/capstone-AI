@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
 
 DEFAULT_MODEL = "claude-sonnet-5"
+DEFAULT_CORS_ORIGINS = "http://localhost:5173,http://localhost:3000"
 
 
 class Settings:
@@ -27,6 +28,12 @@ class Settings:
         self.snapshot_dir = Path(
             os.getenv("ROOKIE_SNAPSHOT_DIR", str(ROOT / "data" / "snapshots"))
         )
+        # 쉼표 구분. 배포 시 프론트 도메인만 남긴다.
+        self.cors_origins = [
+            o.strip()
+            for o in os.getenv("ROOKIE_CORS_ORIGINS", DEFAULT_CORS_ORIGINS).split(",")
+            if o.strip()
+        ]
 
     @property
     def resolved_backend(self) -> str:

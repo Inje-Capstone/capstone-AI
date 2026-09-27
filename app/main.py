@@ -24,10 +24,10 @@ app = FastAPI(
     ),
 )
 
-# 프론트 개발 서버에서 바로 붙을 수 있게. 배포 시에는 도메인을 좁힌다.
+# 기본은 프론트 개발 서버. 배포 시에는 ROOKIE_CORS_ORIGINS로 도메인을 좁힌다.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=get_settings().cors_origins,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

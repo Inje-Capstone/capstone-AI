@@ -10,7 +10,7 @@
 ## 빠른 시작
 
 ```bash
-cd ai-engine
+cd capstone-AI
 python3 -m venv .venv
 .venv/bin/pip install -e ".[dev]"
 
@@ -18,6 +18,8 @@ python3 -m venv .venv
 .venv/bin/python -m pytest -q && .venv/bin/python -m ruff check .
 .venv/bin/python -m uvicorn app.main:app --reload
 ```
+
+> Windows는 `.venv/bin/` 대신 `.venv/Scripts/`를 쓴다.
 
 API 문서: http://localhost:8000/docs · 헬스체크: http://localhost:8000/health
 
@@ -27,10 +29,21 @@ API 문서: http://localhost:8000/docs · 헬스체크: http://localhost:8000/he
 ## 검증 명령
 
 ```bash
-cd ai-engine && .venv/bin/python -m pytest -q && .venv/bin/python -m ruff check .
+.venv/bin/python -m pytest -q && .venv/bin/python -m ruff check .
 ```
 
 완료 선언·커밋 전 필수 통과. API 키가 없어도 전량 통과하도록 설계했다(mock LLM).
+GitHub Actions(`.github/workflows/ci.yml`)가 `main`·`develop` push/PR마다 같은 명령과 Docker 빌드를 돌린다.
+
+## Docker
+
+```bash
+docker build -t rookie-ai-engine .
+docker run --rm -p 8000:8000 --env-file .env rookie-ai-engine
+```
+
+키는 이미지에 굽지 않고 실행 시 `--env-file`(또는 compose `environment`)로 넣는다.
+배포 시 `ROOKIE_CORS_ORIGINS`에 프론트 도메인을 쉼표로 적는다(기본은 로컬 개발 서버 5173·3000).
 
 ## API (와이어프레임 화면과 1:1)
 
