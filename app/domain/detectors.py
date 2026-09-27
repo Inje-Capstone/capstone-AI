@@ -14,8 +14,10 @@ from typing import Callable, Optional
 from app.domain.game_state import KIND_SUB, states_by_event
 from app.domain.models import (
     CATEGORY_BASIC,
+    CATEGORY_CULTURE,
     CATEGORY_PITCHING,
     CATEGORY_TACTICS,
+    KIND_ATBAT,
     KIND_CALL,
     KIND_PITCH,
     KIND_RESULT,
@@ -28,6 +30,7 @@ from app.domain.models import (
 
 Predicate = Callable[[RelayEvent, GameState], bool]
 Explainer = Callable[[RelayEvent, GameState], str]
+OnceKey = Callable[[RelayEvent, GameState], str]
 
 # 떨어지거나 휘는 공. 직구는 제외 — "구종 설명"의 대상이 아니다.
 OFFSPEED_PITCHES = frozenset({"포크볼", "슬라이더", "체인지업", "커브", "스플리터", "너클볼"})
@@ -42,6 +45,9 @@ class Rule:
     priority: float
     matches: Predicate
     why: Explainer
+    # 있으면 같은 키로는 한 경기에 한 번만 감지한다. 볼넷처럼 반복되는 상황이
+    # 카드를 도배하지 않게 — 입문자에게 필요한 건 첫 설명 한 번이다.
+    once: Optional[OnceKey] = None
 
 
 # ── 술어 조합기 ─────────────────────────────────────────────────────────
@@ -74,6 +80,15 @@ def _is_decisive_offspeed(event: RelayEvent, _state: GameState) -> bool:
         return False
     detail = event.detail
     return bool(detail.get("decisive")) and detail.get("pitch_type") in OFFSPEED_PITCHES
+
+
+def _is_team_first_atbat(event: RelayEvent, _state: GameState) -> bool:
+    """1회 타석 시작. 팀별 첫 번째만 남기는 건 `once`가 맡는다."""
+    return event.kind == KIND_ATBAT and event.inning == 1
+
+
+def _once_per_game(rule_id: str) -> OnceKey:
+    return lambda _e, _s: rule_id
 
 
 def _is_pitching_change(event: RelayEvent, _state: GameState) -> bool:
@@ -119,6 +134,26 @@ RULES: Sequence[Rule] = (
         priority=0.8,
         matches=_result_is("sac_fly"),
         why=lambda e, s: "타자가 아웃됐는데 점수가 올라가는 상황이다",
+    ),
+    Rule(
+        id="walk",
+        term_id="walk",
+        category=CATEGORY_BASIC,
+        label="볼넷",
+        priority=0.5,
+        matches=_result_is("walk", "intentional_walk"),
+        why=lambda e, s: "공을 치지 않았는데 타자가 1루로 걸어 나가는 장면이다",
+        once=_once_per_game("walk"),
+    ),
+    Rule(
+        id="hit_by_pitch",
+        term_id="hit_by_pitch",
+        category=CATEGORY_BASIC,
+        label="몸에 맞는 공",
+        priority=0.7,
+        matches=_result_is("hbp"),
+        why=lambda e, s: "투구가 타자 몸에 맞아 타자가 그냥 1루로 나갔다",
+        once=_once_per_game("hit_by_pitch"),
     ),
     Rule(
         id="homerun",
@@ -177,6 +212,25 @@ RULES: Sequence[Rule] = (
         matches=lambda e, s: e.kind == KIND_RESULT and s.bases == (True, True, True),
         why=lambda e, s: "루상이 꽉 차 한 방이면 점수가 크게 움직이는 상황이다",
     ),
+    Rule(
+        id="cheer_song",
+        term_id="cheer_song",
+        category=CATEGORY_CULTURE,
+        label="선수별 응원가",
+        priority=0.6,
+        matches=_is_team_first_atbat,
+        why=lambda e, s: f"{s.batting_team}의 첫 공격 — 응원석이 타자마다 응원가를 부르기 시작한다",
+        once=lambda e, s: f"cheer_song:{e.half}",
+    ),
+    Rule(
+        id="homerun_cheer",
+        term_id="homerun_celebration",
+        category=CATEGORY_CULTURE,
+        label="홈런 응원",
+        priority=0.6,
+        matches=_result_is("homerun"),
+        why=lambda e, s: f"{s.batting_team} 응원석이 홈런 세리머니로 가장 크게 들썩이는 순간이다",
+    ),
 )
 
 RULES_BY_ID = {rule.id: rule for rule in RULES}
@@ -192,12 +246,18 @@ def detect(feed: GameFeed, until_t: Optional[int] = None) -> list[Situation]:
     states = states_by_event(events, feed.meta.away_team, feed.meta.home_team)
 
     situations: list[Situation] = []
+    seen_once: set[str] = set()
     for event, state in zip(events, states):
         if until_t is not None and event.t > until_t:
             break
         for rule in RULES:
             if not rule.matches(event, state):
                 continue
+            if rule.once is not None:
+                key = rule.once(event, state)
+                if key in seen_once:
+                    continue
+                seen_once.add(key)
             situations.append(
                 Situation(
                     id=f"{feed.meta.id}:{event.id}:{rule.id}",
