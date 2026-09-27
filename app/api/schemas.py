@@ -137,6 +137,9 @@ class MatchupOut(BaseModel):
     vs_pitcher: Optional[str] = None
     team_form: Optional[str] = None
     ai_note: Optional[str] = None
+    source: Optional[str] = Field(
+        default=None, description="fixture(가상 기록) | relay(중계에 실린 실제 기록)"
+    )
 
     @classmethod
     def of(cls, matchup: Matchup) -> "MatchupOut":
@@ -150,6 +153,7 @@ class MatchupOut(BaseModel):
             vs_pitcher=matchup.vs_pitcher,
             team_form=matchup.team_form,
             ai_note=matchup.ai_note,
+            source=matchup.source,
         )
 
 

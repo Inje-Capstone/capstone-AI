@@ -194,5 +194,6 @@ class Matchup(BaseModel):
     vs_pitcher: str
     team_form: str
     ai_note: Optional[str] = None
+    source: str = "fixture"  # fixture(가상 기록) | relay(중계에 실린 실제 기록)
     available: bool = True
     unavailable_reason: Optional[str] = None

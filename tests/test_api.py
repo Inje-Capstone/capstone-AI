@@ -180,6 +180,7 @@ def test_matchup_returns_records_plus_optional_note(client):
     assert body["vs_pitcher"].startswith("vs 조민서")
     assert body["team_form"] == "최근 10경기 0.600"
     assert body["ai_note"]
+    assert body["source"] == "fixture"  # 데모 경기 기록은 가상이다 — 화면에서 밝힌다
 
 
 # ── 챗봇 ────────────────────────────────────────────────────────────────
