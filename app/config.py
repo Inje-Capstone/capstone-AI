@@ -34,6 +34,7 @@ class Settings:
         self.snapshot_dir = Path(
             os.getenv("ROOKIE_SNAPSHOT_DIR", str(ROOT / "data" / "snapshots"))
         )
+        self.video_dir = Path(os.getenv("ROOKIE_VIDEO_DIR", str(ROOT / "data" / "video")))
         # 쉼표 구분. 배포 시 프론트 도메인만 남긴다.
         self.cors_origins = [
             o.strip()

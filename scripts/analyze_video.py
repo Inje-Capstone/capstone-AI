@@ -35,10 +35,8 @@ from app.adapters.video.base import (  # noqa: E402
     VideoAnalyzerError,
     VideoClip,
 )
-from app.config import ROOT, get_settings  # noqa: E402
+from app.config import get_settings  # noqa: E402
 from app.domain.video_sync import Anchor, OffsetEstimate, estimate_offset  # noqa: E402
-
-DEFAULT_OUT_DIR = ROOT / "data" / "video"
 
 
 # ── 순수 함수 (테스트 대상) ───────────────────────────────────────────────
@@ -207,7 +205,7 @@ def main() -> int:
     parser.add_argument("--clip-base-url", default=None)
     parser.add_argument("--ffmpeg", default=None)
     parser.add_argument("--ffprobe", default=None)
-    parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
+    parser.add_argument("--out-dir", type=Path, default=None, help="기본: ROOKIE_VIDEO_DIR")
     parser.add_argument("--apply", action="store_true", help="신뢰할 만하면 fixture 오프셋 갱신")
     args = parser.parse_args()
 
@@ -227,7 +225,7 @@ def main() -> int:
         subprocess.run(
             ffmpeg_cut_cmd(ffmpeg, args.video, start, length, dest, args.height), check=True)
 
-    out_path = args.out_dir / f"{args.game_id}.json"
+    out_path = (args.out_dir or settings.video_dir) / f"{args.game_id}.json"
     snap = run(args.game_id, args.video, analyzer, clips, cut, out_path)
 
     estimate = estimate_offset(feed.events, anchors_from(snap["events"]))

@@ -9,6 +9,7 @@ from app.adapters.glossary.seed import load_glossary
 from app.adapters.llm import build_llm_client
 from app.adapters.relay.fixture import FixtureRelaySource
 from app.adapters.stats.fixture import FixtureStatsSource
+from app.adapters.video.notes import VideoNotes
 from app.config import get_settings
 from app.domain.models import ExplainProfile
 from app.domain.profile import profile_from_onboarding
@@ -31,6 +32,11 @@ def get_stats_source() -> FixtureStatsSource:
 
 
 @lru_cache(maxsize=1)
+def get_video_notes() -> VideoNotes:
+    return VideoNotes(get_settings().video_dir)
+
+
+@lru_cache(maxsize=1)
 def get_card_service() -> CardService:
     settings = get_settings()
     return CardService(
@@ -42,7 +48,9 @@ def get_card_service() -> CardService:
 
 @lru_cache(maxsize=1)
 def get_chat_service() -> ChatService:
-    return ChatService(relay=get_relay_source(), llm=build_llm_client())
+    return ChatService(
+        relay=get_relay_source(), llm=build_llm_client(), video=get_video_notes()
+    )
 
 
 @lru_cache(maxsize=1)
@@ -81,6 +89,7 @@ def reset_services() -> None:
         get_chat_service,
         get_matchup_service,
         get_glossary_service,
+        get_video_notes,
         get_quiz_service,
         get_moment_service,
     ):

@@ -5,16 +5,18 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 
 from app.adapters.relay.base import RelaySourceError
+from app.adapters.video.notes import evidence_line, near
 from app.api.deps import (
     get_card_service,
     get_matchup_service,
     get_moment_service,
     get_relay_source,
+    get_video_notes,
     profile_params,
 )
 from app.api.schemas import CardOut, CardsOut, GameOut, MatchupOut, MomentOut, StateOut
 from app.domain.game_state import replay
-from app.domain.models import ExplainProfile
+from app.domain.models import Card, ExplainProfile
 from app.domain.timeline import Timeline
 
 router = APIRouter(prefix="/api/games", tags=["game"])
@@ -43,6 +45,7 @@ def game_cards(
     profile: ExplainProfile = Depends(profile_params),
 ):
     feed = _load(game_id)
+    timeline = Timeline(feed.meta.relay_video_offset_sec)
     service = get_card_service()
     cards = service.cards(feed.meta.id, t, profile)
     # 감지된 상황은 있는데 카드가 하나도 안 나왔다면 생성이 죽은 것이다.
@@ -52,7 +55,7 @@ def game_cards(
         game_id=feed.meta.id,
         t=t,
         level=profile.level,
-        cards=[CardOut.of(c) for c in cards],
+        cards=[_card_out(c, feed.meta.id, timeline) for c in cards],
         degraded=degraded,
     )
 
@@ -74,7 +77,7 @@ def simplify_card(
             status_code=409,
             detail="더 쉽게 설명할 수 없는 카드입니다 (이미 가장 쉬운 단계이거나 존재하지 않음)",
         )
-    return CardOut.of(card)
+    return _card_out(card, feed.meta.id, Timeline(feed.meta.relay_video_offset_sec))
 
 
 @router.get(
@@ -104,3 +107,17 @@ def _load(game_id: str):
         return get_relay_source().load(game_id)
     except RelaySourceError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+def _card_out(card: Card, game_id: str, timeline: Timeline) -> CardOut:
+    """카드 t는 내부에선 중계 시각이다 — 프론트가 시킹할 수 있게 영상 타임코드로 바꿔 내보낸다.
+
+    영상 분석 스냅샷이 있으면 그 장면 전후의 VLM 관찰을 근거(reasons)에 덧붙인다.
+    판정은 바꾸지 않는다 — 카드가 뜬 이유는 여전히 중계 + 규칙이다.
+    """
+    out = CardOut.of(card)
+    out.t = timeline.to_video(card.t)
+    notes = near(get_video_notes().events(game_id), out.t)
+    if notes:
+        out.reasons = out.reasons + [evidence_line(n) for n in notes[:2]]
+    return out

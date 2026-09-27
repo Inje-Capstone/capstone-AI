@@ -13,6 +13,7 @@ from pydantic import BaseModel
 
 from app.adapters.llm.base import LLMClient, LLMError
 from app.adapters.relay.base import RelaySource
+from app.adapters.video.notes import VideoNotes, clock, recent
 from app.domain.game_state import replay
 from app.domain.models import ExplainProfile, RelayEvent
 from app.domain.timeline import Timeline
@@ -33,9 +34,12 @@ class ChatAnswer(BaseModel):
 
 
 class ChatService:
-    def __init__(self, relay: RelaySource, llm: LLMClient) -> None:
+    def __init__(
+        self, relay: RelaySource, llm: LLMClient, video: Optional[VideoNotes] = None
+    ) -> None:
         self.relay = relay
         self.llm = llm
+        self.video = video
 
     def answer(
         self,
@@ -49,13 +53,21 @@ class ChatService:
         relay_t = timeline.to_relay(int(video_t)) if video_t is not None else None
 
         state = replay(feed.events, feed.meta.away_team, feed.meta.home_team, until_t=relay_t)
-        recent = _recent_events(feed.events, relay_t)
+        recent_events = _recent_events(feed.events, relay_t)
         context_summary = f"{state.scoreboard_text()} · {state.runners_text()}"
+        video_lines = []
+        if self.video is not None and video_t is not None:
+            video_lines = [
+                f"({clock(e.t_start)}) {e.description or e.event_type}"
+                for e in recent(self.video.events(feed.meta.id), video_t)[-3:]
+            ]
 
         try:
             result = self.llm.complete(
                 system=system_prompt("chat_system"),
-                user=chat_user_prompt(question, state, profile.level, recent),
+                user=chat_user_prompt(
+                    question, state, profile.level, recent_events, video_lines=video_lines
+                ),
                 max_tokens=500,
                 effort="medium",
                 thinking=True,  # 경기 상황 추론이 필요하다
@@ -67,7 +79,7 @@ class ChatService:
                 ok=False,
                 source="none",
                 context_summary=context_summary,
-                used_event_ids=[e.id for e in recent],
+                used_event_ids=[e.id for e in recent_events],
             )
 
         return ChatAnswer(
@@ -75,7 +87,7 @@ class ChatService:
             ok=True,
             source=result.source,
             context_summary=context_summary,
-            used_event_ids=[e.id for e in recent],
+            used_event_ids=[e.id for e in recent_events],
         )
 
 
