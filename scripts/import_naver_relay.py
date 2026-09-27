@@ -21,7 +21,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.adapters.relay.fixture import _parse_fixture  # noqa: E402
-from app.adapters.relay.naver import NaverRelayError, convert_game, fetch_game  # noqa: E402
+from app.adapters.relay.naver import (  # noqa: E402
+    NaverRelayError,
+    convert_game,
+    fetch_game,
+    fetch_preview,
+)
 from app.config import get_settings  # noqa: E402
 from app.domain.game_state import replay  # noqa: E402
 
@@ -47,6 +52,7 @@ def main() -> int:
         info, innings,
         video_offset_sec=args.video_offset,
         has_video=False if args.no_video else None,
+        preview=fetch_preview(args.game_id),
     )
     out_dir = args.out_dir or get_settings().fixture_dir
     out_dir.mkdir(parents=True, exist_ok=True)

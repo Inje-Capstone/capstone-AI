@@ -93,6 +93,14 @@ def _get_json(url: str, timeout: float = 10.0) -> dict[str, Any]:
     return body["result"]
 
 
+def fetch_preview(game_id: str) -> Optional[dict[str, Any]]:
+    """경기 전 프리뷰(순위·최근 5경기·상대 전적·선발 상대 성적). 없어도 임포트는 된다."""
+    try:
+        return _get_json(f"{API_BASE}/{game_id}/preview").get("previewData")
+    except (NaverRelayError, OSError, ValueError):
+        return None
+
+
 def fetch_game(game_id: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """(경기 메타, 이닝별 textRelayData 목록). 네트워크를 쓰는 유일한 함수."""
     info = _get_json(f"{API_BASE}/{game_id}")["game"]
@@ -113,6 +121,7 @@ def convert_game(
     innings: list[dict[str, Any]],
     video_offset_sec: int = 0,
     has_video: Optional[bool] = None,
+    preview: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """네이버 원본 → fixture JSON(dict). FixtureRelaySource가 그대로 읽는다."""
     options = _flatten(innings, info["gameId"])
@@ -134,9 +143,56 @@ def convert_game(
             "video_duration_sec": events[-1]["t"] if events else 0,
             "relay_video_offset_sec": 0,  # 오프셋은 이미 t에 반영했다
             "final_score": {"away": info.get("awayTeamScore"), "home": info.get("homeTeamScore")},
+            "context": preview_context(preview) if preview else {},
         },
         "events": events,
     }
+
+
+def preview_context(preview: dict[str, Any]) -> dict[str, Any]:
+    """프리뷰 → 분석 패널용 문장. 전부 **경기 전** 값이라 결과 스포일러가 없다.
+
+    - team_form[팀명]: 순위·시즌 전적·최근 5경기·상대 전적
+    - pitcher_vs_team[선발명]: 올 시즌 상대 팀 상대 성적 (타자 대 투수 전적은 네이버가 주지 않는다)
+    """
+    info = preview.get("gameInfo") or {}
+    names = {"home": info.get("hName"), "away": info.get("aName")}
+    vs = preview.get("seasonVsResult") or {}
+    team_form: dict[str, str] = {}
+    for side, key in (("home", "h"), ("away", "a")):
+        name = names[side]
+        if not name:
+            continue
+        parts = []
+        st = preview.get(f"{side}Standings") or {}
+        if st.get("rank"):
+            draws = f" {st['d']}무" if st.get("d") else ""
+            record = f"{st.get('w', 0)}승 {st.get('l', 0)}패{draws}"
+            parts.append(f"{st['rank']}위 ({record})")
+        prev = preview.get(f"{side}TeamPreviousGames") or []
+        if prev:
+            w = sum(1 for g in prev if g.get("result") == "승")
+            lose = sum(1 for g in prev if g.get("result") == "패")
+            draw = sum(1 for g in prev if g.get("result") == "무")
+            recent = f"최근 {len(prev)}경기 {w}승 {lose}패" + (f" {draw}무" if draw else "")
+            parts.append(recent)
+        other = names["away" if side == "home" else "home"]
+        if vs and other:
+            parts.append(f"{other} 상대 {vs.get(key + 'w', 0)}승 {vs.get(key + 'l', 0)}패")
+        if parts:
+            team_form[name] = " · ".join(parts)
+
+    pitcher_vs_team: dict[str, str] = {}
+    for side, opp in (("home", names["away"]), ("away", names["home"])):
+        starter = preview.get(f"{side}Starter") or {}
+        name = (starter.get("playerInfo") or {}).get("name")
+        stats = starter.get("currentSeasonStatsOnOpponents") or {}
+        if name and opp and stats.get("era") is not None:
+            pitcher_vs_team[name] = (
+                f"{name} 올 시즌 {opp} 상대 {stats.get('gameCount', 0)}경기 "
+                f"{stats.get('inn', '0')}이닝 ERA {stats['era']}"
+            )
+    return {"team_form": team_form, "pitcher_vs_team": pitcher_vs_team}
 
 
 def _flatten(innings: list[dict[str, Any]], game_id: str) -> list[dict[str, Any]]:

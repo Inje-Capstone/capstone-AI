@@ -71,6 +71,7 @@ def _parse_fixture(path: Path) -> Optional[GameFeed]:
         relay_video_offset_sec=int(game.get("relay_video_offset_sec", 0)),
         final_away=final.get("away"),
         final_home=final.get("home"),
+        context=game.get("context") or {},
     )
     events = [RelayEvent(**e) for e in raw.get("events", [])]
     events.sort(key=lambda e: e.t)

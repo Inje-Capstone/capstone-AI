@@ -74,6 +74,8 @@ class GameMeta(BaseModel):
     relay_video_offset_sec: int = 0
     final_away: Optional[int] = None
     final_home: Optional[int] = None
+    # 경기 전 맥락(임포트 시 수집): team_form[팀], pitcher_vs_team[선발] → 분석 패널 문장
+    context: dict[str, Any] = Field(default_factory=dict)
 
     def title(self) -> str:
         return f"{self.away_team} vs {self.home_team}"

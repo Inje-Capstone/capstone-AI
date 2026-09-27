@@ -39,7 +39,7 @@ class MatchupService:
             return _unavailable("아직 타석이 시작되지 않았어요")
 
         # 중계에 그 타석 시점 기록이 실려 왔으면(네이버 임포트) 그게 우선이다.
-        facts = relay_facts(feed.events, relay_t, state)
+        facts = relay_facts(feed.events, relay_t, state, feed.meta.context)
         source = "relay"
         if facts is None:
             source = "fixture"
@@ -80,9 +80,12 @@ class MatchupService:
 
 
 def relay_facts(
-    events: list[RelayEvent], relay_t: Optional[int], state: GameState
+    events: list[RelayEvent],
+    relay_t: Optional[int],
+    state: GameState,
+    context: Optional[dict] = None,
 ) -> Optional[BatterFacts]:
-    """현재 타자의 가장 최근 타석 시작 이벤트에 실린 기록. 없으면 None."""
+    """현재 타자의 가장 최근 타석 시작 이벤트에 실린 기록 + 경기 전 맥락. 없으면 None."""
     stats = None
     for event in events:
         if relay_t is not None and event.t > relay_t:
@@ -91,10 +94,13 @@ def relay_facts(
             stats = event.detail.get("stats")
     if not stats:
         return None
+    context = context or {}
     return BatterFacts(
         batter=state.batter or "",
         avg=stats.get("season_avg"),
         recent=stats.get("today"),
+        vs_pitcher=(context.get("pitcher_vs_team") or {}).get(state.pitcher or ""),
+        team_form=(context.get("team_form") or {}).get(state.batting_team),
     )
 
 
