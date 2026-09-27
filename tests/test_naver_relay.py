@@ -207,3 +207,46 @@ def test_offspeed_card_once_per_pitch_type(tmp_path):
     offspeed = [s for s in detect(_parse_fixture(path)) if s.rule_id == "decisive_offspeed"]
     assert ["슬라이더" in s.reasons[1] for s in offspeed] == [True, False]
     assert len(offspeed) == 2
+
+
+def _two_pa_game():
+    """같은 타자가 두 번 나오는 경기. batterRecord는 그 타석 결과까지 반영된 값이다."""
+    g = _Game()
+    g.pa(1, "0", "1회초")
+    g.pa(1, "0", "1번타자 가나다")
+    g.opt(8, "1번타자 가나다", batterRecord={
+        "name": "가나다", "seasonHra": 0.301, "ab": 1, "hit": 1, "hr": 1, "rbi": 1})
+    g.pitch(1, "H", "직구", 145, "140000")
+    g.opt(23, "가나다 : 좌익수 뒤 홈런", state={})
+    g.opt(24, "가나다 : 홈인", state={"awayScore": 1})
+    g.pa(1, "0", "1번타자 가나다")
+    g.opt(8, "1번타자 가나다", batterRecord={
+        "name": "가나다", "seasonHra": 0.299, "ab": 2, "hit": 1, "hr": 1, "rbi": 1, "so": 1})
+    g.pitch(1, "S", "직구", 145, "140500")
+    g.opt(13, "가나다 : 삼진 아웃", state={"out": 1})
+    return convert_game(INFO, g.innings())
+
+
+def test_atbat_stats_do_not_spoil_the_current_atbat():
+    first, second = _events(_two_pa_game(), "atbat")
+    # 첫 타석: 오늘 기록 없음 (홈런을 미리 알려주지 않는다)
+    assert first["detail"]["stats"] == {"season_avg": "0.301", "today": "오늘 첫 타석"}
+    # 두 번째 타석: 직전 타석까지의 기록 (삼진은 아직 모른다)
+    assert second["detail"]["stats"] == {
+        "season_avg": "0.301", "today": "오늘 1타수 1안타 1홈런 1타점",
+    }
+
+
+def test_matchup_prefers_relay_stats(tmp_path):
+    from app.domain.game_state import states_by_event
+    from app.services.matchup_service import relay_facts
+
+    path = tmp_path / "g.json"
+    path.write_text(json.dumps(_two_pa_game(), ensure_ascii=False), encoding="utf-8")
+    feed = _parse_fixture(path)
+    second_atbat = [e for e in feed.events if e.kind == "atbat"][1]
+    idx = feed.events.index(second_atbat)
+    state = states_by_event(feed.events, "원정", "홈")[idx]
+    facts = relay_facts(feed.events, second_atbat.t, state)
+    assert facts is not None
+    assert (facts.avg, facts.recent) == ("0.301", "오늘 1타수 1안타 1홈런 1타점")

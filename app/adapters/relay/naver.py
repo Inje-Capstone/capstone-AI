@@ -206,6 +206,15 @@ def _runner_call(text: str) -> tuple[str, dict[str, Any]]:
     return "call", {"call": "runner"}
 
 
+def _today_line(record: dict[str, Any]) -> str:
+    """직전 타석까지의 오늘 기록. 예: `오늘 3타수 1안타 1타점 1볼넷`"""
+    parts = [f"{record.get('ab', 0)}타수 {record.get('hit', 0)}안타"]
+    for key, label in (("hr", "홈런"), ("rbi", "타점"), ("bb", "볼넷"), ("so", "삼진")):
+        if record.get(key):
+            parts.append(f"{record[key]}{label}")
+    return "오늘 " + " ".join(parts)
+
+
 class _Converter:
     def __init__(self, pitcher_names: dict[str, str], video_offset_sec: int) -> None:
         self.names = pitcher_names
@@ -216,6 +225,7 @@ class _Converter:
         self.prev = {"outs": 0, "bases": [], "away": 0, "home": 0}
         self.half_key: Optional[tuple[int, str]] = None
         self.batter: Optional[str] = None
+        self.last_record: dict[str, dict[str, Any]] = {}  # 타자별 직전 타석 기록
 
     # 주 루프: 타자 결과 + 뒤따르는 주자 텍스트를 한 이벤트로 합친다.
     def run(self, options: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -297,7 +307,27 @@ class _Converter:
         record = opt.get("batterRecord") or {}
         words = opt.get("text", "").split()
         self.batter = record.get("name") or (words[-1] if words else self.batter)
-        self._emit(opt, "atbat", {})
+        detail: dict[str, Any] = {}
+        if record.get("name"):
+            detail["stats"] = self._stats_before(record)
+            self.last_record[record["name"]] = record
+        self._emit(opt, "atbat", detail)
+
+    def _stats_before(self, record: dict[str, Any]) -> dict[str, Any]:
+        """타석 **시작 시점**에 보여줄 기록.
+
+        네이버 batterRecord는 그 타석 결과까지 반영된 값이라 그대로 쓰면 결과를 미리
+        알려주는 셈이 된다. 같은 타자의 직전 타석 기록을 쓰고, 첫 타석이면 오늘 기록은
+        비운다. 시즌 타율만은 첫 타석에 직전 값이 없어 이 타석이 포함된 값을 쓴다
+        (소수 셋째 자리 수준의 차이).
+        """
+        prev = self.last_record.get(record["name"])
+        season = (prev or record).get("seasonHra")
+        stats: dict[str, Any] = {
+            "season_avg": f"{float(season):.3f}" if season is not None else None,
+            "today": _today_line(prev) if prev else "오늘 첫 타석",
+        }
+        return stats
 
     def _pitch(self, opt: dict[str, Any], rest: list[dict[str, Any]]) -> None:
         detail: dict[str, Any] = {

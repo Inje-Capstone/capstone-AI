@@ -10,9 +10,9 @@ from typing import Optional
 
 from app.adapters.llm.base import LLMClient, LLMError
 from app.adapters.relay.base import RelaySource
-from app.adapters.stats.base import StatsSource, StatsSourceError
+from app.adapters.stats.base import BatterFacts, StatsSource, StatsSourceError
 from app.domain.game_state import replay
-from app.domain.models import Matchup
+from app.domain.models import KIND_ATBAT, GameState, Matchup, RelayEvent
 from app.domain.timeline import Timeline
 from app.prompt_templates import matchup_user_prompt, system_prompt
 
@@ -38,13 +38,18 @@ class MatchupService:
         if not state.batter:
             return _unavailable("아직 타석이 시작되지 않았어요")
 
-        try:
-            facts = self.stats.batter_facts(
-                state.batter, state.pitcher, state.batting_team
-            )
-        except StatsSourceError as exc:
-            log.warning("기록 조회 실패 (%s): %s", state.batter, exc)
-            return _unavailable(UNAVAILABLE_TEXT)
+        # 중계에 그 타석 시점 기록이 실려 왔으면(네이버 임포트) 그게 우선이다.
+        facts = relay_facts(feed.events, relay_t, state)
+        source = "relay"
+        if facts is None:
+            source = "fixture"
+            try:
+                facts = self.stats.batter_facts(
+                    state.batter, state.pitcher, state.batting_team
+                )
+            except StatsSourceError as exc:
+                log.warning("기록 조회 실패 (%s): %s", state.batter, exc)
+                return _unavailable(UNAVAILABLE_TEXT)
 
         matchup = Matchup(
             batter=facts.batter,
@@ -52,6 +57,7 @@ class MatchupService:
             recent_form=facts.recent or "기록 없음",
             vs_pitcher=facts.vs_pitcher or "상대 전적 없음",
             team_form=facts.team_form or "기록 없음",
+            source=source,
         )
 
         if with_ai_note:
@@ -71,6 +77,25 @@ class MatchupService:
                     log.info("한 줄 해석 생략 (%s): %s", state.batter, exc)
 
         return matchup
+
+
+def relay_facts(
+    events: list[RelayEvent], relay_t: Optional[int], state: GameState
+) -> Optional[BatterFacts]:
+    """현재 타자의 가장 최근 타석 시작 이벤트에 실린 기록. 없으면 None."""
+    stats = None
+    for event in events:
+        if relay_t is not None and event.t > relay_t:
+            break
+        if event.kind == KIND_ATBAT and event.batter == state.batter:
+            stats = event.detail.get("stats")
+    if not stats:
+        return None
+    return BatterFacts(
+        batter=state.batter or "",
+        avg=stats.get("season_avg"),
+        recent=stats.get("today"),
+    )
 
 
 def _unavailable(reason: str) -> Matchup:
