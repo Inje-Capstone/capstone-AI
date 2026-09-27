@@ -124,6 +124,24 @@ data/
   (`source: "relay"`). 네이버 값은 그 타석 결과가 이미 반영돼 있어 **직전 타석 기록**을 쓴다 — 결과 스포일러 방지
 - ⚠️ 변환 결과는 gitignore 대상이다 — 재배포 허용 여부를 확인하기 전까지 커밋하지 않는다
 
+## 영상 분석 (VSS 방식) — 영상-중계 자동 싱크
+
+```bash
+# .env에 NVIDIA_API_KEY (build.nvidia.com) — 서버 런타임은 쓰지 않는다
+.venv/bin/python scripts/analyze_video.py 20260920HHLG02026 game.mp4 --limit 3   # 앞 3분만 시험
+.venv/bin/python scripts/analyze_video.py 20260920HHLG02026 game.mp4 --apply
+```
+
+VSS 풀스택 대신 **VSS의 기본 VLM(Cosmos Reason)을 NVIDIA 호스팅 API로 직접** 부른다(GPU 불필요, 기술 조사서 권고안).
+ffmpeg로 60초 청크(360p·무음)를 만들어 VLM에 "보이는 것만" 관찰시키고(`hit`·`strikeout`·`pitching_change`…),
+중계의 같은 종류 이벤트와 다수결로 짝지어 **영상 오프셋**을 추정한다. `--apply`면 fixture의 `relay_video_offset_sec`를 갱신한다.
+
+- 판정은 여전히 중계 + 규칙 엔진이 한다 — "VLM이 보고, 규칙 엔진이 판정한다"
+- 청크 단위로 `data/video/{id}.json`에 누적 저장(중단 후 재실행하면 이어서), 표가 모자라면 `--apply`를 거부
+- VSS 서버가 생기면 `--backend vss --vss-url http://host:38111 --clip-base-url ...`로 LVS `/v1/summarize`에 붙는다
+- 로컬 NIM이면 `--base-url http://host:8000/v1`
+- ⚠️ 두 백엔드 모두 응답 스키마 실측 전(`TODO(스키마 미검증)`), NVIDIA 트라이얼 약관상 운영 금지 — 사전 배치 분석 전용
+
 ## LLM 백엔드
 
 `ROOKIE_LLM_BACKEND` 환경변수로 강제할 수 있다.
