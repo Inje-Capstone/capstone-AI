@@ -59,6 +59,7 @@ docker run --rm -p 8000:8000 --env-file .env rookie-ai-engine
 | `GET /api/glossary/{term_id}?level=` | S5 용어 상세 (카드 `term_id` 딥링크) |
 | `GET /api/games/{id}/today-rules?t=&level=&category=` | 시청 종료 팝업 — 이 경기에서 카드로 본 룰 (LLM 호출 없음) |
 | `POST /api/quiz` | 오늘 본 룰 퀴즈 (하루 5문제). `term_ids`는 백엔드가 그날 본 것을 모아 넘기고, `seed`(사용자ID+날짜)로 같은 날 같은 문제 |
+| `GET /api/games/{id}/moment?t=&level=` | S4 방금 장면 한 줄 요약 (Haiku 4.5, 모델 없으면 중계 원문 조립 — 항상 응답) |
 
 `level`은 `입문 | 초보 | 익숙`, `category`는 반복 쿼리 파라미터(`기본 룰`, `구종 · 투구`,
 `전술 · 기록`, `응원 문화`). 온보딩 답변을 그대로 넘기면 된다 — 유저 DB는 백엔드 팀 소유다.
@@ -151,7 +152,7 @@ ffmpeg로 60초 청크(360p·무음)를 만들어 VLM에 "보이는 것만" 관�
 | 값 | 동작 |
 |---|---|
 | `auto` (기본) | 키가 있으면 `claude`, 없으면 `mock` |
-| `claude` | Claude Sonnet 5 (`ROOKIE_LLM_MODEL`로 변경) |
+| `claude` | Claude Sonnet 5 (`ROOKIE_LLM_MODEL`로 변경). 한 줄 요약만 Haiku 4.5 (`ROOKIE_SUMMARY_MODEL`) |
 | `mock` | 용어 사전 시드를 조립. **생성이 아니다** — 테스트·오프라인 데모용 |
 | `fail` | 항상 실패. 폴백 경로를 실제로 밟아볼 때 |
 

@@ -15,6 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
 
 DEFAULT_MODEL = "claude-sonnet-5"
+# 방금 장면 한 줄 요약 — 짧고 많다(경기당 ~100줄). 저지연·저비용 모델 (조사서 2.3.4)
+DEFAULT_SUMMARY_MODEL = "claude-haiku-4-5"
 DEFAULT_CORS_ORIGINS = "http://localhost:5173,http://localhost:3000"
 
 
@@ -22,6 +24,10 @@ class Settings:
     def __init__(self) -> None:
         self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
         self.llm_model = os.getenv("ROOKIE_LLM_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
+        self.summary_model = (
+            os.getenv("ROOKIE_SUMMARY_MODEL", DEFAULT_SUMMARY_MODEL).strip()
+            or DEFAULT_SUMMARY_MODEL
+        )
         # auto | claude | mock | fail
         self.llm_backend = os.getenv("ROOKIE_LLM_BACKEND", "auto").strip().lower()
         self.fixture_dir = Path(os.getenv("ROOKIE_FIXTURE_DIR", str(ROOT / "data" / "fixtures")))

@@ -16,6 +16,7 @@ from app.services.card_service import CardService
 from app.services.chat_service import ChatService
 from app.services.glossary_service import GlossaryService
 from app.services.matchup_service import MatchupService
+from app.services.moment_service import MomentService
 from app.services.quiz_service import QuizService
 
 
@@ -61,6 +62,16 @@ def get_quiz_service() -> QuizService:
     return QuizService(load_glossary(), build_llm_client())
 
 
+@lru_cache(maxsize=1)
+def get_moment_service() -> MomentService:
+    settings = get_settings()
+    return MomentService(
+        relay=get_relay_source(),
+        llm=build_llm_client(settings.summary_model),
+        snapshot_dir=settings.snapshot_dir,
+    )
+
+
 def reset_services() -> None:
     """테스트에서 백엔드를 바꿔 끼울 때 캐시를 비운다."""
     for fn in (
@@ -71,6 +82,7 @@ def reset_services() -> None:
         get_matchup_service,
         get_glossary_service,
         get_quiz_service,
+        get_moment_service,
     ):
         fn.cache_clear()
 
