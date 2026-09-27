@@ -1,0 +1,334 @@
+"""네이버 스포츠 문자중계 → 내부 fixture 형식 변환.
+
+서버가 네이버를 직접 부르지 않는다. `scripts/import_naver_relay.py`가 경기를 한 번 받아
+`data/fixtures/`에 fixture JSON으로 굳히고, 서버는 FixtureRelaySource로 그 파일만 읽는다.
+외부가 죽어도 화면이 살고, 데모 중 네트워크 호출이 0이 된다.
+
+스키마는 2026-09-27 실측(3경기) 기준이다. 필드 의미는 docs/exec-plans의 조사 노트 참고.
+네이버 필드명은 이 파일 밖으로 나가지 않는다 — 출력은 RelayEvent와 같은 모양의 dict다.
+
+변환 원칙: 주루를 추론하지 않는다. 네이버가 텍스트마다 실어 보내는 `currentGameState`
+(아웃·주자·점수)의 **차이**를 이벤트의 `outs_made`/`runs`/`bases_after`로 옮긴다.
+그래서 GameSim으로 재생하면 네이버 상태와 항상 일치한다.
+"""
+
+import json
+import re
+import urllib.request
+from datetime import datetime
+from typing import Any, Optional
+
+API_BASE = "https://api-gw.sports.naver.com/schedule/games"
+MAX_INNINGS = 15  # 연장 포함 상한. 빈 이닝은 건너뛴다.
+
+# textOptions.type
+T_INNING_START = 0
+T_PITCH = 1
+T_SUB = 2
+T_ETC = 7
+T_BATTER = 8
+T_RESULT = 13
+T_RESULT_SCORING = 23
+T_RUNNER = 14
+T_RUNNER_SCORING = 24
+T_GAME_END = 99
+
+_RESULT_TYPES = (T_RESULT, T_RESULT_SCORING)
+_RUNNER_TYPES = (T_RUNNER, T_RUNNER_SCORING)
+
+PITCH_RESULTS = {
+    "B": "ball",
+    "T": "called_strike",
+    "S": "swing_strike",
+    "F": "foul",
+    "W": "foul",  # 번트 파울
+    "H": "in_play",
+}
+
+# 타자 결과 텍스트 → 결과 코드. 위에서부터 먼저 맞는 것.
+_RESULT_PATTERNS: tuple[tuple[str, str], ...] = (
+    ("낫 아웃", "dropped_third_strike"),
+    ("낫아웃", "dropped_third_strike"),
+    ("삼진", "strikeout"),
+    ("고의4구", "intentional_walk"),
+    ("고의 4구", "intentional_walk"),
+    ("볼넷", "walk"),
+    ("몸에 맞는", "hbp"),
+    ("홈런", "homerun"),
+    ("희생플라이", "sac_fly"),
+    ("희생번트", "sac_bunt"),
+    ("삼중살", "triple_play"),
+    ("병살", "double_play"),
+    ("인필드플라이", "infield_fly"),
+    ("3루타", "triple"),
+    ("2루타", "double"),
+    ("1루타", "single"),
+    ("내야안타", "single"),
+    ("번트안타", "single"),
+    ("실책", "error"),
+    ("야수선택", "fielders_choice"),
+    ("땅볼로 출루", "fielders_choice"),
+    ("땅볼", "groundout"),
+    ("라인드라이브", "lineout"),
+    ("플라이", "flyout"),
+)
+
+_PITCHER_CHANGE_RE = re.compile(r"^투수 \S+ : 투수 (\S+) \(으\)로 교체")
+
+
+class NaverRelayError(RuntimeError):
+    pass
+
+
+# ── 조회 ────────────────────────────────────────────────────────────────
+def _get_json(url: str, timeout: float = 10.0) -> dict[str, Any]:
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "Mozilla/5.0", "Referer": "https://m.sports.naver.com/"},
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as res:  # noqa: S310 - 고정 https 도메인
+        body = json.loads(res.read().decode("utf-8"))
+    if not body.get("success"):
+        raise NaverRelayError(f"네이버 응답 실패: {url} ({body.get('code')})")
+    return body["result"]
+
+
+def fetch_game(game_id: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """(경기 메타, 이닝별 textRelayData 목록). 네트워크를 쓰는 유일한 함수."""
+    info = _get_json(f"{API_BASE}/{game_id}")["game"]
+    innings = []
+    for inning in range(1, MAX_INNINGS + 1):
+        data = _get_json(f"{API_BASE}/{game_id}/relay?inning={inning}")["textRelayData"]
+        if not any(r.get("inn") == inning for r in data.get("textRelays", [])):
+            break  # 경기가 끝난 뒤의 이닝은 마지막 이닝 데이터를 그대로 돌려준다
+        innings.append(data)
+    if not innings:
+        raise NaverRelayError(f"문자중계가 없는 경기: {game_id}")
+    return info, innings
+
+
+# ── 변환 ────────────────────────────────────────────────────────────────
+def convert_game(
+    info: dict[str, Any],
+    innings: list[dict[str, Any]],
+    video_offset_sec: int = 0,
+    has_video: Optional[bool] = None,
+) -> dict[str, Any]:
+    """네이버 원본 → fixture JSON(dict). FixtureRelaySource가 그대로 읽는다."""
+    options = _flatten(innings, info["gameId"])
+    names = _pitcher_names(innings)
+    events = _Converter(names, video_offset_sec).run(options)
+    return {
+        "_note": (
+            "네이버 스포츠 문자중계에서 변환한 실제 경기 데이터. "
+            "scripts/import_naver_relay.py로 재생성한다. 재배포 허용 여부 확인 전까지 커밋 금지."
+        ),
+        "source": "naver",
+        "game": {
+            "id": info["gameId"],
+            "date": info.get("gameDate", ""),
+            "stadium": info.get("stadium") or "",
+            "away_team": info["awayTeamName"],
+            "home_team": info["homeTeamName"],
+            "has_video": bool(info.get("hasVideo")) if has_video is None else has_video,
+            "video_duration_sec": events[-1]["t"] if events else 0,
+            "relay_video_offset_sec": 0,  # 오프셋은 이미 t에 반영했다
+            "final_score": {"away": info.get("awayTeamScore"), "home": info.get("homeTeamScore")},
+        },
+        "events": events,
+    }
+
+
+def _flatten(innings: list[dict[str, Any]], game_id: str) -> list[dict[str, Any]]:
+    """타석 묶음(최신순)을 풀어 seqno 순 텍스트 목록으로. 이닝·초말·타석 번호를 붙인다."""
+    seen: set[int] = set()
+    flat = []
+    for data in innings:
+        for relay in data.get("textRelays", []):
+            half = "top" if str(relay.get("homeOrAway")) == "0" else "bot"
+            for opt in relay.get("textOptions", []):
+                seq = opt.get("seqno")
+                if seq is None or seq in seen:
+                    continue
+                seen.add(seq)
+                flat.append({**opt, "_inn": relay["inn"], "_half": half, "_pa": relay["no"]})
+    if not flat:
+        raise NaverRelayError(f"변환할 중계 텍스트가 없다: {game_id}")
+    return sorted(flat, key=lambda o: o["seqno"])
+
+
+def _pitcher_names(innings: list[dict[str, Any]]) -> dict[str, str]:
+    names: dict[str, str] = {}
+    for data in innings:
+        for side in ("homeEntry", "awayEntry", "homeLineup", "awayLineup"):
+            for group in ("pitcher", "batter"):
+                for p in (data.get(side) or {}).get(group) or []:
+                    if p.get("pcode") and p.get("name"):
+                        names[str(p["pcode"])] = p["name"]
+    return names
+
+
+def _state_of(opt: dict[str, Any]) -> dict[str, Any]:
+    gs = opt.get("currentGameState") or {}
+    return {
+        "outs": int(gs.get("out") or 0),
+        "bases": [n for n, key in ((1, "base1"), (2, "base2"), (3, "base3"))
+                  if str(gs.get(key) or "0") != "0"],
+        "away": int(gs.get("awayScore") or 0),
+        "home": int(gs.get("homeScore") or 0),
+        "pitcher": str(gs.get("pitcher") or ""),
+    }
+
+
+def _after_colon(text: str) -> str:
+    return text.split(" : ", 1)[1] if " : " in text else text
+
+
+def classify_result(text: str) -> str:
+    body = _after_colon(text)
+    for needle, code in _RESULT_PATTERNS:
+        if needle in body:
+            return code
+    return "out" if "아웃" in body else "other"
+
+
+def _runner_call(text: str) -> tuple[str, dict[str, Any]]:
+    """타석 도중 주자 이벤트 → (kind, detail). 도루는 steal, 나머지는 call."""
+    body = _after_colon(text)
+    if "도루실패" in body or "도루 실패" in body:
+        return "steal", {"caught": True}
+    if "도루" in body:
+        m = re.search(r"(\d)루까지", body)
+        return "steal", {"base": int(m.group(1)) if m else None}
+    for needle, call in (("보크", "balk"), ("폭투", "wild_pitch"), ("포일", "passed_ball")):
+        if needle in body:
+            return "call", {"call": call}
+    return "call", {"call": "runner"}
+
+
+class _Converter:
+    def __init__(self, pitcher_names: dict[str, str], video_offset_sec: int) -> None:
+        self.names = pitcher_names
+        self.offset = video_offset_sec
+        self.events: list[dict[str, Any]] = []
+        self.first_pitch: Optional[datetime] = None
+        self.t = 0
+        self.prev = {"outs": 0, "bases": [], "away": 0, "home": 0}
+        self.half_key: Optional[tuple[int, str]] = None
+        self.batter: Optional[str] = None
+
+    # 주 루프: 타자 결과 + 뒤따르는 주자 텍스트를 한 이벤트로 합친다.
+    def run(self, options: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        i = 0
+        while i < len(options):
+            opt = options[i]
+            self._enter_half(opt)
+            kind = opt.get("type")
+            if kind == T_PITCH:
+                self._pitch(opt, options[i + 1:])
+            elif kind == T_BATTER:
+                self._atbat(opt)
+            elif kind == T_SUB:
+                self._sub(opt)
+            elif kind in _RESULT_TYPES:
+                j = i + 1
+                while j < len(options) and options[j].get("type") in _RUNNER_TYPES \
+                        and options[j]["_pa"] == opt["_pa"]:
+                    j += 1
+                self._result(opt, options[i:j])
+                i = j
+                continue
+            elif kind in _RUNNER_TYPES:
+                self._runner(opt)
+            elif kind == T_ETC:
+                self._emit(opt, "note", {})
+            # 0(이닝 시작)·99(경기 종료)는 상태가 대신 말해준다.
+            i += 1
+        return self.events
+
+    def _enter_half(self, opt: dict[str, Any]) -> None:
+        key = (opt["_inn"], opt["_half"])
+        if key != self.half_key:
+            self.half_key = key
+            # 새 공격: 아웃·주자는 초기화되고 점수만 이어진다(GameSim._sync_half와 같다).
+            self.prev = {**self.prev, "outs": 0, "bases": []}
+
+    def _clock(self, opt: dict[str, Any]) -> int:
+        """투구 시각(ptsPitchId)으로 경과 초를 갱신한다. 시각 없는 텍스트는 직전 값."""
+        pid = opt.get("ptsPitchId")
+        if pid:
+            try:
+                at = datetime.strptime(pid, "%y%m%d_%H%M%S")
+            except ValueError:
+                at = None
+            if at is not None:
+                if self.first_pitch is None:
+                    self.first_pitch = at
+                self.t = max(self.t, int((at - self.first_pitch).total_seconds()))
+        return self.t + self.offset
+
+    def _pitcher(self, opt: dict[str, Any]) -> Optional[str]:
+        code = _state_of(opt)["pitcher"]
+        return self.names.get(code)
+
+    def _emit(
+        self, opt: dict[str, Any], kind: str, detail: dict[str, Any], suffix: str = ""
+    ) -> None:
+        self.events.append({
+            "id": f"n{opt['seqno']}{suffix}",
+            "t": self._clock(opt),
+            "inning": opt["_inn"],
+            "half": opt["_half"],
+            "kind": kind,
+            "text": opt.get("text", ""),
+            "batter": self.batter,
+            "pitcher": self._pitcher(opt),
+            "detail": detail,
+        })
+
+    def _delta(self, last: dict[str, Any]) -> dict[str, Any]:
+        now = _state_of(last)
+        runs = (now["away"] - self.prev["away"]) + (now["home"] - self.prev["home"])
+        outs_made = max(0, now["outs"] - self.prev["outs"])
+        self.prev = now
+        return {"outs_made": outs_made, "runs": max(0, runs), "bases_after": now["bases"]}
+
+    def _atbat(self, opt: dict[str, Any]) -> None:
+        record = opt.get("batterRecord") or {}
+        words = opt.get("text", "").split()
+        self.batter = record.get("name") or (words[-1] if words else self.batter)
+        self._emit(opt, "atbat", {})
+
+    def _pitch(self, opt: dict[str, Any], rest: list[dict[str, Any]]) -> None:
+        detail: dict[str, Any] = {
+            "result": PITCH_RESULTS.get(opt.get("pitchResult") or "", "unknown"),
+            "pitch_type": opt.get("stuff") or None,
+            "speed": opt.get("speed"),
+        }
+        # 삼진으로 끝난 타석의 마지막 공 = 결정구
+        nxt = next((o for o in rest if o.get("type") in (T_PITCH, *_RESULT_TYPES)), None)
+        if nxt is not None and nxt.get("type") in _RESULT_TYPES and nxt["_pa"] == opt["_pa"]:
+            detail["decisive"] = classify_result(nxt.get("text", "")) == "strikeout"
+        self._emit(opt, "pitch", detail)
+
+    def _sub(self, opt: dict[str, Any]) -> None:
+        m = _PITCHER_CHANGE_RE.match(opt.get("text", ""))
+        if m:
+            self._emit(opt, "sub", {"sub_type": "pitcher", "pitcher": m.group(1)})
+        else:
+            self._emit(opt, "sub", {"sub_type": "player"})
+
+    def _result(self, opt: dict[str, Any], group: list[dict[str, Any]]) -> None:
+        code = classify_result(opt.get("text", ""))
+        if code == "dropped_third_strike":
+            # 카드용 심판 콜을 먼저 흘리고, 결과는 출루 여부로 나눈다.
+            self._emit(opt, "call", {"call": "dropped_third_strike"}, suffix="c")
+            code = "dropped_third_strike_safe" if "출루" in opt.get("text", "") else "strikeout"
+        elif code == "infield_fly":
+            self._emit(opt, "call", {"call": "infield_fly"}, suffix="c")
+        detail = {"result": code, **self._delta(group[-1])}
+        self._emit(opt, "result", detail)
+
+    def _runner(self, opt: dict[str, Any]) -> None:
+        kind, detail = _runner_call(opt.get("text", ""))
+        self._emit(opt, kind, {**detail, **self._delta(opt)})

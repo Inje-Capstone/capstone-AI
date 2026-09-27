@@ -67,13 +67,6 @@ def _result_is(*names: str) -> Predicate:
     return _p
 
 
-def _kind_is(kind: str) -> Predicate:
-    def _p(event: RelayEvent, _state: GameState) -> bool:
-        return event.kind == kind
-
-    return _p
-
-
 def _is_decisive_offspeed(event: RelayEvent, _state: GameState) -> bool:
     """타석을 끝낸 변화구 한 개. 매 투구마다 카드를 띄우지 않기 위한 좁은 조건."""
     if event.kind != KIND_PITCH:
@@ -179,7 +172,7 @@ RULES: Sequence[Rule] = (
         category=CATEGORY_TACTICS,
         label="도루",
         priority=0.6,
-        matches=_kind_is(KIND_STEAL),
+        matches=lambda e, s: e.kind == KIND_STEAL and not e.detail.get("caught"),
         why=lambda e, s: "주자가 투수·포수의 빈틈을 노려 다음 베이스를 훔쳤다",
     ),
     Rule(
@@ -193,6 +186,8 @@ RULES: Sequence[Rule] = (
             f"{e.detail.get('pitch_type')} {e.detail.get('speed')}km/h로 타석을 끝냈다 — "
             "구종 차이를 체감할 수 있는 장면이다"
         ),
+        # 실경기엔 삼진 결정구가 한 경기 수십 개다. 구종마다 첫 장면만 설명한다.
+        once=lambda e, s: f"offspeed:{e.detail.get('pitch_type')}",
     ),
     Rule(
         id="pitching_change",
