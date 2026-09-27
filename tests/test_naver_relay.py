@@ -267,3 +267,45 @@ def test_repeated_pitching_changes_and_bases_loaded_are_throttled(tmp_path):
     rules = [s.rule_id for s in detect(_parse_fixture(path))]
     assert rules.count("pitching_change") == 1
     assert rules.count("bases_loaded") == 1
+
+
+PREVIEW = {
+    "gameInfo": {"hName": "홈", "aName": "원정"},
+    "homeStandings": {"rank": 3, "w": 74, "l": 55, "d": 1},
+    "awayStandings": {"rank": 9, "w": 54, "l": 71, "d": 0},
+    "homeTeamPreviousGames": [{"result": "승"}] * 3 + [{"result": "패"}, {"result": "무"}],
+    "awayTeamPreviousGames": [{"result": "패"}] * 2,
+    "seasonVsResult": {"hw": 7, "hl": 8, "aw": 8, "al": 7},
+    "homeStarter": {"playerInfo": {"name": "홈선발"},
+                    "currentSeasonStatsOnOpponents": {"era": "4.66", "gameCount": 2, "inn": "9.2"}},
+    "awayStarter": {"playerInfo": {"name": "원정선발"}, "currentSeasonStatsOnOpponents": {}},
+}
+
+
+def test_preview_context_sentences():
+    from app.adapters.relay.naver import preview_context
+
+    ctx = preview_context(PREVIEW)
+    assert ctx["team_form"]["홈"] == (
+        "3위 (74승 55패 1무) · 최근 5경기 3승 1패 1무 · 원정 상대 7승 8패"
+    )
+    assert ctx["team_form"]["원정"] == "9위 (54승 71패) · 최근 2경기 0승 2패 · 홈 상대 8승 7패"
+    assert ctx["pitcher_vs_team"] == {"홈선발": "홈선발 올 시즌 원정 상대 2경기 9.2이닝 ERA 4.66"}
+
+
+def test_matchup_uses_preview_context(tmp_path):
+    from app.domain.game_state import states_by_event
+    from app.services.matchup_service import relay_facts
+
+    fixture = _two_pa_game()
+    fixture["game"]["context"] = {
+        "team_form": {"원정": "9위"}, "pitcher_vs_team": {"홈선발": "홈선발 상대 ERA 4.66"}}
+    path = tmp_path / "g.json"
+    path.write_text(json.dumps(fixture, ensure_ascii=False), encoding="utf-8")
+    feed = _parse_fixture(path)
+    assert feed.meta.context["team_form"] == {"원정": "9위"}
+    atbat = [e for e in feed.events if e.kind == "atbat"][1]
+    state = states_by_event(feed.events, "원정", "홈")[feed.events.index(atbat)]
+    facts = relay_facts(feed.events, atbat.t, state, feed.meta.context)
+    assert facts.team_form == "9위"
+    assert facts.vs_pitcher == "홈선발 상대 ERA 4.66"
