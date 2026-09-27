@@ -70,6 +70,7 @@ def chat_user_prompt(
     level: int,
     recent_events: Sequence[RelayEvent],
     recent_labels: Optional[Sequence[str]] = None,
+    video_lines: Optional[Sequence[str]] = None,
 ) -> str:
     lines: list[str] = [
         f"[질문] {question.strip()}",
@@ -82,6 +83,10 @@ def chat_user_prompt(
             lines.append(f"- ({event.inning}회{event.half_label}) {event.text}")
     if recent_labels:
         lines.append(f"[방금 설명한 상황] {', '.join(recent_labels)}")
+    if video_lines:
+        # VLM 관찰은 판정 근거가 아니다 — 화면 묘사 참고용으로만 준다.
+        lines.append("[영상 장면(자동 관찰, 틀릴 수 있음)]")
+        lines.extend(f"- {v}" for v in video_lines)
     lines.append("")
     lines.append("위 정보만 근거로 질문에 답하라.")
     return "\n".join(lines)
