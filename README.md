@@ -55,6 +55,8 @@ docker run --rm -p 8000:8000 --env-file .env rookie-ai-engine
 | `POST /api/games/{id}/cards/{card_id}/simplify` | S4 "더 쉽게 설명" |
 | `GET /api/games/{id}/matchup?t=` | S4 우하단 선수·매치업 분석 |
 | `POST /api/games/{id}/chat` | S4 하단 챗봇 |
+| `GET /api/glossary?q=&category=` | S5 용어 사전 목록·검색 |
+| `GET /api/glossary/{term_id}?level=` | S5 용어 상세 (카드 `term_id` 딥링크) |
 
 `level`은 `입문 | 초보 | 익숙`, `category`는 반복 쿼리 파라미터(`기본 룰`, `구종 · 투구`,
 `전술 · 기록`, `응원 문화`). 온보딩 답변을 그대로 넘기면 된다 — 유저 DB는 백엔드 팀 소유다.
@@ -123,5 +125,5 @@ data/
 - 실제 문자중계 크롤링 (`adapters/relay/` 에 자리만 비워둠)
 - 실제 선수 기록 소스 (`adapters/stats/`)
 - 중계 음성 STT 기반 영상 동기화 — 지금은 fixture에 타임코드가 박혀 있다
-- 용어 사전 본문 콘텐츠 (지금은 난이도별 한 줄 시드만)
+- 용어 사전 본문 확충 (지금은 용어 14개 × 난이도별 한 줄 + 관련 용어)
 - 라이브 모드(캡스톤2)

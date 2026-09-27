@@ -4,7 +4,7 @@
 와이어프레임 S3·S4·S5의 화면 요소와 1:1로 대응하도록 잡았다.
 """
 
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -168,3 +168,34 @@ class ChatOut(BaseModel):
     source: str
     context: str = Field(description="답변에 쓴 경기 상황 요약 — 근거 표시용")
     used_event_ids: list[str]
+
+
+class TermSummaryOut(BaseModel):
+    """S5 용어 사전 목록 1행 / 관련 용어 칩."""
+
+    id: str = Field(description="카드의 term_id와 같은 키 — 딥링크 대상")
+    name: str
+    category: str
+    category_label: str
+    aliases: list[str]
+    summary: str = Field(description="입문 난이도 한 줄 정의")
+
+    @classmethod
+    def of(cls, entry: dict[str, Any], category_label: str) -> "TermSummaryOut":
+        return cls(
+            id=entry["id"],
+            name=entry.get("name", entry["id"]),
+            category=entry.get("category", ""),
+            category_label=category_label,
+            aliases=entry.get("aliases", []),
+            summary=entry.get("easy", ""),
+        )
+
+
+class TermOut(TermSummaryOut):
+    """S5 용어 상세."""
+
+    level: int
+    body: str = Field(description="요청한 난이도의 설명")
+    levels: dict[str, str] = Field(description="난이도 토글용: 입문 | 초보 | 익숙 → 설명")
+    related: list[TermSummaryOut]
