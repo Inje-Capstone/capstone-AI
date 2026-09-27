@@ -250,3 +250,20 @@ def test_matchup_prefers_relay_stats(tmp_path):
     facts = relay_facts(feed.events, second_atbat.t, state)
     assert facts is not None
     assert (facts.avg, facts.recent) == ("0.301", "오늘 1타수 1안타 1홈런 1타점")
+
+
+def test_repeated_pitching_changes_and_bases_loaded_are_throttled(tmp_path):
+    """한 팀의 투수 교체는 첫 번째만, 만루는 반 이닝에 한 번만 카드가 된다."""
+    g = _Game()
+    g.pa(1, "0", "1회초")
+    for n, name in enumerate(("가", "나")):
+        g.pa(1, "0", f"{n + 1}번타자 {name}")
+        g.opt(8, f"{n + 1}번타자 {name}", batterRecord={"name": name})
+        g.opt(2, f"투수 홈선발 : 투수 불펜{n} (으)로 교체")
+        g.pitch(1, "B", "직구", 140, f"14{n}000")
+        g.opt(13, f"{name} : 볼넷", state={"base1": 9, "base2": 9, "base3": 9})
+    path = tmp_path / "g.json"
+    path.write_text(json.dumps(convert_game(INFO, g.innings()), ensure_ascii=False), "utf-8")
+    rules = [s.rule_id for s in detect(_parse_fixture(path))]
+    assert rules.count("pitching_change") == 1
+    assert rules.count("bases_loaded") == 1
