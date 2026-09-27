@@ -4,6 +4,7 @@ from app.adapters.relay.fixture import FixtureRelaySource
 from app.domain.detectors import RULES, RULES_BY_ID, detect
 from app.domain.models import (
     CATEGORY_BASIC,
+    CATEGORY_CULTURE,
     CATEGORY_PITCHING,
     CATEGORY_TACTICS,
     LEVEL_BEGINNER,
@@ -142,7 +143,39 @@ def test_rules_table_has_no_duplicate_ids():
 def test_every_rule_has_a_glossary_term():
     for rule in RULES:
         assert rule.term_id, f"{rule.id}에 용어 사전 키가 없다"
-        assert rule.category in (CATEGORY_BASIC, CATEGORY_PITCHING, CATEGORY_TACTICS)
+        assert rule.category in (
+            CATEGORY_BASIC, CATEGORY_PITCHING, CATEGORY_TACTICS, CATEGORY_CULTURE
+        )
+
+
+def test_every_rule_term_exists_in_glossary_seed():
+    """용어 시드가 없으면 mock 카드가 빈 문장이 되고 S5 딥링크가 깨진다."""
+    from app.adapters.llm.mock import load_glossary
+
+    glossary = load_glossary()
+    missing = sorted({r.term_id for r in RULES} - set(glossary))
+    assert missing == []
+
+
+def test_every_category_has_at_least_one_rule():
+    """온보딩에서 어떤 관심사를 골라도 그 카테고리 카드가 존재해야 한다."""
+    covered = {r.category for r in RULES}
+    assert covered == {CATEGORY_BASIC, CATEGORY_PITCHING, CATEGORY_TACTICS, CATEGORY_CULTURE}
+
+
+def test_once_rules_fire_only_once_per_key(feed, situations):
+    """fixture엔 볼넷이 3번 있지만 설명 카드는 첫 번째 한 장뿐이다."""
+    walks_in_feed = [e for e in feed.events if e.detail.get("result") == "walk"]
+    assert len(walks_in_feed) >= 2
+    walks = _by_rule(situations, "walk")
+    assert len(walks) == 1
+    assert walks[0].event_ids == [walks_in_feed[0].id]
+
+
+def test_cheer_song_fires_once_per_team(situations):
+    cheers = _by_rule(situations, "cheer_song")
+    assert [c.state.half for c in cheers] == ["top", "bot"]
+    assert all(c.state.inning == 1 for c in cheers)
 
 
 # ── 타임라인 ────────────────────────────────────────────────────────────

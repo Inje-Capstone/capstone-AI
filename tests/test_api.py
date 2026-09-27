@@ -104,7 +104,8 @@ def test_cards_are_newest_first(client):
 
 
 def test_cards_before_any_situation_are_empty_but_not_degraded(client):
-    body = client.get(f"/api/games/{GAME_ID}/cards", params={"t": 100}).json()
+    # 첫 중계 이벤트(t=60) 이전 — 1회초 첫 타석부터 응원 문화 카드가 감지된다.
+    body = client.get(f"/api/games/{GAME_ID}/cards", params={"t": 30}).json()
     assert body["cards"] == []
     assert body["degraded"] is False  # 감지된 상황 자체가 없는 것이지 고장이 아니다
 
@@ -244,3 +245,14 @@ def test_llm_failure_degrades_cards_only(monkeypatch, client):
     ).json()
     assert chat["ok"] is False
     assert "다시 시도" in chat["answer"]
+
+
+def test_culture_only_profile_still_gets_cards(client):
+    """응원 문화만 고른 입문자도 빈 화면이 아니어야 한다."""
+    cards = client.get(
+        f"/api/games/{GAME_ID}/cards",
+        params={"t": FINAL_T, "level": "입문", "category": "응원 문화"},
+    ).json()["cards"]
+    culture = [c for c in cards if c["category"] == "culture"]
+    assert {c["rule_id"] for c in culture} == {"cheer_song", "homerun_cheer"}
+    assert all(c["reasons"] for c in culture)
