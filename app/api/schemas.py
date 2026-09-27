@@ -203,3 +203,50 @@ class TermOut(TermSummaryOut):
     body: str = Field(description="요청한 난이도의 설명")
     levels: dict[str, str] = Field(description="난이도 토글용: 입문 | 초보 | 익숙 → 설명")
     related: list[TermSummaryOut]
+
+
+class TodayRuleOut(BaseModel):
+    """오늘 이 경기에서 카드로 본 룰 1개 — 시청 종료 팝업·퀴즈 재료."""
+
+    rule_id: str
+    term_id: str
+    label: str
+    category: str
+    category_label: str
+    first_t: int = Field(description="처음 본 시점(영상 타임코드, 초)")
+    count: int = Field(description="이 룰로 뜬 카드 수")
+
+
+class TodayRulesOut(BaseModel):
+    game_id: str
+    t: Optional[int]
+    level: int
+    rules: list[TodayRuleOut]
+    term_ids: list[str] = Field(description="퀴즈 요청에 그대로 넘길 용어 키 (처음 본 순)")
+
+
+class QuizIn(BaseModel):
+    """하루 5문제. 백엔드가 그날 본 term_ids를 모아(여러 경기 합산) 넘긴다."""
+
+    term_ids: list[str] = Field(default_factory=list, max_length=50)
+    level: Optional[str] = Field(default=None, description="입문 | 초보 | 익숙")
+    count: int = Field(default=5, ge=1, le=10)
+    seed: Optional[str] = Field(
+        default=None, max_length=100,
+        description="같은 값이면 같은 문제·보기 순서 (예: 사용자ID+날짜). 없으면 term_ids 기준",
+    )
+
+
+class QuizItemOut(BaseModel):
+    id: str
+    term_id: str = Field(description="용어 사전(S5) 딥링크 키 — 해설 화면에서 이동")
+    question: str
+    choices: list[str]
+    answer_index: int
+    explanation: str
+    source: str = Field(description="glossary(용어 사전 조립) | llm(생성)")
+
+
+class QuizOut(BaseModel):
+    level: int
+    items: list[QuizItemOut]

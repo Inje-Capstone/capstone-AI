@@ -57,6 +57,8 @@ docker run --rm -p 8000:8000 --env-file .env rookie-ai-engine
 | `POST /api/games/{id}/chat` | S4 하단 챗봇 |
 | `GET /api/glossary?q=&category=` | S5 용어 사전 목록·검색 |
 | `GET /api/glossary/{term_id}?level=` | S5 용어 상세 (카드 `term_id` 딥링크) |
+| `GET /api/games/{id}/today-rules?t=&level=&category=` | 시청 종료 팝업 — 이 경기에서 카드로 본 룰 (LLM 호출 없음) |
+| `POST /api/quiz` | 오늘 본 룰 퀴즈 (하루 5문제). `term_ids`는 백엔드가 그날 본 것을 모아 넘기고, `seed`(사용자ID+날짜)로 같은 날 같은 문제 |
 
 `level`은 `입문 | 초보 | 익숙`, `category`는 반복 쿼리 파라미터(`기본 룰`, `구종 · 투구`,
 `전술 · 기록`, `응원 문화`). 온보딩 답변을 그대로 넘기면 된다 — 유저 DB는 백엔드 팀 소유다.
