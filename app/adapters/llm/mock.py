@@ -9,12 +9,10 @@
 
 import json
 import re
-from pathlib import Path
 from typing import Any, Optional
 
+from app.adapters.glossary.seed import load_glossary
 from app.adapters.llm.base import LLMError, LLMResult
-
-GLOSSARY_PATH = Path(__file__).resolve().parents[3] / "data" / "glossary_seed.json"
 
 _LEVEL_RE = re.compile(r"\[난이도\]\s*(\d)")
 _TERM_RE = re.compile(r"\[용어\]\s*(\S+)")
@@ -42,11 +40,6 @@ def has_batchim(word: str) -> bool:
     if not _HANGUL_START <= code <= _HANGUL_END:
         return False  # 한글이 아니면 받침 없는 것으로 취급
     return (code - _HANGUL_START) % 28 != 0
-
-
-def load_glossary() -> dict[str, dict[str, str]]:
-    raw = json.loads(GLOSSARY_PATH.read_text(encoding="utf-8"))
-    return raw.get("terms", {})
 
 
 class MockLLMClient:

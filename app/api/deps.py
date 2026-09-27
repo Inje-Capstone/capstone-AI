@@ -5,6 +5,7 @@ from typing import Optional
 
 from fastapi import Query
 
+from app.adapters.glossary.seed import load_glossary
 from app.adapters.llm import build_llm_client
 from app.adapters.relay.fixture import FixtureRelaySource
 from app.adapters.stats.fixture import FixtureStatsSource
@@ -13,6 +14,7 @@ from app.domain.models import ExplainProfile
 from app.domain.profile import profile_from_onboarding
 from app.services.card_service import CardService
 from app.services.chat_service import ChatService
+from app.services.glossary_service import GlossaryService
 from app.services.matchup_service import MatchupService
 
 
@@ -48,6 +50,11 @@ def get_matchup_service() -> MatchupService:
     )
 
 
+@lru_cache(maxsize=1)
+def get_glossary_service() -> GlossaryService:
+    return GlossaryService(load_glossary())
+
+
 def reset_services() -> None:
     """테스트에서 백엔드를 바꿔 끼울 때 캐시를 비운다."""
     for fn in (
@@ -56,6 +63,7 @@ def reset_services() -> None:
         get_card_service,
         get_chat_service,
         get_matchup_service,
+        get_glossary_service,
     ):
         fn.cache_clear()
 

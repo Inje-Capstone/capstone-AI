@@ -150,7 +150,7 @@ def test_every_rule_has_a_glossary_term():
 
 def test_every_rule_term_exists_in_glossary_seed():
     """용어 시드가 없으면 mock 카드가 빈 문장이 되고 S5 딥링크가 깨진다."""
-    from app.adapters.llm.mock import load_glossary
+    from app.adapters.glossary.seed import load_glossary
 
     glossary = load_glossary()
     missing = sorted({r.term_id for r in RULES} - set(glossary))
