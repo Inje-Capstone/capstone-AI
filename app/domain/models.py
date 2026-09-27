@@ -125,11 +125,15 @@ class GameState(BaseModel):
         return "주자 " + "·".join(names)
 
     def scoreboard_text(self) -> str:
-        """와이어프레임 S4 좌하단 표기. 예: `두산 3 : 5 LG · 7회말 · B2 S1 O2`"""
+        """와이어프레임 S4 좌하단 표기. 예: `두산 3 : 5 LG · 7회말 · B2 S1 O2`
+
+        볼넷·삼진 투구 직후엔 내부 카운트가 B4·S3이 되지만, 전광판에 그런 카운트는 없다.
+        표기는 B3·S2에서 멈춘다 — "2스트라이크에서 던진 결정구"로 읽혀야 입문자가 안 헷갈린다.
+        """
         return (
             f"{self.away_team} {self.away_score} : {self.home_score} {self.home_team}"
             f" · {self.inning}회{self.half_label}"
-            f" · B{self.balls} S{self.strikes} O{self.outs}"
+            f" · B{min(self.balls, 3)} S{min(self.strikes, 2)} O{self.outs}"
         )
 
 

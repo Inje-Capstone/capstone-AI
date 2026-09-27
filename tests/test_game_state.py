@@ -148,3 +148,11 @@ def test_balk_moves_the_runner_to_second(feed):
     assert before.bases == (True, False, False)  # 보크 직전: 1루
     assert after.bases == (False, True, False)  # 보크 후: 2루
     assert after.outs == 0
+
+
+def test_scoreboard_caps_count_at_b3_s2():
+    """삼진·볼넷 투구 직후 내부 카운트(S3·B4)는 전광판처럼 B3·S2로 보여준다."""
+    from app.domain.models import GameState
+
+    state = GameState(away_team="A", home_team="H", balls=4, strikes=3, outs=1)
+    assert state.scoreboard_text().endswith("B3 S2 O1")

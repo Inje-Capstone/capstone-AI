@@ -196,6 +196,8 @@ RULES: Sequence[Rule] = (
         label="투수 교체",
         priority=0.4,
         matches=_is_pitching_change,
+        # 실경기엔 한 경기 교체가 6~11번이다. 팀마다 첫 교체에서 불펜 운용을 한 번 설명한다.
+        once=lambda e, s: f"pitching_change:{s.fielding_team}",
         why=lambda e, s: "감독이 승부처로 판단해 투수를 바꿨다",
     ),
     Rule(
@@ -205,6 +207,8 @@ RULES: Sequence[Rule] = (
         label="만루",
         priority=0.5,
         matches=lambda e, s: e.kind == KIND_RESULT and s.bases == (True, True, True),
+        # 만루가 이어지는 동안 타석마다 뜨지 않게 — 반 이닝에 한 번.
+        once=lambda e, s: f"bases_loaded:{s.inning}{s.half}",
         why=lambda e, s: "루상이 꽉 차 한 방이면 점수가 크게 움직이는 상황이다",
     ),
     Rule(
@@ -225,6 +229,8 @@ RULES: Sequence[Rule] = (
         priority=0.6,
         matches=_result_is("homerun"),
         why=lambda e, s: f"{s.batting_team} 응원석이 홈런 세리머니로 가장 크게 들썩이는 순간이다",
+        # 홈런 자체는 매번 카드가 뜬다. 응원 문화 설명은 팀마다 첫 홈런에서 한 번.
+        once=lambda e, s: f"homerun_cheer:{s.batting_team}",
     ),
 )
 
