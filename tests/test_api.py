@@ -1,5 +1,8 @@
 """E2E — mock LLM으로 API 계약 전체를 밟는다. API 키가 없어도 전량 통과해야 한다."""
 
+import shutil
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -8,6 +11,9 @@ from app.config import get_settings
 from app.main import app
 
 GAME_ID = "20260823LGOB"
+DEMO_FIXTURE = (
+    Path(__file__).resolve().parents[1] / "data" / "fixtures" / "game_20260823_LG_OB.json"
+)
 BALK_T = 7550
 FINAL_T = 9200
 
@@ -21,6 +27,11 @@ def mock_backend(monkeypatch, tmp_path):
     """
     monkeypatch.setenv("ROOKIE_LLM_BACKEND", "mock")
     monkeypatch.setenv("ROOKIE_SNAPSHOT_DIR", str(tmp_path / "snapshots"))
+    # 로컬에 import_naver_relay.py로 받아 둔 실경기가 있어도 계약 테스트는 데모 경기만 본다.
+    fixtures = tmp_path / "fixtures"
+    fixtures.mkdir()
+    shutil.copy(DEMO_FIXTURE, fixtures / DEMO_FIXTURE.name)
+    monkeypatch.setenv("ROOKIE_FIXTURE_DIR", str(fixtures))
     get_settings.cache_clear()
     reset_services()
     yield
