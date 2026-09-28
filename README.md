@@ -24,6 +24,7 @@ python3 -m venv .venv
 API 문서: http://localhost:8000/docs · 헬스체크: http://localhost:8000/health
 
 실제 모델을 쓰려면 `.env.example`을 `.env`로 복사하고 `ANTHROPIC_API_KEY`를 채운다.
+키가 워크스페이스에 묶여 있지 않으면 `ANTHROPIC_WORKSPACE_ID`(콘솔 Settings → Workspaces)도 넣는다 — 없으면 400.
 키는 **서버에만** 둔다 — 클라이언트/번들에 절대 넣지 않는다.
 
 ## 검증 명령
@@ -137,7 +138,10 @@ data/
 .venv/bin/python scripts/analyze_video.py 20260920HHLG02026 game.mp4 --apply
 ```
 
-VSS 풀스택 대신 **VSS의 기본 VLM(Cosmos Reason)을 NVIDIA 호스팅 API로 직접** 부른다(GPU 불필요, 기술 조사서 권고안).
+VSS 풀스택 대신 **VSS 계열 VLM을 NVIDIA 호스팅 API로 직접** 부른다(GPU 불필요, 기술 조사서 권고안).
+기본 모델은 `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`(VSS 3.2의 Omni 모델) — 2026-09-28 실측으로 호스팅에서
+영상 입력이 되는 걸 확인했고, 해설 **음성까지** 함께 듣는다(청크에 음성 유지, `--no-audio`로 끔).
+Cosmos Reason은 호스팅에서 막혀 있어(404) 로컬 NIM(`--base-url`)일 때만 `--model`로 쓴다.
 ffmpeg로 60초 청크(360p·무음)를 만들어 VLM에 "보이는 것만" 관찰시키고(`hit`·`strikeout`·`pitching_change`…),
 중계의 같은 종류 이벤트와 다수결로 짝지어 **영상 오프셋**을 추정한다. `--apply`면 fixture의 `relay_video_offset_sec`를 갱신한다.
 

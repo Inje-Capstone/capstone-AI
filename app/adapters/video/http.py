@@ -1,6 +1,7 @@
 """영상 분석 백엔드 공통 HTTP. 의존성 추가 없이 urllib만 쓴다."""
 
 import json
+import time
 import urllib.error
 import urllib.request
 from typing import Any, Optional
@@ -9,6 +10,9 @@ from app.adapters.video.base import VideoAnalyzerError
 
 # 재시도는 5xx·네트워크 오류만. 4xx·429는 재시도하면 쿼터만 두 배로 탄다(RELIABILITY).
 _RETRYABLE = frozenset({500, 502, 503, 504})
+# 호스팅 NIM은 수용량이 차면 503을 준다 — 곧바로 다시 치면 또 찬다. 점점 길게 기다린다.
+BACKOFF_SEC = (5.0, 15.0, 30.0)
+_sleep = time.sleep  # 테스트에서 바꿔 끼운다
 
 
 def post_json(
@@ -16,14 +20,16 @@ def post_json(
     payload: dict[str, Any],
     token: Optional[str] = None,
     timeout: float = 300.0,
-    retries: int = 2,
+    retries: int = 3,
 ) -> dict[str, Any]:
     body = json.dumps(payload).encode("utf-8")
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
     last: Optional[Exception] = None
-    for _ in range(retries + 1):
+    for attempt in range(retries + 1):
+        if attempt:
+            _sleep(BACKOFF_SEC[min(attempt - 1, len(BACKOFF_SEC) - 1)])
         req = urllib.request.Request(url, data=body, headers=headers, method="POST")
         try:
             with urllib.request.urlopen(req, timeout=timeout) as res:  # noqa: S310

@@ -41,6 +41,13 @@ def test_quiz_shape():
         "four_distinct_choices", "answer_in_range", "question_nonempty"}
 
 
+def test_generated_check_only_for_real_backend():
+    assert evals.check_generated("template", "mock") == []
+    assert _names(evals.check_generated("template", "llm")) == {"llm_generated"}
+    assert _names(evals.check_generated("none", "llm")) == {"llm_generated"}
+    assert _names(evals.check_generated("snapshot", "llm")) == set()
+
+
 def test_single_digit_ordinals_are_tolerated():
     assert evals.unsupported_numbers("1루 주자가 2루로 갔어요", []) == []
     assert evals.unsupported_numbers("통산 27개", ["기록 12"]) == ["27"]

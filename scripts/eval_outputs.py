@@ -27,7 +27,7 @@ from app.api.deps import (  # noqa: E402
     get_relay_source,
 )
 from app.domain.game_state import states_by_event  # noqa: E402
-from app.domain.profile import profile_from_onboarding  # noqa: E402
+from app.domain.profile import profile_from_onboarding, select  # noqa: E402
 
 
 def run(game_id: str, levels: list[int], chat_points: int = 3) -> list[evals.Result]:
@@ -39,10 +39,18 @@ def run(game_id: str, levels: list[int], chat_points: int = 3) -> list[evals.Res
                                                       feed.meta.home_team))}
     results: list[evals.Result] = []
 
+    backend = get_card_service().llm.source
     for level in levels:
         profile = profile_from_onboarding(level=level)
         situations = {s.id: s for s in get_card_service().situations(game_id)}
-        for card in get_card_service().cards(game_id, None, profile):
+        cards = get_card_service().cards(game_id, None, profile)
+        expected = select(list(situations.values()), profile)
+        made = {c.situation_id for c in cards}
+        for s in expected:  # 뽑혔는데 카드가 안 나온 상황 = 생성 실패
+            if s.id not in made:
+                results.append(evals.Result("card", f"{s.id}@L{level}", "(카드 없음)",
+                                            [evals.Check("card_generated", False, s.label)]))
+        for card in cards:
             s = situations.get(card.situation_id)
             ctx = gloss_text + ([s.trigger_text, s.state.scoreboard_text(),
                                  s.state.runners_text()] if s else [])
@@ -56,7 +64,8 @@ def run(game_id: str, levels: list[int], chat_points: int = 3) -> list[evals.Res
             if idx:
                 ctx.append(states[feed.events[idx - 1].id].scoreboard_text())
             results.append(evals.Result("moment", f"{m.event_id}@L{level}", m.text,
-                                        evals.check_moment(m.text, ctx)))
+                                        evals.check_moment(m.text, ctx)
+                                        + evals.check_generated(m.source, backend)))
 
         points = [e.t for e in feed.events if e.kind == "result"]
         step = max(1, len(points) // chat_points)
@@ -66,7 +75,8 @@ def run(game_id: str, levels: list[int], chat_points: int = 3) -> list[evals.Res
                 ctx = gloss_text + [ans.context_summary] + [
                     e.text for e in feed.events if e.id in ans.used_event_ids] + [q]
                 results.append(evals.Result("chat", f"t{t}@L{level}:{q[:12]}", ans.text,
-                                            evals.check_chat(ans.text, ctx)))
+                                            evals.check_chat(ans.text, ctx)
+                                            + evals.check_generated(ans.source, backend)))
 
         term_ids = [s.term_id for s in situations.values()]
         for item in get_quiz_service().build(term_ids, level=level, seed="eval"):

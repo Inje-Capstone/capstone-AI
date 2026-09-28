@@ -93,7 +93,7 @@ def test_cosmos_sends_base64_video_and_parses(tmp_path, monkeypatch):
     assert seen["url"] == "http://nim:8000/v1/chat/completions"
     assert seen["auth"] == "Bearer KEY"
     body = seen["body"]
-    assert body["model"] == "nvidia/cosmos3-nano-reasoner"
+    assert body["model"] == "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
     video, prompt = body["messages"][0]["content"]
     assert video["video_url"]["url"].startswith("data:video/mp4;base64,")
     assert "JSON" in prompt["text"]
@@ -131,6 +131,8 @@ def _http_error(code):
 
 def test_post_json_retries_5xx_but_not_429(monkeypatch):
     calls = []
+    waits = []
+    monkeypatch.setattr(video_http, "_sleep", waits.append)
 
     def flaky(req, timeout):
         calls.append(1)
@@ -141,6 +143,7 @@ def test_post_json_retries_5xx_but_not_429(monkeypatch):
     monkeypatch.setattr(video_http.urllib.request, "urlopen", flaky)
     assert video_http.post_json("http://x", {})["choices"]
     assert len(calls) == 2
+    assert waits == [5.0]  # 수용량 초과(503)엔 기다렸다가 다시
 
     calls.clear()
 
@@ -217,7 +220,9 @@ def test_plan_clips_covers_range_and_drops_tiny_tail():
 def test_ffmpeg_cut_cmd_is_low_res_and_silent():
     cmd = analyze_video.ffmpeg_cut_cmd("ffmpeg", Path("g.mp4"), 60, 30, Path("o.mp4"), 360)
     assert cmd[cmd.index("-ss") + 1] == "60.000" and cmd[cmd.index("-t") + 1] == "30.000"
-    assert "scale=-2:360" in cmd and "-an" in cmd and cmd[-1] == "o.mp4"
+    assert "scale=-2:360" in cmd and "-ac" in cmd and cmd[-1] == "o.mp4"  # 해설 음성 유지
+    silent = analyze_video.ffmpeg_cut_cmd("ffmpeg", Path("g.mp4"), 0, 5, Path("o.mp4"), audio=False)
+    assert "-an" in silent and "-ac" not in silent
 
 
 class _FakeAnalyzer:

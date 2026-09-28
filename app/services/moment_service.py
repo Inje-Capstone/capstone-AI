@@ -147,8 +147,8 @@ class MomentService:
         user = "\n".join([
             f"[난이도] {level} · {LEVEL_LABELS.get(level, '입문')}",
             f"[중계] ({event.inning}회{event.half_label}) {event.text}",
-            f"[전] {before.scoreboard_text()} · {before.runners_text()}",
-            f"[후] {after.scoreboard_text()} · {after.runners_text()}",
+            f"[전] {before.scoreboard_text()} · {before.outs}아웃 · {before.runners_text()}",
+            f"[후] {after.scoreboard_text()} · {after.outs}아웃 · {after.runners_text()}",
             "",
             "방금 장면을 한 줄로 요약하라.",
         ])

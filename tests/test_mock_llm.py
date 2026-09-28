@@ -61,3 +61,21 @@ def test_unknown_term_does_not_crash():
 def test_failing_client_raises():
     with pytest.raises(LLMError):
         FailingLLMClient().complete(system="", user="")
+
+
+def test_card_and_chat_prompts_are_grounded_in_glossary():
+    """모델이 규칙을 기억으로 뒤집지 않게, 프롬프트에 용어 사전 정의를 싣는다."""
+    from app.adapters.relay.fixture import FixtureRelaySource
+    from app.domain.detectors import detect
+    from app.domain.game_state import replay
+    from app.prompt_templates import card_user_prompt, chat_user_prompt
+
+    feed = FixtureRelaySource().load("20260823LGOB")
+    situation = next(s for s in detect(feed) if s.rule_id == "dropped_third_strike")
+    prompt = card_user_prompt(situation, 2, ["basic_rules"])
+    assert "[정의] 낫아웃:" in prompt and "1루가 비어 있거나 2아웃" in prompt
+
+    state = replay(feed.events, "두산", "LG")
+    chat = chat_user_prompt("보크가 뭐예요?", state, 0, [])
+    assert "[정의] 보크:" in chat
+    assert "[정의]" not in chat_user_prompt("저녁 뭐 먹지?", state, 0, [])

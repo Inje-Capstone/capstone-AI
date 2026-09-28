@@ -11,6 +11,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
+from app.adapters.glossary.seed import load_glossary
 from app.domain.models import CATEGORY_LABELS, LEVEL_LABELS, GameState, RelayEvent, Situation
 
 PROMPT_DIR = Path(__file__).resolve().parent / "prompts"
@@ -32,12 +33,42 @@ def system_prompt(name: str) -> str:
     return path.read_text(encoding="utf-8").strip()
 
 
+@lru_cache(maxsize=1)
+def _glossary() -> dict:
+    return load_glossary()
+
+
+def definition_line(term_id: str) -> Optional[str]:
+    """용어 사전 정의 — 모델이 규칙을 기억에 기대 거꾸로 말하지 않게 하는 근거.
+
+    실측(2026-09-28): 근거 없이 쓰게 하자 Sonnet 5가 낫아웃 성립 조건을 반대로 설명했다.
+    """
+    entry = _glossary().get(term_id)
+    if not entry:
+        return None
+    parts = [entry.get("standard", ""), entry.get("deep", "")]
+    return f"[정의] {entry.get('name', term_id)}: " + " ".join(p for p in parts if p)
+
+
+def terms_in(text: str, limit: int = 2) -> list[str]:
+    """본문에 이름·별칭이 나오는 용어 키 (등장 순)."""
+    found = []
+    for term_id, entry in _glossary().items():
+        words = [entry.get("name", "")] + list(entry.get("aliases", []))
+        positions = [text.find(w) for w in words if w and w in text]
+        if positions:
+            found.append((min(positions), term_id))
+    return [t for _, t in sorted(found)][:limit]
+
+
 def _level_line(level: int) -> str:
     return f"[난이도] {level} · {LEVEL_LABELS.get(level, '입문')}"
 
 
 def _state_line(state: GameState) -> str:
-    return f"[경기] {state.scoreboard_text()} · {state.runners_text()}"
+    # "O1"을 모델이 무사로 읽은 실측 사례가 있어(2026-09-28) 아웃 수를 말로 한 번 더 적는다.
+    outs = "무사" if state.outs == 0 else f"{min(state.outs, 3)}아웃"
+    return f"[경기] {state.scoreboard_text()} · {outs} · {state.runners_text()}"
 
 
 def card_user_prompt(situation: Situation, level: int, categories: Sequence[str]) -> str:
@@ -55,6 +86,9 @@ def card_user_prompt(situation: Situation, level: int, categories: Sequence[str]
         _state_line(situation.state),
         f"[중계 원문] {situation.trigger_text}",
     ]
+    definition = definition_line(situation.term_id)
+    if definition:
+        lines.append(definition)
     if situation.state.batter:
         lines.append(f"[타자] {situation.state.batter}")
     if situation.state.pitcher:
@@ -83,6 +117,11 @@ def chat_user_prompt(
             lines.append(f"- ({event.inning}회{event.half_label}) {event.text}")
     if recent_labels:
         lines.append(f"[방금 설명한 상황] {', '.join(recent_labels)}")
+    context_text = question + " " + " ".join(e.text for e in recent_events)
+    for term_id in terms_in(context_text):
+        definition = definition_line(term_id)
+        if definition:
+            lines.append(definition)
     if video_lines:
         # VLM 관찰은 판정 근거가 아니다 — 화면 묘사 참고용으로만 준다.
         lines.append("[영상 장면(자동 관찰, 틀릴 수 있음)]")
