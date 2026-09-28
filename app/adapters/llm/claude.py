@@ -24,12 +24,7 @@ class ClaudeClient:
             import anthropic
         except ImportError as exc:  # pragma: no cover - 의존성 누락은 설치 문제
             raise LLMError(f"anthropic SDK를 불러올 수 없다: {exc}") from exc
-        headers = (
-            {"anthropic-workspace-id": settings.anthropic_workspace_id}
-            if settings.anthropic_workspace_id
-            else None
-        )
-        self._client = anthropic.Anthropic(api_key=key, default_headers=headers)
+        self._client = anthropic.Anthropic(api_key=key, default_headers=workspace_headers())
 
     def complete(
         self,
@@ -93,3 +88,9 @@ class ClaudeClient:
 def _supports_effort(model: str) -> bool:
     """Haiku 4.5는 effort를 받지 않는다(400). 한 줄 요약처럼 Haiku를 쓰는 경로를 위해 뺀다."""
     return "haiku" not in model
+
+
+def workspace_headers() -> Optional[dict[str, str]]:
+    """워크스페이스에 묶이지 않은 키용 헤더. 배치 스크립트도 같은 걸 쓴다."""
+    ws = get_settings().anthropic_workspace_id
+    return {"anthropic-workspace-id": ws} if ws else None

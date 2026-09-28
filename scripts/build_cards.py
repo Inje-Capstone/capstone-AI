@@ -134,7 +134,11 @@ def _generate_batch(jobs: list, model: str) -> list:
     from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
     from anthropic.types.messages.batch_create_params import Request
 
-    client = anthropic.Anthropic(api_key=get_settings().anthropic_api_key)
+    from app.adapters.llm.claude import workspace_headers
+
+    client = anthropic.Anthropic(
+        api_key=get_settings().anthropic_api_key, default_headers=workspace_headers()
+    )
     index: dict[str, Any] = {}
     requests = []
     for job_no, (situation, level) in enumerate(jobs):
