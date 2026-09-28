@@ -8,7 +8,7 @@
 서버는 이 결과 파일만 읽는다. 영상과 VLM 호출은 여기서 한 번뿐이다.
 
 백엔드:
-  cosmos  NVIDIA 호스팅 Cosmos Reason (VSS 기본 VLM). 환경변수 NVIDIA_API_KEY 필요.
+  cosmos  NVIDIA 호스팅 NIM VLM (기본 Nemotron 3 Nano Omni — VSS 3.2 Omni). NVIDIA_API_KEY 필요.
   vss     VSS LVS 서버 (--vss-url, --clip-base-url: VSS가 청크를 읽어 갈 주소)
 
 사용:
@@ -54,13 +54,23 @@ def plan_clips(
 
 
 def ffmpeg_cut_cmd(
-    ffmpeg: str, video: Path, start: float, length: float, out: Path, height: int = 360
+    ffmpeg: str,
+    video: Path,
+    start: float,
+    length: float,
+    out: Path,
+    height: int = 360,
+    audio: bool = True,
 ) -> list[str]:
-    """분석용 청크: 저해상도·무음·짧은 GOP. VLM 토큰과 업로드 크기를 줄인다."""
+    """분석용 청크: 저해상도·저비트레이트. VLM 토큰과 업로드 크기를 줄인다.
+
+    음성은 기본으로 남긴다(모노 32kbps) — Omni 모델은 해설을 함께 듣는다.
+    """
+    sound = ["-c:a", "aac", "-b:a", "32k", "-ac", "1"] if audio else ["-an"]
     return [
         ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
         "-ss", f"{start:.3f}", "-t", f"{length:.3f}", "-i", str(video),
-        "-vf", f"scale=-2:{height}", "-an",
+        "-vf", f"scale=-2:{height}", *sound,
         "-c:v", "libx264", "-preset", "veryfast", "-crf", "30",
         str(out),
     ]
@@ -202,6 +212,7 @@ def main() -> int:
     parser.add_argument("--limit", type=int, default=None, help="앞에서부터 N청크만 (시험용)")
     parser.add_argument("--height", type=int, default=360)
     parser.add_argument("--fps", type=float, default=2.0)
+    parser.add_argument("--no-audio", action="store_true", help="청크에서 음성(해설)을 뺀다")
     parser.add_argument("--model", default=None)
     parser.add_argument("--base-url", default=None, help="cosmos: 로컬 NIM이면 http://host:8000/v1")
     parser.add_argument("--vss-url", default=None)
@@ -226,7 +237,9 @@ def main() -> int:
 
     def cut(start: float, length: float, dest: Path) -> None:
         subprocess.run(
-            ffmpeg_cut_cmd(ffmpeg, args.video, start, length, dest, args.height), check=True)
+            ffmpeg_cut_cmd(ffmpeg, args.video, start, length, dest, args.height,
+                           audio=not args.no_audio),
+            check=True)
 
     out_path = (args.out_dir or settings.video_dir) / f"{args.game_id}.json"
     snap = run(args.game_id, args.video, analyzer, clips, cut, out_path)

@@ -99,6 +99,13 @@ def check_chat(answer: str, context: Iterable[str]) -> list[Check]:
     ]
 
 
+def check_generated(source: str, backend: str) -> list[Check]:
+    """실제 모델 백엔드인데 폴백(조립 문장·실패 안내)이 나왔으면 생성이 죽은 것이다."""
+    if backend != "llm":
+        return []
+    return [Check("llm_generated", source in ("llm", "snapshot"), source)]
+
+
 def check_quiz(question: str, choices: list[str], answer_index: int) -> list[Check]:
     return [
         Check("four_distinct_choices", len(choices) == 4 and len(set(choices)) == 4),

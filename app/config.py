@@ -23,6 +23,8 @@ DEFAULT_CORS_ORIGINS = "http://localhost:5173,http://localhost:3000"
 class Settings:
     def __init__(self) -> None:
         self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "").strip()
+        # 워크스페이스에 묶이지 않은 키는 이 헤더가 있어야 호출된다(없으면 400).
+        self.anthropic_workspace_id = os.getenv("ANTHROPIC_WORKSPACE_ID", "").strip()
         self.llm_model = os.getenv("ROOKIE_LLM_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
         self.summary_model = (
             os.getenv("ROOKIE_SUMMARY_MODEL", DEFAULT_SUMMARY_MODEL).strip()

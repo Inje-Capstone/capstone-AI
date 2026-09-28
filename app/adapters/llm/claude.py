@@ -24,7 +24,12 @@ class ClaudeClient:
             import anthropic
         except ImportError as exc:  # pragma: no cover - 의존성 누락은 설치 문제
             raise LLMError(f"anthropic SDK를 불러올 수 없다: {exc}") from exc
-        self._client = anthropic.Anthropic(api_key=key)
+        headers = (
+            {"anthropic-workspace-id": settings.anthropic_workspace_id}
+            if settings.anthropic_workspace_id
+            else None
+        )
+        self._client = anthropic.Anthropic(api_key=key, default_headers=headers)
 
     def complete(
         self,
@@ -44,7 +49,9 @@ class ClaudeClient:
             {"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}
         ]
 
-        output_config: dict[str, Any] = {"effort": effort}
+        output_config: dict[str, Any] = {}
+        if _supports_effort(self.model):
+            output_config["effort"] = effort
         if schema is not None:
             output_config["format"] = {"type": "json_schema", "schema": schema}
 
@@ -81,3 +88,8 @@ class ClaudeClient:
             output_tokens=getattr(usage, "output_tokens", 0) or 0,
             cache_read_tokens=getattr(usage, "cache_read_input_tokens", 0) or 0,
         )
+
+
+def _supports_effort(model: str) -> bool:
+    """Haiku 4.5는 effort를 받지 않는다(400). 한 줄 요약처럼 Haiku를 쓰는 경로를 위해 뺀다."""
+    return "haiku" not in model
