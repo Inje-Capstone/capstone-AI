@@ -1,0 +1,6890 @@
+{
+ "_note": "네이버 스포츠 문자중계에서 변환한 실제 경기 데이터. scripts/import_naver_relay.py로 재생성한다. 팀 레포 커밋 허용(2026-09-28).",
+ "source": "naver",
+ "game": {
+  "id": "20260920HHLG02026",
+  "date": "2026-09-20",
+  "stadium": "잠실",
+  "away_team": "한화",
+  "home_team": "LG",
+  "has_video": false,
+  "unavailable_reason": "영상 미확보",
+  "video_duration_sec": 9519,
+  "relay_video_offset_sec": 0,
+  "final_score": {
+   "away": 3,
+   "home": 4
+  },
+  "context": {
+   "team_form": {
+    "LG": "3위 (74승 55패 1무) · 최근 5경기 5승 0패 · 한화 상대 7승 8패",
+    "한화": "9위 (54승 71패 4무) · 최근 5경기 0승 4패 1무 · LG 상대 8승 7패"
+   },
+   "pitcher_vs_team": {
+    "카라스코": "카라스코 올 시즌 한화 상대 2경기 9.2이닝 ERA 4.66",
+    "황준서": "황준서 올 시즌 LG 상대 3경기 7.1이닝 ERA 2.45"
+   }
+  }
+ },
+ "events": [
+  {
+   "id": "n1",
+   "t": 0,
+   "inning": 1,
+   "half": "top",
+   "kind": "atbat",
+   "text": "1번타자 최인호",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.275",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n2",
+   "t": 0,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 파울",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "투심",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n3",
+   "t": 19,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "투심",
+    "speed": "147"
+   }
+  },
+  {
+   "id": "n4",
+   "t": 35,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커브",
+    "speed": "126"
+   }
+  },
+  {
+   "id": "n5",
+   "t": 52,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 타격",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "커터",
+    "speed": "146",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n6",
+   "t": 52,
+   "inning": 1,
+   "half": "top",
+   "kind": "result",
+   "text": "최인호 : 1루수 땅볼 아웃 (1루수 1루 터치아웃)",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "groundout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n7",
+   "t": 52,
+   "inning": 1,
+   "half": "top",
+   "kind": "atbat",
+   "text": "2번타자 박정현",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.228",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n8",
+   "t": 91,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 헛스윙",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "커터",
+    "speed": "146"
+   }
+  },
+  {
+   "id": "n9",
+   "t": 109,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 헛스윙",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "투심",
+    "speed": "147"
+   }
+  },
+  {
+   "id": "n10",
+   "t": 141,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 헛스윙",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "슬라이더",
+    "speed": "137",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n11",
+   "t": 141,
+   "inning": 1,
+   "half": "top",
+   "kind": "result",
+   "text": "박정현 : 삼진 아웃",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n12",
+   "t": 141,
+   "inning": 1,
+   "half": "top",
+   "kind": "atbat",
+   "text": "3번타자 한지윤",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.303",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n13",
+   "t": 170,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "투심",
+    "speed": "146"
+   }
+  },
+  {
+   "id": "n14",
+   "t": 185,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 헛스윙",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "슬라이더",
+    "speed": "138"
+   }
+  },
+  {
+   "id": "n15",
+   "t": 202,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "투심",
+    "speed": "146"
+   }
+  },
+  {
+   "id": "n16",
+   "t": 218,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커터",
+    "speed": "145"
+   }
+  },
+  {
+   "id": "n17",
+   "t": 237,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 파울",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "투심",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n18",
+   "t": 261,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "6구 파울",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "슬라이더",
+    "speed": "134"
+   }
+  },
+  {
+   "id": "n19",
+   "t": 290,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "7구 볼",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커터",
+    "speed": "144",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n20",
+   "t": 290,
+   "inning": 1,
+   "half": "top",
+   "kind": "result",
+   "text": "한지윤 : 볼넷",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "walk",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n21",
+   "t": 290,
+   "inning": 1,
+   "half": "top",
+   "kind": "atbat",
+   "text": "4번타자 강백호",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.287",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n22",
+   "t": 332,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커브",
+    "speed": "123"
+   }
+  },
+  {
+   "id": "n23",
+   "t": 362,
+   "inning": 1,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 타격",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "포크",
+    "speed": "136",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n24",
+   "t": 362,
+   "inning": 1,
+   "half": "top",
+   "kind": "result",
+   "text": "강백호 : 유격수 플라이 아웃",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n26",
+   "t": 362,
+   "inning": 1,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "1번타자 박해민",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.291",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n27",
+   "t": 517,
+   "inning": 1,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n28",
+   "t": 531,
+   "inning": 1,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 스트라이크",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n29",
+   "t": 549,
+   "inning": 1,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커브",
+    "speed": "106"
+   }
+  },
+  {
+   "id": "n30",
+   "t": 568,
+   "inning": 1,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 타격",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "145",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n31",
+   "t": 568,
+   "inning": 1,
+   "half": "bot",
+   "kind": "result",
+   "text": "박해민 : 유격수 뒤 내야안타",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "single",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n32",
+   "t": 568,
+   "inning": 1,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "2번타자 구본혁",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.288",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n33",
+   "t": 614,
+   "inning": 1,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "141"
+   }
+  },
+  {
+   "id": "n34",
+   "t": 652,
+   "inning": 1,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "122"
+   }
+  },
+  {
+   "id": "n35",
+   "t": 673,
+   "inning": 1,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "141"
+   }
+  },
+  {
+   "id": "n36",
+   "t": 673,
+   "inning": 1,
+   "half": "bot",
+   "kind": "note",
+   "text": "투수 투수판 이탈",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {}
+  },
+  {
+   "id": "n37",
+   "t": 713,
+   "inning": 1,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 스트라이크",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n38",
+   "t": 736,
+   "inning": 1,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 파울",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n39",
+   "t": 770,
+   "inning": 1,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "6구 스트라이크",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "포크",
+    "speed": "122",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n40",
+   "t": 770,
+   "inning": 1,
+   "half": "bot",
+   "kind": "result",
+   "text": "구본혁 : 삼진 아웃",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 2,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n42",
+   "t": 770,
+   "inning": 1,
+   "half": "bot",
+   "kind": "note",
+   "text": "1회말 2번타순 6구 후 14:13 ~ 14:14 (1분간) LG요청 비디오 판독: 박해민 2루 도루 관련 아웃→아웃",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {}
+  },
+  {
+   "id": "n43",
+   "t": 770,
+   "inning": 1,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "3번타자 오스틴",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.341",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n44",
+   "t": 853,
+   "inning": 1,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 타격",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "144",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n45",
+   "t": 853,
+   "inning": 1,
+   "half": "bot",
+   "kind": "result",
+   "text": "오스틴 : 중견수 플라이 아웃",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n47",
+   "t": 853,
+   "inning": 2,
+   "half": "top",
+   "kind": "atbat",
+   "text": "5번타자 허인서",
+   "batter": "허인서",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.292",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n48",
+   "t": 1004,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "허인서",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "투심",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n49",
+   "t": 1019,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "허인서",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "투심",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n50",
+   "t": 1035,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 헛스윙",
+   "batter": "허인서",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "커터",
+    "speed": "141"
+   }
+  },
+  {
+   "id": "n51",
+   "t": 1057,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 타격",
+   "batter": "허인서",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "투심",
+    "speed": "146",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n52",
+   "t": 1057,
+   "inning": 2,
+   "half": "top",
+   "kind": "result",
+   "text": "허인서 : 유격수 땅볼 아웃 (유격수->1루수 송구아웃)",
+   "batter": "허인서",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "groundout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n53",
+   "t": 1057,
+   "inning": 2,
+   "half": "top",
+   "kind": "atbat",
+   "text": "6번타자 김태연",
+   "batter": "김태연",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.274",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n54",
+   "t": 1092,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "김태연",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "투심",
+    "speed": "145"
+   }
+  },
+  {
+   "id": "n55",
+   "t": 1108,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "김태연",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커터",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n56",
+   "t": 1124,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "김태연",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "136"
+   }
+  },
+  {
+   "id": "n57",
+   "t": 1142,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "김태연",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "135"
+   }
+  },
+  {
+   "id": "n58",
+   "t": 1171,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 스트라이크",
+   "batter": "김태연",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커터",
+    "speed": "145",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n59",
+   "t": 1171,
+   "inning": 2,
+   "half": "top",
+   "kind": "result",
+   "text": "김태연 : 삼진 아웃",
+   "batter": "김태연",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n60",
+   "t": 1171,
+   "inning": 2,
+   "half": "top",
+   "kind": "atbat",
+   "text": "7번타자 정은원",
+   "batter": "정은원",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.208",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n61",
+   "t": 1204,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "정은원",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "147"
+   }
+  },
+  {
+   "id": "n62",
+   "t": 1218,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 파울",
+   "batter": "정은원",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "커터",
+    "speed": "147"
+   }
+  },
+  {
+   "id": "n63",
+   "t": 1237,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "정은원",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커터",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n64",
+   "t": 1254,
+   "inning": 2,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 타격",
+   "batter": "정은원",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "포크",
+    "speed": "138",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n65",
+   "t": 1254,
+   "inning": 2,
+   "half": "top",
+   "kind": "result",
+   "text": "정은원 : 2루수 땅볼 아웃 (2루수->1루수 송구아웃)",
+   "batter": "정은원",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "groundout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n67",
+   "t": 1254,
+   "inning": 2,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "4번타자 송찬의",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.288",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n68",
+   "t": 1396,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "125"
+   }
+  },
+  {
+   "id": "n69",
+   "t": 1409,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n70",
+   "t": 1423,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "포크",
+    "speed": "123"
+   }
+  },
+  {
+   "id": "n71",
+   "t": 1438,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 스트라이크",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커브",
+    "speed": "105"
+   }
+  },
+  {
+   "id": "n72",
+   "t": 1461,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 볼",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "121"
+   }
+  },
+  {
+   "id": "n73",
+   "t": 1476,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "6구 파울",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "포크",
+    "speed": "121"
+   }
+  },
+  {
+   "id": "n74",
+   "t": 1497,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "7구 파울",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n75",
+   "t": 1517,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "8구 파울",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n76",
+   "t": 1544,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "9구 스트라이크",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "포크",
+    "speed": "122",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n77",
+   "t": 1544,
+   "inning": 2,
+   "half": "bot",
+   "kind": "result",
+   "text": "송찬의 : 삼진 아웃",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n78",
+   "t": 1544,
+   "inning": 2,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "5번타자 문정빈",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.255",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n79",
+   "t": 1578,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "125"
+   }
+  },
+  {
+   "id": "n80",
+   "t": 1594,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "106"
+   }
+  },
+  {
+   "id": "n81",
+   "t": 1618,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "121"
+   }
+  },
+  {
+   "id": "n82",
+   "t": 1634,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 스트라이크",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n83",
+   "t": 1649,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 헛스윙",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "포크",
+    "speed": "125"
+   }
+  },
+  {
+   "id": "n84",
+   "t": 1666,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "6구 볼",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "126",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n85",
+   "t": 1666,
+   "inning": 2,
+   "half": "bot",
+   "kind": "result",
+   "text": "문정빈 : 볼넷",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "walk",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n86",
+   "t": 1666,
+   "inning": 2,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "6번타자 오지환",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.241",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n87",
+   "t": 1705,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 타격",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "143",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n88",
+   "t": 1705,
+   "inning": 2,
+   "half": "bot",
+   "kind": "result",
+   "text": "오지환 : 좌익수 앞 1루타",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "single",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "id": "n90",
+   "t": 1705,
+   "inning": 2,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "7번타자 이재원",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.242",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n91",
+   "t": 1705,
+   "inning": 2,
+   "half": "bot",
+   "kind": "note",
+   "text": "포수 마운드 방문",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {}
+  },
+  {
+   "id": "n92",
+   "t": 1780,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "127"
+   }
+  },
+  {
+   "id": "n93",
+   "t": 1796,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 스트라이크",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "포크",
+    "speed": "123"
+   }
+  },
+  {
+   "id": "n94",
+   "t": 1816,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커브",
+    "speed": "115"
+   }
+  },
+  {
+   "id": "n95",
+   "t": 1849,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 파울",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "포크",
+    "speed": "125"
+   }
+  },
+  {
+   "id": "n96",
+   "t": 1874,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 파울",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "145"
+   }
+  },
+  {
+   "id": "n97",
+   "t": 1899,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "6구 볼",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "129"
+   }
+  },
+  {
+   "id": "n98",
+   "t": 1925,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "7구 헛스윙",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "포크",
+    "speed": "125",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n99",
+   "t": 1925,
+   "inning": 2,
+   "half": "bot",
+   "kind": "result",
+   "text": "이재원 : 삼진 아웃",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "id": "n100",
+   "t": 1925,
+   "inning": 2,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "8번타자 이주헌",
+   "batter": "이주헌",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.214",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n101",
+   "t": 1959,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "이주헌",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "109"
+   }
+  },
+  {
+   "id": "n102",
+   "t": 1983,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "이주헌",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n103",
+   "t": 2004,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "이주헌",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n104",
+   "t": 2023,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 스트라이크",
+   "batter": "이주헌",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n105",
+   "t": 2041,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 헛스윙",
+   "batter": "이주헌",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "포크",
+    "speed": "124"
+   }
+  },
+  {
+   "id": "n106",
+   "t": 2041,
+   "inning": 2,
+   "half": "bot",
+   "kind": "note",
+   "text": "투수 투수판 이탈",
+   "batter": "이주헌",
+   "pitcher": "황준서",
+   "detail": {}
+  },
+  {
+   "id": "n107",
+   "t": 2077,
+   "inning": 2,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "6구 스트라이크",
+   "batter": "이주헌",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "143",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n108",
+   "t": 2077,
+   "inning": 2,
+   "half": "bot",
+   "kind": "result",
+   "text": "이주헌 : 삼진 아웃",
+   "batter": "이주헌",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "id": "n110",
+   "t": 2077,
+   "inning": 3,
+   "half": "top",
+   "kind": "atbat",
+   "text": "8번타자 유민",
+   "batter": "유민",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.264",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n111",
+   "t": 2231,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "유민",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "투심",
+    "speed": "143",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n112",
+   "t": 2231,
+   "inning": 3,
+   "half": "top",
+   "kind": "result",
+   "text": "유민 : 몸에 맞는 볼",
+   "batter": "유민",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "hbp",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n113",
+   "t": 2231,
+   "inning": 3,
+   "half": "top",
+   "kind": "atbat",
+   "text": "9번타자 이도윤",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.260",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n114",
+   "t": 2276,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 파울",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "포크",
+    "speed": "135"
+   }
+  },
+  {
+   "id": "n115",
+   "t": 2302,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 파울",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "커브",
+    "speed": "125"
+   }
+  },
+  {
+   "id": "n116",
+   "t": 2331,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "136"
+   }
+  },
+  {
+   "id": "n117",
+   "t": 2351,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커터",
+    "speed": "145"
+   }
+  },
+  {
+   "id": "n118",
+   "t": 2351,
+   "inning": 3,
+   "half": "top",
+   "kind": "note",
+   "text": "투수 투수판 이탈",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {}
+  },
+  {
+   "id": "n119",
+   "t": 2399,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 파울",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "커터",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n120",
+   "t": 2429,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "6구 볼",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "136"
+   }
+  },
+  {
+   "id": "n121",
+   "t": 2450,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "7구 파울",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "슬라이더",
+    "speed": "140"
+   }
+  },
+  {
+   "id": "n122",
+   "t": 2450,
+   "inning": 3,
+   "half": "top",
+   "kind": "note",
+   "text": "투수 투수판 이탈",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {}
+  },
+  {
+   "id": "n123",
+   "t": 2501,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "8구 타격",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "투심",
+    "speed": "143",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n124",
+   "t": 2501,
+   "inning": 3,
+   "half": "top",
+   "kind": "result",
+   "text": "이도윤 : 유격수 땅볼 아웃 (유격수->1루수 송구아웃)",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "groundout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     2
+    ]
+   }
+  },
+  {
+   "id": "n126",
+   "t": 2501,
+   "inning": 3,
+   "half": "top",
+   "kind": "atbat",
+   "text": "1번타자 최인호",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.275",
+     "today": "오늘 1타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n127",
+   "t": 2546,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커터",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n128",
+   "t": 2562,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "123"
+   }
+  },
+  {
+   "id": "n129",
+   "t": 2591,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "투심",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n130",
+   "t": 2611,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 타격",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "커터",
+    "speed": "142",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n131",
+   "t": 2611,
+   "inning": 3,
+   "half": "top",
+   "kind": "result",
+   "text": "최인호 : 1루수 땅볼 아웃 (1루수 1루 터치아웃)",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "groundout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     3
+    ]
+   }
+  },
+  {
+   "id": "n133",
+   "t": 2611,
+   "inning": 3,
+   "half": "top",
+   "kind": "atbat",
+   "text": "2번타자 박정현",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.228",
+     "today": "오늘 1타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n134",
+   "t": 2655,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커터",
+    "speed": "145"
+   }
+  },
+  {
+   "id": "n135",
+   "t": 2677,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "135"
+   }
+  },
+  {
+   "id": "n136",
+   "t": 2701,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 파울",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "투심",
+    "speed": "146"
+   }
+  },
+  {
+   "id": "n137",
+   "t": 2730,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 헛스윙",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "슬라이더",
+    "speed": "135"
+   }
+  },
+  {
+   "id": "n138",
+   "t": 2769,
+   "inning": 3,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 헛스윙",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "슬라이더",
+    "speed": "136",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n139",
+   "t": 2769,
+   "inning": 3,
+   "half": "top",
+   "kind": "result",
+   "text": "박정현 : 삼진 아웃",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     3
+    ]
+   }
+  },
+  {
+   "id": "n141",
+   "t": 2769,
+   "inning": 3,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "9번타자 신민재",
+   "batter": "신민재",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.251",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n142",
+   "t": 2915,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 파울",
+   "batter": "신민재",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n143",
+   "t": 2938,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 스트라이크",
+   "batter": "신민재",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "145"
+   }
+  },
+  {
+   "id": "n144",
+   "t": 2951,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 타격",
+   "batter": "신민재",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "144",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n145",
+   "t": 2951,
+   "inning": 3,
+   "half": "bot",
+   "kind": "result",
+   "text": "신민재 : 3루수 땅볼 아웃 (3루수->1루수 송구아웃)",
+   "batter": "신민재",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "groundout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n146",
+   "t": 2951,
+   "inning": 3,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "1번타자 박해민",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.291",
+     "today": "오늘 1타수 1안타"
+    }
+   }
+  },
+  {
+   "id": "n147",
+   "t": 2986,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n148",
+   "t": 3002,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "110"
+   }
+  },
+  {
+   "id": "n149",
+   "t": 3020,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "107"
+   }
+  },
+  {
+   "id": "n150",
+   "t": 3038,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 파울",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "141"
+   }
+  },
+  {
+   "id": "n151",
+   "t": 3063,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 타격",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "포크",
+    "speed": "124",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n152",
+   "t": 3063,
+   "inning": 3,
+   "half": "bot",
+   "kind": "result",
+   "text": "박해민 : 3루수 플라이 아웃",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n153",
+   "t": 3063,
+   "inning": 3,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "2번타자 구본혁",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.288",
+     "today": "오늘 1타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n154",
+   "t": 3099,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "128"
+   }
+  },
+  {
+   "id": "n155",
+   "t": 3115,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 파울",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "141"
+   }
+  },
+  {
+   "id": "n156",
+   "t": 3134,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n157",
+   "t": 3150,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "141"
+   }
+  },
+  {
+   "id": "n158",
+   "t": 3168,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 볼",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "143",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n159",
+   "t": 3168,
+   "inning": 3,
+   "half": "bot",
+   "kind": "result",
+   "text": "구본혁 : 볼넷",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "walk",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n160",
+   "t": 3168,
+   "inning": 3,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "3번타자 오스틴",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.341",
+     "today": "오늘 1타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n161",
+   "t": 3215,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "포크",
+    "speed": "126"
+   }
+  },
+  {
+   "id": "n162",
+   "t": 3236,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "110"
+   }
+  },
+  {
+   "id": "n163",
+   "t": 3260,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커브",
+    "speed": "108"
+   }
+  },
+  {
+   "id": "n164",
+   "t": 3260,
+   "inning": 3,
+   "half": "bot",
+   "kind": "note",
+   "text": "투수 투수판 이탈",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {}
+  },
+  {
+   "id": "n165",
+   "t": 3260,
+   "inning": 3,
+   "half": "bot",
+   "kind": "note",
+   "text": "투수 투수판 이탈",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {}
+  },
+  {
+   "id": "n166",
+   "t": 3330,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n167",
+   "t": 3330,
+   "inning": 3,
+   "half": "bot",
+   "kind": "steal",
+   "text": "1루주자 구본혁 : 도루로 2루까지 진루",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "base": 2,
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     2
+    ]
+   }
+  },
+  {
+   "id": "n168",
+   "t": 3374,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 볼",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "143",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n169",
+   "t": 3374,
+   "inning": 3,
+   "half": "bot",
+   "kind": "result",
+   "text": "오스틴 : 몸에 맞는 볼",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "hbp",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "id": "n170",
+   "t": 3374,
+   "inning": 3,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "4번타자 송찬의",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.288",
+     "today": "오늘 1타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n171",
+   "t": 3374,
+   "inning": 3,
+   "half": "bot",
+   "kind": "note",
+   "text": "코칭스태프 마운드 방문",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {}
+  },
+  {
+   "id": "n172",
+   "t": 3455,
+   "inning": 3,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 타격",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "141",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n173",
+   "t": 3455,
+   "inning": 3,
+   "half": "bot",
+   "kind": "result",
+   "text": "송찬의 : 좌익수 플라이 아웃",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "id": "n175",
+   "t": 3455,
+   "inning": 4,
+   "half": "top",
+   "kind": "atbat",
+   "text": "3번타자 한지윤",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.303",
+     "today": "오늘 0타수 0안타 1볼넷"
+    }
+   }
+  },
+  {
+   "id": "n176",
+   "t": 3601,
+   "inning": 4,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커터",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n177",
+   "t": 3617,
+   "inning": 4,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 헛스윙",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "슬라이더",
+    "speed": "135"
+   }
+  },
+  {
+   "id": "n178",
+   "t": 3635,
+   "inning": 4,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 헛스윙",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "슬라이더",
+    "speed": "136",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n179",
+   "t": 3635,
+   "inning": 4,
+   "half": "top",
+   "kind": "result",
+   "text": "한지윤 : 삼진 아웃",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n180",
+   "t": 3635,
+   "inning": 4,
+   "half": "top",
+   "kind": "atbat",
+   "text": "4번타자 강백호",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.287",
+     "today": "오늘 1타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n181",
+   "t": 3678,
+   "inning": 4,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커브",
+    "speed": "125"
+   }
+  },
+  {
+   "id": "n182",
+   "t": 3694,
+   "inning": 4,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "투심",
+    "speed": "145"
+   }
+  },
+  {
+   "id": "n183",
+   "t": 3709,
+   "inning": 4,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "포크",
+    "speed": "138"
+   }
+  },
+  {
+   "id": "n184",
+   "t": 3729,
+   "inning": 4,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커터",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n185",
+   "t": 3750,
+   "inning": 4,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 헛스윙",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "슬라이더",
+    "speed": "140",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n186c",
+   "t": 3750,
+   "inning": 4,
+   "half": "top",
+   "kind": "call",
+   "text": "강백호 : 포수 스트라이크 낫 아웃 (포수->1루수 1루 터치아웃)",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "call": "dropped_third_strike"
+   }
+  },
+  {
+   "id": "n186",
+   "t": 3750,
+   "inning": 4,
+   "half": "top",
+   "kind": "result",
+   "text": "강백호 : 포수 스트라이크 낫 아웃 (포수->1루수 1루 터치아웃)",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n187",
+   "t": 3750,
+   "inning": 4,
+   "half": "top",
+   "kind": "atbat",
+   "text": "5번타자 허인서",
+   "batter": "허인서",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.292",
+     "today": "오늘 1타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n188",
+   "t": 3789,
+   "inning": 4,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 타격",
+   "batter": "허인서",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "커브",
+    "speed": "125",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n189",
+   "t": 3789,
+   "inning": 4,
+   "half": "top",
+   "kind": "result",
+   "text": "허인서 : 중견수 플라이 아웃",
+   "batter": "허인서",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n191",
+   "t": 3789,
+   "inning": 4,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "5번타자 문정빈",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.255",
+     "today": "오늘 0타수 0안타 1볼넷"
+    }
+   }
+  },
+  {
+   "id": "n192",
+   "t": 3924,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "106"
+   }
+  },
+  {
+   "id": "n193",
+   "t": 3948,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 타격",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "포크",
+    "speed": "125",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n194",
+   "t": 3948,
+   "inning": 4,
+   "half": "bot",
+   "kind": "result",
+   "text": "문정빈 : 좌익수 플라이 아웃",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n195",
+   "t": 3948,
+   "inning": 4,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "6번타자 오지환",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.241",
+     "today": "오늘 1타수 1안타"
+    }
+   }
+  },
+  {
+   "id": "n196",
+   "t": 3985,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "124"
+   }
+  },
+  {
+   "id": "n197",
+   "t": 3998,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "125"
+   }
+  },
+  {
+   "id": "n198",
+   "t": 4014,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 파울",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "141"
+   }
+  },
+  {
+   "id": "n199",
+   "t": 4045,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n200",
+   "t": 4064,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 볼",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "123",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n201",
+   "t": 4064,
+   "inning": 4,
+   "half": "bot",
+   "kind": "result",
+   "text": "오지환 : 볼넷",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "walk",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n202",
+   "t": 4064,
+   "inning": 4,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "7번타자 이재원",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.242",
+     "today": "오늘 1타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n203",
+   "t": 4105,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "125"
+   }
+  },
+  {
+   "id": "n204",
+   "t": 4134,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 타격",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "141",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n205",
+   "t": 4134,
+   "inning": 4,
+   "half": "bot",
+   "kind": "result",
+   "text": "이재원 : 좌익수 뒤 홈런 (홈런거리:140M)",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "homerun",
+    "outs_made": 0,
+    "runs": 2,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n207",
+   "t": 4134,
+   "inning": 4,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "8번타자 이주헌",
+   "batter": "이주헌",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.214",
+     "today": "오늘 1타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n208",
+   "t": 4183,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 타격",
+   "batter": "이주헌",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "143",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n209",
+   "t": 4183,
+   "inning": 4,
+   "half": "bot",
+   "kind": "result",
+   "text": "이주헌 : 좌익수 플라이 아웃",
+   "batter": "이주헌",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n210",
+   "t": 4183,
+   "inning": 4,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "9번타자 신민재",
+   "batter": "신민재",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.251",
+     "today": "오늘 1타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n211",
+   "t": 4235,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 파울",
+   "batter": "신민재",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n212",
+   "t": 4256,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "신민재",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "109"
+   }
+  },
+  {
+   "id": "n213",
+   "t": 4275,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 파울",
+   "batter": "신민재",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n214",
+   "t": 4314,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "신민재",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "117"
+   }
+  },
+  {
+   "id": "n215",
+   "t": 4333,
+   "inning": 4,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 타격",
+   "batter": "신민재",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "142",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n216",
+   "t": 4333,
+   "inning": 4,
+   "half": "bot",
+   "kind": "result",
+   "text": "신민재 : 2루수 땅볼 아웃 (2루수->1루수 송구아웃)",
+   "batter": "신민재",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "groundout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n218",
+   "t": 4333,
+   "inning": 5,
+   "half": "top",
+   "kind": "atbat",
+   "text": "6번타자 김태연",
+   "batter": "김태연",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.274",
+     "today": "오늘 1타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n219",
+   "t": 4474,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "김태연",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커브",
+    "speed": "125"
+   }
+  },
+  {
+   "id": "n220",
+   "t": 4489,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 타격",
+   "batter": "김태연",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "145",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n221",
+   "t": 4489,
+   "inning": 5,
+   "half": "top",
+   "kind": "result",
+   "text": "김태연 : 유격수 땅볼 아웃 (유격수->1루수 송구아웃)",
+   "batter": "김태연",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "groundout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n222",
+   "t": 4489,
+   "inning": 5,
+   "half": "top",
+   "kind": "atbat",
+   "text": "7번타자 정은원",
+   "batter": "정은원",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.208",
+     "today": "오늘 1타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n223",
+   "t": 4528,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 타격",
+   "batter": "정은원",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "커터",
+    "speed": "143",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n224",
+   "t": 4528,
+   "inning": 5,
+   "half": "top",
+   "kind": "result",
+   "text": "정은원 : 투수 왼쪽 번트안타",
+   "batter": "정은원",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "single",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n225",
+   "t": 4528,
+   "inning": 5,
+   "half": "top",
+   "kind": "atbat",
+   "text": "8번타자 유민",
+   "batter": "유민",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.264",
+     "today": "오늘 0타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n226",
+   "t": 4572,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 파울",
+   "batter": "유민",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n227",
+   "t": 4596,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "유민",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "125"
+   }
+  },
+  {
+   "id": "n228",
+   "t": 4621,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "유민",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "136"
+   }
+  },
+  {
+   "id": "n229",
+   "t": 4621,
+   "inning": 5,
+   "half": "top",
+   "kind": "note",
+   "text": "투수 투수판 이탈",
+   "batter": "유민",
+   "pitcher": "카라스코",
+   "detail": {}
+  },
+  {
+   "id": "n230",
+   "t": 4671,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "유민",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "135"
+   }
+  },
+  {
+   "id": "n231",
+   "t": 4690,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 스트라이크",
+   "batter": "유민",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커터",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n232",
+   "t": 4719,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "6구 볼",
+   "batter": "유민",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "136",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n233",
+   "t": 4719,
+   "inning": 5,
+   "half": "top",
+   "kind": "result",
+   "text": "유민 : 볼넷",
+   "batter": "유민",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "walk",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "id": "n235",
+   "t": 4719,
+   "inning": 5,
+   "half": "top",
+   "kind": "atbat",
+   "text": "9번타자 이도윤",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.260",
+     "today": "오늘 1타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n236",
+   "t": 4719,
+   "inning": 5,
+   "half": "top",
+   "kind": "note",
+   "text": "코칭스태프 마운드 방문",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {}
+  },
+  {
+   "id": "n237",
+   "t": 4802,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커브",
+    "speed": "126"
+   }
+  },
+  {
+   "id": "n238",
+   "t": 4821,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "137"
+   }
+  },
+  {
+   "id": "n239",
+   "t": 4843,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "125"
+   }
+  },
+  {
+   "id": "n240",
+   "t": 4864,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "투심",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n241",
+   "t": 4886,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 파울",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "커터",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n242",
+   "t": 4917,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "6구 타격",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "커터",
+    "speed": "144",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n243",
+   "t": 4917,
+   "inning": 5,
+   "half": "top",
+   "kind": "result",
+   "text": "이도윤 : 2루수 야수선택으로 출루 (2루수)",
+   "batter": "이도윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "fielders_choice",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1,
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "id": "n246",
+   "t": 4917,
+   "inning": 5,
+   "half": "top",
+   "kind": "atbat",
+   "text": "1번타자 최인호",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.273",
+     "today": "오늘 2타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n247",
+   "t": 5059,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 헛스윙",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "포크",
+    "speed": "137"
+   }
+  },
+  {
+   "id": "n248",
+   "t": 5080,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 스트라이크",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커터",
+    "speed": "147"
+   }
+  },
+  {
+   "id": "n249",
+   "t": 5100,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "139"
+   }
+  },
+  {
+   "id": "n250",
+   "t": 5130,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "139"
+   }
+  },
+  {
+   "id": "n251",
+   "t": 5153,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 볼",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "투심",
+    "speed": "145"
+   }
+  },
+  {
+   "id": "n252",
+   "t": 5176,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "6구 타격",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "커터",
+    "speed": "142",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n253",
+   "t": 5176,
+   "inning": 5,
+   "half": "top",
+   "kind": "result",
+   "text": "최인호 : 우익수 앞 1루타",
+   "batter": "최인호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "single",
+    "outs_made": 0,
+    "runs": 1,
+    "bases_after": [
+     1,
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "id": "n257",
+   "t": 5176,
+   "inning": 5,
+   "half": "top",
+   "kind": "atbat",
+   "text": "2번타자 박정현",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.226",
+     "today": "오늘 2타수 0안타 2삼진"
+    }
+   }
+  },
+  {
+   "id": "n258",
+   "t": 5176,
+   "inning": 5,
+   "half": "top",
+   "kind": "note",
+   "text": "포수 마운드 방문",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {}
+  },
+  {
+   "id": "n259",
+   "t": 5260,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 파울",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "슬라이더",
+    "speed": "138"
+   }
+  },
+  {
+   "id": "n260",
+   "t": 5284,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 타격",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "커터",
+    "speed": "145",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n261",
+   "t": 5284,
+   "inning": 5,
+   "half": "top",
+   "kind": "result",
+   "text": "박정현 : 중견수 희생플라이 아웃",
+   "batter": "박정현",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "sac_fly",
+    "outs_made": 1,
+    "runs": 1,
+    "bases_after": [
+     1,
+     3
+    ]
+   }
+  },
+  {
+   "id": "n264",
+   "t": 5284,
+   "inning": 5,
+   "half": "top",
+   "kind": "atbat",
+   "text": "3번타자 한지윤",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.299",
+     "today": "오늘 1타수 0안타 1볼넷 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n265",
+   "t": 5347,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "투심",
+    "speed": "148"
+   }
+  },
+  {
+   "id": "n266",
+   "t": 5367,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "139"
+   }
+  },
+  {
+   "id": "n267",
+   "t": 5390,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 타격",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "슬라이더",
+    "speed": "137",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n268",
+   "t": 5390,
+   "inning": 5,
+   "half": "top",
+   "kind": "result",
+   "text": "한지윤 : 우익수 앞 1루타",
+   "batter": "한지윤",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "single",
+    "outs_made": 0,
+    "runs": 1,
+    "bases_after": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "id": "n271",
+   "t": 5390,
+   "inning": 5,
+   "half": "top",
+   "kind": "atbat",
+   "text": "4번타자 강백호",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.286",
+     "today": "오늘 2타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n272",
+   "t": 5437,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커터",
+    "speed": "147"
+   }
+  },
+  {
+   "id": "n273",
+   "t": 5456,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "128"
+   }
+  },
+  {
+   "id": "n274",
+   "t": 5456,
+   "inning": 5,
+   "half": "top",
+   "kind": "call",
+   "text": "1루주자 한지윤 : 폭투로 2루까지 진루",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "call": "wild_pitch",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "id": "n275",
+   "t": 5456,
+   "inning": 5,
+   "half": "top",
+   "kind": "call",
+   "text": "2루주자 최인호 : 폭투로 3루까지 진루",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "call": "wild_pitch",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "id": "n276",
+   "t": 5499,
+   "inning": 5,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 타격",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "포크",
+    "speed": "138",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n277",
+   "t": 5499,
+   "inning": 5,
+   "half": "top",
+   "kind": "result",
+   "text": "강백호 : 중견수 플라이 아웃",
+   "batter": "강백호",
+   "pitcher": "카라스코",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "id": "n279",
+   "t": 5499,
+   "inning": 5,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "1번타자 박해민",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.290",
+     "today": "오늘 2타수 1안타"
+    }
+   }
+  },
+  {
+   "id": "n280",
+   "t": 5659,
+   "inning": 5,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 타격",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "140",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n281",
+   "t": 5659,
+   "inning": 5,
+   "half": "bot",
+   "kind": "result",
+   "text": "박해민 : 우익수 오른쪽 2루타",
+   "batter": "박해민",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "double",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     2
+    ]
+   }
+  },
+  {
+   "id": "n282",
+   "t": 5659,
+   "inning": 5,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "2번타자 구본혁",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.288",
+     "today": "오늘 1타수 0안타 1볼넷 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n283",
+   "t": 5733,
+   "inning": 5,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 타격",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "138",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n284",
+   "t": 5733,
+   "inning": 5,
+   "half": "bot",
+   "kind": "result",
+   "text": "구본혁 : 3루수 희생번트 아웃 (3루수->2루수 1루 터치아웃)",
+   "batter": "구본혁",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "sac_bunt",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     3
+    ]
+   }
+  },
+  {
+   "id": "n286",
+   "t": 5733,
+   "inning": 5,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "3번타자 오스틴",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.341",
+     "today": "오늘 1타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n287",
+   "t": 5790,
+   "inning": 5,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커브",
+    "speed": "107"
+   }
+  },
+  {
+   "id": "n288",
+   "t": 5814,
+   "inning": 5,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 타격",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "포크",
+    "speed": "131",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n289",
+   "t": 5814,
+   "inning": 5,
+   "half": "bot",
+   "kind": "result",
+   "text": "오스틴 : 좌익수 앞 1루타",
+   "batter": "오스틴",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "single",
+    "outs_made": 0,
+    "runs": 1,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n291",
+   "t": 5814,
+   "inning": 5,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "4번타자 송찬의",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.287",
+     "today": "오늘 2타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n292",
+   "t": 5856,
+   "inning": 5,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 헛스윙",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "포크",
+    "speed": "127"
+   }
+  },
+  {
+   "id": "n293",
+   "t": 5873,
+   "inning": 5,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 타격",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "슬라이더",
+    "speed": "117",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n294",
+   "t": 5873,
+   "inning": 5,
+   "half": "bot",
+   "kind": "result",
+   "text": "송찬의 : 좌익수 플라이 아웃",
+   "batter": "송찬의",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n295",
+   "t": 5873,
+   "inning": 5,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "5번타자 문정빈",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.254",
+     "today": "오늘 1타수 0안타 1볼넷"
+    }
+   }
+  },
+  {
+   "id": "n296",
+   "t": 5915,
+   "inning": 5,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "116"
+   }
+  },
+  {
+   "id": "n297",
+   "t": 5915,
+   "inning": 5,
+   "half": "bot",
+   "kind": "steal",
+   "text": "1루주자 오스틴 : 도루로 2루까지 진루",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "base": 2,
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     2
+    ]
+   }
+  },
+  {
+   "id": "n298",
+   "t": 5946,
+   "inning": 5,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "포크",
+    "speed": "130"
+   }
+  },
+  {
+   "id": "n299",
+   "t": 5970,
+   "inning": 5,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 타격",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "포크",
+    "speed": "127",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n300",
+   "t": 5970,
+   "inning": 5,
+   "half": "bot",
+   "kind": "result",
+   "text": "문정빈 : 중견수 왼쪽 1루타",
+   "batter": "문정빈",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "single",
+    "outs_made": 0,
+    "runs": 1,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n302",
+   "t": 5970,
+   "inning": 5,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "6번타자 오지환",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.241",
+     "today": "오늘 1타수 1안타 1볼넷"
+    }
+   }
+  },
+  {
+   "id": "n303",
+   "t": 6033,
+   "inning": 5,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 타격",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "143",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n304",
+   "t": 6033,
+   "inning": 5,
+   "half": "bot",
+   "kind": "result",
+   "text": "오지환 : 2루수 땅볼 아웃 (2루수->1루수 송구아웃)",
+   "batter": "오지환",
+   "pitcher": "황준서",
+   "detail": {
+    "result": "groundout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n306",
+   "t": 6033,
+   "inning": 6,
+   "half": "top",
+   "kind": "atbat",
+   "text": "5번타자 허인서",
+   "batter": "허인서",
+   "pitcher": "카라스코",
+   "detail": {
+    "stats": {
+     "season_avg": "0.291",
+     "today": "오늘 2타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n307",
+   "t": 6033,
+   "inning": 6,
+   "half": "top",
+   "kind": "sub",
+   "text": "투수 카라스코 : 투수 김강률 (으)로 교체",
+   "batter": "허인서",
+   "pitcher": "김강률",
+   "detail": {
+    "sub_type": "pitcher",
+    "pitcher": "김강률"
+   }
+  },
+  {
+   "id": "n308",
+   "t": 6033,
+   "inning": 6,
+   "half": "top",
+   "kind": "sub",
+   "text": "포수 이주헌 : 포수 박동원 (으)로 교체",
+   "batter": "허인서",
+   "pitcher": "김강률",
+   "detail": {
+    "sub_type": "player"
+   }
+  },
+  {
+   "id": "n309",
+   "t": 6317,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "허인서",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "149"
+   }
+  },
+  {
+   "id": "n310",
+   "t": 6335,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 타격",
+   "batter": "허인서",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "150",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n311",
+   "t": 6335,
+   "inning": 6,
+   "half": "top",
+   "kind": "result",
+   "text": "허인서 : 2루수 땅볼 아웃 (2루수->1루수 송구아웃)",
+   "batter": "허인서",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "groundout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n312",
+   "t": 6335,
+   "inning": 6,
+   "half": "top",
+   "kind": "atbat",
+   "text": "6번타자 김태연",
+   "batter": "김태연",
+   "pitcher": "김강률",
+   "detail": {
+    "stats": {
+     "season_avg": "0.274",
+     "today": "오늘 2타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n313",
+   "t": 6373,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 헛스윙",
+   "batter": "김태연",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "직구",
+    "speed": "147"
+   }
+  },
+  {
+   "id": "n314",
+   "t": 6390,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 파울",
+   "batter": "김태연",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "149"
+   }
+  },
+  {
+   "id": "n315",
+   "t": 6415,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 파울",
+   "batter": "김태연",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "슬라이더",
+    "speed": "135"
+   }
+  },
+  {
+   "id": "n316",
+   "t": 6442,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "김태연",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "149"
+   }
+  },
+  {
+   "id": "n317",
+   "t": 6461,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 볼",
+   "batter": "김태연",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "119"
+   }
+  },
+  {
+   "id": "n318",
+   "t": 6482,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "6구 타격",
+   "batter": "김태연",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "148",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n319",
+   "t": 6482,
+   "inning": 6,
+   "half": "top",
+   "kind": "result",
+   "text": "김태연 : 우익수 파울플라이 아웃",
+   "batter": "김태연",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n320",
+   "t": 6482,
+   "inning": 6,
+   "half": "top",
+   "kind": "atbat",
+   "text": "7번타자 정은원",
+   "batter": "정은원",
+   "pitcher": "김강률",
+   "detail": {
+    "stats": {
+     "season_avg": "0.240",
+     "today": "오늘 2타수 1안타"
+    }
+   }
+  },
+  {
+   "id": "n321",
+   "t": 6528,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "정은원",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "145"
+   }
+  },
+  {
+   "id": "n322",
+   "t": 6543,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "정은원",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n323",
+   "t": 6567,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "정은원",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "146"
+   }
+  },
+  {
+   "id": "n324",
+   "t": 6584,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "정은원",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "145",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n325",
+   "t": 6584,
+   "inning": 6,
+   "half": "top",
+   "kind": "result",
+   "text": "정은원 : 볼넷",
+   "batter": "정은원",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "walk",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n326",
+   "t": 6584,
+   "inning": 6,
+   "half": "top",
+   "kind": "atbat",
+   "text": "8번타자 유민",
+   "batter": "유민",
+   "pitcher": "김강률",
+   "detail": {
+    "stats": {
+     "season_avg": "0.264",
+     "today": "오늘 0타수 0안타 1볼넷"
+    }
+   }
+  },
+  {
+   "id": "n327",
+   "t": 6625,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "유민",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "133"
+   }
+  },
+  {
+   "id": "n328",
+   "t": 6645,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 헛스윙",
+   "batter": "유민",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "직구",
+    "speed": "148"
+   }
+  },
+  {
+   "id": "n329",
+   "t": 6663,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 헛스윙",
+   "batter": "유민",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "직구",
+    "speed": "149"
+   }
+  },
+  {
+   "id": "n330",
+   "t": 6689,
+   "inning": 6,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 헛스윙",
+   "batter": "유민",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "직구",
+    "speed": "149",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n331",
+   "t": 6689,
+   "inning": 6,
+   "half": "top",
+   "kind": "result",
+   "text": "유민 : 삼진 아웃",
+   "batter": "유민",
+   "pitcher": "김강률",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n333",
+   "t": 6689,
+   "inning": 6,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "7번타자 이재원",
+   "batter": "이재원",
+   "pitcher": "황준서",
+   "detail": {
+    "stats": {
+     "season_avg": "0.250",
+     "today": "오늘 2타수 1안타 1홈런 2타점 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n334",
+   "t": 6689,
+   "inning": 6,
+   "half": "bot",
+   "kind": "sub",
+   "text": "투수 황준서 : 투수 주현상 (으)로 교체",
+   "batter": "이재원",
+   "pitcher": "주현상",
+   "detail": {
+    "sub_type": "pitcher",
+    "pitcher": "주현상"
+   }
+  },
+  {
+   "id": "n335",
+   "t": 6851,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "이재원",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "138"
+   }
+  },
+  {
+   "id": "n336",
+   "t": 6868,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "이재원",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "137"
+   }
+  },
+  {
+   "id": "n337",
+   "t": 6883,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 파울",
+   "batter": "이재원",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "커브",
+    "speed": "125"
+   }
+  },
+  {
+   "id": "n338",
+   "t": 6917,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "이재원",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "137"
+   }
+  },
+  {
+   "id": "n339",
+   "t": 6940,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 파울",
+   "batter": "이재원",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n340",
+   "t": 6966,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "6구 볼",
+   "batter": "이재원",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "137"
+   }
+  },
+  {
+   "id": "n341",
+   "t": 6984,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "7구 스트라이크",
+   "batter": "이재원",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "137",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n342",
+   "t": 6984,
+   "inning": 6,
+   "half": "bot",
+   "kind": "result",
+   "text": "이재원 : 삼진 아웃",
+   "batter": "이재원",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n343",
+   "t": 6984,
+   "inning": 6,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "8번타자 박동원",
+   "batter": "박동원",
+   "pitcher": "주현상",
+   "detail": {
+    "stats": {
+     "season_avg": "0.223",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n344",
+   "t": 7026,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 타격",
+   "batter": "박동원",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "슬라이더",
+    "speed": "136",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n345",
+   "t": 7026,
+   "inning": 6,
+   "half": "bot",
+   "kind": "result",
+   "text": "박동원 : 2루수 플라이 아웃",
+   "batter": "박동원",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n346",
+   "t": 7026,
+   "inning": 6,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "9번타자 신민재",
+   "batter": "신민재",
+   "pitcher": "주현상",
+   "detail": {
+    "stats": {
+     "season_avg": "0.251",
+     "today": "오늘 2타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n347",
+   "t": 7068,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "신민재",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "145"
+   }
+  },
+  {
+   "id": "n348",
+   "t": 7082,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 헛스윙",
+   "batter": "신민재",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "슬라이더",
+    "speed": "137"
+   }
+  },
+  {
+   "id": "n349",
+   "t": 7103,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "신민재",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "138"
+   }
+  },
+  {
+   "id": "n350",
+   "t": 7118,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "신민재",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "체인지업",
+    "speed": "133"
+   }
+  },
+  {
+   "id": "n351",
+   "t": 7134,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 파울",
+   "batter": "신민재",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "146"
+   }
+  },
+  {
+   "id": "n352",
+   "t": 7158,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "6구 볼",
+   "batter": "신민재",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "145"
+   }
+  },
+  {
+   "id": "n353",
+   "t": 7179,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "7구 타격",
+   "batter": "신민재",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "슬라이더",
+    "speed": "138",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n354",
+   "t": 7179,
+   "inning": 6,
+   "half": "bot",
+   "kind": "result",
+   "text": "신민재 : 우익수 뒤 3루타",
+   "batter": "신민재",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "triple",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     3
+    ]
+   }
+  },
+  {
+   "id": "n355",
+   "t": 7179,
+   "inning": 6,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "1번타자 박해민",
+   "batter": "박해민",
+   "pitcher": "주현상",
+   "detail": {
+    "stats": {
+     "season_avg": "0.292",
+     "today": "오늘 3타수 2안타"
+    }
+   }
+  },
+  {
+   "id": "n356",
+   "t": 7249,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "박해민",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "146"
+   }
+  },
+  {
+   "id": "n357",
+   "t": 7273,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "박해민",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "체인지업",
+    "speed": "134"
+   }
+  },
+  {
+   "id": "n358",
+   "t": 7298,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "박해민",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "체인지업",
+    "speed": "133"
+   }
+  },
+  {
+   "id": "n359",
+   "t": 7326,
+   "inning": 6,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 타격",
+   "batter": "박해민",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "148",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n360",
+   "t": 7326,
+   "inning": 6,
+   "half": "bot",
+   "kind": "result",
+   "text": "박해민 : 우익수 플라이 아웃",
+   "batter": "박해민",
+   "pitcher": "주현상",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     3
+    ]
+   }
+  },
+  {
+   "id": "n362",
+   "t": 7326,
+   "inning": 7,
+   "half": "top",
+   "kind": "atbat",
+   "text": "9번타자 이도윤",
+   "batter": "이도윤",
+   "pitcher": "김강률",
+   "detail": {
+    "stats": {
+     "season_avg": "0.260",
+     "today": "오늘 2타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n363",
+   "t": 7326,
+   "inning": 7,
+   "half": "top",
+   "kind": "sub",
+   "text": "투수 김강률 : 투수 케네디 (으)로 교체",
+   "batter": "이도윤",
+   "pitcher": "케네디",
+   "detail": {
+    "sub_type": "pitcher",
+    "pitcher": "케네디"
+   }
+  },
+  {
+   "id": "n364",
+   "t": 7477,
+   "inning": 7,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "이도윤",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "140"
+   }
+  },
+  {
+   "id": "n365",
+   "t": 7492,
+   "inning": 7,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 스트라이크",
+   "batter": "이도윤",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "140"
+   }
+  },
+  {
+   "id": "n366",
+   "t": 7506,
+   "inning": 7,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 헛스윙",
+   "batter": "이도윤",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "슬라이더",
+    "speed": "127"
+   }
+  },
+  {
+   "id": "n367",
+   "t": 7533,
+   "inning": 7,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 스트라이크",
+   "batter": "이도윤",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "130",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n368",
+   "t": 7533,
+   "inning": 7,
+   "half": "top",
+   "kind": "result",
+   "text": "이도윤 : 삼진 아웃",
+   "batter": "이도윤",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n369",
+   "t": 7533,
+   "inning": 7,
+   "half": "top",
+   "kind": "atbat",
+   "text": "1번타자 최인호",
+   "batter": "최인호",
+   "pitcher": "케네디",
+   "detail": {
+    "stats": {
+     "season_avg": "0.279",
+     "today": "오늘 3타수 1안타 1타점"
+    }
+   }
+  },
+  {
+   "id": "n370",
+   "t": 7621,
+   "inning": 7,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "최인호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "141"
+   }
+  },
+  {
+   "id": "n371",
+   "t": 7635,
+   "inning": 7,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "최인호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "129"
+   }
+  },
+  {
+   "id": "n372",
+   "t": 7648,
+   "inning": 7,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "최인호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "129"
+   }
+  },
+  {
+   "id": "n373",
+   "t": 7663,
+   "inning": 7,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 파울",
+   "batter": "최인호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "슬라이더",
+    "speed": "127"
+   }
+  },
+  {
+   "id": "n374",
+   "t": 7698,
+   "inning": 7,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 헛스윙",
+   "batter": "최인호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "슬라이더",
+    "speed": "131",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n375",
+   "t": 7698,
+   "inning": 7,
+   "half": "top",
+   "kind": "result",
+   "text": "최인호 : 삼진 아웃",
+   "batter": "최인호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n376",
+   "t": 7698,
+   "inning": 7,
+   "half": "top",
+   "kind": "atbat",
+   "text": "2번타자 박정현",
+   "batter": "박정현",
+   "pitcher": "케네디",
+   "detail": {
+    "stats": {
+     "season_avg": "0.226",
+     "today": "오늘 2타수 0안타 1타점 2삼진"
+    }
+   }
+  },
+  {
+   "id": "n377",
+   "t": 7731,
+   "inning": 7,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 타격",
+   "batter": "박정현",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "142",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n378",
+   "t": 7731,
+   "inning": 7,
+   "half": "top",
+   "kind": "result",
+   "text": "박정현 : 유격수 땅볼 아웃 (유격수->1루수 송구아웃)",
+   "batter": "박정현",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "groundout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n380",
+   "t": 7731,
+   "inning": 7,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "2번타자 구본혁",
+   "batter": "구본혁",
+   "pitcher": "주현상",
+   "detail": {
+    "stats": {
+     "season_avg": "0.288",
+     "today": "오늘 1타수 0안타 1볼넷 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n381",
+   "t": 7731,
+   "inning": 7,
+   "half": "bot",
+   "kind": "sub",
+   "text": "투수 주현상 : 투수 강재민 (으)로 교체",
+   "batter": "구본혁",
+   "pitcher": "강재민",
+   "detail": {
+    "sub_type": "pitcher",
+    "pitcher": "강재민"
+   }
+  },
+  {
+   "id": "n382",
+   "t": 7869,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "구본혁",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n383",
+   "t": 7883,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "구본혁",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n384",
+   "t": 7900,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "구본혁",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "137"
+   }
+  },
+  {
+   "id": "n385",
+   "t": 7916,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "구본혁",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "134"
+   }
+  },
+  {
+   "id": "n386",
+   "t": 7934,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 볼",
+   "batter": "구본혁",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "135",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n387",
+   "t": 7934,
+   "inning": 7,
+   "half": "bot",
+   "kind": "result",
+   "text": "구본혁 : 볼넷",
+   "batter": "구본혁",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "walk",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n388",
+   "t": 7934,
+   "inning": 7,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "3번타자 오스틴",
+   "batter": "오스틴",
+   "pitcher": "강재민",
+   "detail": {
+    "stats": {
+     "season_avg": "0.343",
+     "today": "오늘 2타수 1안타 1타점"
+    }
+   }
+  },
+  {
+   "id": "n389",
+   "t": 7980,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "오스틴",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "139"
+   }
+  },
+  {
+   "id": "n390",
+   "t": 7998,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 파울",
+   "batter": "오스틴",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n391",
+   "t": 8018,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "오스틴",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "138"
+   }
+  },
+  {
+   "id": "n392",
+   "t": 8040,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 스트라이크",
+   "batter": "오스틴",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "134",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n393",
+   "t": 8040,
+   "inning": 7,
+   "half": "bot",
+   "kind": "result",
+   "text": "오스틴 : 삼진 아웃",
+   "batter": "오스틴",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n394",
+   "t": 8040,
+   "inning": 7,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "4번타자 송찬의",
+   "batter": "송찬의",
+   "pitcher": "강재민",
+   "detail": {
+    "stats": {
+     "season_avg": "0.287",
+     "today": "오늘 3타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n395",
+   "t": 8068,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "송찬의",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "135"
+   }
+  },
+  {
+   "id": "n396",
+   "t": 8083,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "송찬의",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "135"
+   }
+  },
+  {
+   "id": "n397",
+   "t": 8083,
+   "inning": 7,
+   "half": "bot",
+   "kind": "note",
+   "text": "투수 투수판 이탈",
+   "batter": "송찬의",
+   "pitcher": "강재민",
+   "detail": {}
+  },
+  {
+   "id": "n398",
+   "t": 8112,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "송찬의",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "138"
+   }
+  },
+  {
+   "id": "n399",
+   "t": 8129,
+   "inning": 7,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 타격",
+   "batter": "송찬의",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "슬라이더",
+    "speed": "134",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n400",
+   "t": 8129,
+   "inning": 7,
+   "half": "bot",
+   "kind": "result",
+   "text": "송찬의 : 2루수 병살타 아웃 (2루수->1루수 송구아웃)",
+   "batter": "송찬의",
+   "pitcher": "강재민",
+   "detail": {
+    "result": "double_play",
+    "outs_made": 2,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n403",
+   "t": 8129,
+   "inning": 8,
+   "half": "top",
+   "kind": "atbat",
+   "text": "3번타자 한지윤",
+   "batter": "한지윤",
+   "pitcher": "케네디",
+   "detail": {
+    "stats": {
+     "season_avg": "0.308",
+     "today": "오늘 2타수 1안타 1타점 1볼넷 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n404",
+   "t": 8271,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "한지윤",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n405",
+   "t": 8286,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 헛스윙",
+   "batter": "한지윤",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "직구",
+    "speed": "142"
+   }
+  },
+  {
+   "id": "n406",
+   "t": 8312,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 스트라이크",
+   "batter": "한지윤",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n407",
+   "t": 8327,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "한지윤",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "130"
+   }
+  },
+  {
+   "id": "n408",
+   "t": 8344,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 헛스윙",
+   "batter": "한지윤",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "직구",
+    "speed": "142",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n409",
+   "t": 8344,
+   "inning": 8,
+   "half": "top",
+   "kind": "result",
+   "text": "한지윤 : 삼진 아웃",
+   "batter": "한지윤",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n410",
+   "t": 8344,
+   "inning": 8,
+   "half": "top",
+   "kind": "atbat",
+   "text": "4번타자 강백호",
+   "batter": "강백호",
+   "pitcher": "케네디",
+   "detail": {
+    "stats": {
+     "season_avg": "0.286",
+     "today": "오늘 3타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n411",
+   "t": 8375,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "강백호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "132"
+   }
+  },
+  {
+   "id": "n412",
+   "t": 8390,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "강백호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "131"
+   }
+  },
+  {
+   "id": "n413",
+   "t": 8405,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "강백호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "131"
+   }
+  },
+  {
+   "id": "n414",
+   "t": 8421,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "강백호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n415",
+   "t": 8440,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 파울",
+   "batter": "강백호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "144"
+   }
+  },
+  {
+   "id": "n416",
+   "t": 8462,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "6구 파울",
+   "batter": "강백호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "슬라이더",
+    "speed": "131"
+   }
+  },
+  {
+   "id": "n417",
+   "t": 8481,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "7구 볼",
+   "batter": "강백호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "144",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n418",
+   "t": 8481,
+   "inning": 8,
+   "half": "top",
+   "kind": "result",
+   "text": "강백호 : 볼넷",
+   "batter": "강백호",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "walk",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n419",
+   "t": 8481,
+   "inning": 8,
+   "half": "top",
+   "kind": "atbat",
+   "text": "5번타자 허인서",
+   "batter": "허인서",
+   "pitcher": "케네디",
+   "detail": {
+    "stats": {
+     "season_avg": "0.290",
+     "today": "오늘 3타수 0안타"
+    }
+   }
+  },
+  {
+   "id": "n420",
+   "t": 8481,
+   "inning": 8,
+   "half": "top",
+   "kind": "sub",
+   "text": "1루주자 강백호 : 대주자 최유빈 (으)로 교체",
+   "batter": "허인서",
+   "pitcher": "케네디",
+   "detail": {
+    "sub_type": "player"
+   }
+  },
+  {
+   "id": "n421",
+   "t": 8526,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "허인서",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "143"
+   }
+  },
+  {
+   "id": "n422",
+   "t": 8545,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "허인서",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "132"
+   }
+  },
+  {
+   "id": "n423",
+   "t": 8564,
+   "inning": 8,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 타격",
+   "batter": "허인서",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "143",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n424",
+   "t": 8564,
+   "inning": 8,
+   "half": "top",
+   "kind": "result",
+   "text": "허인서 : 3루수 병살타 아웃 (3루수->2루수->1루수 송구아웃)",
+   "batter": "허인서",
+   "pitcher": "케네디",
+   "detail": {
+    "result": "double_play",
+    "outs_made": 2,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n427",
+   "t": 8564,
+   "inning": 8,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "5번타자 문정빈",
+   "batter": "문정빈",
+   "pitcher": "강재민",
+   "detail": {
+    "stats": {
+     "season_avg": "0.257",
+     "today": "오늘 2타수 1안타 1타점 1볼넷"
+    }
+   }
+  },
+  {
+   "id": "n428",
+   "t": 8564,
+   "inning": 8,
+   "half": "bot",
+   "kind": "sub",
+   "text": "투수 강재민 : 투수 김서현 (으)로 교체",
+   "batter": "문정빈",
+   "pitcher": "김서현",
+   "detail": {
+    "sub_type": "pitcher",
+    "pitcher": "김서현"
+   }
+  },
+  {
+   "id": "n429",
+   "t": 8564,
+   "inning": 8,
+   "half": "bot",
+   "kind": "sub",
+   "text": "대주자 최유빈 : 지명타자(으)로 수비위치 변경",
+   "batter": "문정빈",
+   "pitcher": "김서현",
+   "detail": {
+    "sub_type": "player"
+   }
+  },
+  {
+   "id": "n430",
+   "t": 8702,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "문정빈",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "128"
+   }
+  },
+  {
+   "id": "n431",
+   "t": 8724,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 헛스윙",
+   "batter": "문정빈",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "슬라이더",
+    "speed": "129"
+   }
+  },
+  {
+   "id": "n432",
+   "t": 8740,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "문정빈",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "129"
+   }
+  },
+  {
+   "id": "n433",
+   "t": 8756,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 볼",
+   "batter": "문정빈",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "129"
+   }
+  },
+  {
+   "id": "n434",
+   "t": 8780,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 볼",
+   "batter": "문정빈",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "129"
+   }
+  },
+  {
+   "id": "n435",
+   "t": 8801,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "6구 스트라이크",
+   "batter": "문정빈",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "129",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n436",
+   "t": 8801,
+   "inning": 8,
+   "half": "bot",
+   "kind": "result",
+   "text": "문정빈 : 삼진 아웃",
+   "batter": "문정빈",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n437",
+   "t": 8801,
+   "inning": 8,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "6번타자 오지환",
+   "batter": "오지환",
+   "pitcher": "김서현",
+   "detail": {
+    "stats": {
+     "season_avg": "0.240",
+     "today": "오늘 2타수 1안타 1볼넷"
+    }
+   }
+  },
+  {
+   "id": "n438",
+   "t": 8830,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "오지환",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "131"
+   }
+  },
+  {
+   "id": "n439",
+   "t": 8842,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 스트라이크",
+   "batter": "오지환",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "직구",
+    "speed": "153"
+   }
+  },
+  {
+   "id": "n440",
+   "t": 8858,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 헛스윙",
+   "batter": "오지환",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "슬라이더",
+    "speed": "128"
+   }
+  },
+  {
+   "id": "n441",
+   "t": 8880,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "4구 파울",
+   "batter": "오지환",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "직구",
+    "speed": "155"
+   }
+  },
+  {
+   "id": "n442",
+   "t": 8901,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "5구 헛스윙",
+   "batter": "오지환",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "체인지업",
+    "speed": "138",
+    "decisive": true
+   }
+  },
+  {
+   "id": "n443",
+   "t": 8901,
+   "inning": 8,
+   "half": "bot",
+   "kind": "result",
+   "text": "오지환 : 삼진 아웃",
+   "batter": "오지환",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "strikeout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n444",
+   "t": 8901,
+   "inning": 8,
+   "half": "bot",
+   "kind": "atbat",
+   "text": "7번타자 이재원",
+   "batter": "이재원",
+   "pitcher": "김서현",
+   "detail": {
+    "stats": {
+     "season_avg": "0.247",
+     "today": "오늘 3타수 1안타 1홈런 2타점 2삼진"
+    }
+   }
+  },
+  {
+   "id": "n445",
+   "t": 8931,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "이재원",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "슬라이더",
+    "speed": "129"
+   }
+  },
+  {
+   "id": "n446",
+   "t": 8944,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "2구 스트라이크",
+   "batter": "이재원",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "슬라이더",
+    "speed": "131"
+   }
+  },
+  {
+   "id": "n447",
+   "t": 8958,
+   "inning": 8,
+   "half": "bot",
+   "kind": "pitch",
+   "text": "3구 타격",
+   "batter": "이재원",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "슬라이더",
+    "speed": "131",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n448",
+   "t": 8958,
+   "inning": 8,
+   "half": "bot",
+   "kind": "result",
+   "text": "이재원 : 좌익수 플라이 아웃",
+   "batter": "이재원",
+   "pitcher": "김서현",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": []
+   }
+  },
+  {
+   "id": "n450",
+   "t": 8958,
+   "inning": 9,
+   "half": "top",
+   "kind": "atbat",
+   "text": "6번타자 김태연",
+   "batter": "김태연",
+   "pitcher": "케네디",
+   "detail": {
+    "stats": {
+     "season_avg": "0.273",
+     "today": "오늘 3타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n451",
+   "t": 8958,
+   "inning": 9,
+   "half": "top",
+   "kind": "sub",
+   "text": "투수 케네디 : 투수 손주영 (으)로 교체",
+   "batter": "김태연",
+   "pitcher": "손주영",
+   "detail": {
+    "sub_type": "pitcher",
+    "pitcher": "손주영"
+   }
+  },
+  {
+   "id": "n452",
+   "t": 8958,
+   "inning": 9,
+   "half": "top",
+   "kind": "sub",
+   "text": "우익수 이재원 : 우익수 최원영 (으)로 교체",
+   "batter": "김태연",
+   "pitcher": "손주영",
+   "detail": {
+    "sub_type": "player"
+   }
+  },
+  {
+   "id": "n453",
+   "t": 9105,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 헛스윙",
+   "batter": "김태연",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "직구",
+    "speed": "146"
+   }
+  },
+  {
+   "id": "n454",
+   "t": 9129,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "김태연",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "149"
+   }
+  },
+  {
+   "id": "n455",
+   "t": 9145,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 타격",
+   "batter": "김태연",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "커브",
+    "speed": "121",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n456",
+   "t": 9145,
+   "inning": 9,
+   "half": "top",
+   "kind": "result",
+   "text": "김태연 : 우중간 1루타",
+   "batter": "김태연",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "single",
+    "outs_made": 0,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n457",
+   "t": 9145,
+   "inning": 9,
+   "half": "top",
+   "kind": "atbat",
+   "text": "7번타자 정은원",
+   "batter": "정은원",
+   "pitcher": "손주영",
+   "detail": {
+    "stats": {
+     "season_avg": "0.240",
+     "today": "오늘 2타수 1안타 1볼넷"
+    }
+   }
+  },
+  {
+   "id": "n458",
+   "t": 9189,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 볼",
+   "batter": "정은원",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "직구",
+    "speed": "148"
+   }
+  },
+  {
+   "id": "n459",
+   "t": 9221,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 스트라이크",
+   "batter": "정은원",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커터",
+    "speed": "137"
+   }
+  },
+  {
+   "id": "n460",
+   "t": 9243,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 파울",
+   "batter": "정은원",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "커터",
+    "speed": "138"
+   }
+  },
+  {
+   "id": "n461",
+   "t": 9266,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 파울",
+   "batter": "정은원",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "foul",
+    "pitch_type": "커브",
+    "speed": "122"
+   }
+  },
+  {
+   "id": "n462",
+   "t": 9290,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "5구 타격",
+   "batter": "정은원",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "직구",
+    "speed": "151",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n463",
+   "t": 9290,
+   "inning": 9,
+   "half": "top",
+   "kind": "result",
+   "text": "정은원 : 중견수 플라이 아웃",
+   "batter": "정은원",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "flyout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n464",
+   "t": 9290,
+   "inning": 9,
+   "half": "top",
+   "kind": "atbat",
+   "text": "8번타자 유민",
+   "batter": "유민",
+   "pitcher": "손주영",
+   "detail": {
+    "stats": {
+     "season_avg": "0.259",
+     "today": "오늘 1타수 0안타 1볼넷 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n465",
+   "t": 9290,
+   "inning": 9,
+   "half": "top",
+   "kind": "note",
+   "text": "투수 투수판 이탈",
+   "batter": "유민",
+   "pitcher": "손주영",
+   "detail": {}
+  },
+  {
+   "id": "n466",
+   "t": 9350,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 헛스윙",
+   "batter": "유민",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "swing_strike",
+    "pitch_type": "커터",
+    "speed": "140"
+   }
+  },
+  {
+   "id": "n467",
+   "t": 9379,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 스트라이크",
+   "batter": "유민",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커브",
+    "speed": "123"
+   }
+  },
+  {
+   "id": "n468",
+   "t": 9399,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 타격",
+   "batter": "유민",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "커브",
+    "speed": "124",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n469",
+   "t": 9399,
+   "inning": 9,
+   "half": "top",
+   "kind": "result",
+   "text": "유민 : 유격수 앞 땅볼로 출루",
+   "batter": "유민",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "fielders_choice",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  },
+  {
+   "id": "n471",
+   "t": 9399,
+   "inning": 9,
+   "half": "top",
+   "kind": "atbat",
+   "text": "9번타자 이도윤",
+   "batter": "이도윤",
+   "pitcher": "손주영",
+   "detail": {
+    "stats": {
+     "season_avg": "0.259",
+     "today": "오늘 3타수 0안타 1삼진"
+    }
+   }
+  },
+  {
+   "id": "n472",
+   "t": 9399,
+   "inning": 9,
+   "half": "top",
+   "kind": "atbat",
+   "text": "대타 정민규",
+   "batter": "정민규",
+   "pitcher": "손주영",
+   "detail": {
+    "stats": {
+     "season_avg": "0.000",
+     "today": "오늘 첫 타석"
+    }
+   }
+  },
+  {
+   "id": "n473",
+   "t": 9462,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "1구 스트라이크",
+   "batter": "정민규",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "called_strike",
+    "pitch_type": "커터",
+    "speed": "138"
+   }
+  },
+  {
+   "id": "n474",
+   "t": 9479,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "2구 볼",
+   "batter": "정민규",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커브",
+    "speed": "124"
+   }
+  },
+  {
+   "id": "n475",
+   "t": 9498,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "3구 볼",
+   "batter": "정민규",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "ball",
+    "pitch_type": "커터",
+    "speed": "139"
+   }
+  },
+  {
+   "id": "n476",
+   "t": 9519,
+   "inning": 9,
+   "half": "top",
+   "kind": "pitch",
+   "text": "4구 타격",
+   "batter": "정민규",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "in_play",
+    "pitch_type": "커터",
+    "speed": "140",
+    "decisive": false
+   }
+  },
+  {
+   "id": "n477",
+   "t": 9519,
+   "inning": 9,
+   "half": "top",
+   "kind": "result",
+   "text": "정민규 : 3루수 땅볼 아웃 (3루수->1루수 송구아웃)",
+   "batter": "정민규",
+   "pitcher": "손주영",
+   "detail": {
+    "result": "groundout",
+    "outs_made": 1,
+    "runs": 0,
+    "bases_after": [
+     1
+    ]
+   }
+  }
+ ]
+}

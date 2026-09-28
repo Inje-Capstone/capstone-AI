@@ -150,6 +150,9 @@ def apply_offset(fixture_dir: Path, game_id: str, offset: float) -> Path:
         raw = json.loads(path.read_text(encoding="utf-8"))
         if (raw.get("game") or {}).get("id") == game_id:
             raw["game"]["relay_video_offset_sec"] = int(round(offset))
+            # 영상과 맞춰졌으니 홈(S3)에서 이 경기를 활성화한다.
+            raw["game"]["has_video"] = True
+            raw["game"].pop("unavailable_reason", None)
             save(path, raw)
             return path
     raise SystemExit(f"fixture에서 경기를 찾지 못했다: {game_id}")
