@@ -221,8 +221,6 @@ __marimo__/
 # (데모용으로 실제 모델로 만든 스냅샷을 굳혀 커밋하기로 하면 이 줄을 지운다)
 data/snapshots/*.json
 
-# 네이버 문자중계에서 가져온 실경기 fixture. 재배포 허용 여부 확인 전까지 커밋하지 않는다.
-data/fixtures/naver_*.json
 
 # 영상 VLM 분석 스냅샷(scripts/analyze_video.py). 원본 영상 저작권 검토 전까지 커밋하지 않는다.
 data/video/*.json

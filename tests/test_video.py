@@ -273,5 +273,6 @@ def test_apply_offset_updates_only_that_game(tmp_path):
     (tmp_path / "b.json").write_text(json.dumps({"game": {"id": "B", "relay_video_offset_sec": 0}}))
     path = analyze_video.apply_offset(tmp_path, "B", 95.6)
     assert path.name == "b.json"
-    assert json.loads((tmp_path / "b.json").read_text())["game"]["relay_video_offset_sec"] == 96
+    game_b = json.loads((tmp_path / "b.json").read_text())["game"]
+    assert game_b["relay_video_offset_sec"] == 96 and game_b["has_video"] is True
     assert json.loads((tmp_path / "a.json").read_text())["game"]["relay_video_offset_sec"] == 0

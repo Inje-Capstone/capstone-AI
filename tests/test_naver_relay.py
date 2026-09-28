@@ -118,7 +118,8 @@ def test_meta_maps_to_fixture_game(game):
     meta = game["game"]
     assert meta["id"] == GAME_ID
     assert (meta["away_team"], meta["home_team"], meta["stadium"]) == ("원정", "홈", "가상구장")
-    assert meta["has_video"] is True
+    assert meta["has_video"] is False  # 영상은 analyze_video.py --apply로 붙인다
+    assert meta["unavailable_reason"] == "영상 미확보"
     assert game["source"] == "naver"
 
 

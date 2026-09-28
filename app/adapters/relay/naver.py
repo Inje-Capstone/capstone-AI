@@ -130,7 +130,7 @@ def convert_game(
     return {
         "_note": (
             "네이버 스포츠 문자중계에서 변환한 실제 경기 데이터. "
-            "scripts/import_naver_relay.py로 재생성한다. 재배포 허용 여부 확인 전까지 커밋 금지."
+            "scripts/import_naver_relay.py로 재생성한다. 팀 레포 커밋 허용(2026-09-28)."
         ),
         "source": "naver",
         "game": {
@@ -139,7 +139,9 @@ def convert_game(
             "stadium": info.get("stadium") or "",
             "away_team": info["awayTeamName"],
             "home_team": info["homeTeamName"],
-            "has_video": bool(info.get("hasVideo")) if has_video is None else has_video,
+            # 우리 서비스에 영상이 붙었는지(네이버 영상 유무 아님). analyze_video --apply가 켠다.
+            "has_video": bool(has_video),
+            "unavailable_reason": None if has_video else "영상 미확보",
             "video_duration_sec": events[-1]["t"] if events else 0,
             "relay_video_offset_sec": 0,  # 오프셋은 이미 t에 반영했다
             "final_score": {"away": info.get("awayTeamScore"), "home": info.get("homeTeamScore")},

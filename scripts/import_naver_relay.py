@@ -38,7 +38,10 @@ def main() -> int:
         "--video-offset", type=int, default=0,
         help="영상에서 첫 투구가 나오는 시각(초). 카드 타임코드가 이만큼 밀린다.",
     )
-    parser.add_argument("--no-video", action="store_true", help="영상 미확보로 표시 (S3 비활성)")
+    parser.add_argument(
+        "--has-video", action="store_true",
+        help="영상이 이미 붙어 있음 (기본은 영상 미확보 — analyze_video.py --apply가 켠다)",
+    )
     parser.add_argument("--out-dir", type=Path, default=None)
     args = parser.parse_args()
 
@@ -51,7 +54,7 @@ def main() -> int:
     fixture = convert_game(
         info, innings,
         video_offset_sec=args.video_offset,
-        has_video=False if args.no_video else None,
+        has_video=args.has_video,
         preview=fetch_preview(args.game_id),
     )
     out_dir = args.out_dir or get_settings().fixture_dir
