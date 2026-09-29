@@ -9,7 +9,13 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import routes_chat, routes_game, routes_glossary, routes_quiz
+from app.api import (
+    routes_chat,
+    routes_game,
+    routes_glossary,
+    routes_onboarding,
+    routes_quiz,
+)
 from app.api.deps import get_relay_source
 from app.config import get_settings
 
@@ -37,6 +43,7 @@ app.include_router(routes_game.router)
 app.include_router(routes_chat.router)
 app.include_router(routes_glossary.router)
 app.include_router(routes_quiz.router)
+app.include_router(routes_onboarding.router)
 
 
 @app.get("/health", tags=["ops"], summary="헬스체크 (데모 전 점검용)")

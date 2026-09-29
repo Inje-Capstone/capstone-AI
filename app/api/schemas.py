@@ -8,6 +8,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
+from app.domain.diagnostic import Diagnosis
 from app.domain.models import Card, GameMeta, GameState, Matchup
 
 
@@ -262,3 +263,67 @@ class MomentOut(BaseModel):
         description="llm | snapshot | template(중계 원문 조립 — 모델 없이도 항상 나온다)"
     )
     scoreboard: str
+
+
+class DiagnosticQuestionOut(BaseModel):
+    """온보딩 B① 수준 진단 문항 1개.
+
+    **정답(`answer_index`)과 해설을 담지 않는다** — 클라이언트 번들에 정답이 실리면
+    진단 자체가 무의미해진다. 채점은 같은 경로의 POST가 서버에서 한다.
+    """
+
+    id: str
+    term_id: str = Field(description="용어 사전(S5) 딥링크 키 — 결과 해설에서 이동")
+    question: str
+    choices: list[str]
+
+    @classmethod
+    def of(cls, entry: dict[str, Any]) -> "DiagnosticQuestionOut":
+        return cls(
+            id=entry["id"],
+            term_id=entry.get("term_id", ""),
+            question=entry["question"],
+            choices=list(entry.get("choices", [])),
+        )
+
+
+class DiagnosticOut(BaseModel):
+    total: int = Field(description="문항 수 — 온보딩 진행 표시에 쓴다")
+    questions: list[DiagnosticQuestionOut]
+
+
+class DiagnosticAnswersIn(BaseModel):
+    """고른 보기 인덱스를 문항 순서대로. 안 고른 문항은 null(= 틀림으로 센다)."""
+
+    answers: list[Optional[int]] = Field(
+        min_length=1,
+        max_length=10,
+        description="0부터 시작하는 보기 인덱스. 범위를 벗어나면 틀림으로 센다.",
+    )
+
+
+class DiagnosticAnswerOut(BaseModel):
+    """문항별 채점 결과 — 결과 화면의 해설·용어 사전 링크."""
+
+    question_id: str
+    term_id: str
+    chosen_index: Optional[int]
+    answer_index: int
+    correct: bool
+    explanation: str
+
+
+class DiagnosticResultOut(BaseModel):
+    """진단 결과 화면. `level_label`을 이후 요청의 `level`에 그대로 넘기면 된다."""
+
+    correct_count: int
+    total: int
+    level: int
+    level_label: str = Field(description="입문 | 초보 | 익숙")
+    message: str = Field(description="결과 화면 문구")
+    answers: list[DiagnosticAnswerOut]
+    reasons: list[str] = Field(description="이 수준이 나온 근거 (core-belief 4)")
+
+    @classmethod
+    def of(cls, diagnosis: Diagnosis) -> "DiagnosticResultOut":
+        return cls(**diagnosis.model_dump())
