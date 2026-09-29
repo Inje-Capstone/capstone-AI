@@ -1,10 +1,11 @@
 """서비스 조립. 어댑터 선택은 여기 한 곳에서만 일어난다."""
 
 from functools import lru_cache
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import Query
 
+from app.adapters.diagnostic.seed import load_diagnostic
 from app.adapters.glossary.seed import load_glossary
 from app.adapters.llm import build_llm_client
 from app.adapters.relay.fixture import FixtureRelaySource
@@ -71,6 +72,12 @@ def get_quiz_service() -> QuizService:
 
 
 @lru_cache(maxsize=1)
+def get_diagnostic_questions() -> list[dict[str, Any]]:
+    """온보딩 수준 진단 문제은행. 고정 콘텐츠라 LLM도 경기 데이터도 쓰지 않는다."""
+    return load_diagnostic()
+
+
+@lru_cache(maxsize=1)
 def get_moment_service() -> MomentService:
     settings = get_settings()
     return MomentService(
@@ -92,6 +99,7 @@ def reset_services() -> None:
         get_video_notes,
         get_quiz_service,
         get_moment_service,
+        get_diagnostic_questions,
     ):
         fn.cache_clear()
 
