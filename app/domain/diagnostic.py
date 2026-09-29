@@ -19,6 +19,10 @@ from app.domain.models import (
 # 스펙이 정한 문항 수. 이 수일 때는 아래 표를 그대로 쓴다 (user-flow.md B①-결과).
 SPEC_TOTAL = 3
 
+# 문제은행에 정답이 없을 때의 자리값. 어떤 선택과도 같아서는 안 된다 —
+# 사용자가 보낸 음수 인덱스와 우연히 맞아 오채점되는 걸 막는다.
+NO_ANSWER = -1
+
 # 맞힌 수 → 수준. 경계를 코드 여러 곳에 흩지 않고 여기 한 곳에 둔다.
 LEVEL_BY_CORRECT = {
     0: LEVEL_BEGINNER,
@@ -40,14 +44,18 @@ RESULT_MESSAGES = {
 
 
 class GradedAnswer(BaseModel):
-    """문항 1개의 채점 결과. 결과 화면에서 해설과 용어 사전 링크에 쓴다."""
+    """문항 1개의 채점 결과. 결과 화면에서 해설과 용어 사전 링크에 쓴다.
+
+    `answer_index`·`explanation`은 **답을 낸 문항에만** 채워진다 — 빈 답안 한 번으로
+    정답표를 받아 가는 경로를 만들지 않기 위해서다.
+    """
 
     question_id: str
     term_id: str
     chosen_index: Optional[int]
-    answer_index: int
+    answer_index: Optional[int] = None
     correct: bool
-    explanation: str
+    explanation: Optional[str] = None
 
 
 class Diagnosis(BaseModel):
@@ -79,6 +87,18 @@ def level_for(correct: int, total: int) -> int:
     return LEVEL_BEGINNER
 
 
+def _answer_index(question: dict[str, Any]) -> int:
+    """문제은행의 정답 인덱스. 없거나 정수가 아니거나 음수면 `NO_ANSWER`.
+
+    `True`는 파이썬에서 `1`과 같으므로 따로 걸러 낸다 — 시드가 망가졌을 때
+    2번 보기가 정답이 되는 식으로 조용히 틀리는 걸 막는다.
+    """
+    raw = question.get("answer_index")
+    if isinstance(raw, bool) or not isinstance(raw, int) or raw < 0:
+        return NO_ANSWER
+    return raw
+
+
 def grade(
     questions: Sequence[dict[str, Any]], chosen: Sequence[Optional[int]]
 ) -> Diagnosis:
@@ -86,19 +106,21 @@ def grade(
 
     안 보낸 문항·범위를 벗어난 인덱스는 **틀림으로 세고 에러를 내지 않는다** —
     온보딩은 건너뛸 수 없는 관문이라(user-flow A4) 여기서 막히면 가입이 끝난다.
+    답을 내지 않은 문항에는 정답·해설을 붙이지 않는다.
     """
     graded: list[GradedAnswer] = []
     for n, question in enumerate(questions):
         pick = chosen[n] if n < len(chosen) else None
-        answer = int(question.get("answer_index", -1))
+        answer = _answer_index(question)
+        answered = pick is not None
         graded.append(
             GradedAnswer(
                 question_id=str(question.get("id", f"q{n + 1}")),
                 term_id=str(question.get("term_id", "")),
                 chosen_index=pick,
-                answer_index=answer,
-                correct=pick is not None and pick == answer,
-                explanation=str(question.get("explanation", "")),
+                answer_index=answer if answered and answer != NO_ANSWER else None,
+                correct=answered and pick >= 0 and answer != NO_ANSWER and pick == answer,
+                explanation=str(question.get("explanation", "")) if answered else None,
             )
         )
 

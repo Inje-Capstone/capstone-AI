@@ -297,7 +297,8 @@ class DiagnosticAnswersIn(BaseModel):
 
     answers: list[Optional[int]] = Field(
         min_length=1,
-        max_length=10,
+        # 요청 크기 상한일 뿐이다 — 문제은행(현재 3문항)이 늘어도 걸리지 않게 넉넉히 둔다.
+        max_length=20,
         description="0부터 시작하는 보기 인덱스. 범위를 벗어나면 틀림으로 센다.",
     )
 
@@ -308,9 +309,13 @@ class DiagnosticAnswerOut(BaseModel):
     question_id: str
     term_id: str
     chosen_index: Optional[int]
-    answer_index: int
+    answer_index: Optional[int] = Field(
+        default=None, description="정답 인덱스 — **답을 낸 문항에만** 채워진다"
+    )
     correct: bool
-    explanation: str
+    explanation: Optional[str] = Field(
+        default=None, description="해설 — **답을 낸 문항에만** 채워진다"
+    )
 
 
 class DiagnosticResultOut(BaseModel):

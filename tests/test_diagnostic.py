@@ -100,9 +100,21 @@ def test_missing_answers_count_wrong(client):
     assert body["answers"][-1]["chosen_index"] is None
 
 
-def test_null_answer_is_allowed_and_wrong(client):
+def test_unanswered_questions_do_not_reveal_the_answer_key(client):
+    """빈 답안 한 번으로 정답표를 받아 가지 못한다."""
     body = client.post(ENDPOINT, json={"answers": [None, None, None]}).json()
     assert body["correct_count"] == 0
+    for answer in body["answers"]:
+        assert answer["answer_index"] is None
+        assert not answer["explanation"]
+
+
+def test_answered_questions_get_answer_and_explanation(client):
+    """답을 냈으면 결과 화면이 정답과 해설을 보여준다."""
+    body = client.post(ENDPOINT, json={"answers": _answers(3)}).json()
+    for answer in body["answers"]:
+        assert answer["answer_index"] is not None
+        assert answer["explanation"]
 
 
 def test_empty_answers_rejected(client):
@@ -133,3 +145,27 @@ def test_grade_reports_each_answer_with_explanation():
     assert result.correct_count == len(questions)
     assert [a.term_id for a in result.answers] == [q["term_id"] for q in questions]
     assert all(a.explanation for a in result.answers)
+
+
+BROKEN_QUESTION = {
+    "id": "x",
+    "term_id": "walk",
+    "question": "정답이 빠진 문항",
+    "choices": ["a", "b"],
+    "explanation": "e",
+}
+
+
+@pytest.mark.parametrize("pick", [-1, 0, 1, None])
+def test_question_without_answer_index_is_never_correct(pick):
+    """시드에서 정답이 빠지면 조용히 오채점되지 않고 전부 틀림으로 센다."""
+    result = grade([BROKEN_QUESTION], [pick])
+    assert result.correct_count == 0
+    assert result.answers[0].correct is False
+    assert result.answers[0].answer_index is None
+
+
+def test_boolean_answer_index_is_not_read_as_one():
+    """True == 1이라 걸러내지 않으면 2번 보기가 정답이 된다."""
+    result = grade([{**BROKEN_QUESTION, "answer_index": True}], [1])
+    assert result.correct_count == 0
