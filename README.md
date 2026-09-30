@@ -46,6 +46,29 @@ docker run --rm -p 8000:8000 --env-file .env rookie-ai-engine
 키는 이미지에 굽지 않고 실행 시 `--env-file`(또는 compose `environment`)로 넣는다.
 배포 시 `ROOKIE_CORS_ORIGINS`에 프론트 도메인을 쉼표로 적는다(기본은 로컬 개발 서버 5173·3000).
 
+### EC2 배포 (2026-09-30 결정 — 기존 EC2에서 직접 빌드)
+
+레지스트리(ECR)를 쓰지 않고 **EC2에서 리포를 받아 빌드한다.**
+
+```bash
+git clone https://github.com/Inje-Capstone/capstone-AI.git && cd capstone-AI
+docker build -t rookie-ai-engine .
+docker run -d --name rookie-ai --restart unless-stopped \
+  -p 127.0.0.1:8000:8000 --env-file .env rookie-ai-engine
+curl localhost:8000/health
+```
+
+- **`-p 127.0.0.1:8000:8000`** — 인스턴스 내부에만 연다. 엔진에는 인증이 없으므로
+  `0.0.0.0`으로 열면 누구나 챗봇을 호출할 수 있고 그 비용은 우리 API 키에서 나간다.
+  같은 EC2의 Spring Boot는 `http://127.0.0.1:8000`으로 부른다.
+- **아키텍처**: EC2(x86_64)에서 빌드하면 맞는다. **Apple Silicon 맥에서 빌드한 이미지는 EC2에서 뜨지 않는다**
+  (필요하면 `docker build --platform linux/amd64`). EC2에서 빌드하기로 한 이유 중 하나다.
+- CI가 `main`·PR마다 **linux/amd64에서 이미지 빌드를 검증**한다 — 빌드가 깨진 상태로 배포될 일은 없다.
+- `--restart unless-stopped`로 인스턴스 재부팅 후 자동 기동. 로그는 `docker logs`만 쓰면 재시작 시 사라지므로
+  운영에 쓸 거면 CloudWatch 등으로 뺀다.
+- 런타임에 **GPU도 NVIDIA API도 쓰지 않는다** — 일반 인스턴스로 충분하다.
+  NVIDIA 키는 오프라인 배치(`scripts/analyze_video.py`) 전용이다.
+
 ## API (와이어프레임 화면과 1:1)
 
 | 엔드포인트 | 화면 |
@@ -74,6 +97,26 @@ docker run --rm -p 8000:8000 --env-file .env rookie-ai-engine
 ```bash
 curl 'localhost:8000/api/games/20260823LGOB/cards?t=7550&level=입문' --get
 ```
+
+## API 명세 (백엔드 연동용)
+
+백엔드(Spring Boot)가 DTO를 생성하는 원본은 **OpenAPI 명세**다. 손으로 옮겨 적은 문서는 곧 낡는다.
+
+```bash
+.venv/bin/python scripts/export_openapi.py   # docs/openapi.json 갱신
+```
+
+- 커밋된 파일: [docs/openapi.json](docs/openapi.json) — 서버를 띄우지 않고도 바로 쓸 수 있다
+- 서버가 떠 있으면 `/openapi.json`(원본) · `/docs`(대화형)도 같은 내용이다
+- **계약을 바꾸고 이 스크립트를 다시 돌리지 않으면 `tests/test_openapi_export.py`가 실패한다** —
+  남의 코드가 조용히 낡은 계약을 따라가는 걸 막기 위해서다. 실패하면 다시 내보내고 함께 커밋하라.
+
+Spring Boot 쪽은 이 파일을 openapi-generator에 넣어 클라이언트·DTO를 생성하면 된다.
+주의할 계약 두 가지:
+
+- `POST /api/games/{id}/cards/{card_id}/simplify`는 **POST인데 요청 본문이 없다**(경로·쿼리만 쓴다).
+- `category`는 **반복 쿼리 파라미터**다(`?category=A&category=B`). 콤마로 합치면 안 되고,
+  값에 공백·가운뎃점이 있어(`구종 · 투구`) URL 인코딩이 필요하다.
 
 ## 구조
 
