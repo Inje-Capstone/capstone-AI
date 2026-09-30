@@ -6,8 +6,9 @@
 
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api import (
     routes_chat,
@@ -20,6 +21,8 @@ from app.api.deps import get_relay_source
 from app.config import get_settings
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+
+log = logging.getLogger(__name__)
 
 app = FastAPI(
     title="ROOKIE AI Engine",
@@ -44,6 +47,18 @@ app.include_router(routes_chat.router)
 app.include_router(routes_glossary.router)
 app.include_router(routes_quiz.router)
 app.include_router(routes_onboarding.router)
+
+
+@app.exception_handler(Exception)
+async def unhandled_error(request: Request, exc: Exception) -> JSONResponse:
+    """예상 못한 예외도 JSON 한 모양으로 돌려준다 (백엔드 팀 합의 2026-09-30).
+
+    FastAPI 기본 500은 평문 `Internal Server Error`라 JSON 파서가 깨진다. 프론트가 다뤄야 할
+    에러 모양을 줄이려고 404와 같은 `{"detail": "…"}`로 맞춘다 — 배열로 오는 건 422만 남는다.
+    예외 내용은 로그에만 남긴다. 응답에 실으면 내부 구조가 새어 나간다.
+    """
+    log.exception("처리되지 않은 예외: %s %s", request.method, request.url.path)
+    return JSONResponse(status_code=500, content={"detail": "서버 내부 오류입니다."})
 
 
 @app.get("/health", tags=["ops"], summary="헬스체크 (데모 전 점검용)")
