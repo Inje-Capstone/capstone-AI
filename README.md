@@ -197,6 +197,21 @@ data/
   모자라면 GPU 1장을 분석할 때만 빌려 `--base-url http://host:8000/v1`로 붙인다. VSS 서버면 `--backend vss`
 - ⚠️ 실제 야구 영상에서 점수판·장면 판독 품질은 실측 전. NVIDIA 트라이얼 약관상 운영 금지 — 사전 배치 분석 전용
 
+## 실시간 모드
+
+```bash
+# 서버: .env에 ROOKIE_LIVE_TOKEN=<임의 문자열>
+ROOKIE_LIVE_TOKEN=... .venv/bin/python scripts/live_video.py LIVE1 game.mp4 --away 한화 --home LG
+```
+
+녹화 파일은 `-re`로 실제 속도 재생(시연용 실시간), 스트림 URL도 받는다. 10초 조각(`--seg-sec`)마다 VLM 분석 →
+`POST /api/live/{id}/ingest`. 서버는 쌓인 판독 전체로 다시 판정해 새 상황을 `GET /api/live/{id}/stream`(SSE)으로 알린다.
+실시간 경기도 기존 `/api/games/{id}/cards·state·moment·chat`으로 그대로 보인다.
+
+- 지연: 조각 길이 + VLM 응답(실측 약 18초) ≈ 25~30초. VLM이 조각보다 느려 `--workers`로 동시 분석
+- 수집 API는 `X-Live-Token` 필수(토큰 미설정이면 수집 꺼짐). 화면용 SSE는 공개
+- NVIDIA 무료 API는 약관상 운영 금지 — 실제 운영은 GPU NIM(`--base-url`)으로, 경기 시간에만 켠다
+
 ## 정답지 가져오기 (네이버 문자중계 — 검증 전용)
 
 ```bash
