@@ -34,8 +34,12 @@ class CosmosAnalyzer:
         fps: float = 2.0,
         max_tokens: int = 1024,
         scenario: Optional[str] = None,
+        thinking: bool = True,
     ) -> None:
         self.api_key = api_key
+        # 추론(reasoning) 끄기: 2026-10-02 실측 응답 1.5~2.2초(켜면 3.6~65초로 들쭉날쭉).
+        # 실시간 모드 기본값. 판독 품질에 미치는 영향은 실제 경기 영상으로 확인 필요.
+        self.thinking = thinking
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.fps = fps
@@ -59,6 +63,7 @@ class CosmosAnalyzer:
             "max_tokens": self.max_tokens,
             "temperature": 0.2,
             "media_io_kwargs": {"video": {"fps": self.fps}},
+            **({} if self.thinking else {"chat_template_kwargs": {"enable_thinking": False}}),
         }
 
     def analyze(self, clip: VideoClip) -> ClipAnalysis:

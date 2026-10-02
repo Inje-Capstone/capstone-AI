@@ -280,3 +280,10 @@ def test_run_restarts_when_model_changes(tmp_path):
     other.model = "fake-2"
     snap = analyze_video.run("G", Path("g.mp4"), other, [(0.0, 60.0)], _cut, out)
     assert other.calls == [0.0] and snap["model"] == "fake-2"
+
+
+def test_cosmos_can_turn_off_reasoning(tmp_path):
+    on = CosmosAnalyzer("K").request_body(_clip(tmp_path))
+    off = CosmosAnalyzer("K", thinking=False).request_body(_clip(tmp_path))
+    assert "chat_template_kwargs" not in on
+    assert off["chat_template_kwargs"] == {"enable_thinking": False}
