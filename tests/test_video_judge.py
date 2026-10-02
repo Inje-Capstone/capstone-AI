@@ -275,3 +275,49 @@ def test_build_video_feed_from_snapshot_serves_through_engine(tmp_path):
     steal = next(s for s in situations if s.rule_id == "steal")
     assert any(r.startswith("영상 근거:") and "slide" in r for r in steal.reasons)
     assert "영상 판정" in steal.reasons[0]
+
+
+# ── 영상 판정 + 데이터 보강 (선수·구종·기록은 데이터) ─────────────────────
+def test_enrich_adds_names_pitch_type_and_atbats_without_using_data_results():
+    from app.domain.enrich import enrich
+    from app.domain.models import RelayEvent
+
+    def ev(id_, t, kind, **kw):
+        return RelayEvent(id=id_, t=t, inning=1, half="top", kind=kind, text="", **kw)
+
+    data = [
+        ev("a1", 100, "atbat", batter="가나다", pitcher="투수A",
+           detail={"stats": {"season_avg": "0.300", "today": "오늘 첫 타석"}}),
+        ev("p1", 110, "pitch", detail={"result": "ball", "pitch_type": "직구", "speed": 145}),
+        ev("p2", 125, "pitch", detail={"result": "swing_strike", "pitch_type": "포크볼",
+                                       "speed": 132}),
+        ev("r1", 125, "result", detail={"result": "strikeout"}),  # 데이터의 결과 — 쓰면 안 된다
+        ev("s1", 200, "sub", detail={"sub_type": "pitcher", "pitcher": "투수B"}),
+    ]
+    video = [  # 영상 시각 = 데이터 + 50
+        ev("v1", 176, "result", detail={"result": "strikeout", "outs_made": 1}),
+        ev("v2", 255, "sub", detail={"sub_type": "pitcher"}),
+    ]
+    stable = [R(140), R(300, outs=1)]
+    out = enrich(video, data, offset=50, stable=stable)
+    kinds = [(e.t, e.kind) for e in out]
+    assert kinds == [(150, "atbat"), (176, "pitch"), (176, "result"), (255, "sub")]
+    atbat = out[0]
+    # 이닝은 영상 점수판을 따른다
+    assert (atbat.batter, atbat.pitcher, atbat.inning) == ("가나다", "투수A", 3)
+    assert atbat.detail["stats"]["season_avg"] == "0.300"
+    pitch = out[1]
+    assert pitch.detail["pitch_type"] == "포크볼" and pitch.detail["decisive"] is True
+    assert pitch.detail["result"] == "unknown"  # 데이터의 투구 결과는 가져오지 않는다
+    assert out[2].batter == "가나다" and out[2].id == "v1"
+    assert out[3].detail["pitcher"] == "투수B"
+    assert not any(e.id == "dr1" for e in out)  # 데이터 결과 이벤트는 들어오지 않는다
+
+
+def test_enrich_without_scoreboard_returns_video_only():
+    from app.domain.enrich import enrich
+    from app.domain.models import RelayEvent
+
+    v = [RelayEvent(id="v1", t=1, inning=1, half="top", kind="result", text="",
+                    detail={"result": "walk"})]
+    assert enrich(v, [], offset=0, stable=[]) == v
