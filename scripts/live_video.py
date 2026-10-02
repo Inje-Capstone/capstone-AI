@@ -6,7 +6,8 @@ ffmpeg가 입력(녹화 파일은 `-re`로 실제 속도 재생, 또는 스트�
 VLM 한 번에 15~20초가 걸려 조각 길이보다 길므로 여러 조각을 동시에 분석한다(`--workers`).
 서버는 들어온 결과 전체로 다시 판정하므로 순서가 섞여도 괜찮다.
 
-화면은 실제 장면보다 대략 (조각 길이 + VLM 응답 시간)만큼 늦다 — 10초 조각이면 25~30초.
+화면은 실제 장면보다 대략 (조각 길이 + VLM 응답 시간)만큼 늦다. 기본은 5초 조각 + 추론 끔:
+2026-10-02 실측 VLM 응답 1.5~2.2초 → 약 5~10초 지연 (추론 켜면 3.6~65초로 들쭉날쭉).
 NVIDIA 무료 API는 약관상 운영에 못 쓴다. 시연·테스트용이고, 실제 운영은 GPU NIM(`--base-url`)으로.
 
 사용:
@@ -125,13 +126,15 @@ def main() -> int:
     parser.add_argument("--date", default="")
     parser.add_argument("--stadium", default="")
     parser.add_argument("--server", default="http://localhost:8000")
-    parser.add_argument("--seg-sec", type=float, default=10.0)
+    parser.add_argument("--seg-sec", type=float, default=5.0)
     parser.add_argument("--workers", type=int, default=3)
     parser.add_argument("--height", type=int, default=360)
     parser.add_argument("--no-realtime", action="store_true",
                         help="파일을 실제 속도가 아니라 최대 속도로")
     parser.add_argument("--backend", choices=("cosmos", "vss"), default="cosmos")
     parser.add_argument("--fps", type=float, default=2.0)
+    parser.add_argument("--think", dest="no_think", action="store_false",
+                        help="VLM 추론 켜기 (느림 — 기본은 꺼서 지연을 줄인다)")
     parser.add_argument("--model", default=None)
     parser.add_argument("--base-url", default=None)
     parser.add_argument("--vss-url", default=None)

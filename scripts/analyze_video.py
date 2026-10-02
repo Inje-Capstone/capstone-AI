@@ -179,6 +179,7 @@ def build_analyzer(args: argparse.Namespace) -> VideoAnalyzer:
         return CosmosAnalyzer(
             key, base_url=args.base_url or DEFAULT_BASE_URL,
             model=args.model or DEFAULT_MODEL, fps=args.fps,
+            thinking=not getattr(args, "no_think", False),
         )
     from app.adapters.video.vss import VssAnalyzer
 
@@ -213,6 +214,8 @@ def main() -> int:
     parser.add_argument("--limit", type=int, default=None, help="앞에서부터 N청크만 (시험용)")
     parser.add_argument("--height", type=int, default=360)
     parser.add_argument("--fps", type=float, default=2.0)
+    parser.add_argument("--no-think", action="store_true",
+                        help="VLM 추론 끄기 (빠름, 품질 확인 필요)")
     parser.add_argument("--no-audio", action="store_true", help="청크에서 음성(해설)을 뺀다")
     parser.add_argument("--model", default=None)
     parser.add_argument("--base-url", default=None, help="cosmos: 로컬 NIM이면 http://host:8000/v1")
