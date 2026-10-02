@@ -203,6 +203,21 @@ def judge(readings: Sequence[Reading], cues: Sequence[Cue]) -> list[Judgment]:
     return sorted(out, key=lambda j: j.t)
 
 
+# ── 분석 스냅샷(analyze_video.py) → 판독·단서 ───────────────────────────
+def from_snapshot(snap: dict) -> tuple[list[Reading], list[Cue]]:
+    """`data/video/{id}.json` → (점수판 판독, 장면·해설 단서)."""
+    readings = []
+    for r in snap.get("scoreboard") or []:
+        bases = tuple(n in (r.get("bases") or []) for n in (1, 2, 3))
+        readings.append(Reading(float(r["t"]), int(r["inning"]), r["half"], int(r["balls"]),
+                                int(r["strikes"]), int(r["outs"]), bases,  # type: ignore[arg-type]
+                                int(r["away"]), int(r["home"])))
+    cues = [Cue(float(e["t_start"]), e["event_type"], e.get("description", ""))
+            for e in snap.get("events") or [] if e.get("event_type") in CUE_KINDS]
+    cues += [Cue(float(s["t"]), "speech", s["text"]) for s in snap.get("speech") or []]
+    return readings, sorted(cues, key=lambda c: c.t)
+
+
 # ── RelayEvent 변환 (기존 엔진으로 넘기기) ────────────────────────────────
 _CODE_TEXT = {
     "balk": "보크", "steal": "도루", "caught_stealing": "도루 실패", "wild_pitch": "폭투",

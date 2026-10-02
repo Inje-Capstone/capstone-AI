@@ -165,43 +165,47 @@ data/
 > mock으로 만든 스냅샷은 실제 모델로 도는 환경에서 **자동으로 무시된다**.
 > 조립 문장이 생성물인 척 나가는 걸 막기 위해서다.
 
-## 실제 경기 가져오기 (네이버 문자중계)
+## 영상 판정 (VSS 방식) — 영상으로 판정하고 문자중계로 검증
 
-```bash
-.venv/bin/python scripts/import_naver_relay.py 20260920HHLG02026 --video-offset 60
-```
-
-네이버 스포츠 문자중계를 받아 `data/fixtures/naver_{id}.json`으로 변환한다. 서버는 이 파일만 읽는다
-(런타임 외부 호출 0). 받은 직후 재생한 최종 점수가 네이버 점수와 다르면 저장하지 않는다.
-
-- 타임코드 `t` = 첫 투구 이후 경과 초(투구별 실제 시각 기준) + `--video-offset`(영상에서 첫 투구가 나오는 초)
-- 경기 ID는 네이버 형식(`YYYYMMDD{원정}{홈}0YYYY`) 그대로 쓴다
-- 타석마다 그 시점 기록(시즌 타율·오늘 성적)이 함께 저장돼 분석 패널이 가상 기록 대신 쓴다
-  (`source: "relay"`). 네이버 값은 그 타석 결과가 이미 반영돼 있어 **직전 타석 기록**을 쓴다 — 결과 스포일러 방지
-- 경기 프리뷰(경기 전 값)도 함께 받아 분석 패널에 팀 순위·최근 5경기·상대 전적·선발의 상대 팀 성적을 채운다
-- 실경기 3개(2026-09-20 한화-LG·KIA-NC·두산-KT)를 `data/fixtures/naver_*.json`으로 커밋해 뒀다(팀 레포 커밋 허용)
-- 처음엔 `has_video: false`(영상 미확보, S3 비활성). 영상을 `analyze_video.py --apply`로 맞추면 켜진다
-
-## 영상 분석 (VSS 방식) — 영상-중계 자동 싱크
+**서비스 화면의 상황 인지는 영상에서만 나온다.** 네이버 문자중계는 같은 경기의 정답지로 정확도를
+재는 데만 쓴다. "VLM이 보고, 규칙 엔진이 판정한다."
 
 ```bash
 # .env에 NVIDIA_API_KEY (build.nvidia.com) — 서버 런타임은 쓰지 않는다
 .venv/bin/python scripts/analyze_video.py 20260920HHLG02026 game.mp4 --limit 3   # 앞 3분만 시험
-.venv/bin/python scripts/analyze_video.py 20260920HHLG02026 game.mp4 --apply
+.venv/bin/python scripts/analyze_video.py 20260920HHLG02026 game.mp4            # 전체 (재실행하면 이어서)
+.venv/bin/python scripts/build_video_feed.py 20260920HHLG02026                  # 판정 → data/fixtures/video_{id}.json
+.venv/bin/python scripts/grade_video.py 20260920HHLG02026                       # 문자중계로 채점
 ```
 
-VSS 풀스택 대신 **VSS 계열 VLM을 NVIDIA 호스팅 API로 직접** 부른다(GPU 불필요, 기술 조사서 권고안).
-기본 모델은 `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`(VSS 3.2의 Omni 모델) — 2026-09-28 실측으로 호스팅에서
-영상 입력이 되는 걸 확인했고, 해설 **음성까지** 함께 듣는다(청크에 음성 유지, `--no-audio`로 끔).
-Cosmos Reason은 호스팅에서 막혀 있어(404) 로컬 NIM(`--base-url`)일 때만 `--model`로 쓴다.
-ffmpeg로 60초 청크(360p·무음)를 만들어 VLM에 "보이는 것만" 관찰시키고(`hit`·`strikeout`·`pitching_change`…),
-중계의 같은 종류 이벤트와 다수결로 짝지어 **영상 오프셋**을 추정한다. `--apply`면 fixture의 `relay_video_offset_sec`를 갱신한다.
+1. **분석**(`analyze_video.py`): 60초 청크(360p, 해설 음성 유지)를 VLM에 보내 세 가지를 받는다 —
+   **점수판 판독**(이닝·볼카운트·아웃·주자·점수), **장면 단서**(슬라이딩·포수 놓침·담장 넘김…),
+   **해설 키워드**("보크", "도루"…). VLM은 판정하지 않는다. `data/video/{id}.json`에 청크 단위로 누적.
+2. **판정**(`app/domain/video_judge.py`): 점수판 변화의 모양 × 단서로 보크·도루·도루 실패·폭투·볼넷·사구·
+   낫아웃·인필드플라이·희생플라이·병살·홈런·투수 교체를 가른다. 확신도와 근거를 남기고, 확신이 모자라면
+   상태만 반영하고 종류는 붙이지 않는다(카드 안 뜸). 결과는 기존 엔진(GameSim → 감지 규칙 → 카드·챗봇·퀴즈)이
+   그대로 받고, 카드 근거에 "영상 근거: 점수판 …, 해설 '보크' …"가 붙는다.
+3. **검증**(`grade_video.py`): 같은 경기 문자중계(`data/relay_truth/`)와 상황 단위로 비교해 규칙별 재현율·정밀도.
+   영상이 덮은 구간만 센다. 시각은 영상 오프셋 추정으로 맞춘다.
 
-- 판정은 여전히 중계 + 규칙 엔진이 한다 — "VLM이 보고, 규칙 엔진이 판정한다"
-- 청크 단위로 `data/video/{id}.json`에 누적 저장(중단 후 재실행하면 이어서), 표가 모자라면 `--apply`를 거부
-- VSS 서버가 생기면 `--backend vss --vss-url http://host:38111 --clip-base-url ...`로 LVS `/v1/summarize`에 붙는다
-- 로컬 NIM이면 `--base-url http://host:8000/v1`
-- ⚠️ 두 백엔드 모두 응답 스키마 실측 전(`TODO(스키마 미검증)`), NVIDIA 트라이얼 약관상 운영 금지 — 사전 배치 분석 전용
+판정 로직 상한(`scripts/simulate_video_judge.py`, 실경기 중계로 "완벽한 눈" 판독·단서를 합성):
+실경기 3개 38/38 일치, 단서 30% 누락 + 점수판 10% 오독에서 재현율 92%·정밀도 97%.
+**실제 정확도는 경기 영상 실측으로만 말한다.** 구종(결정구 변화구 카드)은 영상 판정 범위 밖이다.
+
+- VLM: VSS 풀스택 대신 **VSS 계열 VLM을 NVIDIA 호스팅 API로 직접** 부른다(GPU 불필요, 기술 조사서 권고안).
+  기본 `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`(VSS 3.2 Omni, 영상+음성). 무료가 막히거나 품질이
+  모자라면 GPU 1장을 분석할 때만 빌려 `--base-url http://host:8000/v1`로 붙인다. VSS 서버면 `--backend vss`
+- ⚠️ 실제 야구 영상에서 점수판·장면 판독 품질은 실측 전. NVIDIA 트라이얼 약관상 운영 금지 — 사전 배치 분석 전용
+
+## 정답지 가져오기 (네이버 문자중계 — 검증 전용)
+
+```bash
+.venv/bin/python scripts/import_naver_relay.py 20260920HHLG02026
+```
+
+네이버 스포츠 문자중계를 `data/relay_truth/naver_{id}.json`으로 변환한다. **서비스 화면에는 쓰지 않는다**
+(`data/fixtures/`가 아니라 정답지 폴더). 2019년 이후 정규시즌 경기는 끝난 뒤에도 받을 수 있다(표본 확인).
+받은 직후 재생한 최종 점수가 네이버 점수와 다르면 저장하지 않는다. 실경기 3개(2026-09-20)를 커밋해 뒀다.
 
 ## 생성 결과 검사
 

@@ -11,7 +11,7 @@
 
 from typing import Callable, Optional
 
-from app.adapters.video.base import EVENT_TYPES, VideoClip, VideoEvent, parse_events
+from app.adapters.video.base import EVENT_TYPES, ClipAnalysis, VideoClip, parse_analysis
 from app.adapters.video.http import completion_text, post_json
 
 
@@ -46,10 +46,10 @@ class VssAnalyzer:
             body["model"] = self.model
         return body
 
-    def analyze(self, clip: VideoClip) -> list[VideoEvent]:
+    def analyze(self, clip: VideoClip) -> ClipAnalysis:
         response = post_json(
             f"{self.base_url}/v1/summarize", self.request_body(clip), token=self.token
         )
-        return parse_events(
+        return parse_analysis(
             completion_text(response), clip, self.provider, self.model or "vss-default"
         )

@@ -57,7 +57,7 @@ def main() -> int:
         has_video=args.has_video,
         preview=fetch_preview(args.game_id),
     )
-    out_dir = args.out_dir or get_settings().fixture_dir
+    out_dir = args.out_dir or get_settings().truth_dir  # 정답지 — 서비스 화면엔 안 나간다
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / f"naver_{args.game_id}.json"
     tmp = out.with_suffix(".tmp")

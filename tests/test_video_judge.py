@@ -182,6 +182,9 @@ def test_grade_matches_within_tolerance_once():
     assert scores["steal"].matched == 0
     total = summary(list(scores.values()))
     assert total["matched"] == 2
+    windowed = {s.rule_id: s for s in grade(truth, video, offset=300, tolerance=15,
+                                             window=(0, 450))}
+    assert windowed["balk"].expected == 1  # 영상이 덮지 않은 구간의 정답은 세지 않는다
 
 
 # ── 실경기 상한 측정 (완벽한 눈) ─────────────────────────────────────────
@@ -212,3 +215,63 @@ def test_noise_degrades_gracefully(sim):
     found = sum(v[1] for v in totals.values())
     assert matched / expected >= 0.8
     assert matched / found >= 0.85
+
+
+# ── VLM 출력 v2 → 판독·단서 → 영상 판정 데이터 ───────────────────────────
+def test_parse_analysis_scoreboard_speech_and_events(tmp_path):
+    import json
+
+    from app.adapters.video.base import VideoClip, parse_analysis
+
+    clip = VideoClip(tmp_path / "c.mp4", 600.0, 60.0)
+    text = "<think>..</think><answer>" + json.dumps({
+        "scoreboard": [
+            {"t": 2, "inning": 3, "half": "말", "balls": 1, "strikes": 2, "outs": 1,
+             "bases": "1,3", "away": 2, "home": 4},
+            {"t": 5, "inning": 3, "half": "bot", "balls": 1, "strikes": 2, "outs": 1,
+             "bases": [True, False, True], "away": 2, "home": 4},
+            {"t": 9, "inning": "?", "half": "top", "balls": 0, "strikes": 0, "outs": 0,
+             "bases": [], "away": 0, "home": 0},  # 못 읽은 값 — 버린다
+        ],
+        "events": [{"start": 8, "end": 9, "type": "slide", "description": "2루 슬라이딩"}],
+        "speech": [{"t": 8.5, "text": "도루 성공입니다"}, {"t": 99, "text": "청크 밖"}],
+    }, ensure_ascii=False) + "</answer>"
+    a = parse_analysis(text, clip, "p", "m")
+    assert [(r["t"], r["half"], r["bases"]) for r in a.scoreboard] == [
+        (602.0, "bot", [1, 3]), (605.0, "bot", [1, 3])]
+    assert [(e.t_start, e.event_type) for e in a.events] == [(608.0, "slide")]
+    assert a.speech == [{"t": 608.5, "text": "도루 성공입니다"}]
+
+
+def test_build_video_feed_from_snapshot_serves_through_engine(tmp_path):
+    spec = importlib.util.spec_from_file_location(
+        "build_video_feed", ROOT / "scripts" / "build_video_feed.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    def board(t, **kw):
+        base = {"t": t, "inning": 1, "half": "top", "balls": 0, "strikes": 0, "outs": 0,
+                "bases": [], "away": 0, "home": 0}
+        return [{**base, **kw}, {**base, **kw, "t": t + 1}]
+
+    snap = {
+        "provider": "fake", "model": "fake", "prompt_version": "video-scoreboard-v2",
+        "scoreboard": board(10) + board(40, balls=3) + board(70, bases=[1])
+        + board(100, bases=[2]),
+        "events": [{"t_start": 95, "t_end": 96, "event_type": "slide", "description": "슬라이딩"}],
+        "speech": [{"t": 97, "text": "도루!"}],
+    }
+    feed = mod.build("G1", snap, {"away_team": "A", "home_team": "H"})
+    assert feed["source"] == "video" and feed["game"]["has_video"] is True
+    assert feed["analysis"]["judgments"] == {"walk": 1, "steal": 1}
+    import json
+
+    from app.adapters.relay.fixture import _parse_fixture
+
+    path = tmp_path / "video_G1.json"
+    path.write_text(json.dumps(feed, ensure_ascii=False), encoding="utf-8")
+    parsed = _parse_fixture(path)
+    situations = detect(parsed)
+    steal = next(s for s in situations if s.rule_id == "steal")
+    assert any(r.startswith("영상 근거:") and "slide" in r for r in steal.reasons)
+    assert "영상 판정" in steal.reasons[0]

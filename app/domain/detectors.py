@@ -272,9 +272,14 @@ def detect(feed: GameFeed, until_t: Optional[int] = None) -> list[Situation]:
                     state=state,
                     priority=rule.priority,
                     reasons=[
-                        f"감지: {rule.label} (규칙 {rule.id}, 중계 {event.id})",
+                        f"감지: {rule.label} (규칙 {rule.id}, "
+                        f"{'영상 판정' if event.detail.get('source') == 'video' else '중계'} "
+                        f"{event.id})",
                         f"근거: {rule.why(event, state)}",
                         f"경기 상황: {state.scoreboard_text()} · {state.runners_text()}",
+                    ] + [
+                        # 영상 판정이면 무엇을 보고 판정했는지(점수판 변화·장면·해설)를 남긴다
+                        f"영상 근거: {line}" for line in event.detail.get("evidence", [])
                     ],
                 )
             )
