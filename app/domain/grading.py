@@ -6,6 +6,7 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Optional
 
 from app.domain.models import Situation
 
@@ -55,11 +56,19 @@ def grade(
     offset: float = 0.0,
     tolerance: float = 30.0,
     rules: Sequence[str] = GRADED_RULES,
+    window: Optional[tuple[float, float]] = None,
 ) -> list[RuleScore]:
-    """규칙별 점수. `offset`은 영상 t − 중계 t (영상 싱크 추정값)."""
+    """규칙별 점수. `offset`은 영상 t − 중계 t (영상 싱크 추정값).
+
+    `window`(영상 기준 시작·끝 초)를 주면 영상이 실제로 덮은 구간의 정답만 센다 —
+    경기 일부만 분석했는데 전체 경기를 정답으로 놓으면 재현율이 부당하게 낮아진다.
+    """
+    def covered(t: float) -> bool:
+        return window is None or window[0] <= t <= window[1]
+
     scores = []
     for rule in rules:
-        t_truth = [s.t + offset for s in truth if s.rule_id == rule]
+        t_truth = [s.t + offset for s in truth if s.rule_id == rule and covered(s.t + offset)]
         t_video = [float(s.t) for s in video if s.rule_id == rule]
         scores.append(RuleScore(rule, len(t_truth), len(t_video),
                                 _match(t_truth, t_video, tolerance)))

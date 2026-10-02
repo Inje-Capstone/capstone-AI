@@ -104,7 +104,7 @@ def video_feed(feed: GameFeed, readings: list[Reading], cues: list[Cue]) -> Game
 
 
 def run(game_ids: Sequence[str], cue_drop: float, misread: float, seed: int) -> dict:
-    source = FixtureRelaySource(get_settings().fixture_dir)
+    source = FixtureRelaySource(get_settings().truth_dir)
     rng = random.Random(seed)
     totals: dict[str, list[int]] = {r: [0, 0, 0] for r in GRADED_RULES}
     for gid in game_ids:

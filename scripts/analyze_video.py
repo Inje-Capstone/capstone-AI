@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-"""경기 영상을 VSS 방식(청크 → VLM 관찰)으로 분석하고 영상-중계 오프셋을 추정한다.
+"""경기 영상을 VSS 방식(청크 → VLM)으로 분석한다 — 점수판 판독 · 장면 단서 · 해설 키워드.
 
-흐름: ffmpeg로 청크 분할(저해상도·무음) → 청크마다 VLM 관찰 → `data/video/{game}.json`에
-청크 단위로 누적 저장(중단돼도 이어서 돈다) → 중계 이벤트와 정합해 오프셋 추정 →
-`--apply`면 fixture의 `relay_video_offset_sec`를 갱신.
+흐름: ffmpeg로 청크 분할(저해상도, 해설 음성 유지) → 청크마다 VLM → `data/video/{game}.json`에
+청크 단위로 누적 저장(중단돼도 이어서 돈다). 판정은 build_video_feed.py가, 채점은
+grade_video.py가 한다. 같은 경기 정답지(문자중계)가 있으면 채점용 영상 오프셋도 추정해 둔다.
 
-서버는 이 결과 파일만 읽는다. 영상과 VLM 호출은 여기서 한 번뿐이다.
+영상과 VLM 호출은 여기서 한 번뿐이다. 서버는 결과 파일만 읽는다.
 
 백엔드:
   cosmos  NVIDIA 호스팅 NIM VLM (기본 Nemotron 3 Nano Omni — VSS 3.2 Omni). NVIDIA_API_KEY 필요.
@@ -13,7 +13,7 @@
 
 사용:
     python scripts/analyze_video.py 20260920HHLG02026 game.mp4 --limit 3        # 앞 3청크만 시험
-    python scripts/analyze_video.py 20260920HHLG02026 game.mp4 --apply
+    python scripts/analyze_video.py 20260920HHLG02026 game.mp4
 """
 
 import argparse
@@ -28,6 +28,7 @@ from typing import Any, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from app.adapters.relay.base import RelaySourceError  # noqa: E402
 from app.adapters.relay.fixture import FixtureRelaySource  # noqa: E402
 from app.adapters.video.base import (  # noqa: E402
     PROMPT_VERSION,
@@ -76,8 +77,14 @@ def ffmpeg_cut_cmd(
     ]
 
 
+# v1 스냅샷의 옛 이름 → v2 단서 이름
+_LEGACY_KINDS = {"hit": "contact", "home_run": "ball_over_fence", "stolen_base": "slide",
+                 "strikeout": "swing_miss"}
+
+
 def anchors_from(events: list[dict[str, Any]]) -> list[Anchor]:
-    return [Anchor(float(e["t_start"]), e["event_type"]) for e in events]
+    return [Anchor(float(e["t_start"]), _LEGACY_KINDS.get(e["event_type"], e["event_type"]))
+            for e in events]
 
 
 # ── 실행 ────────────────────────────────────────────────────────────────
@@ -110,6 +117,7 @@ def load_snapshot(path: Path, game_id: str, analyzer: VideoAnalyzer) -> dict[str
         "_note": "영상 VLM 관찰 결과(판정 아님). scripts/analyze_video.py로 재생성한다.",
         "game_id": game_id, "provider": analyzer.provider, "model": analyzer.model,
         "prompt_version": PROMPT_VERSION, "done": [], "failed": [], "events": [],
+        "scoreboard": [], "speech": [],
     }
 
 
@@ -139,33 +147,26 @@ def run(
             dest = Path(tmp) / f"clip_{int(start):06d}.mp4"
             cut(start, length, dest)
             try:
-                events = analyzer.analyze(VideoClip(dest, start, length))
+                result = analyzer.analyze(VideoClip(dest, start, length))
             except VideoAnalyzerError as exc:
                 print(f"[{i}/{len(clips)}] {start:.0f}s 실패: {exc}", file=sys.stderr)
                 snap["failed"] = sorted(set(snap.get("failed", [])) | {start})
                 save(out_path, snap)
                 continue
             snap["events"] = sorted(
-                snap["events"] + [e.model_dump() for e in events], key=lambda e: e["t_start"])
+                snap["events"] + [e.model_dump() for e in result.events],
+                key=lambda e: e["t_start"])
+            snap["scoreboard"] = sorted(snap.get("scoreboard", []) + result.scoreboard,
+                                        key=lambda r: r["t"])
+            snap["speech"] = sorted(snap.get("speech", []) + result.speech,
+                                    key=lambda r: r["t"])
             snap["done"] = sorted(done | {start})
             snap["failed"] = [s for s in snap.get("failed", []) if s != start]
             done.add(start)
             save(out_path, snap)
-            print(f"[{i}/{len(clips)}] {start:.0f}s +{len(events)}개")
+            print(f"[{i}/{len(clips)}] {start:.0f}s 장면 +{len(result.events)} "
+                  f"점수판 +{len(result.scoreboard)} 해설 +{len(result.speech)}")
     return snap
-
-
-def apply_offset(fixture_dir: Path, game_id: str, offset: float) -> Path:
-    for path in sorted(fixture_dir.glob("*.json")):
-        raw = json.loads(path.read_text(encoding="utf-8"))
-        if (raw.get("game") or {}).get("id") == game_id:
-            raw["game"]["relay_video_offset_sec"] = int(round(offset))
-            # 영상과 맞춰졌으니 홈(S3)에서 이 경기를 활성화한다.
-            raw["game"]["has_video"] = True
-            raw["game"].pop("unavailable_reason", None)
-            save(path, raw)
-            return path
-    raise SystemExit(f"fixture에서 경기를 찾지 못했다: {game_id}")
 
 
 def build_analyzer(args: argparse.Namespace) -> VideoAnalyzer:
@@ -220,13 +221,11 @@ def main() -> int:
     parser.add_argument("--ffmpeg", default=None)
     parser.add_argument("--ffprobe", default=None)
     parser.add_argument("--out-dir", type=Path, default=None, help="기본: ROOKIE_VIDEO_DIR")
-    parser.add_argument("--apply", action="store_true", help="신뢰할 만하면 fixture 오프셋 갱신")
     args = parser.parse_args()
 
     if not args.video.exists():
         raise SystemExit(f"영상이 없다: {args.video}")
     settings = get_settings()
-    feed = FixtureRelaySource(settings.fixture_dir).load(args.game_id)  # 경기부터 확인
 
     ffmpeg = find_tool("ffmpeg", args.ffmpeg)
     ffprobe = find_tool("ffprobe", args.ffprobe)
@@ -244,7 +243,14 @@ def main() -> int:
     out_path = (args.out_dir or settings.video_dir) / f"{args.game_id}.json"
     snap = run(args.game_id, args.video, analyzer, clips, cut, out_path)
 
-    estimate = estimate_offset(feed.events, anchors_from(snap["events"]))
+    print(f"저장: {out_path} (점수판 {len(snap.get('scoreboard', []))} · "
+          f"장면 {len(snap['events'])} · 해설 {len(snap.get('speech', []))})")
+    try:  # 채점용: 같은 경기 정답지가 있으면 영상 오프셋을 추정해 둔다
+        truth = FixtureRelaySource(settings.truth_dir).load(args.game_id)
+    except RelaySourceError:
+        print("정답지(문자중계)가 없어 오프셋 추정은 건너뛴다 — 채점 없이 판정만 가능")
+        return 0
+    estimate = estimate_offset(truth.events, anchors_from(snap["events"]))
     report(estimate)
     if estimate is not None:
         snap["offset"] = {
@@ -253,14 +259,6 @@ def main() -> int:
             "confident": estimate.confident,
         }
         save(out_path, snap)
-    print(f"저장: {out_path} (관찰 {len(snap['events'])}개)")
-
-    if args.apply:
-        if estimate is None or not estimate.confident:
-            print("--apply 생략: 추정을 신뢰할 수 없다", file=sys.stderr)
-            return 2
-        path = apply_offset(settings.fixture_dir, args.game_id, estimate.offset)
-        print(f"fixture 오프셋 갱신: {path.name} → {int(round(estimate.offset))}s")
     return 0
 
 

@@ -33,6 +33,8 @@ class Settings:
         # auto | claude | mock | fail
         self.llm_backend = os.getenv("ROOKIE_LLM_BACKEND", "auto").strip().lower()
         self.fixture_dir = Path(os.getenv("ROOKIE_FIXTURE_DIR", str(ROOT / "data" / "fixtures")))
+        # 검증용 정답지(네이버 문자중계). 서비스 화면에는 쓰지 않는다 — 영상 판정 채점 전용.
+        self.truth_dir = Path(os.getenv("ROOKIE_TRUTH_DIR", str(ROOT / "data" / "relay_truth")))
         self.snapshot_dir = Path(
             os.getenv("ROOKIE_SNAPSHOT_DIR", str(ROOT / "data" / "snapshots"))
         )

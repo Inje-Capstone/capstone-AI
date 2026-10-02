@@ -42,17 +42,15 @@ def relay_anchors(events: Iterable[RelayEvent]) -> list[Anchor]:
     for e in events:
         detail = e.detail
         kind: Optional[str] = None
+        # 이름은 영상 단서 어휘(adapters/video/base.EVENT_TYPES)에 맞춘다
         if e.kind == KIND_PITCH and detail.get("result") == "in_play":
-            kind = "hit"
-        elif e.kind == KIND_RESULT:
-            kind = {
-                "homerun": "home_run",
-                "strikeout": "strikeout",
-                "walk": "walk",
-                "intentional_walk": "walk",
-            }.get(detail.get("result", ""))
-        elif e.kind == KIND_STEAL and not detail.get("caught"):
-            kind = "stolen_base"
+            kind = "contact"
+        elif e.kind == KIND_PITCH and detail.get("result") == "swing_strike":
+            kind = "swing_miss"
+        elif e.kind == KIND_RESULT and detail.get("result") == "homerun":
+            kind = "ball_over_fence"
+        elif e.kind == KIND_STEAL:
+            kind = "slide"
         elif e.kind == KIND_SUB and detail.get("sub_type") == "pitcher":
             kind = "pitching_change"
         elif e.kind == "note":

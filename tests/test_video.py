@@ -39,11 +39,11 @@ def test_parse_strips_think_and_answer_and_shifts_to_video_time(tmp_path):
     text = (
         "<think>타자가 친다...</think>\n<answer>\n"
         '{"events": [{"start": 12, "end": 15, "type": "hit", "description": "우전 안타"},'
-        ' {"start": "00:40", "end": "00:41", "type": "HOME_RUN"}]}\n</answer>'
+        ' {"start": "00:40", "end": "00:41", "type": "BALL_OVER_FENCE"}]}\n</answer>'
     )
     events = parse_events(text, _clip(tmp_path), "p", "m")
     assert [(e.t_start, e.t_end, e.event_type) for e in events] == [
-        (612.0, 615.0, "hit"), (640.0, 641.0, "home_run")]
+        (612.0, 615.0, "other"), (640.0, 641.0, "ball_over_fence")]
     assert events[0].description == "우전 안타" and events[0].provider == "p"
 
 
@@ -88,7 +88,7 @@ def test_cosmos_sends_base64_video_and_parses(tmp_path, monkeypatch):
 
     monkeypatch.setattr(video_http.urllib.request, "urlopen", fake_urlopen)
     analyzer = CosmosAnalyzer("KEY", base_url="http://nim:8000/v1/", fps=1.0)
-    events = analyzer.analyze(_clip(tmp_path))
+    events = analyzer.analyze(_clip(tmp_path)).events
 
     assert seen["url"] == "http://nim:8000/v1/chat/completions"
     assert seen["auth"] == "Bearer KEY"
@@ -98,7 +98,7 @@ def test_cosmos_sends_base64_video_and_parses(tmp_path, monkeypatch):
     assert video["video_url"]["url"].startswith("data:video/mp4;base64,")
     assert "JSON" in prompt["text"]
     assert body["media_io_kwargs"] == {"video": {"fps": 1.0}}
-    assert [(e.t_start, e.event_type) for e in events] == [(603.0, "strikeout")]
+    assert [(e.t_start, e.event_type) for e in events] == [(603.0, "other")]  # v1 이름은 other
 
 
 def test_vss_summarize_request_and_structured_output(tmp_path, monkeypatch):
@@ -114,7 +114,7 @@ def test_vss_summarize_request_and_structured_output(tmp_path, monkeypatch):
 
     monkeypatch.setattr(video_http.urllib.request, "urlopen", fake_urlopen)
     analyzer = VssAnalyzer("http://vss:38111", url_for=lambda c: f"http://files/{c.path.name}")
-    events = analyzer.analyze(_clip(tmp_path))
+    events = analyzer.analyze(_clip(tmp_path)).events
 
     assert seen["url"] == "http://vss:38111/v1/summarize"
     body = seen["body"]
@@ -164,10 +164,10 @@ def _relay_game():
     events, t = [], 0
     for i in range(60):
         t += rng.randint(60, 200)
-        kind = rng.choice(["in_play", "strikeout", "walk"])
-        if kind == "in_play":
+        kind = rng.choice(["in_play", "swing_strike", "walk"])
+        if kind in ("in_play", "swing_strike"):
             events.append(RelayEvent(id=f"p{i}", t=t, inning=1, half="top", kind="pitch",
-                                     text="타격", detail={"result": "in_play"}))
+                                     text="투구", detail={"result": kind}))
         else:
             events.append(RelayEvent(id=f"r{i}", t=t, inning=1, half="top", kind="result",
                                      text=kind, detail={"result": kind}))
@@ -178,7 +178,7 @@ def _relay_game():
 
 def test_relay_anchors_map_kinds():
     kinds = {a.kind for a in relay_anchors(_relay_game())}
-    assert kinds == {"hit", "strikeout", "walk", "pitching_change"}
+    assert kinds == {"contact", "swing_miss", "pitching_change"}
 
 
 def test_offset_recovered_despite_jitter_misses_and_false_positives():
@@ -238,8 +238,15 @@ class _FakeAnalyzer:
         assert clip.path.read_bytes() == b"clip"
         if clip.start in self.fail_at:
             raise VideoAnalyzerError("boom")
-        return [VideoEvent(t_start=clip.start + 5, t_end=clip.start + 6, event_type="hit",
-                           provider=self.provider, model=self.model)]
+        from app.adapters.video.base import ClipAnalysis
+
+        return ClipAnalysis(
+            events=[VideoEvent(t_start=clip.start + 5, t_end=clip.start + 6,
+                               event_type="contact", provider=self.provider, model=self.model)],
+            scoreboard=[{"t": clip.start + 1, "inning": 1, "half": "top", "balls": 0,
+                         "strikes": 0, "outs": 0, "bases": [], "away": 0, "home": 0}],
+            speech=[{"t": clip.start + 5, "text": "도루"}],
+        )
 
 
 def _cut(start, length, dest):
@@ -254,6 +261,8 @@ def test_run_accumulates_resumes_and_retries_failed_clips(tmp_path):
     snap = analyze_video.run("G", Path("g.mp4"), first, clips, _cut, out)
     assert first.calls == [0.0, 60.0, 120.0]
     assert snap["done"] == [0.0, 120.0] and snap["failed"] == [60.0]
+    assert [r["t"] for r in snap["scoreboard"]] == [1.0, 121.0]
+    assert [s["text"] for s in snap["speech"]] == ["도루", "도루"]
     assert [e["t_start"] for e in snap["events"]] == [5.0, 125.0]
 
     second = _FakeAnalyzer()
@@ -271,13 +280,3 @@ def test_run_restarts_when_model_changes(tmp_path):
     other.model = "fake-2"
     snap = analyze_video.run("G", Path("g.mp4"), other, [(0.0, 60.0)], _cut, out)
     assert other.calls == [0.0] and snap["model"] == "fake-2"
-
-
-def test_apply_offset_updates_only_that_game(tmp_path):
-    (tmp_path / "a.json").write_text(json.dumps({"game": {"id": "A", "relay_video_offset_sec": 0}}))
-    (tmp_path / "b.json").write_text(json.dumps({"game": {"id": "B", "relay_video_offset_sec": 0}}))
-    path = analyze_video.apply_offset(tmp_path, "B", 95.6)
-    assert path.name == "b.json"
-    game_b = json.loads((tmp_path / "b.json").read_text())["game"]
-    assert game_b["relay_video_offset_sec"] == 96 and game_b["has_video"] is True
-    assert json.loads((tmp_path / "a.json").read_text())["game"]["relay_video_offset_sec"] == 0

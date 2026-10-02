@@ -16,7 +16,7 @@ OpenAI 호환 chat completions에 청크 영상을 base64 `video_url`로 싣는�
 import base64
 from typing import Optional
 
-from app.adapters.video.base import VideoClip, VideoEvent, event_prompt, parse_events
+from app.adapters.video.base import ClipAnalysis, VideoClip, event_prompt, parse_analysis
 from app.adapters.video.http import completion_text, post_json
 
 DEFAULT_BASE_URL = "https://integrate.api.nvidia.com/v1"
@@ -61,8 +61,8 @@ class CosmosAnalyzer:
             "media_io_kwargs": {"video": {"fps": self.fps}},
         }
 
-    def analyze(self, clip: VideoClip) -> list[VideoEvent]:
+    def analyze(self, clip: VideoClip) -> ClipAnalysis:
         response = post_json(
             f"{self.base_url}/chat/completions", self.request_body(clip), token=self.api_key
         )
-        return parse_events(completion_text(response), clip, self.provider, self.model)
+        return parse_analysis(completion_text(response), clip, self.provider, self.model)
