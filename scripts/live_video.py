@@ -21,6 +21,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import urllib.request
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -29,6 +30,12 @@ from typing import Any, Callable, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from app.adapters.relay.naver import (  # noqa: E402
+    NaverRelayError,
+    convert_game,
+    fetch_game,
+    fetch_preview,
+)
 from app.adapters.video.base import VideoAnalyzerError, VideoClip  # noqa: E402
 
 _here = Path(__file__).resolve().parent
@@ -74,6 +81,42 @@ class Server:
             method="POST")
         with urllib.request.urlopen(req, timeout=30) as res:  # noqa: S310
             return json.loads(res.read().decode("utf-8"))
+
+
+def data_payload(game_id: str, fetch=fetch_game, preview=fetch_preview) -> dict[str, Any]:
+    """네이버 중계 현재분 → /data 본문. 매번 전체를 받는다(이닝 수만큼 요청)."""
+    info, innings = fetch(game_id)
+    fx = convert_game(info, innings, preview=preview(game_id))
+    return {"events": fx["events"], "context": fx["game"].get("context") or {}}
+
+
+class DataPoller(threading.Thread):
+    """경기 중 네이버 중계를 `every`초마다 받아 서버로. 실패해도 영상 분석은 계속된다."""
+
+    def __init__(self, naver_id: str, server: Any, game_id: str, every: float,
+                 log: Callable[[str], None] = print, payload=data_payload) -> None:
+        super().__init__(daemon=True)
+        self.naver_id, self.server, self.game_id = naver_id, server, game_id
+        self.every, self.log, self.payload = every, log, payload
+        self.stop = threading.Event()
+        self.sent = 0
+
+    def poll_once(self) -> None:
+        try:
+            body = self.payload(self.naver_id)
+        except (NaverRelayError, OSError, ValueError) as exc:
+            self.log(f"데이터 받기 실패(다음에 다시): {exc}")
+            return
+        res = self.server.post(f"/api/live/{self.game_id}/data", body)
+        self.sent += 1
+        off = res.get("offset")
+        self.log(f"데이터 {len(body['events'])}건 → 서버"
+                 + (f" (영상↔데이터 {off:+.0f}s)" if off is not None else " (시간 맞추는 중)"))
+
+    def run(self) -> None:
+        while not self.stop.is_set():
+            self.poll_once()
+            self.stop.wait(self.every)
 
 
 def analyze_segment(analyzer: Any, path: Path, start: float, length: float) -> dict[str, Any]:
@@ -131,6 +174,9 @@ def main() -> int:
     parser.add_argument("--height", type=int, default=360)
     parser.add_argument("--no-realtime", action="store_true",
                         help="파일을 실제 속도가 아니라 최대 속도로")
+    parser.add_argument("--naver-id", default=None,
+                        help="네이버 경기 ID — 주면 선수·구종·기록을 데이터로 붙인다")
+    parser.add_argument("--data-sec", type=float, default=20.0, help="데이터 갱신 주기(초)")
     parser.add_argument("--backend", choices=("cosmos", "vss"), default="cosmos")
     parser.add_argument("--fps", type=float, default=2.0)
     parser.add_argument("--think", dest="no_think", action="store_false",
@@ -155,12 +201,19 @@ def main() -> int:
         producer = subprocess.Popen(segment_cmd(
             ffmpeg, args.source, out_dir, args.seg_sec, args.height, not args.no_realtime))
         print(f"실시간 분석 시작: {args.game_id} ({args.seg_sec:.0f}초 조각, 동시 {args.workers})")
+        poller = None
+        if args.naver_id:
+            poller = DataPoller(args.naver_id, server, args.game_id, args.data_sec)
+            poller.start()
         try:
             sent = run(args.game_id, analyzer, server, out_dir, args.seg_sec, producer,
                        args.workers)
         finally:
             if producer.poll() is None:
                 producer.terminate()
+            if poller is not None:
+                poller.stop.set()
+                poller.poll_once()  # 마지막 상태로 한 번 더
     server.post(f"/api/live/{args.game_id}/end", {})
     print(f"종료: 조각 {sent}개 전송")
     return 0

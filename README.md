@@ -203,7 +203,7 @@ data/
 
 ```bash
 # 서버: .env에 ROOKIE_LIVE_TOKEN=<임의 문자열>
-ROOKIE_LIVE_TOKEN=... .venv/bin/python scripts/live_video.py LIVE1 game.mp4 --away 한화 --home LG
+ROOKIE_LIVE_TOKEN=... .venv/bin/python scripts/live_video.py LIVE1 game.mp4 --away 한화 --home LG \n    --naver-id 20260920HHLG02026
 ```
 
 녹화 파일은 `-re`로 실제 속도 재생(시연용 실시간), 스트림 URL도 받는다. 5초 조각(`--seg-sec`)마다 VLM 분석 →
@@ -213,6 +213,9 @@ ROOKIE_LIVE_TOKEN=... .venv/bin/python scripts/live_video.py LIVE1 game.mp4 --aw
 - 지연: 조각 길이 + VLM 응답. 기본(5초 조각, VLM 추론 끔)은 응답 실측 1.5~2.2초 → 약 5~10초.
   추론을 켜면(`--think`) 3.6~65초로 들쭉날쭉. 추론을 끈 판독 품질은 실제 경기 영상으로 확인 필요
 - 수집 API는 `X-Live-Token` 필수(토큰 미설정이면 수집 꺼짐). 화면용 SSE는 공개
+- 데이터: `--naver-id <네이버 경기 ID>`를 주면 경기 중 네이버 중계를 `--data-sec`(20초)마다 받아
+  `POST /api/live/{id}/data`로 보낸다 → 선수 이름·구종·기록이 실시간 판정에 붙는다. 영상↔데이터 시간차는
+  쌓인 장면 단서로 추정해 확신이 서면 고정하고, 그 전까지는 영상 판정만 보인다
 - NVIDIA 무료 API는 약관상 운영 금지 — 실제 운영은 GPU NIM(`--base-url`)으로, 경기 시간에만 켠다
 
 ## 정답지 가져오기 (네이버 문자중계 — 검증 전용)

@@ -480,6 +480,27 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "LiveDataIn": {
+        "description": "경기 데이터(네이버 중계를 변환한 이벤트 전체 + 팀 맥락). 보낼 때마다 전체를 바꿔 끼운다.\n\n선수 이름·구종·기록만 영상 판정에 붙는다. 데이터의 플레이 결과는 화면에 쓰지 않는다.",
+        "properties": {
+          "context": {
+            "additionalProperties": true,
+            "title": "Context",
+            "type": "object"
+          },
+          "events": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 5000,
+            "title": "Events",
+            "type": "array"
+          }
+        },
+        "title": "LiveDataIn",
+        "type": "object"
+      },
       "LiveIngestIn": {
         "description": "analyze_video의 ClipAnalysis와 같은 모양. 시각은 영상(방송) 기준 초.",
         "properties": {
@@ -2013,6 +2034,72 @@
           }
         },
         "summary": "실시간 경기 시작 (분석기용)",
+        "tags": [
+          "live"
+        ]
+      }
+    },
+    "/api/live/{game_id}/data": {
+      "post": {
+        "operationId": "data_api_live__game_id__data_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game_id",
+            "required": true,
+            "schema": {
+              "title": "Game Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-live-token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Live-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveDataIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "경기 데이터 갱신 — 선수·구종·기록 (분석기용)",
         "tags": [
           "live"
         ]
