@@ -38,6 +38,16 @@ class LiveIngestIn(BaseModel):
     speech: list[dict] = Field(default_factory=list, max_length=500)
 
 
+class LiveDataIn(BaseModel):
+    """경기 데이터(네이버 중계를 변환한 이벤트 전체 + 팀 맥락). 보낼 때마다 전체를 바꿔 끼운다.
+
+    선수 이름·구종·기록만 영상 판정에 붙는다. 데이터의 플레이 결과는 화면에 쓰지 않는다.
+    """
+
+    events: list[dict] = Field(default_factory=list, max_length=5000)
+    context: dict = Field(default_factory=dict)
+
+
 def _check_token(token: Optional[str]) -> None:
     expected = get_settings().live_token
     if not expected:
@@ -73,6 +83,21 @@ def ingest(payload: LiveIngestIn, game_id: str = Path(...),
         raise HTTPException(status_code=409, detail="이미 끝난 경기다")
     fresh = game.ingest(payload.model_dump())
     return {"new_situations": [s.rule_id for s in fresh], "updates": len(game.updates)}
+
+
+@router.post("/{game_id}/data", summary="경기 데이터 갱신 — 선수·구종·기록 (분석기용)")
+def data(payload: LiveDataIn, game_id: str = Path(...),
+         x_live_token: Optional[str] = Header(default=None)):
+    _check_token(x_live_token)
+    game = _game(game_id)
+    if game.ended:
+        raise HTTPException(status_code=409, detail="이미 끝난 경기다")
+    try:
+        fresh = game.set_data(payload.events, payload.context or None)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail=f"데이터 이벤트 형식 오류: {exc}") from exc
+    return {"new_situations": [s.rule_id for s in fresh], "offset": game.offset,
+            "data_events": len(game.data_events)}
 
 
 @router.post("/{game_id}/end", summary="실시간 경기 종료 (분석기용)")

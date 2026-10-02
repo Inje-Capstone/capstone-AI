@@ -173,3 +173,91 @@ def test_run_sends_each_segment_once_with_offsets(tmp_path):
     starts = sorted(b["scoreboard"][0]["t"] for _, b in server.bodies)
     assert starts == [1.0, 11.0, 21.0]
     assert {p for p, _ in server.bodies} == {"/api/live/L1/ingest"}
+
+
+# ── 실시간 데이터 보강 (선수·구종·기록) ──────────────────────────────────
+def _data_body():
+    raw = json.loads((ROOT / "data" / "relay_truth" / f"naver_{TRUTH}.json")
+                     .read_text(encoding="utf-8"))
+    return {"events": raw["events"], "context": raw["game"].get("context") or {}}
+
+
+def test_live_data_adds_names_after_offset_is_locked(client):
+    client.post("/api/live/L2", json={"away_team": "한화", "home_team": "LG"}, headers=H)
+    chunks = _chunks(limit_t=3000)
+    # 데이터 먼저 와도 영상 단서가 모자라면 시간차를 고정하지 않는다
+    res = client.post("/api/live/L2/data", json=_data_body(), headers=H).json()
+    assert res["offset"] is None and res["data_events"] > 100
+    for body in chunks:
+        client.post("/api/live/L2/ingest", json=body, headers=H)
+    res = client.post("/api/live/L2/data", json=_data_body(), headers=H).json()
+    assert res["offset"] == 0.0  # 합성 영상은 데이터와 같은 시각
+
+    state = client.get("/api/games/L2/state", params={"t": 1500}).json()
+    assert state["batter"] and state["pitcher"]  # 데이터로 붙은 선수 이름
+    matchup = client.get("/api/games/L2/matchup", params={"t": 1500}).json()
+    assert matchup["available"] and "시즌 타율" in matchup["batter_line"]
+    assert "위" in matchup["team_form"]  # 데이터의 팀 맥락
+    rules = {c["rule_id"] for c in
+             client.get("/api/games/L2/cards", params={"level": "익숙"}).json()["cards"]}
+    assert "cheer_song" in rules  # 데이터의 타석 시작이 붙어야 뜨는 카드
+    from app.api.deps import get_live_source
+
+    feed = get_live_source().get("L2").feed
+    assert not any(e.detail.get("source") == "data" and e.kind == "result" for e in feed.events)
+    client.post("/api/live/L2/end", headers=H)  # 끝나야 스트림이 닫힌다
+    with client.stream("GET", "/api/live/L2/stream") as r:
+        msgs = [json.loads(ln[6:]) for ln in r.iter_lines() if ln.startswith("data: ")]
+    assert msgs[0]["data"] is False  # 첫 업데이트 땐 아직 데이터 미적용
+    assert any(m.get("data") for m in msgs) and msgs[-1] == {"type": "end"}
+
+
+def test_live_data_rejects_bad_events(client):
+    client.post("/api/live/L3", json={"away_team": "A", "home_team": "B"}, headers=H)
+    bad = {"events": [{"id": "x"}], "context": {}}
+    assert client.post("/api/live/L3/data", json=bad, headers=H).status_code == 422
+    assert client.post("/api/live/L3/data", json=_data_body()).status_code == 401
+
+
+def test_data_poller_survives_fetch_errors():
+    live = _load("live_video")
+    from app.adapters.relay.naver import NaverRelayError
+
+    calls = {"n": 0}
+
+    def payload(naver_id):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise NaverRelayError("네트워크")
+        return {"events": [{"id": "a"}], "context": {}}
+
+    class FakeServer:
+        def __init__(self):
+            self.paths = []
+
+        def post(self, path, body):
+            self.paths.append(path)
+            return {"offset": 12.0}
+
+    server, logs = FakeServer(), []
+    poller = live.DataPoller("N1", server, "L1", every=0, log=logs.append, payload=payload)
+    poller.poll_once()
+    poller.poll_once()
+    assert server.paths == ["/api/live/L1/data"] and poller.sent == 1
+    assert "실패" in logs[0] and "+12s" in logs[1]
+
+
+def test_data_payload_uses_converter():
+    live = _load("live_video")
+    raw = json.loads((ROOT / "data" / "relay_truth" / f"naver_{TRUTH}.json")
+                     .read_text(encoding="utf-8"))
+    assert raw["events"]  # 변환 결과 형식 = /data 본문 형식
+    fake_info = {"gameId": "G", "awayTeamName": "A", "homeTeamName": "H"}
+
+    def fetch(gid):
+        option = {"seqno": 1, "type": 8, "text": "1번타자 가", "currentGameState": {}}
+        relay = {"inn": 1, "homeOrAway": "0", "no": 1, "textOptions": [option]}
+        return fake_info, [{"textRelays": [relay]}]
+
+    body = live.data_payload("G", fetch=fetch, preview=lambda gid: None)
+    assert [e["kind"] for e in body["events"]] == ["atbat"] and body["context"] == {}
