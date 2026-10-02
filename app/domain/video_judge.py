@@ -242,7 +242,14 @@ def to_relay_events(
     종류(보크인지)만 확신이 있을 때 붙인다. 그래서 확신 없는 판정은 카드가 안 뜬다.
     """
     events: list[RelayEvent] = []
-    for n, j in enumerate(judgments):
+    used: set[str] = set()
+    for j in judgments:
+        # id는 판정 시각에서 만든다 — 실시간 모드에서 판정이 늘어나도
+        # 기존 이벤트 id(=카드 캐시 키)가 바뀌지 않게. 같은 0.1초에 둘이면 글자를 붙인다.
+        n = ("s" if j.kind == "sub" else "") + str(int(round(j.t * 10)))
+        while n in used:
+            n += "b"
+        used.add(n)
         if j.kind == "sub":
             events.append(RelayEvent(
                 id=f"v{n}", t=int(j.t), inning=j.detail.get("inning", 1),

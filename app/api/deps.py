@@ -17,14 +17,20 @@ from app.domain.profile import profile_from_onboarding
 from app.services.card_service import CardService
 from app.services.chat_service import ChatService
 from app.services.glossary_service import GlossaryService
+from app.services.live_service import LiveRelaySource
 from app.services.matchup_service import MatchupService
 from app.services.moment_service import MomentService
 from app.services.quiz_service import QuizService
 
 
 @lru_cache(maxsize=1)
-def get_relay_source() -> FixtureRelaySource:
-    return FixtureRelaySource(get_settings().fixture_dir)
+def get_live_source() -> LiveRelaySource:
+    """실시간 경기 + 파일 경기. 실시간 경기도 일반 경기 엔드포인트로 그대로 보인다."""
+    return LiveRelaySource(FixtureRelaySource(get_settings().fixture_dir))
+
+
+def get_relay_source() -> LiveRelaySource:
+    return get_live_source()
 
 
 @lru_cache(maxsize=1)
@@ -90,7 +96,7 @@ def get_moment_service() -> MomentService:
 def reset_services() -> None:
     """테스트에서 백엔드를 바꿔 끼울 때 캐시를 비운다."""
     for fn in (
-        get_relay_source,
+        get_live_source,
         get_stats_source,
         get_card_service,
         get_chat_service,

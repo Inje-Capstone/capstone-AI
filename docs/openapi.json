@@ -480,6 +480,72 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "LiveIngestIn": {
+        "description": "analyze_video의 ClipAnalysis와 같은 모양. 시각은 영상(방송) 기준 초.",
+        "properties": {
+          "events": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 500,
+            "title": "Events",
+            "type": "array"
+          },
+          "scoreboard": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 500,
+            "title": "Scoreboard",
+            "type": "array"
+          },
+          "speech": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 500,
+            "title": "Speech",
+            "type": "array"
+          }
+        },
+        "title": "LiveIngestIn",
+        "type": "object"
+      },
+      "LiveStartIn": {
+        "properties": {
+          "away_team": {
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Away Team",
+            "type": "string"
+          },
+          "date": {
+            "default": "",
+            "title": "Date",
+            "type": "string"
+          },
+          "home_team": {
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Home Team",
+            "type": "string"
+          },
+          "stadium": {
+            "default": "",
+            "title": "Stadium",
+            "type": "string"
+          }
+        },
+        "required": [
+          "away_team",
+          "home_team"
+        ],
+        "title": "LiveStartIn",
+        "type": "object"
+      },
       "MatchupOut": {
         "description": "S4 우측 하단 선수·매치업 분석.",
         "properties": {
@@ -1882,6 +1948,249 @@
         "summary": "용어 상세 (S5, 카드 딥링크)",
         "tags": [
           "glossary"
+        ]
+      }
+    },
+    "/api/live/{game_id}": {
+      "post": {
+        "operationId": "start_api_live__game_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game_id",
+            "required": true,
+            "schema": {
+              "maxLength": 40,
+              "title": "Game Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-live-token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Live-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveStartIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "실시간 경기 시작 (분석기용)",
+        "tags": [
+          "live"
+        ]
+      }
+    },
+    "/api/live/{game_id}/end": {
+      "post": {
+        "operationId": "end_api_live__game_id__end_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game_id",
+            "required": true,
+            "schema": {
+              "title": "Game Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-live-token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Live-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "실시간 경기 종료 (분석기용)",
+        "tags": [
+          "live"
+        ]
+      }
+    },
+    "/api/live/{game_id}/ingest": {
+      "post": {
+        "operationId": "ingest_api_live__game_id__ingest_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game_id",
+            "required": true,
+            "schema": {
+              "title": "Game Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-live-token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Live-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveIngestIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "청크 분석 결과 수집 (분석기용)",
+        "tags": [
+          "live"
+        ]
+      }
+    },
+    "/api/live/{game_id}/stream": {
+      "get": {
+        "description": "`data: {...}` 줄 단위. type=update(새 상황·스코어보드) | end.\n\n각 메시지에 순번 id가 붙는다 — 끊기면 since=마지막 id로 이어 받는다.",
+        "operationId": "stream_api_live__game_id__stream_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game_id",
+            "required": true,
+            "schema": {
+              "title": "Game Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "이어 받기: 마지막으로 받은 순번",
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "이어 받기: 마지막으로 받은 순번",
+              "minimum": 0,
+              "title": "Since",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "실시간 업데이트 (SSE)",
+        "tags": [
+          "live"
         ]
       }
     },

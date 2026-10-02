@@ -14,6 +14,7 @@ from app.api import (
     routes_chat,
     routes_game,
     routes_glossary,
+    routes_live,
     routes_onboarding,
     routes_quiz,
 )
@@ -47,6 +48,7 @@ app.include_router(routes_chat.router)
 app.include_router(routes_glossary.router)
 app.include_router(routes_quiz.router)
 app.include_router(routes_onboarding.router)
+app.include_router(routes_live.router)
 
 
 @app.exception_handler(Exception)
