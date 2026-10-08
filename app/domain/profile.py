@@ -8,7 +8,7 @@ if문을 두지 않는다. 규칙마다 점수를 계산하고 임계값 하나�
 """
 
 from collections.abc import Iterable, Sequence
-from typing import Optional
+from typing import Optional, Union
 
 from app.domain.models import (
     ALL_CATEGORIES,
@@ -51,8 +51,16 @@ LEVEL_CATEGORY_MULTIPLIER = {
     },
 }
 
-# 온보딩 화면(S2)의 한글 선택지 → 내부 키
+# 백엔드 User.learningLevel(enum 이름) ↔ 내부 난이도. 백엔드가 저장값을 그대로 넘기면 된다.
+BACKEND_LEVEL_NAMES = {
+    LEVEL_BEGINNER: "INTRODUCTORY",  # 입문
+    LEVEL_NOVICE: "BEGINNER",  # 초보
+    LEVEL_FAMILIAR: "FAMILIAR",  # 익숙
+}
+
+# 온보딩 화면(S2)의 한글 선택지·백엔드 enum 이름 → 내부 키
 LEVEL_BY_LABEL = {label: level for level, label in LEVEL_LABELS.items()}
+LEVEL_BY_LABEL.update({name: level for level, name in BACKEND_LEVEL_NAMES.items()})
 CATEGORY_BY_LABEL = {label: key for key, label in CATEGORY_LABELS.items()}
 # 표기 흔들림 흡수 (칩 라벨의 공백 유무 등)
 CATEGORY_BY_LABEL.update(
@@ -125,3 +133,40 @@ def select(
         enriched.reasons = list(enriched.reasons) + reasons
         kept.append(enriched)
     return kept
+
+
+def weights_for(level: Union[int, str, None], categories: Optional[Iterable[str]] = None,
+                threshold: float = 0.5) -> dict:
+    """난이도(+관심 카테고리)별 노출 가중치 — 백엔드 저장·표시용.
+
+    카드 노출 점수 = 규칙 중요도 × 관심도(고른 카테고리 1.0 · 안 고른 카테고리 0.35) × 난이도 배율.
+    규칙별로 이 점수와 임계값 통과 여부까지 함께 내보내 "이 사용자에게 어떤 설명이 뜨는가"를
+    백엔드가 그대로 저장·표시할 수 있게 한다.
+    """
+    from app.domain.detectors import RULES  # 순환 import 방지
+
+    profile = profile_from_onboarding(level=level, categories=categories, threshold=threshold)
+    mult = LEVEL_CATEGORY_MULTIPLIER.get(profile.level, {})
+    cats = {
+        key: {
+            "label": CATEGORY_LABELS[key],
+            "selected": key in profile.categories,
+            "interestWeight": 1.0 if key in profile.categories else UNSELECTED_CATEGORY_WEIGHT,
+            "levelMultiplier": mult.get(key, 1.0),
+        }
+        for key in ALL_CATEGORIES
+    }
+    rules = []
+    for rule in RULES:
+        c = cats[rule.category]
+        score = round(rule.priority * c["interestWeight"] * c["levelMultiplier"], 3)
+        rules.append({"ruleId": rule.id, "label": rule.label, "termId": rule.term_id,
+                      "category": rule.category, "priority": rule.priority,
+                      "score": score, "shown": score >= profile.threshold})
+    return {
+        "learningLevel": BACKEND_LEVEL_NAMES.get(profile.level, "INTRODUCTORY"),
+        "levelLabel": LEVEL_LABELS.get(profile.level, "입문"),
+        "threshold": profile.threshold,
+        "categories": cats,
+        "rules": rules,
+    }

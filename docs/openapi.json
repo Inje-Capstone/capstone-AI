@@ -1,6 +1,336 @@
 {
   "components": {
     "schemas": {
+      "BackendAnswerIn": {
+        "properties": {
+          "optionId": {
+            "description": "1부터. 범위를 벗어나면 틀림으로 센다",
+            "title": "Optionid",
+            "type": "integer"
+          },
+          "questionId": {
+            "title": "Questionid",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "questionId",
+          "optionId"
+        ],
+        "title": "BackendAnswerIn",
+        "type": "object"
+      },
+      "BackendCategoryWeight": {
+        "properties": {
+          "interestWeight": {
+            "description": "고른 카테고리 1.0 · 안 고른 카테고리 0.35",
+            "title": "Interestweight",
+            "type": "number"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "levelMultiplier": {
+            "description": "난이도별 카테고리 배율",
+            "title": "Levelmultiplier",
+            "type": "number"
+          },
+          "selected": {
+            "title": "Selected",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "label",
+          "selected",
+          "interestWeight",
+          "levelMultiplier"
+        ],
+        "title": "BackendCategoryWeight",
+        "type": "object"
+      },
+      "BackendDiagnosisIn": {
+        "description": "백엔드 `DiagnosisSubmitRequest` 그대로 (+ 선택: 관심 카테고리).",
+        "properties": {
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/BackendAnswerIn"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Answers",
+            "type": "array"
+          },
+          "categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "관심 카테고리 키 또는 한글 라벨. 없으면 전부 관심",
+            "title": "Categories"
+          }
+        },
+        "required": [
+          "answers"
+        ],
+        "title": "BackendDiagnosisIn",
+        "type": "object"
+      },
+      "BackendDiagnosisOut": {
+        "description": "백엔드 `DiagnosisResultResponse`(correctCount·totalCount·learningLevel) + 해설·가중치.",
+        "properties": {
+          "correctCount": {
+            "title": "Correctcount",
+            "type": "integer"
+          },
+          "learningLevel": {
+            "description": "백엔드 LearningLevel enum 이름 그대로",
+            "title": "Learninglevel",
+            "type": "string"
+          },
+          "levelLabel": {
+            "title": "Levellabel",
+            "type": "string"
+          },
+          "message": {
+            "description": "결과 화면 문구",
+            "title": "Message",
+            "type": "string"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/BackendQuestionResult"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "totalCount": {
+            "title": "Totalcount",
+            "type": "integer"
+          },
+          "weights": {
+            "$ref": "#/components/schemas/BackendWeightsOut"
+          }
+        },
+        "required": [
+          "correctCount",
+          "totalCount",
+          "learningLevel",
+          "levelLabel",
+          "message",
+          "results",
+          "weights"
+        ],
+        "title": "BackendDiagnosisOut",
+        "type": "object"
+      },
+      "BackendOptionOut": {
+        "properties": {
+          "optionId": {
+            "description": "1부터",
+            "title": "Optionid",
+            "type": "integer"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "optionId",
+          "text"
+        ],
+        "title": "BackendOptionOut",
+        "type": "object"
+      },
+      "BackendQuestionOut": {
+        "description": "백엔드 `DiagnosisQuestionResponse`와 같은 모양 (+ termId). 정답은 담지 않는다.",
+        "properties": {
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/BackendOptionOut"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "questionId": {
+            "description": "1부터 — 문제은행 순서",
+            "title": "Questionid",
+            "type": "integer"
+          },
+          "termId": {
+            "description": "용어 사전 딥링크 키",
+            "title": "Termid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "questionId",
+          "termId",
+          "question",
+          "options"
+        ],
+        "title": "BackendQuestionOut",
+        "type": "object"
+      },
+      "BackendQuestionResult": {
+        "properties": {
+          "answerOptionId": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "정답 번호 — **답을 낸 문항에만** 채워진다",
+            "title": "Answeroptionid"
+          },
+          "chosenOptionId": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chosenoptionid"
+          },
+          "correct": {
+            "title": "Correct",
+            "type": "boolean"
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "questionId": {
+            "title": "Questionid",
+            "type": "integer"
+          },
+          "termId": {
+            "title": "Termid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "questionId",
+          "termId",
+          "chosenOptionId",
+          "correct"
+        ],
+        "title": "BackendQuestionResult",
+        "type": "object"
+      },
+      "BackendRuleWeight": {
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "priority": {
+            "description": "규칙 고유 중요도",
+            "title": "Priority",
+            "type": "number"
+          },
+          "ruleId": {
+            "title": "Ruleid",
+            "type": "string"
+          },
+          "score": {
+            "description": "priority × interestWeight × levelMultiplier",
+            "title": "Score",
+            "type": "number"
+          },
+          "shown": {
+            "description": "score ≥ threshold — 이 사용자에게 카드가 뜨는지",
+            "title": "Shown",
+            "type": "boolean"
+          },
+          "termId": {
+            "title": "Termid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ruleId",
+          "label",
+          "termId",
+          "category",
+          "priority",
+          "score",
+          "shown"
+        ],
+        "title": "BackendRuleWeight",
+        "type": "object"
+      },
+      "BackendWeightsOut": {
+        "description": "개인화 가중치. 카드 노출 점수 = 중요도 × 관심도 × 난이도 배율, threshold 이상만 노출.",
+        "properties": {
+          "categories": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/BackendCategoryWeight"
+            },
+            "title": "Categories",
+            "type": "object"
+          },
+          "learningLevel": {
+            "description": "INTRODUCTORY | BEGINNER | FAMILIAR",
+            "title": "Learninglevel",
+            "type": "string"
+          },
+          "levelLabel": {
+            "description": "입문 | 초보 | 익숙",
+            "title": "Levellabel",
+            "type": "string"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/BackendRuleWeight"
+            },
+            "title": "Rules",
+            "type": "array"
+          },
+          "threshold": {
+            "title": "Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "learningLevel",
+          "levelLabel",
+          "threshold",
+          "categories",
+          "rules"
+        ],
+        "title": "BackendWeightsOut",
+        "type": "object"
+      },
       "CardOut": {
         "description": "S4 우측 상단 AI 설명 카드 1장.",
         "properties": {
@@ -1196,6 +1526,141 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/backend/onboarding/diagnosis": {
+      "post": {
+        "description": "백엔드 `DiagnosisSubmitRequest`를 그대로 받는다.\n\n빠진 문항·모르는 번호는 틀림으로 센다(에러 없음 — 온보딩은 막히면 안 된다).\n관심 카테고리를 같이 보내면 가중치에 반영하고, 없으면 전부 관심으로 본다.",
+        "operationId": "backend_diagnosis_api_backend_onboarding_diagnosis_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackendDiagnosisIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackendDiagnosisOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "진단 채점 → learningLevel + 개인화 가중치",
+        "tags": [
+          "backend"
+        ]
+      }
+    },
+    "/api/backend/onboarding/questions": {
+      "get": {
+        "description": "`questionId`·`optionId`는 1부터. 정답·해설은 담지 않는다 — 채점은 POST가 서버에서 한다.",
+        "operationId": "backend_questions_api_backend_onboarding_questions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BackendQuestionOut"
+                  },
+                  "title": "Response Backend Questions Api Backend Onboarding Questions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "진단 퀴즈 문항 (백엔드 DTO 모양 · 정답 없음)",
+        "tags": [
+          "backend"
+        ]
+      }
+    },
+    "/api/backend/onboarding/weights": {
+      "get": {
+        "description": "저장된 `User.learningLevel`이 바뀌었을 때(재진단·설정 변경) 다시 받아 가는 용도.",
+        "operationId": "backend_weights_api_backend_onboarding_weights_get",
+        "parameters": [
+          {
+            "description": "INTRODUCTORY | BEGINNER | FAMILIAR (입문 | 초보 | 익숙도 허용)",
+            "in": "query",
+            "name": "learningLevel",
+            "required": false,
+            "schema": {
+              "default": "INTRODUCTORY",
+              "description": "INTRODUCTORY | BEGINNER | FAMILIAR (입문 | 초보 | 익숙도 허용)",
+              "title": "Learninglevel",
+              "type": "string"
+            }
+          },
+          {
+            "description": "관심 카테고리 — 키(basic_rules…) 또는 한글 라벨. 없으면 전부",
+            "in": "query",
+            "name": "categories",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "관심 카테고리 — 키(basic_rules…) 또는 한글 라벨. 없으면 전부",
+              "title": "Categories"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackendWeightsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "learningLevel(+관심 카테고리)별 개인화 가중치",
+        "tags": [
+          "backend"
+        ]
+      }
+    },
     "/api/games": {
       "get": {
         "operationId": "list_games_api_games_get",
