@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api import (
+    routes_backend,
     routes_chat,
     routes_game,
     routes_glossary,
@@ -49,6 +50,7 @@ app.include_router(routes_glossary.router)
 app.include_router(routes_quiz.router)
 app.include_router(routes_onboarding.router)
 app.include_router(routes_live.router)
+app.include_router(routes_backend.router)
 
 
 @app.exception_handler(Exception)

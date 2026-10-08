@@ -1,10 +1,11 @@
 # HANDOFF — 이어서 작업하기
 
-> 갱신 2026-10-04. 다른 PC(맥 등)에서 `git pull` 후 이 문서부터 읽는다. 기능 설명·API는 [README.md](README.md).
+> 갱신 2026-10-08. 다른 PC(맥 등)에서 `git pull` 후 이 문서부터 읽는다. 기능 설명·API는 [README.md](README.md).
 
 ## 1. 지금 상태
 
-- main: PR #1~#24 머지, CI(test 3.9·3.12 + docker) 통과, pytest 216 · ruff clean
+- main: PR #1~#26 머지, CI(test 3.9·3.12 + docker) 통과, pytest 226 · ruff clean
+- 온보딩 진단 퀴즈·개인화 가중치를 백엔드 DTO 모양으로 제공: `/api/backend/onboarding/*` (README "백엔드 온보딩 연동")
 - **코드로 할 수 있는 건 끝났다. 다음은 실제 경기 영상 실측.** (§5)
 
 ## 2. 구조 — 누가 무엇을 하나
@@ -72,6 +73,7 @@ cp .env.example .env                      # 키는 git에 없다 — 직접 채�
 
 - **경기 영상(mp4)**: 지도교수 승인 · 비공개 보관 · 필요한 구간만 (저작권)
 - **백엔드 팀 합의**: 백엔드 `docker-compose.yml`에 ai-engine 서비스(빌드 컨텍스트 = 이 레포 git URL) + EC2 `.env`에 키. 프론트 → 백엔드 → AI 호출(AI는 내부망만). 퀴즈 포인트·팝업 조건은 백엔드 소유. 명세: `docs/openapi.json`
+- **백엔드 온보딩**: 진단은 `POST /api/backend/onboarding/diagnosis` 호출 → `learningLevel` 저장. AI 문항은 보기 4개 → 백엔드 `optionId @Max(3)`을 4로 풀거나 AI 문항(`/questions`)을 그대로 쓰기
 
 ## 7. 결정 기록
 

@@ -87,12 +87,27 @@ curl localhost:8000/health
 | `GET /api/games/{id}/moment?t=&level=` | S4 방금 장면 한 줄 요약 (Haiku 4.5, 모델 없으면 중계 원문 조립 — 항상 응답) |
 | `GET /api/onboarding/diagnostic` | 온보딩 B① 수준 진단 문항 3개. **정답 비노출** · LLM 호출 없음 |
 | `POST /api/onboarding/diagnostic` | 진단 채점 → 입문(0~1개) · 초보(2개) · 익숙(3개) + 결과 문구 · 문항별 해설 |
+| `GET /api/backend/onboarding/questions` | **백엔드용** 진단 문항 — 백엔드 `DiagnosisQuestionResponse` 모양(camelCase, `questionId`·`optionId` 1부터) |
+| `POST /api/backend/onboarding/diagnosis` | **백엔드용** 채점 — `DiagnosisSubmitRequest` 그대로 받아 `correctCount`·`totalCount`·`learningLevel` + 해설 + 개인화 가중치 |
+| `GET /api/backend/onboarding/weights?learningLevel=&categories=` | **백엔드용** 수준(+관심 카테고리)별 가중치 — 카테고리 배율·규칙별 점수·노출 여부 |
 
 진단은 **보상 없는 자기 진단**이다(포인트는 하루 퀴즈 몫). 채점 응답은 답을 낸 문항의 정답·해설을
 함께 주므로 — 결과 화면이 그걸 보여줘야 한다 — 시험처럼 신뢰할 수 있는 관문으로 쓰지 말 것.
 응시 1회 제한·재응시 이력이 필요하면 상태를 가진 백엔드가 감싼다.
 
-`level`은 `입문 | 초보 | 익숙`, `category`는 반복 쿼리 파라미터(`기본 룰`, `구종 · 투구`,
+### 백엔드 온보딩 연동
+
+`learningLevel`은 백엔드 `LearningLevel` enum 이름 그대로다: `INTRODUCTORY`(입문) · `BEGINNER`(초보) · `FAMILIAR`(익숙).
+백엔드는 받은 값을 `User.learningLevel`·`diagnosisScore`(=`correctCount`)에 저장하고, 이후 카드·챗봇 요청의
+`level`에 **그 enum 이름을 그대로** 넘기면 된다(한글 라벨도 계속 받는다).
+
+가중치: 카드 노출 점수 = 규칙 중요도 × 관심도(고른 카테고리 1.0 · 안 고른 카테고리 0.35) × 난이도 배율, 0.5 이상만 노출.
+`weights.rules[].shown`이 "이 사용자에게 그 설명 카드가 뜨는가"다 — 실제 카드 선택과 같은 공식(테스트로 고정).
+
+> 백엔드 측 맞출 것: AI 문제은행은 **보기 4개**라 `DiagnosisSubmitRequest`의 `optionId @Max(3)`을 `@Max(4)`로 풀거나,
+> 백엔드 임시 문항(`DiagnosisQuiz`) 대신 `GET /api/backend/onboarding/questions`를 받아 쓴다.
+
+`level`은 `입문 | 초보 | 익숙`(또는 `INTRODUCTORY | BEGINNER | FAMILIAR`), `category`는 반복 쿼리 파라미터(`기본 룰`, `구종 · 투구`,
 `전술 · 기록`, `응원 문화`). 온보딩 답변을 그대로 넘기면 된다 — 유저 DB는 백엔드 팀 소유다.
 
 ```bash

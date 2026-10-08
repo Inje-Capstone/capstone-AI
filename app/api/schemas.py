@@ -332,3 +332,82 @@ class DiagnosticResultOut(BaseModel):
     @classmethod
     def of(cls, diagnosis: Diagnosis) -> "DiagnosticResultOut":
         return cls(**diagnosis.model_dump())
+
+
+# ── 백엔드(Spring Boot) 연동 — 필드 이름을 백엔드 DTO와 같은 camelCase로 맞춘다 ──
+class BackendOptionOut(BaseModel):
+    optionId: int = Field(description="1부터")
+    text: str
+
+
+class BackendQuestionOut(BaseModel):
+    """백엔드 `DiagnosisQuestionResponse`와 같은 모양 (+ termId). 정답은 담지 않는다."""
+
+    questionId: int = Field(description="1부터 — 문제은행 순서")
+    termId: str = Field(description="용어 사전 딥링크 키")
+    question: str
+    options: list[BackendOptionOut]
+
+
+class BackendAnswerIn(BaseModel):
+    questionId: int
+    optionId: int = Field(description="1부터. 범위를 벗어나면 틀림으로 센다")
+
+
+class BackendDiagnosisIn(BaseModel):
+    """백엔드 `DiagnosisSubmitRequest` 그대로 (+ 선택: 관심 카테고리)."""
+
+    answers: list[BackendAnswerIn] = Field(min_length=1, max_length=20)
+    categories: Optional[list[str]] = Field(
+        default=None, description="관심 카테고리 키 또는 한글 라벨. 없으면 전부 관심"
+    )
+
+
+class BackendQuestionResult(BaseModel):
+    questionId: int
+    termId: str
+    chosenOptionId: Optional[int]
+    answerOptionId: Optional[int] = Field(
+        default=None, description="정답 번호 — **답을 낸 문항에만** 채워진다"
+    )
+    correct: bool
+    explanation: Optional[str] = None
+
+
+class BackendCategoryWeight(BaseModel):
+    label: str
+    selected: bool
+    interestWeight: float = Field(description="고른 카테고리 1.0 · 안 고른 카테고리 0.35")
+    levelMultiplier: float = Field(description="난이도별 카테고리 배율")
+
+
+class BackendRuleWeight(BaseModel):
+    ruleId: str
+    label: str
+    termId: str
+    category: str
+    priority: float = Field(description="규칙 고유 중요도")
+    score: float = Field(description="priority × interestWeight × levelMultiplier")
+    shown: bool = Field(description="score ≥ threshold — 이 사용자에게 카드가 뜨는지")
+
+
+class BackendWeightsOut(BaseModel):
+    """개인화 가중치. 카드 노출 점수 = 중요도 × 관심도 × 난이도 배율, threshold 이상만 노출."""
+
+    learningLevel: str = Field(description="INTRODUCTORY | BEGINNER | FAMILIAR")
+    levelLabel: str = Field(description="입문 | 초보 | 익숙")
+    threshold: float
+    categories: dict[str, BackendCategoryWeight]
+    rules: list[BackendRuleWeight]
+
+
+class BackendDiagnosisOut(BaseModel):
+    """백엔드 `DiagnosisResultResponse`(correctCount·totalCount·learningLevel) + 해설·가중치."""
+
+    correctCount: int
+    totalCount: int
+    learningLevel: str = Field(description="백엔드 LearningLevel enum 이름 그대로")
+    levelLabel: str
+    message: str = Field(description="결과 화면 문구")
+    results: list[BackendQuestionResult]
+    weights: BackendWeightsOut
