@@ -61,9 +61,43 @@ cp .env.example .env                      # 키는 git에 없다 — 직접 채�
 .venv/bin/python scripts/eval_outputs.py 20260823LGOB    # LLM 출력 규칙 검사
 ```
 
+## 4-1. 영상 판독 비용 단계 — 무료 API → GPU 직접
+
+**1단계 (지금): NVIDIA 무료 호스팅 API** — `.env`의 `NVIDIA_API_KEY`만 있으면 된다.
+- 크레딧: 가입 시 1,000 (프로필에서 "Request More"로 최대 5,000 요청). 회사 메일이면 90일 AI Enterprise 체험 + 4,000 추가. 분당 40회 제한
+- 다 쓰면 자동 충전은 없다 → 2단계로
+- 소모 추정(요청 1회 = 1크레딧 가정): 리플레이 3시간 경기 60초 조각 ≈ 180회 / **실시간 5초 조각 ≈ 2,160회 → 1,000크레딧으로 실시간 한 경기를 다 못 돈다**
+
+**2단계: GPU를 분석할 때만 빌려 직접 띄운다** — 코드 수정 없음, 주소만 바꾼다.
+- 모델: 같은 모델(Nemotron 3 Nano Omni) 가중치가 Hugging Face에 공개돼 있다. 라이선스 NVIDIA Open Model Agreement — 상업 이용까지 허용
+  - NVIDIA NIM 컨테이너(`nvcr.io/nim/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`)도 있지만 별도 평가 라이선스. 개발자 프로그램 회원은 연구·개발·테스트 용도로 GPU 16장까지 무료 → 캡스톤은 해당. **기본은 vLLM + HF 가중치**(로그인 불필요, FP8이 L40S에 들어감)
+- GPU: FP8(약 33GB) = **L40S 48GB 1장** / BF16(약 62GB) = H100·A100 80GB 1장. 디스크 70GB 이상
+- 요금(2026-10 조사, 바뀜): 해외 RunPod L40S 시간당 약 $0.8~1.1 · H100 약 $2~3 / 국내 엘리스클라우드 H100 GPU당 ₩4,270 · A100 80GB ₩1,970
+  - 국내 업체 종량제는 지원금 규정(해외·구독 금지)에 안 걸릴 수도 있다 — 학교 담당자 확인 필요
+- 경기당 추정(실측 전): 리플레이 = 모델 받기 10~20분 + 분석 수십 분 → L40S로 $1 안팎. 실시간 = 경기 3시간 내내 켜야 함
+
+```bash
+# GPU 서버 (RunPod이면 템플릿 이미지 vllm/vllm-openai:v0.20.0)
+VLM_API_KEY=<아무 긴 문자열> bash scripts/gpu_serve.sh          # FP8 · L40S
+MODEL_VARIANT=BF16 VLM_API_KEY=<...> bash scripts/gpu_serve.sh  # H100·A100 80GB
+
+# 일반 GPU 서버(docker)라면
+docker run --gpus all --ipc host -p 8000:8000 -v ~/.cache/huggingface:/root/.cache/huggingface \
+  -v $PWD/scripts:/s -e VLM_API_KEY=<...> --entrypoint bash vllm/vllm-openai:v0.20.0 /s/gpu_serve.sh
+
+# 분석 PC — .env의 키 대신 위에서 정한 문자열을 넘긴다(환경변수가 .env보다 우선)
+NVIDIA_API_KEY=<같은 문자열> .venv/bin/python scripts/analyze_video.py <ID> game.mp4 --base-url http://<서버IP>:8000/v1 --limit 3
+NVIDIA_API_KEY=<같은 문자열> .venv/bin/python scripts/live_video.py LIVE1 game.mp4 --away 한화 --home LG --base-url http://<서버IP>:8000/v1
+```
+
+- 첫 실행은 가중치 다운로드로 오래 걸린다. 디스크(볼륨)를 남겨 두면 다음엔 바로 뜬다(볼륨 보관비만 듦)
+- **끝나면 GPU(Pod)를 반드시 정지** — 켜 둔 시간만큼 과금
+- 이 절차는 아직 실제 GPU로 돌려 보지 않았다. 첫 실행 때 `--limit 3`으로 응답 형식부터 확인
+
 ## 5. 다음 할 일 (순서대로)
 
 1. **경기 영상 확보** → `analyze_video.py --limit 3`으로 점수판·장면·해설 판독 품질 확인 → `app/adapters/video/base.py`의 프롬프트 조정
+   - **한국어 해설을 알아듣는지 먼저 확인** — 모델 안내에 언어 지원이 영어로만 적혀 있다(§8). 안 되면 `--no-audio`로 점수판·장면만 쓰거나 한국어 음성인식을 따로 붙인다
 2. 같은 경기를 **추론 켬/끔**(`--no-think`)으로 각각 분석 → `grade_video.py`로 정확도 비교 → 실시간 기본값 확정
 3. 판정 규칙·확신도 조정(`video_judge.py`) → 시연 경기 카드·요약 사전 생성 → 커밋
 4. 백엔드 compose에 ai-engine 추가(아래 §6)
@@ -83,10 +117,13 @@ cp .env.example .env                      # 키는 git에 없다 — 직접 채�
 | 10-02 | 플레이는 영상, 선수·구종·기록은 데이터, 데이터 결과는 채점만 | "영상 분석"이 실제 판정을 하게 + 정확도를 숫자로 |
 | 10-02 | GPU는 무료 API가 막히거나 품질·저작권 문제 시에만, 분석할 때만 켬 | 상시 가동 월 180만 원 |
 | 10-02 | 실시간: 5초 조각 + VLM 추론 끔 | 응답 실측 1.5~2.2초(켜면 3.6~65초) |
+| 10-10 | 무료 크레딧 소진 후엔 GPU 1장(L40S)에 vLLM + 공개 가중치(FP8)로 직접 띄움 | 같은 모델이라 코드 수정 없음, 상업 이용 허용 라이선스, 경기당 $1 안팎 추정 |
 | 10-02 | AI 비용은 캡스톤 지원금으로 처리 안 함 | 해외·프로그램·구독 금지(국고). 위장 세금계산서는 허위 증빙 |
 
 ## 8. 함정 (실측으로 알게 된 것)
 
+- **영상 모델의 언어**: Nemotron 3 Nano Omni 안내에 "English-only". 한국어 해설 음성 인식은 미확인 — 실측 전까지 해설 단서를 믿지 말 것
+- 영상 모델 입력 한도: 영상 1개 최대 2분(1080p는 1fps·128프레임까지). 지금 조각(60초·5초)은 안에 든다
 - NVIDIA 호스팅: `cosmos-reason2-8b`는 이 계정에서 404, `cosmos3-nano-reasoner`는 미호스팅. 붐비면 503 → 자동 재시도(5/15/30초)
 - Anthropic: Haiku 4.5는 `effort` 미지원(코드에서 자동 제외). 근거 없이 쓰면 규칙을 뒤집어 설명 → 카드·챗봇에 용어 사전 정의 주입함
 - `docs/openapi.json`: 라우트를 바꾸면 `scripts/export_openapi.py` 실행(테스트가 불일치를 잡는다)
