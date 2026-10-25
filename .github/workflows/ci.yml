@@ -12,7 +12,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # ubuntu-latest(26.04)엔 Python 3.9가 없다
     strategy:
       matrix:
         # 3.9 = 팀원 맥 .venv, 3.12 = Docker 이미지
@@ -41,7 +41,7 @@ jobs:
         run: python -m ruff check .
 
   docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # ubuntu-latest(26.04)엔 Python 3.9가 없다
     needs: test
 
     steps:
