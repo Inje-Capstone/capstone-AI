@@ -73,9 +73,25 @@ def _has(cues: Sequence[Cue], kind: str, words: Sequence[str] = ()) -> Optional[
     return None
 
 
+# 해설이 영어(MLB 중계)이거나 VLM이 영어로 적을 때 — 한국어 키워드마다 같은 뜻의 영어.
+# "walk"는 "walk-off"와 겹쳐 쓰지 않는다.
+_EN_WORDS = {
+    "보크": ("balk",), "도루": ("steal", "stole"), "폭투": ("wild pitch",),
+    "포일": ("passed ball",), "삼진": ("strikeout", "struck out", "strike three"),
+    "병살": ("double play",), "삼중살": ("triple play",), "홈런": ("home run", "homer"),
+    "희생플라이": ("sacrifice fly", "sac fly"), "인필드": ("infield fly",),
+    "몸에 맞": ("hit by pitch", "hit by a pitch", "plunk"),
+    "볼넷": ("ball four", "base on balls", "draws a walk", "drew a walk"),
+    "낫아웃": ("dropped third", "dropped strike"), "견제": ("pickoff", "picked off"),
+}
+
+
 def _speech(cues: Sequence[Cue], *words: str) -> Optional[Cue]:
+    wanted = [w.lower() for w in words]
+    for w in words:
+        wanted += [e for k, en in _EN_WORDS.items() if k in w for e in en]
     for c in cues:
-        if c.kind == "speech" and any(w in c.text for w in words):
+        if c.kind == "speech" and any(w in c.text.lower() for w in wanted):
             return c
     return None
 
@@ -103,6 +119,15 @@ def judge_transition(tr: Transition, cues: Sequence[Cue]) -> Optional[Judgment]:
     def make(kind: str, code: str, prior: float, supports=(), **detail) -> Judgment:
         conf, ev = _confidence(prior, supports)
         return Judgment(tr.t, kind, code, conf, [shape] + ev, tr, detail)
+
+    # 끝내기: 경기가 끝나면 점수판이 주자를 지우거나 그대로 멈춰 주자 모양을 믿을 수 없다.
+    # 결승점이 들어왔다는 사실만 믿고 종류는 단서로 가른다 (2026-10-25 하이라이트 클립 실측).
+    if is_walk_off(tr):
+        found = _walk_off_kind(near)
+        if found:
+            code, cue = found
+            kind = "result" if code in ("homerun", "walk", "hbp", "sac_fly") else "call"
+            return make(kind, code, 0.5, [cue], walk_off=True)
 
     # 같은 타석 안의 주자 움직임 (카운트 유지 — 0-0 카운트면 리셋처럼 보여도 단서로 가른다)
     mid_pa = not tr.half_change and (
@@ -180,9 +205,40 @@ def judge_transition(tr: Transition, cues: Sequence[Cue]) -> Optional[Judgment]:
     return None
 
 
-def judge(readings: Sequence[Reading], cues: Sequence[Cue]) -> list[Judgment]:
-    """점수판 판독 열 + 단서 → 판정 목록 (시간순). 투수 교체는 단서만으로 판정한다."""
-    stable = stabilize(readings)
+def is_walk_off(tr: Transition) -> bool:
+    """9회 이후 말 공격에서 홈팀이 뒤지거나 비기다 앞서게 된 전이."""
+    b, a = tr.before, tr.after
+    return (a.half == "bot" and a.inning >= 9 and not tr.half_change
+            and b.home <= b.away and a.home > a.away)
+
+
+def _walk_off_kind(near: Sequence[Cue]) -> Optional[tuple[str, Cue]]:
+    """끝내기 결승점의 종류 — 단서가 분명한 것만. 순서는 오인 비용이 큰 것부터."""
+    checks = (
+        ("homerun", _has(near, "ball_over_fence") or _speech(near, "홈런")),
+        ("balk", _speech(near, "보크") or _has(near, "pitcher_stops")),
+        ("wild_pitch", _speech(near, "폭투")),
+        ("passed_ball", _speech(near, "포일")),
+        ("hbp", _has(near, "hit_by_pitch") or _speech(near, "몸에 맞", "사구", "데드볼")),
+        ("dropped_third_strike", _speech(near, "낫아웃", "낫 아웃")),
+        ("walk", _speech(near, "볼넷", "포볼", "밀어내기")),
+        ("sac_fly", _speech(near, "희생플라이", "희생 플라이") or _has(near, "deep_fly")),
+    )
+    for code, cue in checks:
+        if cue is not None:
+            return code, cue
+    return None
+
+
+def judge(
+    readings: Sequence[Reading], cues: Sequence[Cue], min_repeat: int = 2
+) -> list[Judgment]:
+    """점수판 판독 열 + 단서 → 판정 목록 (시간순). 투수 교체는 단서만으로 판정한다.
+
+    `min_repeat`: 같은 점수판이 몇 번 연속 보여야 믿나. 경기 전체는 2(오독 거르기),
+    점수판이 몇 번밖에 안 나오는 하이라이트 클립은 1로 쓴다.
+    """
+    stable = stabilize(readings, min_repeat=min_repeat)
     out = []
     for tr in transitions(stable):
         j = judge_transition(tr, cues)

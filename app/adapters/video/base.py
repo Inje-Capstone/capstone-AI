@@ -141,7 +141,43 @@ def _json_payload(text: str) -> Any:
         try:
             return json.loads(body[start:end + 1])
         except json.JSONDecodeError:
-            return None
+            return _salvage_truncated(body[start:])
+
+
+def _salvage_truncated(body: str) -> Any:
+    """출력 토큰 한도로 중간에 잘린 JSON — 마지막으로 끝난 항목까지만 살린다.
+
+    실측(2026-10-25 하이라이트 클립): 점수판을 초마다 적다가 응답이 잘려 청크 전체를 잃었다.
+    문자열 밖의 괄호를 따라가며, 항목 하나가 닫힌 지점마다 '여기서 끊고 남은 괄호를 닫은' 후보를
+    기억한다. 가장 늦은 후보부터 파싱해 본다.
+    """
+    stack: list[str] = []
+    cuts: list[tuple[int, str]] = []
+    in_str = escaped = False
+    for i, ch in enumerate(body):
+        if in_str:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch in "{[":
+            stack.append("}" if ch == "{" else "]")
+        elif ch in "}]":
+            if not stack:
+                break
+            stack.pop()
+            cuts.append((i + 1, "".join(reversed(stack))))
+    for end, closer in reversed(cuts[-50:]):
+        try:
+            return json.loads(body[:end] + closer)
+        except json.JSONDecodeError:
+            continue
+    return None
 
 
 def _seconds(value: Any) -> Optional[float]:
