@@ -41,7 +41,9 @@ def test_search_matches_alias_ignoring_spaces(client):
 
 def test_category_filter_accepts_onboarding_labels(client):
     body = client.get("/api/glossary", params={"category": "응원 문화"}).json()
-    assert {t["id"] for t in body} == {"cheer_song", "homerun_celebration"}
+    culture = {k for k, v in load_glossary().items() if v["category"] == "culture"}
+    assert {t["id"] for t in body} == culture
+    assert {"cheer_song", "homerun_celebration"} <= culture
     assert all(t["category_label"] == "응원 문화" for t in body)
 
 
