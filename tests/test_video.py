@@ -287,3 +287,18 @@ def test_cosmos_can_turn_off_reasoning(tmp_path):
     off = CosmosAnalyzer("K", thinking=False).request_body(_clip(tmp_path))
     assert "chat_template_kwargs" not in on
     assert off["chat_template_kwargs"] == {"enable_thinking": False}
+
+
+def test_truncated_vlm_json_keeps_finished_items():
+    """출력 토큰 한도로 잘린 응답 — 끝난 항목까지는 살린다 (2026-10-25 실측)."""
+    from app.adapters.video.base import _json_payload
+
+    full = {
+        "scoreboard": [{"t": 0, "outs": 0}, {"t": 18, "outs": 1}],
+        "events": [{"start": 1, "type": "pitch", "description": 'quote " and } brace'}],
+    }
+    text = json.dumps(full, ensure_ascii=False)
+    cut = text[: text.index('"description"') + 30]  # 이벤트 설명 중간에서 잘림
+    assert _json_payload(cut) == {"scoreboard": full["scoreboard"]}
+    assert _json_payload(text[:-2]) == full  # 마지막 괄호만 잘림
+    assert _json_payload("not json") is None

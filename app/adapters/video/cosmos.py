@@ -32,7 +32,7 @@ class CosmosAnalyzer:
         base_url: str = DEFAULT_BASE_URL,
         model: str = DEFAULT_MODEL,
         fps: float = 2.0,
-        max_tokens: int = 1024,
+        max_tokens: int = 4096,
         scenario: Optional[str] = None,
         thinking: bool = True,
     ) -> None:

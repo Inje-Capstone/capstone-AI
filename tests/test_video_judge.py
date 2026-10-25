@@ -321,3 +321,39 @@ def test_enrich_without_scoreboard_returns_video_only():
     v = [RelayEvent(id="v1", t=1, inning=1, half="top", kind="result", text="",
                     detail={"result": "walk"})]
     assert enrich(v, [], offset=0, stable=[]) == v
+
+
+# ── 하이라이트 클립에서 드러난 경우 (2026-10-25) ───────────────────────
+def test_walk_off_balk_even_when_scoreboard_clears_bases():
+    """끝내기 후 점수판이 주자를 지워도 결승점 + 보크 단서면 보크."""
+    before = R(0, bases=(True, True, True), away=6, home=6, inning=9, half="bot")
+    after = R(18, away=6, home=7, inning=9, half="bot")
+    j = one(before, after, [Cue(12, "pitcher_stops")])
+    assert (j.code, j.detail.get("walk_off")) == ("balk", True)
+
+
+def test_walk_off_without_cue_falls_back_to_normal_rules():
+    before = R(0, bases=(True, True, True), away=6, home=6, inning=9, half="bot", balls=3)
+    after = R(18, bases=(True, True, True), away=6, home=7, inning=9, half="bot")
+    assert one(before, after).code == "walk"  # 만루 3볼 → 밀어내기는 모양만으로
+
+
+def test_english_commentary_counts_as_speech_cue():
+    before = R(0, bases=(False, False, True), outs=1)
+    after = R(10, outs=1, home=1)
+    j = one(before, after, [Cue(8, "speech", "And that's a BALK, the run scores!")])
+    assert j.code == "balk"
+
+
+def test_walk_off_word_is_not_a_walk():
+    before = R(0, bases=(False, True, False), away=2, home=2, inning=9, half="bot")
+    after = R(15, away=2, home=3, inning=9, half="bot")
+    j = one(before, after, [Cue(10, "speech", "walk-off single!")])
+    assert j is None or j.code != "walk"
+
+
+def test_single_reading_clip_needs_min_repeat_one():
+    readings = [R(0, bases=(False, False, True), outs=1), R(10, outs=1, home=1)]
+    cues = [Cue(8, "speech", "보크")]
+    assert judge(readings, cues) == []  # 경기 전체 기준(2번 연속)으론 못 믿는다
+    assert [j.code for j in judge(readings, cues, min_repeat=1)] == ["balk"]
