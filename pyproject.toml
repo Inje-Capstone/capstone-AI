@@ -12,6 +12,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# 해설 받아쓰기(NVIDIA 호스팅 Whisper, gRPC) — 영상 분석 스크립트에서만 쓴다. 서버는 필요 없다.
+asr = [
+    "nvidia-riva-client>=2.14",
+]
 dev = [
     "pytest>=8.0",
     "httpx>=0.27",

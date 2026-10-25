@@ -36,16 +36,18 @@ EVENT_TYPES = (
     "replay_review",  # 비디오 판독·느린 화면
     "celebration",  # 득점·홈런 세리머니
     "crowd_cheer",  # 응원석 클로즈업
+    # v3 (2026-10-26 클립 실측 후 추가) — 결과가 화면에 드러나는 동작
+    "strikeout",  # 삼진 (타자가 돌아섬·포수 포구 후 아웃 동작)
+    "ball_four",  # 볼넷 (타자가 1루로 걸어감)
+    "out_at_base",  # 베이스에서 포스·태그 아웃
+    "runner_scores",  # 주자가 홈을 밟아 득점
+    "fielder_drops_ball",  # 야수가 공을 떨어뜨림·놓침
+    "umpire_signal",  # 심판의 판정 동작 (설명에 세이프·아웃·보크 지적 등)
     "other",
 )
 
-PROMPT_VERSION = "video-scoreboard-v2"
+PROMPT_VERSION = "video-scoreboard-v3"
 
-# 해설에서 들어야 할 말 (Omni 모델은 음성을 같이 듣는다)
-SPEECH_KEYWORDS = (
-    "보크", "도루", "견제", "폭투", "포일", "낫아웃", "인필드플라이", "희생플라이", "홈런",
-    "볼넷", "몸에 맞는 공", "삼진", "병살", "삼중살", "투수 교체",
-)
 
 
 class VideoAnalyzerError(RuntimeError):
@@ -95,14 +97,15 @@ class VideoAnalyzer(Protocol):
 
 
 def event_prompt(scenario: str = "KBO 야구 TV 중계") -> str:
-    """VLM 지시문 v2 — 점수판 판독 + 장면 단서 + 해설 키워드. 시각은 청크 기준 초.
+    """VLM 지시문 v3 — 점수판 + 장면 단서 + 해설 + 화면 자막. 시각은 청크 기준 초.
 
-    판정은 시키지 않는다. 점수판은 상태의 뼈대, 장면·해설은 종류를 가르는 단서다.
+    판정은 시키지 않는다. 점수판은 상태의 뼈대, 장면·해설·자막은 종류를 가르는 단서다.
+    v3 변경(2026-10-26 클립 실측): 해설 키워드 목록을 지시문에서 뺐다 — 모델이 듣지 않은
+    목록 단어를 그대로 적었다. 한국어 음성 인식이 약해 화면 자막(글자)을 따로 읽힌다.
     """
     types = ", ".join(EVENT_TYPES)
-    words = ", ".join(SPEECH_KEYWORDS)
     return (
-        f"This clip is from a {scenario} broadcast with Korean commentary. "
+        f"This clip is from a {scenario} broadcast. "
         "Report only what is visible or audible. Do not decide rulings yourself.\n"
         "1) scoreboard: read the on-screen score bug whenever it is visible and every time it "
         "changes. Each item: t (seconds from clip start), inning (int), half (\"top\" for 초, "
@@ -110,10 +113,13 @@ def event_prompt(scenario: str = "KBO 야구 TV 중계") -> str:
         "away, home (runs). Skip moments where the score bug is not visible.\n"
         f"2) events: notable moments. Each item: start, end (seconds), type (one of: {types}), "
         "description (one short Korean sentence).\n"
-        f"3) speech: commentary phrases about the play, especially: {words}. "
-        "Each item: t (seconds), text (Korean, as heard).\n"
-        'Answer with JSON only: {"scoreboard": [...], "events": [...], "speech": [...]}. '
-        "Use empty lists when nothing applies."
+        "3) speech: commentary phrases about the play, transcribed in the original language "
+        "exactly as heard. Each item: t (seconds), text. If the commentary is unclear or absent, "
+        "return an empty list. Never copy words from these instructions.\n"
+        "4) captions: on-screen text other than the score bug (play-result graphics, subtitles, "
+        "replay titles), copied exactly. Each item: t (seconds), text.\n"
+        'Answer with JSON only: {"scoreboard": [...], "events": [...], "speech": [...], '
+        '"captions": [...]}. Use empty lists when nothing applies.'
     )
 
 
@@ -262,6 +268,10 @@ def parse_analysis(text: str, clip: VideoClip, provider: str, model: str) -> Cli
     if isinstance(payload, dict):
         board = parse_scoreboard(payload.get("scoreboard"), clip)
         speech = parse_speech(payload.get("speech"), clip)
+        # 화면 자막도 단서 문장으로 — 표시를 붙여 해설 받아쓰기와 구분한다
+        speech += [{**c, "text": f"[자막] {c['text']}"}
+                   for c in parse_speech(payload.get("captions"), clip)]
+        speech.sort(key=lambda r: r["t"])
     else:
         board, speech = [], []
     events = parse_events(text, clip, provider, model, payload=payload)

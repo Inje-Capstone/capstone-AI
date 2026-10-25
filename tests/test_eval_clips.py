@@ -90,3 +90,28 @@ def test_clip_without_scoreboard_counts_cue_only():
     assert row["judged"] is None and row["cue_hit"] and row["readings"] == 0
     report = eval_clips.render([row], {"model": "m", "thinking": "끔"})
     assert "단서 포착" in report and "0/0" in report
+
+
+def test_whisper_transcript_replaces_vlm_speech_but_keeps_captions():
+    snap = {
+        "scoreboard": [],
+        "events": [],
+        "speech": [{"t": 1, "text": "You're gonna be a star."}, {"t": 2, "text": "[자막] 모먼트"}],
+        "asr": {"segments": [{"t": 0, "text": "믿을 수 없는 트리플 플레이!"}]},
+    }
+    label = {
+        "id": "z",
+        "league": "KBO",
+        "situation": "triple_play_r",
+        "expect": "triple_play",
+        "keywords": ["트리플"],
+    }
+    row = eval_clips.score_clip(label, snap)
+    assert row["judged"] is True and row["codes"] == ["triple_play"]
+
+
+def test_whisper_pieces_cover_clip():
+    from app.adapters.video.speech_asr import plan_pieces
+
+    assert plan_pieces(65.5, 30) == [(0.0, 30.0), (30.0, 30.0), (60.0, 5.5)]
+    assert plan_pieces(0.5, 30) == []

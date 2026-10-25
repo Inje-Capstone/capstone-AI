@@ -357,3 +357,25 @@ def test_single_reading_clip_needs_min_repeat_one():
     cues = [Cue(8, "speech", "보크")]
     assert judge(readings, cues) == []  # 경기 전체 기준(2번 연속)으론 못 믿는다
     assert [j.code for j in judge(readings, cues, min_repeat=1)] == ["balk"]
+
+
+def test_cue_only_prefers_rare_play_and_marks_lower_confidence():
+    from app.domain.video_judge import judge_from_cues
+
+    cues = [Cue(3, "speech", "삼진 아웃인데요, 낫아웃입니다!"), Cue(5, "swing_miss", "헛스윙")]
+    j = judge_from_cues(cues)
+    assert (j.code, j.confidence) == ("dropped_third_strike", 0.5)
+    assert judge_from_cues([Cue(1, "pitch", "투구")]) is None
+
+
+def test_cue_only_trusts_captions_then_event_order():
+    from app.domain.video_judge import judge_from_cues
+
+    caption = judge_from_cues([Cue(1, "speech", "[자막] 끝내기 보크!"), Cue(2, "speech", "홈런!")])
+    assert (caption.code, caption.confidence) == ("balk", 0.6)
+    outs = [Cue(t, "out_at_base", "베이스 아웃") for t in (10, 13, 16)]
+    assert judge_from_cues(outs).code == "triple_play"
+    sf = [Cue(5, "deep_fly", "외야수에게 잡힌다"), Cue(12, "runner_scores", "득점")]
+    assert judge_from_cues(sf).code == "sac_fly"
+    steal = [Cue(3, "slide", "홈으로 슬라이딩"), Cue(4, "runner_scores", "득점")]
+    assert judge_from_cues(steal).code == "steal"

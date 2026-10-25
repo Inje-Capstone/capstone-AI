@@ -36,25 +36,85 @@ from analyze_video import (  # noqa: E402
 )
 
 from app.adapters.video.base import PROMPT_VERSION, VideoAnalyzerError, VideoClip  # noqa: E402
-from app.domain.video_judge import MIN_CONFIDENCE, from_snapshot, judge  # noqa: E402
+from app.domain.video_judge import (  # noqa: E402
+    GENERIC_CODES,
+    MIN_CONFIDENCE,
+    Cue,
+    from_snapshot,
+    judge,
+    judge_from_cues,
+)
 
 LABELS = ROOT / "data" / "clip_eval" / "labels.json"
 REPORT = ROOT / "data" / "clip_eval" / "REPORT.md"
+CLIP_WINDOW = 600.0
+SCOREBUG_VERSION = "scorebug-crop-v1"
+ASR_VERSION = "whisper-large-v3-ko-30s"
 
 
 # ── 순수 함수 (테스트 대상) ───────────────────────────────────────────────
 def observed_text(snap: dict[str, Any]) -> str:
-    """VLM이 본 것·들은 것을 한 문자열로 (키워드 검사용, 소문자)."""
+    """VLM이 본 것·들은 것 + 해설 받아쓰기를 한 문자열로 (키워드 검사용, 소문자)."""
     parts = [
         f"{e.get('event_type', '')} {e.get('description', '')}" for e in snap.get("events") or []
     ]
     parts += [s.get("text", "") for s in snap.get("speech") or []]
+    parts += [s.get("text", "") for s in (snap.get("asr") or {}).get("segments") or []]
     return " ".join(parts).lower()
+
+
+def consistent(readings: list[Any]) -> list[Any]:
+    """한 클립 안에서 앞뒤가 맞는 판독만 — 이닝·초말 순서와 점수는 뒤로 가지 않는다.
+
+    실측: 점수판 일부가 가려진 프레임을 '10회말 2-3 카운트 → 7회초 1-7'처럼 읽었다.
+    """
+    out: list[Any] = []
+    for r in readings:
+        if not (0 <= r.balls <= 3 and 0 <= r.strikes <= 2 and 0 <= r.outs <= 3 and r.inning >= 1):
+            continue
+        if out:
+            p = out[-1]
+            order = (r.inning, r.half == "bot") >= (p.inning, p.half == "bot")
+            if not order or r.away < p.away or r.home < p.home or r.inning > p.inning + 1:
+                continue
+        out.append(r)
+    return out
+
+
+def endpoints(readings: list[Any]) -> list[Any]:
+    """하이라이트는 대개 플레이 하나 — 처음 상태와 마지막 상태만 비교한다(중간 오독 무시)."""
+    return readings if len(readings) <= 2 else [readings[0], readings[-1]]
+
+
+CLIP_MODE = "endpoints"
+DESC_CUES = True
 
 
 def score_clip(label: dict[str, Any], snap: dict[str, Any]) -> dict[str, Any]:
     readings, cues = from_snapshot(snap)
-    judgments = judge(readings, cues, min_repeat=1)  # 클립은 점수판이 몇 번 안 나온다
+    asr = [s for s in (snap.get("asr") or {}).get("segments") or [] if s.get("text")]
+    if asr:  # 해설은 Whisper 받아쓰기로 (VLM 받아쓰기는 지어낸 문장이 많다) — 자막은 남긴다
+        cues = [c for c in cues if c.kind != "speech" or c.text.startswith("[자막]")]
+        cues = sorted(
+            cues + [Cue(float(s["t"]), "speech", s["text"]) for s in asr], key=lambda c: c.t
+        )
+    crop = (snap.get("scorebug") or {}).get("scoreboard") or []
+    if crop:  # 점수판 전용 판독이 있으면 그것을 쓴다 (영상 통째 판독보다 정확)
+        readings, _ = from_snapshot({"scoreboard": crop})
+    readings = consistent(readings)
+    if CLIP_MODE == "endpoints":
+        readings = endpoints(readings)
+    if DESC_CUES:  # 장면 설명도 해설처럼 단서로 (클립에선 해설이 드물다)
+        cues = sorted(
+            cues + [Cue(c.t, "speech", c.text) for c in cues if c.kind != "speech" and c.text],
+            key=lambda c: c.t,
+        )
+    # 클립: 점수판이 몇 번 안 나오고(min_repeat 1), 단서는 클립 어디에 있든 본다
+    judgments = judge(readings, cues, min_repeat=1, window=(CLIP_WINDOW, CLIP_WINDOW))
+    if all(j.code in GENERIC_CODES for j in judgments):  # 종류를 못 가렸으면 단서만으로
+        extra = judge_from_cues(cues)
+        if extra is not None:
+            judgments.append(extra)
     shown = [j.code for j in judgments if j.confidence >= MIN_CONFIDENCE]
     every = [j.code for j in judgments]
     text = observed_text(snap)
@@ -114,7 +174,7 @@ def render(rows: list[dict[str, Any]], meta: dict[str, str]) -> str:
         "# 하이라이트 클립 평가",
         "",
         f"> 모델 {meta.get('model', '?')} · 프롬프트 {PROMPT_VERSION} · "
-        f"추론 {meta.get('thinking', '?')} · "
+        f"추론 {meta.get('thinking', '?')} · {meta.get('scorebug', '')} · "
         "`python scripts/eval_clips.py`로 재생성. 정답은 영상 제목 기준(사람 확인 전).",
         "",
         "| 지표 | 값 |",
@@ -188,6 +248,31 @@ def analyze_clip(
     return snap
 
 
+def build_reader(args: argparse.Namespace) -> Any:
+    import os
+
+    from app.adapters.video.cosmos import DEFAULT_BASE_URL, DEFAULT_MODEL
+    from app.adapters.video.scorebug_reader import ScorebugReader
+
+    return ScorebugReader(
+        os.getenv("NVIDIA_API_KEY", "").strip(),
+        args.base_url or DEFAULT_BASE_URL,
+        args.model or DEFAULT_MODEL,
+        max_reads=args.max_reads,
+        ffmpeg=find_tool("ffmpeg", args.ffmpeg),
+    )
+
+
+def build_transcriber(args: argparse.Namespace) -> Any:
+    import os
+
+    from app.adapters.video.speech_asr import WhisperTranscriber
+
+    return WhisperTranscriber(
+        os.getenv("NVIDIA_API_KEY", "").strip(), ffmpeg=find_tool("ffmpeg", args.ffmpeg)
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -195,8 +280,18 @@ def main() -> None:
     )
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--only", default=None, help="이 문자열이 id에 든 클립만")
+    parser.add_argument("--league", default="KBO", help="KBO | MLB | all (MVP는 KBO만)")
     parser.add_argument(
         "--report-only", action="store_true", help="API를 부르지 않고 캐시로 보고서만"
+    )
+    parser.add_argument(
+        "--scorebug",
+        action="store_true",
+        help="점수판을 따로 잘라 읽는다 (app/adapters/video/scorebug_reader.py)",
+    )
+    parser.add_argument("--max-reads", type=int, default=8)
+    parser.add_argument(
+        "--asr", action="store_true", help="해설을 Whisper로 받아 적는다 ([asr] 설치)"
     )
     parser.add_argument("--clip-sec", type=float, default=60.0)
     parser.add_argument("--height", type=int, default=480)
@@ -210,6 +305,8 @@ def main() -> None:
     args.backend, args.vss_url, args.clip_base_url = "cosmos", None, None
 
     labels = json.loads(LABELS.read_text(encoding="utf-8"))["clips"]
+    if args.league != "all":
+        labels = [c for c in labels if c["league"] == args.league]
     if args.only:
         labels = [c for c in labels if args.only in c["id"]]
     if args.limit:
@@ -218,6 +315,8 @@ def main() -> None:
     results_dir.mkdir(parents=True, exist_ok=True)
 
     analyzer: Optional[Any] = None
+    reader: Optional[Any] = None
+    transcriber: Optional[Any] = None
     rows, meta = [], {}
     for i, label in enumerate(labels, 1):
         cache = results_dir / f"{label['id']}.json"
@@ -236,10 +335,47 @@ def main() -> None:
                     find_tool("ffmpeg", args.ffmpeg),
                     find_tool("ffprobe", args.ffprobe),
                 )
+            # 점수판 판독·해설 받아쓰기는 지시문과 무관 — 살린다
+            kept = {k: (snap or {}).get(k) for k in ("scorebug", "asr") if (snap or {}).get(k)}
             snap = analyze_clip(video, analyzer, ffmpeg, ffprobe, args.clip_sec, args.height)
+            snap.update(kept)
             snap["thinking"] = not args.no_think
             cache.write_text(json.dumps(snap, ensure_ascii=False, indent=1), encoding="utf-8")
-        meta = {"model": snap.get("model", "?"), "thinking": "켬" if snap.get("thinking") else "끔"}
+        if args.scorebug and (snap.get("scorebug") or {}).get("version") != SCOREBUG_VERSION:
+            if args.report_only:
+                print(f"[{i}] {label['id']} 점수판 판독 캐시 없음")
+            else:
+                video = args.clips / "videos" / f"{label['yt']}.mp4"
+                if reader is None:
+                    reader = build_reader(args)
+                    ffprobe = find_tool("ffprobe", args.ffprobe)
+                try:
+                    sb = reader.read(video, probe_duration(ffprobe, video))
+                except VideoAnalyzerError as exc:
+                    print(f"[{i}] {label['id']} 점수판 판독 실패: {exc}")
+                    sb = None
+                if sb is not None:
+                    snap["scorebug"] = {**sb, "version": SCOREBUG_VERSION}
+                    cache.write_text(
+                        json.dumps(snap, ensure_ascii=False, indent=1), encoding="utf-8"
+                    )
+        if args.asr and (snap.get("asr") or {}).get("version") != ASR_VERSION:
+            if args.report_only:
+                print(f"[{i}] {label['id']} 해설 받아쓰기 캐시 없음")
+            else:
+                video = args.clips / "videos" / f"{label['yt']}.mp4"
+                if transcriber is None:
+                    transcriber = build_transcriber(args)
+                    ffprobe = find_tool("ffprobe", args.ffprobe)
+                segs = transcriber.transcribe(video, probe_duration(ffprobe, video))
+                snap["asr"] = {"version": ASR_VERSION, "segments": segs}
+                cache.write_text(json.dumps(snap, ensure_ascii=False, indent=1), encoding="utf-8")
+        meta = {
+            "model": snap.get("model", "?"),
+            "thinking": "켬" if snap.get("thinking") else "끔",
+            "scorebug": ("점수판 전용 판독" if args.scorebug else "영상 통째 판독")
+            + (" · 해설 Whisper" if args.asr else ""),
+        }
         row = score_clip(label, snap)
         rows.append(row)
         print(
