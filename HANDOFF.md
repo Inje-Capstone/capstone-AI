@@ -1,10 +1,11 @@
 # HANDOFF — 이어서 작업하기
 
-> 갱신 2026-10-25. 다른 PC(맥 등)에서 `git pull` 후 이 문서부터 읽는다. 기능 설명·API는 [README.md](README.md).
+> 갱신 2026-10-26. 다른 PC(맥 등)에서 `git pull` 후 이 문서부터 읽는다. 기능 설명·API는 [README.md](README.md).
 
 ## 1. 지금 상태
 
 - main: PR #1~#28 머지, CI(test 3.9·3.12 + docker) 통과, pytest 229 · ruff clean
+- **하이라이트 클립 평가(KBO 24개)**: 영상 판정 0% → **42%** (`data/clip_eval/REPORT.md`). 점수판 전용 판독 + Whisper 해설 받아쓰기 + 지시문 v3. **MVP는 KBO만** — MLB는 MVP 이후
 - **야구 규칙 전체 목록 212개**(`data/rules_catalog.json`)와 엔진 커버리지 보고서 [RULES_COVERAGE.md](RULES_COVERAGE.md) — 설명 100% · 영상 결과 인식 22%. 규칙·영상을 새로 받으면 목록부터 고친다(§5-0)
 - 온보딩 진단 퀴즈·개인화 가중치를 백엔드 DTO 모양으로 제공: `/api/backend/onboarding/*` (README "백엔드 온보딩 연동")
 - **코드로 할 수 있는 건 끝났다. 다음은 실제 경기 영상 실측.** (§5)
@@ -56,6 +57,15 @@ cp .env.example .env                      # 키는 git에 없다 — 직접 채�
 ```
 5초 조각 + VLM 추론 끔 → 지연 약 5~10초. 새 상황은 `GET /api/live/LIVE1/stream`(SSE).
 
+**하이라이트 클립 평가** (영상은 레포 밖 비공개 폴더, 정답지 `data/clip_eval/labels.json`)
+```bash
+.venv/bin/pip install -e ".[asr]"                       # 해설 받아쓰기(Whisper, gRPC)
+.venv/bin/python scripts/eval_clips.py --clips ../clips_private --scorebug --asr   # KBO만(기본)
+.venv/bin/python scripts/eval_clips.py --clips ../clips_private --scorebug --asr --report-only  # 캐시로 재채점(무료)
+```
+- 점수판: `app/adapters/video/scorebug_reader.py` — 모서리를 잘라 3배 키워 한 장씩 읽고, 언제 읽을지는 로컬 썸네일 비교로 정한다
+- 해설: `app/adapters/video/speech_asr.py` — NVIDIA 호스팅 Whisper large-v3, 같은 NVIDIA_API_KEY
+
 **점검**
 ```bash
 .venv/bin/python scripts/simulate_video_judge.py         # 판정 로직 상한 (완벽 판독 가정) — 실경기 3개 38/38
@@ -106,6 +116,7 @@ NVIDIA_API_KEY=<같은 문자열> .venv/bin/python scripts/live_video.py LIVE1 g
 - 4단계 30개(기록·행정)는 영상 판정 대상이 아니다 — 질문이 오면 용어 사전 근거로 설명만
 
 
+0. **경기 전체 분석(analyze_video)에도 점수판 전용 판독·Whisper 해설을 붙인다** — 지금은 클립 평가에만 연결돼 있다
 1. **경기 영상 확보** → `analyze_video.py --limit 3`으로 점수판·장면·해설 판독 품질 확인 → `app/adapters/video/base.py`의 프롬프트 조정
    - **한국어 해설을 알아듣는지 먼저 확인** — 모델 안내에 언어 지원이 영어로만 적혀 있다(§8). 안 되면 `--no-audio`로 점수판·장면만 쓰거나 한국어 음성인식을 따로 붙인다
 2. 같은 경기를 **추론 켬/끔**(`--no-think`)으로 각각 분석 → `grade_video.py`로 정확도 비교 → 실시간 기본값 확정
@@ -132,7 +143,9 @@ NVIDIA_API_KEY=<같은 문자열> .venv/bin/python scripts/live_video.py LIVE1 g
 
 ## 8. 함정 (실측으로 알게 된 것)
 
-- **영상 모델의 언어**: Nemotron 3 Nano Omni 안내에 "English-only". 한국어 해설 음성 인식은 미확인 — 실측 전까지 해설 단서를 믿지 말 것
+- **영상 모델의 언어 (실측 2026-10-26)**: Nemotron Omni는 한국어 해설을 못 알아듣고 지어낸 문장·영어 문장을 적는다 → 해설은 Whisper로 받는다. 지시문에 키워드 목록을 주면 듣지 않은 단어를 그대로 적어(가짜 단서) v3에서 뺐다
+- **영상 통째 판독은 점수판에 약하다**: 같은 프레임도 점수판만 잘라 키워 한 장으로 주면 정확히 읽는다. 여러 장을 한 요청에 묶으면 다시 틀린다
+- **하이라이트의 한계**: 점수판이 몇 초만 비치고, 직캠은 점수판·해설이 없다 — 판정 상한이 낮다. 실제 경기 영상(중계 전체)이 MVP 평가의 기준
 - 영상 모델 입력 한도: 영상 1개 최대 2분(1080p는 1fps·128프레임까지). 지금 조각(60초·5초)은 안에 든다
 - NVIDIA 호스팅: `cosmos-reason2-8b`는 이 계정에서 404, `cosmos3-nano-reasoner`는 미호스팅. 붐비면 503 → 자동 재시도(5/15/30초)
 - Anthropic: Haiku 4.5는 `effort` 미지원(코드에서 자동 제외). 근거 없이 쓰면 규칙을 뒤집어 설명 → 카드·챗봇에 용어 사전 정의 주입함

@@ -84,7 +84,7 @@ def test_cosmos_sends_base64_video_and_parses(tmp_path, monkeypatch):
         seen["url"] = req.full_url
         seen["auth"] = req.get_header("Authorization")
         seen["body"] = json.loads(req.data)
-        return _completion('{"events": [{"start": 3, "type": "strikeout"}]}')
+        return _completion('{"events": [{"start": 3, "type": "home_run"}]}')
 
     monkeypatch.setattr(video_http.urllib.request, "urlopen", fake_urlopen)
     analyzer = CosmosAnalyzer("KEY", base_url="http://nim:8000/v1/", fps=1.0)
@@ -98,7 +98,7 @@ def test_cosmos_sends_base64_video_and_parses(tmp_path, monkeypatch):
     assert video["video_url"]["url"].startswith("data:video/mp4;base64,")
     assert "JSON" in prompt["text"]
     assert body["media_io_kwargs"] == {"video": {"fps": 1.0}}
-    assert [(e.t_start, e.event_type) for e in events] == [(603.0, "other")]  # v1 이름은 other
+    assert [(e.t_start, e.event_type) for e in events] == [(603.0, "other")]  # 모르는 이름은 other
 
 
 def test_vss_summarize_request_and_structured_output(tmp_path, monkeypatch):
@@ -302,3 +302,16 @@ def test_truncated_vlm_json_keeps_finished_items():
     assert _json_payload(cut) == {"scoreboard": full["scoreboard"]}
     assert _json_payload(text[:-2]) == full  # 마지막 괄호만 잘림
     assert _json_payload("not json") is None
+
+
+def test_prompt_v3_reads_captions_and_does_not_list_keywords():
+    from app.adapters.video.base import event_prompt, parse_analysis
+
+    prompt = event_prompt()
+    assert "captions" in prompt and "보크" not in prompt and "Korean commentary" not in prompt
+    clip = VideoClip(Path("c.mp4"), 100.0, 60.0)
+    text = json.dumps({"scoreboard": [], "events": [], "speech": [{"t": 3, "text": "와!"}],
+                       "captions": [{"t": 5, "text": "삼중살!"}]}, ensure_ascii=False)
+    analysis = parse_analysis(text, clip, "p", "m")
+    assert [s["text"] for s in analysis.speech] == ["와!", "[자막] 삼중살!"]
+    assert analysis.speech[1]["t"] == 105.0

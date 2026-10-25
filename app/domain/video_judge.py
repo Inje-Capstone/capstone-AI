@@ -33,11 +33,19 @@ CUE_AFTER = 6.0
 MIN_CONFIDENCE = 0.5
 SUB_LOOKAHEAD = 10.0
 
+# 해설에서 들어야 할 말 (Omni 모델은 음성을 같이 듣는다) — VLM 지시문(adapters/video/base)이 쓴다
+SPEECH_KEYWORDS = (
+    "보크", "도루", "견제", "폭투", "포일", "낫아웃", "인필드플라이", "희생플라이", "홈런",
+    "볼넷", "몸에 맞는 공", "삼진", "병살", "삼중살", "투수 교체",
+)
+
 # 단서 종류 (VLM 프롬프트 v2와 같은 어휘)
 CUE_KINDS = (
     "pitch", "swing_miss", "contact", "slide", "pickoff_throw", "pitcher_stops",
     "catcher_miss", "infield_popup", "deep_fly", "ball_over_fence", "hit_by_pitch",
     "pitching_change", "mound_visit", "replay_review", "celebration", "crowd_cheer",
+    "strikeout", "ball_four", "out_at_base", "runner_scores", "fielder_drops_ball",
+    "umpire_signal",
     "speech",  # 해설 키워드 — text에 "보크", "도루" 등
 )
 
@@ -60,8 +68,9 @@ class Judgment:
     detail: dict = field(default_factory=dict)
 
 
-def _near(cues: Sequence[Cue], t: float) -> list[Cue]:
-    return [c for c in cues if t - CUE_BEFORE <= c.t <= t + CUE_AFTER]
+def _near(cues: Sequence[Cue], t: float, before: float = CUE_BEFORE,
+          after: float = CUE_AFTER) -> list[Cue]:
+    return [c for c in cues if t - before <= c.t <= t + after]
 
 
 def _has(cues: Sequence[Cue], kind: str, words: Sequence[str] = ()) -> Optional[Cue]:
@@ -105,11 +114,13 @@ def _confidence(base: float, supports: Sequence[Optional[Cue]]) -> tuple[float, 
     return min(1.0, base + 0.25 * len(found)), [_ev(c) for c in found]
 
 
-def judge_transition(tr: Transition, cues: Sequence[Cue]) -> Optional[Judgment]:
+def judge_transition(
+    tr: Transition, cues: Sequence[Cue], window: tuple[float, float] = (CUE_BEFORE, CUE_AFTER)
+) -> Optional[Judgment]:
     """점수판 전이 하나를 판정한다. 플레이가 아니면(투구 하나) None."""
     if is_count_only(tr):
         return None
-    near = _near(cues, tr.t)
+    near = _near(cues, tr.t, *window)
     b, a = tr.before.bases, tr.after.bases
     def bits(bases: tuple) -> str:
         return "".join("1" if x else "0" for x in bases)
@@ -158,13 +169,13 @@ def judge_transition(tr: Transition, cues: Sequence[Cue]) -> Optional[Judgment]:
 
     # 타석 결과
     if tr.outs_made == 2:
-        k = _speech(near, "삼진") or _has(near, "swing_miss")
+        k = _speech(near, "삼진") or _has(near, "swing_miss") or _has(near, "strikeout")
         if tr.before.strikes == 2 and k and not _speech(near, "병살"):
             # 삼진 + 도루 실패(스트라이크 아웃 스로 아웃) — 병살타 카드를 띄우면 틀린 설명이 된다
             return make("result", "strikeout", 0.5, [k])
         return make("result", "double_play", 0.8, [_speech(near, "병살")])
     if tr.outs_made == 3:  # 판독 누락으로도 생긴다 — 해설이 있을 때만 삼중살
-        tp = _speech(near, "삼중살")
+        tp = _speech(near, "삼중살", "트리플 플레이", "트리플플레이")
         if tp:
             return make("result", "triple_play", 0.6, [tp])
     hr = _has(near, "ball_over_fence") or _speech(near, "홈런")
@@ -187,7 +198,7 @@ def judge_transition(tr: Transition, cues: Sequence[Cue]) -> Optional[Judgment]:
             prior = 0.5 if tr.before.strikes == 2 else 0.3
             return make("call", "dropped_third_strike", prior,
                         [dts, _speech(near, "낫아웃", "낫 아웃")])
-        walk_speech = _speech(near, "볼넷", "포볼", "고의")
+        walk_speech = _speech(near, "볼넷", "포볼", "고의") or _has(near, "ball_four")
         if tr.before.balls == 3 and not _has(near, "contact"):
             return make("result", "walk", 0.6, [walk_speech])
         if walk_speech:
@@ -196,7 +207,7 @@ def judge_transition(tr: Transition, cues: Sequence[Cue]) -> Optional[Judgment]:
         dts = _has(near, "catcher_miss") or _speech(near, "낫아웃", "낫 아웃")
         if dts:  # 낫아웃 상황이었지만 1루에서 아웃
             return make("call", "dropped_third_strike", 0.5, [dts], out=True)
-        k = _has(near, "swing_miss") or _speech(near, "삼진")
+        k = _has(near, "swing_miss") or _has(near, "strikeout") or _speech(near, "삼진")
         if k:
             return make("result", "strikeout", 0.5, [k])
     # 나머지 타석 결과는 종류를 모른다 — 상태는 반영하되 카드는 띄우지 않는다
@@ -231,17 +242,22 @@ def _walk_off_kind(near: Sequence[Cue]) -> Optional[tuple[str, Cue]]:
 
 
 def judge(
-    readings: Sequence[Reading], cues: Sequence[Cue], min_repeat: int = 2
+    readings: Sequence[Reading],
+    cues: Sequence[Cue],
+    min_repeat: int = 2,
+    window: tuple[float, float] = (CUE_BEFORE, CUE_AFTER),
 ) -> list[Judgment]:
     """점수판 판독 열 + 단서 → 판정 목록 (시간순). 투수 교체는 단서만으로 판정한다.
 
     `min_repeat`: 같은 점수판이 몇 번 연속 보여야 믿나. 경기 전체는 2(오독 거르기),
     점수판이 몇 번밖에 안 나오는 하이라이트 클립은 1로 쓴다.
+    `window`: 전이 앞뒤로 단서를 볼 범위(초). 하이라이트는 느린 화면 뒤에야 점수판이 다시
+    보여 단서와 멀리 떨어진다 — 클립 평가에선 클립 전체를 본다.
     """
     stable = stabilize(readings, min_repeat=min_repeat)
     out = []
     for tr in transitions(stable):
-        j = judge_transition(tr, cues)
+        j = judge_transition(tr, cues, window)
         if j is not None:
             out.append(j)
     seen_change: list[float] = []
@@ -259,6 +275,91 @@ def judge(
     return sorted(out, key=lambda j: j.t)
 
 
+# 점수판 없이 단서만으로 (직캠·느린 화면 위주 하이라이트). 드문 것부터 — 흔한 말("삼진")이
+# 드문 판정("낫아웃")을 덮지 않게.
+_CUE_ONLY = (
+    ("triple_play", "call", ("삼중살", "트리플 플레이", "트리플플레이")),
+    ("balk", "call", ("보크",)),
+    ("dropped_third_strike", "call", ("낫아웃", "낫 아웃")),
+    ("infield_fly", "call", ("인필드 플라이", "인필드플라이")),
+    ("passed_ball", "call", ("포일",)),
+    ("wild_pitch", "call", ("폭투",)),
+    ("sac_fly", "result", ("희생플라이", "희생 플라이")),
+    ("hbp", "result", ("몸에 맞", "사구", "데드볼", "헤드샷")),
+    ("steal", "steal", ("홈스틸", "더블스틸", "더블 스틸", "도루")),
+    ("double_play", "result", ("병살", "더블플레이", "더블 플레이")),
+    ("homerun", "result", ("홈런",)),
+    ("walk", "result", ("볼넷", "밀어내기")),
+    ("strikeout", "result", ("삼진",)),
+)
+GENERIC_CODES = frozenset({"out", "reach", "runner", "pitcher"})
+
+
+def _keyword_judgment(cues: Sequence[Cue], conf: float, label: str) -> Optional[Judgment]:
+    for code, kind, words in _CUE_ONLY:
+        hit = _speech(cues, *words)
+        if hit is not None:
+            return Judgment(hit.t, kind, code, conf, [f"단서만({label}): " + _ev(hit)])
+    return None
+
+
+def _cluster(cues: Sequence[Cue], kind: str, span: float) -> list[Cue]:
+    """`span`초 안에 몰린 같은 종류 단서 중 가장 큰 묶음."""
+    hits = sorted((c for c in cues if c.kind == kind), key=lambda c: c.t)
+    best: list[Cue] = []
+    for i, c in enumerate(hits):
+        group = [h for h in hits[i:] if h.t - c.t <= span]
+        if len(group) > len(best):
+            best = group
+    return best
+
+
+def _event_judgment(cues: Sequence[Cue]) -> Optional[Judgment]:
+    """장면 단서의 순서로 — 해설을 못 알아들어도 동작은 보인다 (2026-10-26 KBO 클립 실측)."""
+    def make(code: str, kind: str, cue: Cue, why: str) -> Judgment:
+        return Judgment(cue.t, kind, code, 0.5, [f"장면 순서: {why}"])
+
+    outs = _cluster(cues, "out_at_base", 15.0)
+    if len(outs) >= 3:
+        return make("triple_play", "result", outs[0], f"베이스 아웃 {len(outs)}번이 15초 안에")
+    over = _has(cues, "ball_over_fence")
+    if over:
+        return make("homerun", "result", over, "타구가 담장을 넘어감")
+    hbp = _has(cues, "hit_by_pitch")
+    if hbp:
+        return make("hbp", "result", hbp, "투구가 타자 몸에 맞음")
+    scores = [c for c in cues if c.kind == "runner_scores"]
+    for score in scores:
+        before = [c for c in cues if score.t - 15 <= c.t <= score.t]
+        caught_fly = next((c for c in before if c.kind == "deep_fly" and "잡" in c.text), None)
+        if caught_fly:
+            return make("sac_fly", "result", score, "외야 뜬공을 잡은 뒤 득점")
+        slide = next((c for c in before if c.kind == "slide" and score.t - c.t <= 5), None)
+        contact = any(c.kind == "contact" and score.t - c.t <= 10 for c in before)
+        if slide and not contact:
+            return make("steal", "steal", score, "타격 없이 슬라이딩 득점(홈스틸)")
+    if len(outs) == 2:
+        return make("double_play", "result", outs[0], "베이스 아웃 2번이 15초 안에")
+    k = _has(cues, "strikeout") or _has(cues, "swing_miss")
+    miss = _has(cues, "catcher_miss") or _has(cues, "fielder_drops_ball")
+    if k and miss and abs(k.t - miss.t) <= 5:
+        return make("dropped_third_strike", "call", miss, "헛스윙 직후 포수가 공을 놓침")
+    return None
+
+
+def judge_from_cues(cues: Sequence[Cue]) -> Optional[Judgment]:
+    """점수판 전이로 종류를 못 가렸을 때 단서만으로 하나 고른다 (하이라이트 클립 전용).
+
+    믿을 만한 순서: 화면 자막 → 장면 동작의 순서 → 해설. 한국어 해설 받아쓰기는 실측상
+    지어낸 문장이 많아 마지막에 둔다. 경기 전체 판정에는 쓰지 않는다 — 해설은
+    '도루 조심해야죠'처럼 일어나지 않은 일도 말한다.
+    """
+    captions = [c for c in cues if c.kind == "speech" and c.text.startswith("[자막]")]
+    return (_keyword_judgment(captions, 0.6, "자막")
+            or _event_judgment(cues)
+            or _keyword_judgment([c for c in cues if c not in captions], 0.5, "해설·설명"))
+
+
 # ── 분석 스냅샷(analyze_video.py) → 판독·단서 ───────────────────────────
 def from_snapshot(snap: dict) -> tuple[list[Reading], list[Cue]]:
     """`data/video/{id}.json` → (점수판 판독, 장면·해설 단서)."""
@@ -270,8 +371,19 @@ def from_snapshot(snap: dict) -> tuple[list[Reading], list[Cue]]:
                                 int(r["away"]), int(r["home"])))
     cues = [Cue(float(e["t_start"]), e["event_type"], e.get("description", ""))
             for e in snap.get("events") or [] if e.get("event_type") in CUE_KINDS]
-    cues += [Cue(float(s["t"]), "speech", s["text"]) for s in snap.get("speech") or []]
+    cues += [Cue(float(s["t"]), "speech", s["text"]) for s in snap.get("speech") or []
+             if not is_echoed_keyword(s.get("text", ""))]
     return readings, sorted(cues, key=lambda c: c.t)
+
+
+def is_echoed_keyword(text: str) -> bool:
+    """VLM이 해설을 받아 적지 않고 지시문의 키워드 목록을 따라 적은 것.
+
+    실측(2026-10-26): 해설이 없는 클립에서도 '보크', '포일', '몸에 맞는 공', '투수 교체'를
+    한 단어씩 '들었다'고 내놓았다. 실제 해설은 문장이라 키워드 한 단어로만 오지 않는다.
+    """
+    bare = text.strip().strip(".!?~ ").replace(" ", "")
+    return bare in {k.replace(" ", "") for k in SPEECH_KEYWORDS}
 
 
 # ── RelayEvent 변환 (기존 엔진으로 넘기기) ────────────────────────────────
