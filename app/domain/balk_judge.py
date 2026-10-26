@@ -4,7 +4,8 @@
 '모든 주자가 한 베이스씩 진루'로 검증한다. 점수판이 없는 직캠·해설 영상도 판정 대상이다.
 
 확신도
-- 해설이 '보크'라고 했고 그 앞뒤에 동작 의심이 있다 → 0.8 (종류는 동작이 준다)
+- 해설이 '보크'라고 했고(또는 1·3루 견제 시늉을 설명했고) 그 앞뒤에 동작 의심이 있다 → 0.8
+  (종류는 동작이 준다)
 - 해설만 → 0.5 (종류는 해설 말에서 고른다)
 - 동작만 → 0.35 — 화면에 띄우지 않는 후보. 와인드업(주자 없음)도 '정지 없음'처럼 보인다
 - 점수판 검증: 주자가 한 베이스씩 → +0.15 / 주자가 그대로인 채 투구가 이어짐 → -0.2
@@ -18,14 +19,17 @@ from typing import Optional
 from app.domain.pitch_motion import PitchMotion
 from app.domain.scorebug import Reading, advanced_all_one_base
 
-# Whisper는 '보크'를 '복구·보컬·버크'로 적기도 한다(실측 2026-10-26)
-BALK_WORDS = re.compile(r"보크|복구|보컬|복크|버크|볼크")
+# Whisper는 '보크'를 '복구·보컬·버크·보쿠'로 적기도 한다(실측 2026-10-26)
+BALK_WORDS = re.compile(r"보크|복구|보컬|복크|버크|볼크|보쿠")
+# '보크'라는 말 없이 반칙 동작을 설명하는 해설 — 1·3루 견제 시늉(6.02(a)(2), 2루 시늉은 합법)
+FAKE_THROW = re.compile(r"(1루|3루|일루|삼루|견제).{0,25}(던지지 않|안 던지|던지는 척|시늉)")
 SPEECH_TYPES = (
     ("double_motion", re.compile(r"이중|두 번|투 ?모션|멈췄다가|멈춤 동작이 있")),
     ("no_stop", re.compile(r"정지|멈추지|안 멈|멈춤 ?동작이 없|스톱이 없")),
     ("foot_off", re.compile(r"발을 빼|발이 빠|발 빼|다리를 빼|다리를 풀")),
     ("upper_body", re.compile(r"상체|어깨|고개")),
     ("unoccupied_base", re.compile(r"빈 베이스|비어 있")),
+    ("fake_throw", FAKE_THROW),
 )
 TYPE_LABELS = {
     "no_stop": "세트 정지 없이 투구 (6.02(a)(13))",
@@ -36,6 +40,7 @@ TYPE_LABELS = {
     "pickoff_no_step": "발 안 내딛고 견제 (6.02(a)(3))",
     "upper_body": "투구 전 상체 움직임",
     "unoccupied_base": "빈 베이스로 송구 (6.02(a)(4))",
+    "fake_throw": "1·3루 견제 시늉만 (6.02(a)(2))",
     "unknown": "종류 미상",
 }
 BEFORE, AFTER = 20.0, 10.0  # 해설 앞뒤로 동작을 찾는 범위(초)
@@ -92,7 +97,7 @@ def judge_balk(
     calls: list[BalkCall] = []
     used: set[int] = set()
     for t, text in sorted(speech):
-        if not BALK_WORDS.search(text):
+        if not (BALK_WORDS.search(text) or FAKE_THROW.search(text)):
             continue
         near = [
             k
