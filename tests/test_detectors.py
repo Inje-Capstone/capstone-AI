@@ -1,13 +1,15 @@
 import pytest
 
 from app.adapters.relay.fixture import FixtureRelaySource
-from app.domain.detectors import RULES, RULES_BY_ID, detect
+from app.domain.detectors import CALL_CARDS, RULES, RULES_BY_ID, detect
 from app.domain.models import (
     CATEGORY_BASIC,
     CATEGORY_CULTURE,
     CATEGORY_PITCHING,
     CATEGORY_TACTICS,
     LEVEL_BEGINNER,
+    GameFeed,
+    RelayEvent,
 )
 from app.domain.profile import profile_from_onboarding, score, select
 from app.domain.timeline import Timeline
@@ -34,10 +36,20 @@ def _by_rule(situations, rule_id):
 def test_every_rule_fires_at_least_once_in_the_fixture(situations):
     """fixture는 모든 규칙을 한 번 이상 밟아야 한다 — 안 밟는 규칙은 미검증 코드다."""
     fired = {s.rule_id for s in situations}
-    never = sorted({r.id for r in RULES} - fired)
+    calls = {c[0] for c in CALL_CARDS}  # 심판 선언 카드는 아래 테스트가 하나씩 밟는다
+    never = sorted({r.id for r in RULES} - fired - calls)
     assert never == ["bases_loaded"], (
         f"발화하지 않은 규칙: {never} — fixture에 해당 장면을 추가하거나 규칙을 지워라"
     )
+
+
+@pytest.mark.parametrize("code,term,label,_why", CALL_CARDS, ids=[c[0] for c in CALL_CARDS])
+def test_every_umpire_call_from_video_becomes_a_card(feed, code, term, label, _why):
+    """영상이 알아본 심판 선언(video_judge.CALL_TABLE)마다 카드가 뜬다 — 상태는 바꾸지 않는다."""
+    event = RelayEvent(id="vcall", t=10, inning=1, half="top", kind="call", text=label,
+                       detail={"call": code, "source": "video"})
+    found = [s for s in detect(GameFeed(meta=feed.meta, events=[event])) if s.rule_id == code]
+    assert [(s.term_id, s.label) for s in found] == [(term, label)]
 
 
 def test_balk_is_detected_with_state_and_reasons(situations):

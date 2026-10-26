@@ -30,7 +30,7 @@ from app.adapters.glossary.seed import load_glossary  # noqa: E402
 from app.domain.balk_judge import BALK_WORDS  # noqa: E402
 from app.domain.detectors import RULES  # noqa: E402
 from app.domain.pitch_motion import PITCH_ONLY_RULES  # noqa: E402
-from app.domain.video_judge import SPEECH_KEYWORDS  # noqa: E402
+from app.domain.video_judge import CALL_TABLE, SPEECH_KEYWORDS  # noqa: E402
 
 CATALOG_PATH = ROOT / "data" / "rules_catalog.json"
 REPORT_PATH = ROOT / "RULES_COVERAGE.md"
@@ -53,6 +53,7 @@ def video_codes() -> set[str]:
     found = set(re.findall(r'make\("\w+", "(\w+)"', src))
     found |= set(re.findall(r'\("(\w+)", "(?:call|result|steal)", \(', src))  # 단서만 판정표
     found |= set(re.findall(r'make\("(\w+)", "(?:call|result|steal)"', src))  # 장면 순서 판정
+    found |= {code for code, _words, _kinds in CALL_TABLE}  # 심판 선언(해설·자막 + 확인)
     return (found - {"call", "result"}) | {"sub", "pitcher", "out", "reach"}
 
 
@@ -100,6 +101,7 @@ def judge_words() -> set[str]:
         words |= set(re.findall(r'"([^"]+)"', m.group(1))) if m else set()
     for m in re.finditer(r'\("\w+", "\w+", \(([^)]*)\)\)', src):  # _CUE_ONLY
         words |= set(re.findall(r'"([^"]+)"', m.group(1)))
+    words |= {w for _code, ws, _kinds in CALL_TABLE for w in ws}
     return {w.replace(" ", "") for w in words}
 
 

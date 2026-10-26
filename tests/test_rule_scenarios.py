@@ -11,7 +11,14 @@ from pathlib import Path
 import pytest
 
 from app.domain.scorebug import Reading, stabilize, transitions
-from app.domain.video_judge import Cue, judge, judge_from_cues, judge_transition
+from app.domain.video_judge import (
+    CALL_TABLE,
+    Cue,
+    judge,
+    judge_calls,
+    judge_from_cues,
+    judge_transition,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 E = (False, False, False)
@@ -162,8 +169,64 @@ def test_substitution_rules_come_from_cues():
     assert [(j.kind, j.code) for j in out if j.kind == "sub"] == [("sub", "pitcher")] * 2
 
 
+# 심판 선언 — (코드, 해설 한 마디, 확인 장면). 확인이 있으면 낸다
+CALL_SCENARIOS = [
+    ("catcher_interference", "포수 미트에 배트가 맞았네요, 타격방해입니다", "umpire_signal"),
+    ("obstruction", "주루방해가 선언됩니다", "umpire_signal"),
+    ("interference", "주자의 수비방해로 아웃입니다", "umpire_signal"),
+    ("video_review", "비디오 판독 결과 원심 유지", "replay_review"),
+    ("check_swing", "체크스윙 돌았다는 판정이에요", "umpire_signal"),
+    ("ejection", "감독이 퇴장 명령을 받습니다", "umpire_signal"),
+    ("bench_clearing", "양 팀 벤치클리어링이 일어났어요", "umpire_signal"),
+    ("ground_rule_double", "펜스를 넘어가 인정 2루타", "ball_over_fence"),
+    ("foreign_substance", "글러브에서 이물질이 발견됐습니다", "umpire_signal"),
+    ("pitch_clock", "피치클락 위반으로 볼이 하나 올라갑니다", "umpire_signal"),
+    ("squeeze", "스퀴즈! 3루 주자 들어옵니다", "runner_scores"),
+    ("missed_base", "누의 공과로 어필 아웃", "umpire_signal"),
+    ("home_collision", "홈 충돌 방지 규정 위반 여부를 봅니다", "replay_review"),
+    ("slide_rule", "슬라이딩 규정 위반으로 타자까지 아웃", "replay_review"),
+    ("runner_lane", "3피트 라인 위반이 선언됐어요", "umpire_signal"),
+    ("fan_interference", "관중 방해가 인정됩니다", "replay_review"),
+    ("intentional_drop", "고의낙구가 선언됩니다", "umpire_signal"),
+    ("passing_runner", "앞 주자를 추월해서 아웃이에요", "umpire_signal"),
+    ("called_game", "결국 강우 콜드게임으로 끝납니다", "umpire_signal"),
+]
+
+
+@pytest.mark.parametrize("code,said,seen", CALL_SCENARIOS, ids=[c[0] for c in CALL_SCENARIOS])
+def test_umpire_call_needs_its_word_and_a_confirmation(code, said, seen):
+    found = judge_calls([say(100, said), ev(105, seen)])
+    assert [(j.code, j.confidence) for j in found] == [(code, 0.75)]
+    assert judge_calls([say(100, said)]) == []  # 말만 한 번 — 일어났다는 확인이 없다
+    assert [j.code for j in judge_calls([say(100, "[자막] " + said)])] == [code]
+
+
+def test_umpire_call_table_and_scenarios_match():
+    assert {c[0] for c in CALL_SCENARIOS} == {code for code, _w, _k in CALL_TABLE}
+
+
+def test_common_phrases_are_not_umpire_calls():
+    """'박수 받으며 퇴장', 원바운드 '블로킹', '스퀴즈 가능성'(득점 없음)은 판정이 아니다."""
+    cues = [say(10, "박수를 받으며 퇴장합니다"), say(30, "포수 블로킹 좋네요"), ev(31, "umpire_signal"),
+            say(200, "스퀴즈 작전 가능성도 있죠"), ev(205, "umpire_signal")]
+    assert judge_calls(cues) == []
+
+
+def test_ejection_described_after_the_fact():
+    """'퇴장이 됐습니다'(실측 ABS 항의 클립) — 지난 일을 말해도 심판 동작이 근처면 퇴장이다."""
+    cues = [say(60, "헬멧을 집어던져버렸거든요. 퇴장 사유가 되면서 퇴장이 됐습니다"), ev(75, "umpire_signal")]
+    assert [j.code for j in judge_calls(cues)] == ["ejection"]
+
+
+def test_repeated_commentary_confirms_a_call_with_low_confidence():
+    found = judge_calls([say(100, "주루방해 아닌가요"), say(130, "네, 주루방해가 맞습니다")])
+    assert [(j.code, j.confidence) for j in found] == [("obstruction", 0.5)]
+
+
 def test_every_rule_with_a_video_code_has_a_scenario():
     covered = {rid for s in SCENARIOS for rid in s[0]}
+    called = {c[0] for c in CALL_SCENARIOS}
+    covered |= {r["id"] for r in _rows() if r["video"] in called}
     subs = {"pitching_change_r", "position_player_pitch"}  # 단서로 판정 — 위 교체 테스트
     need = {r["id"] for r in _rows() if r["video"]}
     assert need - covered - subs == set()

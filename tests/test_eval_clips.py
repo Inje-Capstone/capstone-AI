@@ -9,6 +9,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import eval_clips  # noqa: E402
 
+from app.domain.video_judge import CALL_TABLE  # noqa: E402
+
 CATALOG = {
     r["id"]
     for r in json.loads((ROOT / "data" / "rules_catalog.json").read_text(encoding="utf-8"))["rules"]
@@ -48,7 +50,7 @@ def test_labels_point_to_catalog_and_known_codes():
         "hbp",
         "dropped_third_strike",
         "walk",
-    }
+    } | {code for code, _words, _kinds in CALL_TABLE}  # 심판 선언
     for c in labels:
         assert c["situation"] in CATALOG, c["id"]
         assert c["expect"] is None or c["expect"] in codes, c["id"]
