@@ -39,6 +39,12 @@ SPEECH_KEYWORDS = (
     "볼넷", "몸에 맞는 공", "삼진", "병살", "삼중살", "투수 교체",
 )
 
+# 볼넷(5.05(b)(1)) — '고의사구'는 고의4구(四球), 그냥 '사구'는 몸에 맞는 공(死球)
+WALK_WORDS = (
+    "볼넷", "포볼", "밀어내기", "고의사구", "고의 사구", "고의4구", "고의 4구", "자동 고의",
+)
+HBP_WORDS = ("몸에 맞", "사구", "데드볼", "헤드샷")  # 5.05(b)(2)
+
 # 단서 종류 (VLM 프롬프트 v2와 같은 어휘)
 CUE_KINDS = (
     "pitch", "swing_miss", "contact", "slide", "pickoff_throw", "pitcher_stops",
@@ -95,12 +101,22 @@ _EN_WORDS = {
 }
 
 
+# 같은 글자의 다른 말 — '사구(死球)'는 몸에 맞는 공인데 '고의사구(四球)'는 고의4구다
+_HOMONYMS = {"사구": ("고의사구", "고의 사구")}
+
+
+def _says(text: str, word: str) -> bool:
+    for other in _HOMONYMS.get(word, ()):
+        text = text.replace(other, "")
+    return word in text
+
+
 def _speech(cues: Sequence[Cue], *words: str) -> Optional[Cue]:
     wanted = [w.lower() for w in words]
     for w in words:
         wanted += [e for k, en in _EN_WORDS.items() if k in w for e in en]
     for c in cues:
-        if c.kind == "speech" and any(w in c.text.lower() for w in wanted):
+        if c.kind == "speech" and any(_says(c.text.lower(), w) for w in wanted):
             return c
     return None
 
@@ -198,7 +214,7 @@ def judge_transition(
         if iff and b[0] and b[1] and tr.before.outs <= 1:  # 5.09(a)(5) 무사·1사 1·2루/만루
             return make("call", "infield_fly", 0.4, [iff, _speech(near, "인필드")])
     if tr.outs_made == 0 and tr.count_reset and a[0]:
-        hbp = _has(near, "hit_by_pitch") or _speech(near, "몸에 맞", "사구", "데드볼")
+        hbp = _has(near, "hit_by_pitch") or _speech(near, *HBP_WORDS)
         if hbp:
             return make("result", "hbp", 0.5, [hbp])
         dts = _has(near, "catcher_miss") or _speech(near, "낫아웃", "낫 아웃")
@@ -207,7 +223,7 @@ def judge_transition(
             prior = 0.5 if tr.before.strikes == 2 else 0.3
             return make("call", "dropped_third_strike", prior,
                         [dts, _speech(near, "낫아웃", "낫 아웃")])
-        walk_speech = _speech(near, "볼넷", "포볼", "고의") or _has(near, "ball_four")
+        walk_speech = _speech(near, *WALK_WORDS) or _has(near, "ball_four")
         if tr.before.balls == 3 and not _has(near, "contact"):
             return make("result", "walk", 0.6, [walk_speech])
         if walk_speech:
@@ -244,9 +260,9 @@ def _walk_off_kind(near: Sequence[Cue]) -> Optional[tuple[str, Cue]]:
         ("balk", _speech(near, "보크") or _has(near, "pitcher_stops")),
         ("wild_pitch", _speech(near, "폭투")),
         ("passed_ball", _speech(near, "포일")),
-        ("hbp", _has(near, "hit_by_pitch") or _speech(near, "몸에 맞", "사구", "데드볼")),
+        ("hbp", _has(near, "hit_by_pitch") or _speech(near, *HBP_WORDS)),
         ("dropped_third_strike", _speech(near, "낫아웃", "낫 아웃")),
-        ("walk", _speech(near, "볼넷", "포볼", "밀어내기")),
+        ("walk", _speech(near, *WALK_WORDS) or _has(near, "ball_four")),
         ("sac_fly", _speech(near, "희생플라이", "희생 플라이") or _has(near, "deep_fly")),
     )
     for code, cue in checks:
@@ -299,11 +315,11 @@ _CUE_ONLY = (
     ("passed_ball", "call", ("포일",)),
     ("wild_pitch", "call", ("폭투",)),
     ("sac_fly", "result", ("희생플라이", "희생 플라이")),
-    ("hbp", "result", ("몸에 맞", "사구", "데드볼", "헤드샷")),
+    ("hbp", "result", HBP_WORDS),
     ("steal", "steal", ("홈스틸", "더블스틸", "더블 스틸", "도루")),
     ("double_play", "result", ("병살", "더블플레이", "더블 플레이")),
     ("homerun", "result", ("홈런",)),
-    ("walk", "result", ("볼넷", "밀어내기")),
+    ("walk", "result", WALK_WORDS),
     ("strikeout", "result", ("삼진",)),
 )
 GENERIC_CODES = frozenset({"out", "reach", "runner", "pitcher"})
