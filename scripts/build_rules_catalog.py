@@ -18,10 +18,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from rules_catalog_src import R  # noqa: E402
+from rules_catalog_src import MOTION, R  # noqa: E402
 
 from app.adapters.glossary.seed import load_glossary  # noqa: E402
 from app.domain.detectors import RULES  # noqa: E402
+from app.domain.pitch_motion import PITCH_ONLY_RULES  # noqa: E402
 
 CATALOG_PATH = ROOT / "data" / "rules_catalog.json"
 REPORT_PATH = ROOT / "RULES_COVERAGE.md"
@@ -65,6 +66,18 @@ def validate(rows: list[dict]) -> list[str]:
             errors.append(f"{r['id']}: 영상 판정에 없는 코드 {r['video']}")
         if r["tier"] not in TIERS or set(r["observe"]) - set(OBSERVE):
             errors.append(f"{r['id']}: 단계·보이는 방법 값 오류")
+    ids = {r["id"] for r in rows}
+    for rid, (how, _why) in MOTION.items():
+        if rid not in ids:
+            errors.append(f"동작 판정표: 카탈로그에 없는 id {rid}")
+        if how not in ("자세", "해설", "점수판", "불가"):
+            errors.append(f"동작 판정표: {rid} 방법 값 오류 {how}")
+    code_rules = set(PITCH_ONLY_RULES.values())
+    table_pose = {rid for rid, (how, _w) in MOTION.items() if how == "자세"}
+    for rid in code_rules - table_pose:
+        errors.append(f"코드(pitch_motion)가 재는데 표엔 '자세'가 아님: {rid}")
+    for rid in table_pose - code_rules - {"set_position", "hop_step"}:
+        errors.append(f"표엔 '자세'인데 코드(pitch_motion)가 안 잼: {rid}")
     return errors
 
 
@@ -126,6 +139,16 @@ def report(rows: list[dict]) -> str:
                 f"{r['video'] or '·'} | {r['tier']} |"
             )
         out.append("")
+    names = {r["id"]: (r["rule"], r["name"]) for r in rows}
+    out += ["## 보크·투구 반칙 — 동작 판정 방법", "",
+            "성립 조건: 축발이 투수판에 닿아 있고(먼저 빼면 보크 아님) 주자가 있을 때. "
+            "판정은 해설 + 동작, 점수판은 보이면 '주자 한 베이스씩 진루'로 검증 "
+            "(`app/domain/balk_judge.py`).",
+            "", "| 조항 | 상황 | 방법 | 어떻게 |", "|---|---|---|---|"]
+    for rid, (how, why) in MOTION.items():
+        rule, name = names.get(rid, ("?", rid))
+        out.append(f"| {rule} | {name} | {how} | {why} |")
+    out.append("")
     gaps = [r for r in rows if not r["glossary"]]
     out += ["## 설명 근거(용어 사전)가 없는 항목", ""]
     out += [f"- {r['name']} `{r['rule']}`" for r in gaps] or ["- 없음"]

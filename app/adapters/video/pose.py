@@ -16,6 +16,23 @@ CENTER_BAND = (0.2, 0.8)  # 투수 몸 중심 x (화면 비율)
 LOWER_MIN = 0.4  # 투수 몸 중심 y가 이보다 아래
 MIN_HEIGHT = 0.12  # 투수 키(관절 범위)가 화면 높이의 이 비율 이상
 TRACK_JUMP = 0.12  # 앞 프레임 투수와 이만큼(화면 너비) 이상 떨어지면 다른 사람
+FIELD_MIN = 0.15  # 화면에서 잔디·흙 색 비율 — 이보다 적으면 경기장 화면이 아니다
+
+
+def field_ratio(img: Any) -> float:
+    """잔디(초록)·흙(주황 갈색) 화소 비율. 점수판 유무와 상관없이 '경기장 화면'을 가른다.
+
+    실측(2026-10-26): 보크 해설 영상은 화면 대부분이 해설자라 해설자의 모은 손이 투수 세트로
+    잡혔다. 점수판으로 거르면 직캠·해설 속 다시보기를 잃는다 — 색으로 거른다.
+    """
+    import cv2
+
+    small = cv2.resize(img, (64, 36))
+    hsv = cv2.cvtColor(small, cv2.COLOR_BGR2HSV)
+    h, s_, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+    grass = (h >= 30) & (h <= 90) & (s_ >= 50) & (v >= 40)
+    dirt = (h >= 5) & (h <= 25) & (s_ >= 60) & (v >= 60)
+    return float((grass | dirt).mean())
 
 
 def _center_y(pts: list[tuple[float, float, float]], height: int) -> Optional[float]:
@@ -93,6 +110,9 @@ class PitcherPoseExtractor:
                 break
             idx += 1
             if idx % step:
+                continue
+            if field_ratio(img) < FIELD_MIN:  # 스튜디오·해설자 화면 — 경기장이 아니다
+                previous = None
                 continue
             keypoints, scores = self._body(img)
             people = [

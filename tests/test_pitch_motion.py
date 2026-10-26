@@ -1,4 +1,4 @@
-"""투수 동작 분석(실험) — 합성 관절 좌표로 세트·정지·던지기·중단 갈래를 확인한다."""
+"""투수 동작 분석 — 합성 관절 좌표로 정지·정지 없음·이중 동작 갈래를 확인한다."""
 
 from app.adapters.video.pose import pick_pitcher
 from app.domain.pitch_motion import PoseFrame, analyze_motions
@@ -6,54 +6,57 @@ from app.domain.pitch_motion import PoseFrame, analyze_motions
 FPS = 10
 
 
-def _pose(t, wrist_dx=0.0, wrist_dy=0.0, knee_up=0.0, together=True):
-    """몸통 길이 100px 투수. 손목은 가슴 앞(together면 붙어 있음)."""
+def _pose(t, arm=0.0, knee_up=0.0):
+    """몸통 길이 100px 투수. `arm`만큼 팔꿈치·어깨가 아래로 내려온다(세트 들어가기)."""
     p = [(0.0, 0.0, 0.0)] * 17
-    p = list(p)
-    p[0] = (200, 90, 0.9)  # 코
-    p[5], p[6] = (180, 100, 0.9), (220, 100, 0.9)  # 어깨
+    p[0] = (200, 90, 0.9)
+    p[5], p[6] = (180, 100 + arm * 0.2, 0.9), (220, 100 + arm * 0.2, 0.9)  # 어깨
+    p[7], p[8] = (170, 140 + arm, 0.9), (230, 140 + arm, 0.9)  # 팔꿈치
+    p[9], p[10] = (195, 160 + arm, 0.5), (205, 160 + arm, 0.5)  # 손목(가려져 신뢰도 낮음)
     p[11], p[12] = (185, 200, 0.9), (215, 200, 0.9)  # 엉덩이
     p[13], p[14] = (185, 260 - knee_up, 0.9), (215, 260, 0.9)  # 무릎
     p[15], p[16] = (185, 320, 0.9), (215, 320, 0.9)  # 발목
-    gap = 5 if together else 60
-    p[9] = (200 - gap + wrist_dx, 150 + wrist_dy, 0.9)
-    p[10] = (200 + gap + wrist_dx, 150 + wrist_dy, 0.9)
     return PoseFrame(t, tuple(p))
 
 
-def _seq(parts):
+def _seq(*parts):
+    """parts: (프레임 수, arm(k), knee(k)) — k는 구간 안 번호."""
     frames, t = [], 0.0
-    for count, kw in parts:
+    for count, arm, knee in parts:
         for k in range(count):
-            frames.append(
-                _pose(round(t, 2), **{key: (v(k) if callable(v) else v) for key, v in kw.items()})
-            )
+            frames.append(_pose(round(t, 2), arm(k), knee(k)))
             t += 1 / FPS
     return frames
 
 
-def test_set_stop_then_leg_kick_is_a_legal_pitch():
-    frames = _seq([(6, {}), (6, {"knee_up": lambda k: 15 * k, "wrist_dy": lambda k: -20 * k})])
-    (m,) = analyze_motions(frames)
-    assert m.outcome == "throw" and m.suspect is None and m.stop_sec >= 0.3
+def still(n, at):
+    return (n, lambda k: at, lambda k: 0)
 
 
-def test_leg_kick_without_stop_is_flagged():
-    # 손이 천천히 내려오며 모이다가(멈춤 없이) 바로 다리를 든다
+def move(n, a, b):
+    return (n, lambda k: a + (b - a) * (k + 1) / n, lambda k: 0)
+
+
+def kick(n, at):
+    return (n, lambda k: at, lambda k: 20 * (k + 1))
+
+
+def test_sign_set_stop_then_leg_kick_is_legal():
+    motions = analyze_motions(_seq(still(8, 0), move(4, 0, 40), still(8, 40), kick(5, 40)))
+    assert [m.suspect for m in motions] == [None] and motions[0].stop_sec >= 0.3
+
+
+def test_leg_kick_straight_out_of_the_set_motion_is_no_stop():
+    motions = analyze_motions(_seq(still(8, 0), move(6, 0, 40), kick(5, 40)))
+    assert [m.suspect for m in motions] == ["no_stop"]
+
+
+def test_set_entered_in_two_steps_is_double_motion():
     frames = _seq(
-        [
-            (5, {"wrist_dy": lambda k: 5 * k}),
-            (6, {"knee_up": lambda k: 15 * k, "wrist_dy": lambda k: 25 - 20 * k}),
-        ]
+        still(8, 0), move(3, 0, 20), still(2, 20), move(3, 20, 40), still(8, 40), kick(5, 40)
     )
-    motions = analyze_motions(frames)
-    assert motions and motions[0].suspect == "no_stop"
-
-
-def test_motion_that_stops_without_a_throw_is_flagged_interrupted():
-    frames = _seq([(6, {}), (3, {"wrist_dy": lambda k: 25 * k}), (20, {"wrist_dy": 75})])
-    motions = analyze_motions(frames)
-    assert motions and (motions[0].outcome, motions[0].suspect) == ("aborted", "interrupted")
+    (m,) = analyze_motions(frames)
+    assert m.suspect == "double_motion"
 
 
 def test_pick_pitcher_prefers_big_lower_center_person_in_center_field_view():
@@ -64,3 +67,8 @@ def test_pick_pitcher_prefers_big_lower_center_person_in_center_field_view():
     pitcher = person(640, 450, 300)
     assert pick_pitcher(plate + [pitcher], 1280, 720) == 3
     assert pick_pitcher([pitcher], 1280, 720) is None  # 위쪽에 타자·포수가 없으면 다른 화면
+
+
+def test_arms_drop_after_set_without_pitch_is_hands_separated():
+    frames = _seq(still(8, 0), move(4, 0, 40), still(8, 40), move(4, 40, 0), still(30, 0))
+    assert [m.suspect for m in analyze_motions(frames)] == ["hands_separated"]
