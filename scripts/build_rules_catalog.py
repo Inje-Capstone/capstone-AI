@@ -9,6 +9,8 @@
 사용: python scripts/build_rules_catalog.py   (원본: scripts/rules_catalog_src.py)
 """
 
+from __future__ import annotations
+
 import json
 import re
 import sys
