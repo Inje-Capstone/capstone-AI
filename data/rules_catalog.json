@@ -129,7 +129,7 @@
    "glossary": "game_basics",
    "detector": null,
    "video": null,
-   "tier": 1
+   "tier": 2
   },
   {
    "id": "regulation_game",
@@ -142,7 +142,7 @@
    "glossary": "game_basics",
    "detector": null,
    "video": null,
-   "tier": 1
+   "tier": 2
   },
   {
    "id": "walk_off",
@@ -2582,11 +2582,11 @@
    "name": "대타",
    "action": "다른 타자로 교체",
    "ruling": "교체",
-   "observe": "VA",
-   "glossary": "pitching_change",
+   "observe": "A",
+   "glossary": "substitution",
    "detector": null,
-   "video": "sub",
-   "tier": 1
+   "video": null,
+   "tier": 2
   },
   {
    "id": "pinch_runner",
@@ -2820,7 +2820,7 @@
    "glossary": "time_dead_ball",
    "detector": null,
    "video": null,
-   "tier": 3
+   "tier": 2
   },
   {
    "id": "weather_time",
@@ -2885,7 +2885,7 @@
    "glossary": "time_dead_ball",
    "detector": null,
    "video": null,
-   "tier": 3
+   "tier": 2
   },
   {
    "id": "bench_clear",
@@ -2937,7 +2937,7 @@
    "glossary": "balk",
    "detector": null,
    "video": null,
-   "tier": 3
+   "tier": 2
   },
   {
    "id": "umpire_contact",
@@ -3145,7 +3145,7 @@
    "glossary": "extra_innings",
    "detector": null,
    "video": null,
-   "tier": 1
+   "tier": 2
   },
   {
    "id": "tiebreaker",
@@ -3275,7 +3275,7 @@
    "glossary": "strike_zone",
    "detector": null,
    "video": null,
-   "tier": 3
+   "tier": 2
   },
   {
    "id": "umpire_hit",

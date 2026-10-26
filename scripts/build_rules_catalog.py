@@ -89,13 +89,30 @@ def signal_known(tok: str) -> bool:
     return all(a in SIGNALS or a.startswith("kw:") for a in tok.split("|"))
 
 
+def judge_words() -> set[str]:
+    """영상 판정이 실제로 알아듣는 해설·자막 낱말 — video_judge.py 코드에서 센다."""
+    src = (ROOT / "app" / "domain" / "video_judge.py").read_text(encoding="utf-8")
+    words = set(SPEECH_KEYWORDS)
+    for call in re.findall(r"_speech\([^)]*\)", src):
+        words |= set(re.findall(r'"([^"]+)"', call))
+    for name in ("WALK_WORDS", "HBP_WORDS"):
+        m = re.search(name + r" = \(([^)]*)\)", src)
+        words |= set(re.findall(r'"([^"]+)"', m.group(1))) if m else set()
+    for m in re.finditer(r'\("\w+", "\w+", \(([^)]*)\)\)', src):  # _CUE_ONLY
+        words |= set(re.findall(r'"([^"]+)"', m.group(1)))
+    return {w.replace(" ", "") for w in words}
+
+
+JUDGE_WORDS = judge_words()
+
+
 def signal_built(tok: str) -> bool:
-    """신호가 지금 코드로 관측되나 — 대체 신호(a|b)는 하나만 돼도 된다."""
-    words = {k.replace(" ", "") for k in SPEECH_KEYWORDS}
+    """신호가 지금 코드로 관측되나 — 대체 신호(a|b)는 하나만 돼도 된다.
+    해설 키워드는 판정 코드가 그 낱말(또는 그 낱말을 품은 말)을 알아들어야 한다."""
     for a in tok.split("|"):
         if a.startswith("kw:"):
             w = a[3:].replace(" ", "")
-            if w in words or BALK_WORDS.fullmatch(w):
+            if BALK_WORDS.fullmatch(w) or any(c in w for c in JUDGE_WORDS):
                 return True
         elif SIGNALS.get(a, ("", "", ""))[2]:
             return True
@@ -114,17 +131,61 @@ def split_signals(rid: str) -> tuple[list[str], list[str]]:
     return [s for s in toks if s not in judge], judge
 
 
+# 무슨 판정인지는 말해 주지 않는 신호 — 심판이 뭔가 선언했다·판독했다는 것만 안다
+GENERIC_SIGNALS = ("ev.umpire_signal", "ump.call", "ev.replay_review")
+
+
 def action_status(rid: str) -> tuple[str, str]:
-    """(인식, 판단) 상태. 인식 가능 = 계기 신호(장면·해설·심판·누적 상태)가 하나라도 구현
-    (계기 없이 점수판만 쓰는 규칙은 점수판이 다 구현되면). 판단 가능 = 판단 신호가 모두 구현."""
+    """(인식, 판단) 상태. 인식 가능 = 그 규칙을 가리키는 계기 신호(장면·해설 낱말·누적 상태)가
+    하나라도 구현 — 심판 동작·판독 화면은 종류를 몰라 계기가 아니다(계기 없이 점수판만 쓰는
+    규칙은 점수판이 다 구현되면). 판단 가능 = 판단 신호가 모두 구현."""
     recog, judge = split_signals(rid)
-    triggers = [s for s in recog if not s.startswith("sb.")]
+    triggers = [s for s in recog
+                if not all(a.startswith("sb.") or a in GENERIC_SIGNALS for a in s.split("|"))]
     if triggers:
         r = "가능" if any(signal_built(s) for s in triggers) else "불가"
     else:
         r = "가능" if recog and all(signal_built(s) for s in recog) else "—"
     j = "—" if not judge else ("가능" if all(signal_built(s) for s in judge) else "불가")
     return r, j
+
+
+UMPIRE_SIGNALS = ("ev.umpire_signal", "ump.call", "ev.replay_review")
+OBSERVE_SIGNALS = {  # 보이는 방법 글자 → 행동 로직에 있어야 할 신호 접두
+    "S": ("sb.", "ctx."), "A": ("kw:",), "U": UMPIRE_SIGNALS,
+    "V": ("ev.", "pose.", "ball.", "obj."),
+}
+
+
+def review(rows: list[dict]) -> list[str]:
+    """행동 로직 재검수 — 카탈로그(단계·보이는 방법·영상 코드)·동작 판정표와 로직이 맞물리나."""
+    errors = []
+    for r in rows:
+        rid = r["id"]
+        if rid not in ACTION:
+            continue
+        alts = [a for tok in ACTION[rid][1].split() for a in tok.split("|")]
+        recog, judge = split_signals(rid)
+        rs, js = action_status(rid)
+        if r["tier"] == 1 and not r["video"]:
+            errors.append(f"{rid}: 1단계인데 영상 판정 코드가 없다")
+        if r["video"] and rs != "가능":
+            errors.append(f"{rid}: 영상 코드 {r['video']}가 있는데 인식 신호가 구현되지 않았다")
+        if r["tier"] == 3 and not judge:
+            errors.append(f"{rid}: 3단계(동작 판단)인데 판단 신호가 없다")
+        if r["tier"] == 2 and not recog:
+            errors.append(f"{rid}: 2단계(판정 인식)인데 인식 신호가 없다")
+        for letter, prefixes in OBSERVE_SIGNALS.items():
+            if letter in r["observe"] and not any(a.startswith(prefixes) for a in alts):
+                errors.append(f"{rid}: 보이는 방법 {letter}인데 그 신호가 로직에 없다")
+        code = "pitcher" if r["video"] == "sub" else r["video"]
+        if code and code not in ACTION[rid][2]:
+            errors.append(f"{rid}: 판정 로직이 영상 코드 {code}를 말하지 않는다")
+        if rid in MOTION:
+            how = MOTION[rid][0]
+            if (how == "자세") != (js == "가능"):
+                errors.append(f"{rid}: 동작 판정표는 '{how}'인데 판단 신호는 {js}")
+    return errors
 
 
 def load_catalog() -> list[dict]:
@@ -165,6 +226,8 @@ def validate(rows: list[dict]) -> list[str]:
         for tok in sigs.split():
             if not signal_known(tok):
                 errors.append(f"행동 로직 {rid}: 신호 어휘에 없는 {tok}")
+    if not any(e.startswith("행동 로직") for e in errors):
+        errors += review(rows)
     for rid in COVERS:
         if rid not in ids:
             errors.append(f"묶음 커버: 카탈로그에 없는 id {rid}")

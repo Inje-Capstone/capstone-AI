@@ -5,6 +5,7 @@
 ## 1. 지금 상태
 
 - main: PR #1~#28 머지, CI(test 3.9·3.12 + docker) 통과, pytest 229 · ruff clean
+- **행동 판정 로직(2026-10-26)**: 영상 대상 규칙 233개마다 성립 조건·관측 신호·판정(`scripts/action_logic_src.py`) — 인식(심판 판정 알아보기) 가능 152 · 판단(동작 직접 보기) 가능 9. 미구현 신호 우선순위는 RULES_COVERAGE.md. 재검수 검사(단계·보이는 방법·영상 코드·동작 판정표 정합)와 규칙 장면 테스트(`tests/test_rule_scenarios.py`)가 어긋나면 실패
 - **판정 로직 재점검(2026-10-26)**: 모든 영상 판정 코드에 근거 조항·성립 조건을 붙여 저장 규칙과 대조 — [RULES_COVERAGE.md](RULES_COVERAGE.md) '영상 판정 로직', '보크·투구 반칙 — 동작 판정 방법'. 코드와 표가 어긋나면 빌드 실패
 - **투수 자세 보크 판정(실험)**: `scripts/balk_check.py` (선택 설치 `[pose]`) — 해설 + 동작으로 판정, 점수판은 검증. 정확도 실측 전
 - **하이라이트 클립 평가(KBO 24개)**: 영상 판정 0% → **46%** (`data/clip_eval/REPORT.md`). 점수판 전용 판독 + Whisper 해설 받아쓰기 + 지시문 v3. **MVP는 KBO만** — MLB는 MVP 이후
