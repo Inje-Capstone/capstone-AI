@@ -25,3 +25,8 @@ def test_every_rule_can_be_explained():
     """영상으로 못 보는 규칙도 질문이 오면 근거를 대고 설명할 수 있어야 한다."""
     rows = catalog.load_catalog()
     assert [r["id"] for r in rows if not r["glossary"]] == []
+
+
+def test_every_official_rule_provision_is_covered():
+    """공식 야구규칙(OBR) 조항이 하나도 빠짐없이 카탈로그 어느 행엔가 걸려 있어야 한다."""
+    assert catalog.coverage(catalog.load_catalog()) == []
