@@ -53,9 +53,9 @@
   {"id": "mlb_grd_fence_gillespie", "yt": "PPOMdrsigpA", "league": "MLB", "situation": "ground_rule_lodged", "expect": null, "keywords": ["인정 2루타", "끼", "stuck", "ground-rule", "ground rule"], "title": "Gillespie's double gets stuck in the fence"},
   {"id": "mlb_grd_ortiz", "yt": "Bt9-RIBR04o", "league": "MLB", "situation": "ground_rule_2b", "expect": null, "keywords": ["인정 2루타", "ground-rule", "ground rule"], "title": "Ortiz hits second ground-rule double of game"},
   {"id": "mlb_obstruction_ws", "yt": "dOlihOEDXgE", "league": "MLB", "situation": "obstruction_a", "expect": null, "keywords": ["주루방해", "obstruction"], "title": "Cardinals walk off on obstruction call (WS G3)"},
-  {"id": "kbo_squeeze_kia", "yt": "YWbcNKwUZHo", "league": "KBO", "situation": "squeeze_r", "expect": null, "keywords": ["스퀴즈", "번트", "squeeze", "bunt"], "title": "KIA 김선빈 결승 스퀴즈 번트"},
-  {"id": "kbo_checkswing_review", "yt": "las9824qg4o", "league": "KBO", "situation": "check_swing_review", "expect": null, "keywords": ["체크", "판독", "check swing", "replay"], "title": "첫 체크 스윙 비디오 판독"},
-  {"id": "kbo_abs_ejection", "yt": "W-APlBjm8AI", "league": "KBO", "situation": "ejection_mgr", "expect": null, "keywords": ["퇴장", "ABS", "항의", "ejected"], "title": "황재균 ABS 판정 항의 퇴장"},
+  {"id": "kbo_squeeze_kia", "yt": "YWbcNKwUZHo", "league": "KBO", "situation": "squeeze_r", "expect": "squeeze", "keywords": ["스퀴즈", "번트", "squeeze", "bunt"], "title": "KIA 김선빈 결승 스퀴즈 번트"},
+  {"id": "kbo_checkswing_review", "yt": "las9824qg4o", "league": "KBO", "situation": "check_swing_review", "expect": "video_review", "keywords": ["체크", "판독", "check swing", "replay"], "title": "첫 체크 스윙 비디오 판독"},
+  {"id": "kbo_abs_ejection", "yt": "W-APlBjm8AI", "league": "KBO", "situation": "ejection_mgr", "expect": "ejection", "keywords": ["퇴장", "ABS", "항의", "ejected"], "title": "황재균 ABS 판정 항의 퇴장"},
   {"id": "kbo_home_assist", "yt": "V0lBwrR3ulc", "league": "KBO", "situation": "tag_out_r", "expect": null, "keywords": ["보살", "홈 송구", "아웃", "throw", "out at home"], "title": "김성윤 레이저 홈 송구"}
  ]
 }

@@ -212,6 +212,12 @@ def test_common_phrases_are_not_umpire_calls():
     assert judge_calls(cues) == []
 
 
+def test_ejection_described_after_the_fact():
+    """'퇴장이 됐습니다'(실측 ABS 항의 클립) — 지난 일을 말해도 심판 동작이 근처면 퇴장이다."""
+    cues = [say(60, "헬멧을 집어던져버렸거든요. 퇴장 사유가 되면서 퇴장이 됐습니다"), ev(75, "umpire_signal")]
+    assert [j.code for j in judge_calls(cues)] == ["ejection"]
+
+
 def test_repeated_commentary_confirms_a_call_with_low_confidence():
     found = judge_calls([say(100, "주루방해 아닌가요"), say(130, "네, 주루방해가 맞습니다")])
     assert [(j.code, j.confidence) for j in found] == [("obstruction", 0.5)]

@@ -5,14 +5,14 @@
 | 지표 | 값 |
 |---|---|
 | 클립 | 28개 |
-| 판정 정답 (영상 판정이 정답 코드를 냄) | 15/24 (62%) |
-| 오판 (정답이 아닌 판정 코드를 냄) | 2/24 (8%) |
+| 판정 정답 (영상 판정이 정답 코드를 냄) | 17/27 (63%) |
+| 오판 (정답이 아닌 판정 코드를 냄) | 4/27 (15%) |
 | 단서 포착 (VLM 관찰에 정답 키워드) | 16/28 (57%) |
 | 점수판을 하나도 못 읽은 클립 | 5개 |
 
 | 리그 | 판정 | 단서 |
 |---|---|---|
-| KBO | 15/24 (62%) | 16/28 (57%) |
+| KBO | 17/27 (63%) | 16/28 (57%) |
 
 | 판정 코드 | 정답 |
 |---|---|
@@ -20,12 +20,15 @@
 | caught_stealing | 1/1 (100%) |
 | double_play | 0/3 (0%) |
 | dropped_third_strike | 0/2 (0%) |
+| ejection | 1/1 (100%) |
 | hbp | 1/2 (50%) |
 | homerun | 2/2 (100%) |
 | sac_fly | 1/2 (50%) |
+| squeeze | 0/1 (0%) |
 | steal | 3/4 (75%) |
 | strikeout | 1/1 (100%) |
 | triple_play | 4/4 (100%) |
+| video_review | 1/1 (100%) |
 
 ## 클립별
 
@@ -55,7 +58,7 @@
 | kbo_sf_walkoff_lg | sac_fly | ✓ | reach, sac_fly | ✗ | 2 |
 | kbo_hr_kim | homerun | ✓ | out, homerun | 홈런, home run | 2 |
 | kbo_hr_slam_hilliard | homerun | ✓ | pitcher, homerun | 홈런, 만루 | 2 |
-| kbo_squeeze_kia | (단서만) | · | reach, strikeout | 번트 | 2 |
-| kbo_checkswing_review | (단서만) | · | strikeout | 체크, 판독, replay | 2 |
-| kbo_abs_ejection | (단서만) | · | pitcher, strikeout | 퇴장, ABS | 0 |
+| kbo_squeeze_kia | squeeze | ✗ | reach, strikeout | 번트 | 2 |
+| kbo_checkswing_review | video_review | ✓ | video_review, check_swing, strikeout | 체크, 판독, replay | 2 |
+| kbo_abs_ejection | ejection | ✓ | ejection, pitcher | 퇴장, ABS | 0 |
 | kbo_home_assist | (단서만) | · | out, triple_play | 홈 송구, 아웃, throw | 2 |
