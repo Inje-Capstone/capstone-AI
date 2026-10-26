@@ -104,8 +104,12 @@ _EN_WORDS = {
 }
 
 
-# 같은 글자의 다른 말 — '사구(死球)'는 몸에 맞는 공인데 '고의사구(四球)'는 고의4구다
-_HOMONYMS = {"사구": ("고의사구", "고의 사구")}
+# 같은 글자의 다른 말 — '사구(死球)'는 몸에 맞는 공인데 '고의사구(四球)'는 고의4구다.
+# 낱말을 품은 다른 말(복합어)을 지우고 찾는다
+_HOMONYMS = {
+    "사구": ("고의사구", "고의 사구"),
+    "홈런": ("홈런스타", "홈런더비", "홈런 더비", "홈런왕"),  # 광고·행사 자막(실측 '크보 홈런스타')
+}
 
 
 def _says(text: str, word: str) -> bool:
@@ -224,7 +228,7 @@ def judge_transition(
         hbp = _has(near, "hit_by_pitch") or _speech(near, *HBP_WORDS)
         if hbp:
             return make("result", "hbp", 0.5, [hbp])
-        dts = _has(near, "catcher_miss") or _speech(near, "낫아웃", "낫 아웃")
+        dts = _strike_three_miss(near) or _speech(near, "낫아웃", "낫 아웃")
         # 낫아웃은 1루가 비었거나 2아웃일 때만(5.09(a)(3)). 2스트라이크가 보였으면 확신도를 더 준다
         if dts and dts_possible(tr.before):
             prior = 0.5 if tr.before.strikes == 2 else 0.3
@@ -236,7 +240,7 @@ def judge_transition(
         if walk_speech:
             return make("result", "walk", 0.5, [walk_speech])
     if tr.outs_made == 1 and tr.before.strikes == 2:
-        dts = _has(near, "catcher_miss") or _speech(near, "낫아웃", "낫 아웃")
+        dts = _strike_three_miss(near) or _speech(near, "낫아웃", "낫 아웃")
         if dts and dts_possible(tr.before):  # 낫아웃 상황이었지만 1루에서 아웃
             return make("call", "dropped_third_strike", 0.5, [dts], out=True)
         k = _has(near, "swing_miss") or _has(near, "strikeout") or _speech(near, "삼진")
@@ -245,6 +249,16 @@ def judge_transition(
     # 나머지 타석 결과는 종류를 모른다 — 상태는 반영하되 카드는 띄우지 않는다
     if tr.count_reset or tr.half_change or tr.outs_made or tr.runs:
         return make("result", "out" if tr.outs_made else "reach", 0.5)
+    return None
+
+
+def _strike_three_miss(cues: Sequence[Cue]) -> Optional[Cue]:
+    """낫아웃(5.05(a)(2))의 '포수가 3스트라이크를 놓침' — 타구(contact) 직후 3초 안의 놓침은
+    인플레이 타구를 처리하다 놓친 것이라 낫아웃이 아니다(실측: 끝내기 뜬공 직후 '포수 놓침')."""
+    hits = [c.t for c in cues if c.kind == "contact"]
+    for c in cues:
+        if c.kind == "catcher_miss" and not any(0 <= c.t - h <= 3 for h in hits):
+            return c
     return None
 
 
@@ -389,7 +403,14 @@ def _event_judgment(cues: Sequence[Cue]) -> Optional[Judgment]:
         if slide and not contact and not missed:  # 포수가 놓쳤으면 폭투·포일 득점
             return make("steal", "steal", score, "타격 없이 슬라이딩 득점(홈스틸)")
     if len(outs) == 2:
-        return make("double_play", "result", outs[0], "베이스 아웃 2번이 15초 안에")
+        # 병살은 한 플레이 — 직전 10초에 타구·헛스윙이 없으면 견제·도루 아웃이 따로 둘이다
+        batted = any(c.kind in ("contact", "swing_miss", "strikeout")
+                     and 0 <= outs[0].t - c.t <= 10 for c in cues)
+        if batted:
+            return make("double_play", "result", outs[0], "베이스 아웃 2번이 15초 안에")
+        lead = _has(cues, "pickoff_throw") or _has(cues, "slide") or _speech(cues, "견제", "도루")
+        if lead:
+            return make("caught_stealing", "steal", outs[0], "타구 없이 베이스 아웃(견제·도루)")
     k = _has(cues, "strikeout") or _has(cues, "swing_miss")
     miss = _has(cues, "catcher_miss") or _has(cues, "fielder_drops_ball")
     if k and miss and abs(k.t - miss.t) <= 5:

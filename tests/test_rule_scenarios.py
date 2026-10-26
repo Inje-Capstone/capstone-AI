@@ -98,6 +98,10 @@ NOT_THIS = [
     ("steal_basic", R(0, bases=B1, balls=1), R(10, bases=B2, balls=2), [ev(9, "slide"), say(9, "폭투")], "steal"),
     # 9.07 홈스틸 — 포수가 놓친 장면(폭투·포일) 뒤 득점은 홈스틸이 아니다
     ("home_steal", R(0, bases=B3, balls=1), R(10, away=1, balls=2), [ev(9, "slide"), say(9, "포일")], "steal"),
+    # 5.05(a)(2) 낫아웃은 3스트라이크를 놓친 것 — 타구 직후 포수가 놓친 건 수비 플레이
+    ("dts_out", R(0, strikes=2, outs=1), R(10, outs=2), [ev(1, "contact"), ev(3, "catcher_miss")], "dropped_third_strike"),
+    # 광고 자막 '홈런스타'는 홈런이 아니다
+    ("homerun_basic", R(0), R(10, outs=1), [say(8, "[자막] 크보 홈런스타를 찾아라!")], "homerun"),
     # 병살은 한 플레이 — 아웃+득점+남은 주자가 직전 주자+타자보다 많으면 여러 플레이가 합쳐진 것
     ("double_play_r", R(0, bases=B12), R(130, outs=2, bases=B12, away=3), [], "double_play"),
     # 홈런은 득점 = 주자 수 + 1
@@ -125,15 +129,24 @@ def test_rule_precondition_blocks_the_call(rid, before, after, cues, code):
 
 def test_scene_double_play_with_triple_play_commentary_is_a_triple_play():
     """장면이 아웃 하나를 놓쳐도 해설 '트리플 플레이'는 병살을 품는 더 구체적인 판정이다."""
-    cues = [ev(36, "out_at_base"), ev(40, "out_at_base"), say(45, "트리플 플레이를 처음 봤다고요?")]
+    cues = [ev(34, "contact"), ev(36, "out_at_base"), ev(40, "out_at_base"),
+            say(45, "트리플 플레이를 처음 봤다고요?")]
     assert judge_from_cues(cues).code == "triple_play"
-    assert judge_from_cues(cues[:2]).code == "double_play"
+    assert judge_from_cues(cues[:3]).code == "double_play"
 
 
 def test_more_than_three_outs_in_a_burst_is_not_a_triple_play():
     """반 이닝 아웃은 셋뿐(5.09(e)) — 15초에 아웃 여섯은 장면을 되풀이해 지어낸 관찰이다."""
     assert judge_from_cues([ev(140 + 5 * i, "out_at_base") for i in range(6)]) is None
     assert judge_from_cues([ev(140 + 5 * i, "out_at_base") for i in range(3)]).code == "triple_play"
+
+
+def test_two_outs_without_a_batted_ball_are_not_a_double_play():
+    """견제사 두 번(타구 없음)은 병살이 아니다 — 병살은 한 플레이에 아웃 둘."""
+    pickoffs = [ev(20, "slide"), ev(40, "out_at_base"), ev(48, "out_at_base"), say(50, "견제로 잡아 냅니다")]
+    assert judge_from_cues(pickoffs).code == "caught_stealing"
+    batted = [ev(34, "contact"), ev(36, "out_at_base"), ev(40, "out_at_base")]
+    assert judge_from_cues(batted).code == "double_play"
 
 
 def test_juggled_foul_tip_is_a_strikeout_not_a_dropped_third_strike():
