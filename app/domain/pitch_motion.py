@@ -36,6 +36,7 @@ ARM_UP = 0.2  # 손목이 코보다 이만큼 위 — 팔을 들었다(투구로
 REACH = 1.3  # 손목-어깨 거리 / 몸통 길이 — 팔을 옆으로 크게 뻗음(견제 송구)
 FOOT_MOVE = 0.3  # 발목 이동 / 몸통 길이 — 이보다 움직이면 발을 옮긴 것
 ARM_DROP = 0.25  # 팔꿈치가 세트 위치보다 이만큼 내려오면 손을 푼 것
+DELIVERY_START = 0.5  # 정지 뒤 다리가 기준선까지 오르는 동안의 움직임(초) — 실측 0.1~0.5초
 MIN_SCORE = 0.3
 
 # 자세로 재는 의심 종류 → 카탈로그 id (data/rules_catalog.json)
@@ -278,7 +279,11 @@ def analyze_motions(frames: Sequence[PoseFrame]) -> list[PitchMotion]:
             t_kick = frames[s0].t
             if prev is None or t_kick - frames[prev[2]].t > 0.5:
                 continue  # 다리 들기 전을 못 봤다(장면 전환)
-            if _moved(frames, prev[1], s0, pivot_ankle) >= FOOT_MOVE:
+            # 축발 = 지금 든 다리의 반대쪽(좌우 판별이 영상 전체 다수결과 어긋날 수 있다).
+            # 다리를 들기 전까지만 잰다 — 든 순간엔 몸 전체가 움직인다
+            side = lifted_side(frames[s0])
+            pivot = _ankles(side)[1] if side else pivot_ankle
+            if _moved(frames, prev[1], prev[2], pivot) >= FOOT_MOVE:
                 add(
                     frames[prev[1]].t,
                     0.0,
@@ -288,13 +293,23 @@ def analyze_motions(frames: Sequence[PoseFrame]) -> list[PitchMotion]:
                     ["축발이 먼저 빠짐 — 투수판 이탈, 보크 아님"],
                 )
                 continue
-            stop = _dur(frames, prev) if prev[0] == "still" else 0.0
+            k_still = k - 1
+            p2 = segs[k - 2] if k >= 2 else None
+            seen = p2 is not None and frames[prev[1]].t - frames[p2[2]].t <= 0.5
+            if seen and p2 is not None and p2[0] == "kick" and _dur(frames, prev) <= DELIVERY_START:
+                continue  # 같은 투구 — 무릎이 기준선을 잠깐 오르내렸다
+            if prev[0] == "move" and seen and p2 is not None:
+                if p2[0] == "still" and _dur(frames, prev) <= DELIVERY_START:
+                    k_still = k - 2  # 멈춘 뒤 투구 시작의 짧은 움직임 — 정지는 그 앞 구간
+            elif prev[0] == "move":
+                continue  # 다리 들기 전 정지 여부를 못 봤다(장면 전환 직후)
+            stop = _dur(frames, segs[k_still]) if segs[k_still][0] == "still" else 0.0
             why = [f"투구 시작(다리 듦) {t_kick:.1f}s · 직전 정지 {stop:.2f}s(기준 {STOP_MIN}s)"]
             suspect: Optional[str] = None
             if stop < STOP_MIN:
                 suspect = "no_stop"
             else:
-                pause = _double_motion(frames, segs, k - 1)
+                pause = _double_motion(frames, segs, k_still)
                 if pause is not None:
                     suspect = "double_motion"
                     why.append(

@@ -72,3 +72,16 @@ def test_pick_pitcher_prefers_big_lower_center_person_in_center_field_view():
 def test_arms_drop_after_set_without_pitch_is_hands_separated():
     frames = _seq(still(8, 0), move(4, 0, 40), still(8, 40), move(4, 40, 0), still(30, 0))
     assert [m.suspect for m in analyze_motions(frames)] == ["hands_separated"]
+
+
+def test_short_delivery_start_after_a_set_stop_is_legal():
+    """정지 뒤 다리가 올라가는 0.3초의 움직임은 투구 시작 — 정지는 그 앞 구간으로 잰다."""
+    frames = _seq(still(8, 0), move(4, 0, 40), still(8, 40), move(3, 40, 44), kick(5, 44))
+    assert [m.suspect for m in analyze_motions(frames)] == [None]
+
+
+def test_knee_dipping_below_the_line_mid_kick_is_one_pitch():
+    """한 투구 안에서 무릎이 기준선을 잠깐 내려갔다 올라가도 투구는 하나다."""
+    dip = (2, lambda k: 40, lambda k: 30)  # 무릎 차 30px = 0.3 몸통 < 기준 0.35
+    frames = _seq(still(8, 0), move(4, 0, 40), still(8, 40), kick(5, 40), dip, kick(4, 40))
+    assert len(analyze_motions(frames)) == 1
