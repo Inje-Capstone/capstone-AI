@@ -4,6 +4,8 @@
 - 설명: 용어 사전(data/glossary_seed.json)에 키가 있는가
 - 카드: 감지 규칙(app/domain/detectors.RULES)에 있는가
 - 영상: 영상 판정(app/domain/video_judge.py)이 내는 코드인가
+- 행동 로직: 영상으로 다룰 규칙(단계 1~3)마다 성립 조건·관측 신호·판정(scripts/action_logic_src.py),
+  신호가 실제 구현됐는지(신호 어휘의 구현 위치·해설 키워드)
 - 조항: 공식 야구규칙(data/obr_provisions.json, 번호만)의 모든 조항이 어느 행엔가 걸리는가
 
 사용: python scripts/build_rules_catalog.py   (원본: scripts/rules_catalog_src.py)
@@ -21,11 +23,14 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
+from action_logic_src import ACTION, SIGNALS  # noqa: E402
 from rules_catalog_src import COVERS, JUDGE, MOTION, R  # noqa: E402
 
 from app.adapters.glossary.seed import load_glossary  # noqa: E402
+from app.domain.balk_judge import BALK_WORDS  # noqa: E402
 from app.domain.detectors import RULES  # noqa: E402
 from app.domain.pitch_motion import PITCH_ONLY_RULES  # noqa: E402
+from app.domain.video_judge import SPEECH_KEYWORDS  # noqa: E402
 
 CATALOG_PATH = ROOT / "data" / "rules_catalog.json"
 REPORT_PATH = ROOT / "RULES_COVERAGE.md"
@@ -80,6 +85,48 @@ def coverage(rows: list[dict]) -> list[str]:
     return [p for p in ids if p not in covered]
 
 
+def signal_known(tok: str) -> bool:
+    return all(a in SIGNALS or a.startswith("kw:") for a in tok.split("|"))
+
+
+def signal_built(tok: str) -> bool:
+    """신호가 지금 코드로 관측되나 — 대체 신호(a|b)는 하나만 돼도 된다."""
+    words = {k.replace(" ", "") for k in SPEECH_KEYWORDS}
+    for a in tok.split("|"):
+        if a.startswith("kw:"):
+            w = a[3:].replace(" ", "")
+            if w in words or BALK_WORDS.fullmatch(w):
+                return True
+        elif SIGNALS.get(a, ("", "", ""))[2]:
+            return True
+    return False
+
+
+# 동작을 직접 보는 신호 — 나머지는 판정을 알아보는 신호
+JUDGE_PREFIX = ("pose.", "ball.", "obj.", "time.")
+
+
+def split_signals(rid: str) -> tuple[list[str], list[str]]:
+    """(인식 신호, 판단 신호). 인식 = 점수판·장면·해설·심판 동작으로 '심판 판정을 알아본다',
+    판단 = 자세·공·물체·시간으로 '동작을 직접 판단한다'."""
+    toks = ACTION[rid][1].split()
+    judge = [s for s in toks if all(a.startswith(JUDGE_PREFIX) for a in s.split("|"))]
+    return [s for s in toks if s not in judge], judge
+
+
+def action_status(rid: str) -> tuple[str, str]:
+    """(인식, 판단) 상태. 인식 가능 = 계기 신호(장면·해설·심판·누적 상태)가 하나라도 구현
+    (계기 없이 점수판만 쓰는 규칙은 점수판이 다 구현되면). 판단 가능 = 판단 신호가 모두 구현."""
+    recog, judge = split_signals(rid)
+    triggers = [s for s in recog if not s.startswith("sb.")]
+    if triggers:
+        r = "가능" if any(signal_built(s) for s in triggers) else "불가"
+    else:
+        r = "가능" if recog and all(signal_built(s) for s in recog) else "—"
+    j = "—" if not judge else ("가능" if all(signal_built(s) for s in judge) else "불가")
+    return r, j
+
+
 def load_catalog() -> list[dict]:
     rows = [dict(zip(FIELDS, r)) for r in R]
     ids = Counter(r["id"] for r in rows)
@@ -109,6 +156,15 @@ def validate(rows: list[dict]) -> list[str]:
         for x in refs(r):
             if not x.endswith("*") and x not in known:
                 errors.append(f"{r['id']}: 공식 규칙에 없는 조항 번호 {x}")
+    for r in rows:
+        if r["tier"] != 4 and r["id"] not in ACTION:
+            errors.append(f"{r['id']}: 행동 판정 로직(action_logic_src.ACTION)이 없다")
+    for rid, (_pre, sigs, _how) in ACTION.items():
+        if rid not in ids:
+            errors.append(f"행동 로직: 카탈로그에 없는 id {rid}")
+        for tok in sigs.split():
+            if not signal_known(tok):
+                errors.append(f"행동 로직 {rid}: 신호 어휘에 없는 {tok}")
     for rid in COVERS:
         if rid not in ids:
             errors.append(f"묶음 커버: 카탈로그에 없는 id {rid}")
@@ -208,11 +264,48 @@ def report(rows: list[dict]) -> str:
         rule, name = names.get(rid, ("?", rid))
         out.append(f"| {rule} | {name} | {how} | {why} |")
     out.append("")
+    out += action_report(rows)
     gaps = [r for r in rows if not r["glossary"]]
     out += ["## 설명 근거(용어 사전)가 없는 항목", ""]
     out += [f"- {r['name']} `{r['rule']}`" for r in gaps] or ["- 없음"]
     out.append("")
     return "\n".join(out)
+
+
+def action_report(rows: list[dict]) -> list[str]:
+    acted = [r for r in rows if r["id"] in ACTION]
+    st = {r["id"]: action_status(r["id"]) for r in acted}
+    recog = Counter(v[0] for v in st.values())
+    judge = Counter(v[1] for v in st.values())
+    blocked: Counter = Counter()
+    for r in acted:
+        for tok in dict.fromkeys(ACTION[r["id"]][1].split()):
+            if not signal_built(tok):
+                blocked[tok] += 1
+    out = ["## 행동 판정 로직 — 규칙마다 성립 조건 · 관측 신호 · 판정", "",
+           "원본 `scripts/action_logic_src.py`. 판정은 두 길이다 — "
+           "**인식**: 점수판·장면·해설·심판 동작으로 심판이 내린 판정을 알아본다 · "
+           "**판단**: 자세·공·물체·시간으로 동작을 직접 본다(심판 판정과 어긋나면 심판을 따른다). "
+           "상태는 코드에서 센다. ~~취소선~~ 신호는 아직 못 본다.", "",
+           f"영상 대상 {len(acted)}개 — 인식 가능 {recog.get('가능', 0)}"
+           f" · 불가 {recog.get('불가', 0)}"
+           f" / 판단 가능 {judge.get('가능', 0)} · 불가 {judge.get('불가', 0)}"
+           f" · 판단 신호 없음 {judge.get('—', 0)}", "",
+           "### 미구현 신호 — 막힌 규칙 수 (구현 우선순위)", "",
+           "| 신호 | 무엇 | 걸린 규칙 |", "|---|---|---|"]
+    for tok, n in blocked.most_common():
+        what = "해설·자막 키워드" if tok.startswith("kw:") else " / ".join(
+            SIGNALS[a][1] for a in tok.split("|") if a in SIGNALS)
+        out.append(f"| `{tok}` | {what} | {n} |")
+    out += ["", "| 규칙 | 성립 조건 | 관측 신호 | 판정 | 인식 | 판단 |",
+            "|---|---|---|---|---|---|"]
+    for r in acted:
+        pre, sigs, how = ACTION[r["id"]]
+        shown = " ".join(f"`{s}`" if signal_built(s) else f"~~{s}~~" for s in sigs.split())
+        rs, js = st[r["id"]]
+        out.append(f"| {r['name']} | {pre} | {shown} | {how} | {rs} | {js} |")
+    out.append("")
+    return out
 
 
 def main() -> None:

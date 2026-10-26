@@ -450,6 +450,334 @@
 | 6.02(b) | 퀵리턴 피치 | 해설 | 타자 준비 전 투구 — 타자 자세가 필요 |
 | 6.02(b) | 이중동작·홉스텝 | 자세 | 6.02(a)(1) 이중 동작과 같은 검사(멈칫 뒤 재개) |
 
+## 행동 판정 로직 — 규칙마다 성립 조건 · 관측 신호 · 판정
+
+원본 `scripts/action_logic_src.py`. 판정은 두 길이다 — **인식**: 점수판·장면·해설·심판 동작으로 심판이 내린 판정을 알아본다 · **판단**: 자세·공·물체·시간으로 동작을 직접 본다(심판 판정과 어긋나면 심판을 따른다). 상태는 코드에서 센다. ~~취소선~~ 신호는 아직 못 본다.
+
+영상 대상 233개 — 인식 가능 202 · 불가 18 / 판단 가능 9 · 불가 124 · 판단 신호 없음 100
+
+### 미구현 신호 — 막힌 규칙 수 (구현 우선순위)
+
+| 신호 | 무엇 | 걸린 규칙 |
+|---|---|---|
+| `pose.contact` | 선수 간 접촉·충돌·주로 막기 | 30 |
+| `ball.touch` | 공이 사람·장비·관중에 닿음 | 19 |
+| `pose.runner_path` | 주자 경로(주로·3피트·추월·역주·이탈) | 17 |
+| `ball.dead_area` | 공이 볼데드 지역(관중석·덕아웃·장비 속)으로 | 15 |
+| `ball.track` | 공 궤적(바운드·파울라인·담장·폴) | 14 |
+| `pose.base_touch` | 발과 베이스 접촉(밟았는지·순서) | 10 |
+| `ball.catch` | 포구 여부(글러브 안·떨어뜨림·트랩) | 9 |
+| `pose.batter_feet` | 타자 발과 타석 선의 위치 | 8 |
+| `time.clock` | 피치클락 표시·경과 시간 | 6 |
+| `obj.equipment` | 몸에서 뗀 장비·배트가 날아감 | 5 |
+| `ball.zone` | 투구 위치(스트라이크존) | 4 |
+| `ctx.lineup` | 타순·라인업·교체 기록 | 4 |
+| `pose.runner_start` | 주자 출발 시점(포구·투구 대비) | 4 |
+| `pose.pitcher_rubber` | 축발과 투수판 접촉(밟음·걸침) | 4 |
+| `pose.pitcher_turn` | 투수 회전 방향·견제 쪽 멈칫 | 4 |
+| `pose.catcher_pos` | 포수 위치(포수석 안·홈플레이트 앞) | 4 |
+| `pose.coach` | 코치 위치·주자 접촉 | 4 |
+| `kw:퇴장` | 해설·자막 키워드 | 4 |
+| `pose.batter_swing` | 배트 회전 각도(체크스윙) | 3 |
+| `kw:타격방해` | 해설·자막 키워드 | 3 |
+| `kw:인정2루타` | 해설·자막 키워드 | 3 |
+| `ball.release` | 공을 놓았는지(송구 vs 시늉) | 3 |
+| `pose.slide_path` | 슬라이딩 시작점·방향·베이스 도달 | 3 |
+| `pose.fielder_pos` | 야수 위치(시프트·시야 방해) | 3 |
+| `kw:2루타` | 해설·자막 키워드 | 2 |
+| `kw:3루타` | 해설·자막 키워드 | 2 |
+| `kw:피치클락` | 해설·자막 키워드 | 2 |
+| `ctx.visits` | 마운드 방문 횟수 누적 | 2 |
+| `kw:퀵피치` | 해설·자막 키워드 | 2 |
+| `obj.foreign` | 손·글러브의 이물질·부착물 | 2 |
+| `kw:이물질` | 해설·자막 키워드 | 2 |
+| `pose.batter_move` | 타자가 홈플레이트·포수 쪽으로 움직임 | 2 |
+| `kw:타임` | 해설·자막 키워드 | 2 |
+| `kw:우천` | 해설·자막 키워드 | 2 |
+| `kw:체크스윙` | 해설·자막 키워드 | 2 |
+| `kw:안타` | 해설·자막 키워드 | 1 |
+| `kw:그라운드` | 해설·자막 키워드 | 1 |
+| `kw:만루` | 해설·자막 키워드 | 1 |
+| `kw:내야안타` | 해설·자막 키워드 | 1 |
+| `kw:번트` | 해설·자막 키워드 | 1 |
+| `kw:희생번트` | 해설·자막 키워드 | 1 |
+| `pose.batter_avoid` | 투구를 피하려는 동작 | 1 |
+| `kw:고의` | 해설·자막 키워드 | 1 |
+| `kw:타순` | 해설·자막 키워드 | 1 |
+| `kw:스리번트` | 해설·자막 키워드 | 1 |
+| `kw:파울팁` | 해설·자막 키워드 | 1 |
+| `kw:홈스틸` | 해설·자막 키워드 | 1 |
+| `kw:더블스틸` | 해설·자막 키워드 | 1 |
+| `kw:딜레이드` | 해설·자막 키워드 | 1 |
+| `kw:히트앤런` | 해설·자막 키워드 | 1 |
+| `kw:스퀴즈` | 해설·자막 키워드 | 1 |
+| `kw:협살` | 해설·자막 키워드 | 1 |
+| `pose.pitcher_facing` | 투수 몸이 타자를 향하는지 | 1 |
+| `kw:지연` | 해설·자막 키워드 | 1 |
+| `pose.pitcher_hand_mouth` | 투수판 원 안에서 손을 입에 댐 | 1 |
+| `kw:빈볼` | 해설·자막 키워드 | 1 |
+| `kw:헤드샷` | 해설·자막 키워드 | 1 |
+| `kw:무보살` | 해설·자막 키워드 | 1 |
+| `kw:직선타` | 해설·자막 키워드 | 1 |
+| `kw:고의낙구` | 해설·자막 키워드 | 1 |
+| `kw:3피트` | 해설·자막 키워드 | 1 |
+| `kw:추월` | 해설·자막 키워드 | 1 |
+| `kw:은닉구` | 해설·자막 키워드 | 1 |
+| `time.order` | 두 사건의 선후(3아웃 vs 홈 터치·공 vs 주자) | 1 |
+| `kw:밀어내기` | 해설·자막 키워드 | 1 |
+| `kw:관중` | 해설·자막 키워드 | 1 |
+| `kw:대타` | 해설·자막 키워드 | 1 |
+| `kw:대주자` | 해설·자막 키워드 | 1 |
+| `kw:교체` | 해설·자막 키워드 | 1 |
+| `kw:중단` | 해설·자막 키워드 | 1 |
+| `kw:부상` | 해설·자막 키워드 | 1 |
+| `kw:벤치클리어링` | 해설·자막 키워드 | 1 |
+| `kw:항의` | 해설·자막 키워드 | 1 |
+| `kw:콜드` | 해설·자막 키워드 | 1 |
+| `kw:노게임` | 해설·자막 키워드 | 1 |
+| `kw:서스펜디드` | 해설·자막 키워드 | 1 |
+| `kw:판독` | 해설·자막 키워드 | 1 |
+| `kw:챌린지` | 해설·자막 키워드 | 1 |
+| `kw:어필` | 해설·자막 키워드 | 1 |
+| `kw:실책` | 해설·자막 키워드 | 1 |
+| `kw:야수선택` | 해설·자막 키워드 | 1 |
+
+| 규칙 | 성립 조건 | 관측 신호 | 판정 | 인식 | 판단 |
+|---|---|---|---|---|---|
+| 스트라이크존 | 투구가 있었다 | `sb.count` ~~ball.zone~~ | 스트라이크 +1 & 헛스윙·파울 없음 → 존 통과(KBO는 ABS 판정을 그대로 받음) | 가능 | 불가 |
+| 볼·스트라이크 | 투구가 있었다 | `sb.count` `ev.pitch` `ev.swing_miss` | 점수판 볼·스트라이크 +1 → 그 투구 결과 | 가능 | — |
+| 삼진 | 직전 2스트라이크 | `sb.outs` `sb.count` `ev.strikeout` `kw:삼진` | 아웃 +1 & 다음 타자 & 낫아웃 단서 없음 → strikeout | 가능 | — |
+| 볼넷 | 직전 3볼 · 타격 없음 | `sb.bases` `sb.count` `ev.ball_four` `kw:볼넷` | 타자 1루 & 밀린 주자만 진루 & 아웃 그대로 → walk | 가능 | — |
+| 페어·파울 | 타격(contact)이 있었다 | `ev.contact` ~~ball.track~~ `sb.count` `ev.umpire_signal|ump.call` | 파울이면 스트라이크 +1(2S면 그대로)·주자 귀루 / 페어면 인플레이 — 심판 동작이 먼저 | 가능 | 불가 |
+| 파울폴 맞은 타구 | 뜬 타구가 폴 근처 | ~~ball.track~~ `ev.ball_over_fence` `sb.score` `kw:홈런` | 폴에 맞음 + 득점 = 주자 수+1 → 홈런 | 가능 | 불가 |
+| 포구의 정의 | 뜬공·직선타·송구 | ~~ball.catch~~ `ev.fielder_drops_ball` `sb.outs` | 공을 쥔 채 스스로 놓기 전까지 유지 → 포구 / 떨어뜨림 → 불인정(점수판 아웃 여부로 확인) | 가능 | 불가 |
+| 트랩 캐치 | 뜬공·직선타 낮게 잡음 | ~~ball.catch~~ ~~ball.track~~ `ev.replay_review` `sb.outs` | 땅에 먼저 닿음 → 포구 불인정 · 판독 뒤 점수판 아웃 변화로 확정 | 가능 | 불가 |
+| 옮겨 쥐다 떨어뜨림 | 포구 직후 옮겨 쥠 | ~~ball.catch~~ `ev.fielder_drops_ball` `ev.umpire_signal|ump.call` | 옮겨 쥐다 떨어뜨림 → 포구 인정(송구 동작 뒤) 여부는 심판 동작·점수판 아웃으로 | 가능 | 불가 |
+| 이닝·아웃카운트 | — | `sb.outs` `sb.inning` | 아웃 3 → 이닝·초말 바뀜(점수판으로 확인) | 가능 | — |
+| 정식 경기(9회) | — | `sb.inning` `sb.score` `ctx.game` | 9회 완료(홈팀 리드면 9회말 생략) → 경기 종료 | 가능 | — |
+| 끝내기 | 마지막 회(9회 이후) 말 · 홈팀 동점 이하 | `sb.inning` `sb.score` `ev.celebration` | 말 공격 중 홈팀이 앞서는 득점 → 즉시 종료(끝내기) | 가능 | — |
+| 플레이볼 | — | `ev.umpire_signal|ump.call` `ev.pitch` | 주심 '플레이' 동작 뒤 첫 투구 → 인플레이 시작 | 가능 | — |
+| 파울 볼데드 | 타격 · 공이 파울지역에서 안 잡힘 | `ev.contact` ~~ball.track~~ `sb.count` `sb.bases` | 파울 → 주자 원래 베이스·스트라이크 +1(2S면 그대로) | 가능 | 불가 |
+| 경기 종료 시점 | — | `sb.inning` `sb.score` `ev.ball_over_fence` | 9회초 끝 홈팀 리드 → 종료 / 9회 이후 말 홈팀 역전 득점 → 즉시 종료(담장 넘긴 홈런은 모두 득점) | 가능 | — |
+| 안타(단타) | 타격 | `ev.contact` `sb.bases` ~~kw:안타~~ | 타자 1루 & 아웃 그대로 & 실책 해설 없음 → 단타 | 가능 | — |
+| 2루타 | 타격 | `ev.contact` `sb.bases` ~~kw:2루타~~ | 타자 2루 → 2루타(인정 2루타 단서면 그쪽) | 가능 | — |
+| 3루타 | 타격 | `ev.contact` `sb.bases` ~~kw:3루타~~ | 타자 3루 → 3루타 | 가능 | — |
+| 홈런 | 타격 | `ev.ball_over_fence` `sb.score` `sb.bases` `kw:홈런` | 득점 = 주자 수+1 & 주자 모두 사라짐 → homerun | 가능 | — |
+| 그라운드 홈런 | 타격 · 담장 안 | `ev.contact` `ev.runner_scores` `sb.score` ~~kw:그라운드~~ | 담장 넘김 없이 타자까지 득점 & 실책 해설 없음 → 그라운드 홈런 | 가능 | — |
+| 만루홈런 | 만루 | `ev.ball_over_fence` `sb.score` ~~kw:만루~~ | 만루에서 득점 +4 → 만루홈런 | 가능 | — |
+| 내야안타 | 타격 · 내야 타구 | `ev.contact` `sb.bases` ~~kw:내야안타~~ | 타자 1루 & 내야 처리 장면 → 내야안타 | 가능 | — |
+| 기습번트 안타 | 번트 | `ev.contact` `sb.bases` ~~kw:번트~~ | 번트 뒤 타자 1루 & 아웃 그대로 → 번트 안타 | 가능 | — |
+| 희생번트 | 2아웃 전 · 주자 있음 | `ev.contact` `sb.outs` `sb.bases` ~~kw:희생번트~~ | 번트 뒤 아웃 +1 & 주자 진루 → 희생번트 | 가능 | — |
+| 낫아웃 출루 | 1루 비었거나 2아웃 | `ev.catcher_miss` `sb.count` `sb.bases` `kw:낫아웃` | 2S에서 포수 놓침 & 타자 1루 → dropped_third_strike | 가능 | — |
+| 낫아웃 성립 안 됨 | 1루 주자 있고 2아웃 전 | `ev.catcher_miss` `sb.outs` | 2S 놓쳐도 아웃 +1 → 그냥 삼진(낫아웃 불성립) | 가능 | — |
+| 낫아웃인데 안 뜀 | 낫아웃 성립 상황 | `ev.catcher_miss` ~~pose.runner_path~~ `sb.outs` | 타자가 1루로 안 뛰고 흙 원을 벗어남 → 아웃 | 가능 | 불가 |
+| 몸에 맞는 공 | 타격 시도 없음 | `ev.hit_by_pitch` `sb.bases` `kw:몸에맞는공` | 타자 1루 & 아웃 그대로 → hbp | 가능 | — |
+| 존 안 공에 맞음 | 투구가 타자에 닿음 | `ev.hit_by_pitch` ~~ball.zone~~ `sb.count` | 닿은 위치가 존 안 → 스트라이크(출루 없음) | 가능 | 불가 |
+| 피하지 않은 사구 | 투구가 타자에 닿음 · 존 밖 | `ev.hit_by_pitch` ~~pose.batter_avoid~~ `sb.count` | 피하는 동작 없음 → 볼(출루 없음) — 심판 재량이라 '의심'만 | 가능 | 불가 |
+| 헛스윙 중 몸에 맞음 | 투구가 타자에 닿음 | `ev.hit_by_pitch` ~~pose.batter_swing~~ `ev.swing_miss` `sb.count` | 스윙 중 맞음 → 스트라이크(2S면 삼진) | 가능 | 불가 |
+| 타격방해 출루 | 타격 시도 | ~~kw:타격방해~~ `sb.bases` `ev.umpire_signal|ump.call` | 타자 1루 & 해설 '타격방해' → 포수 타격방해 | 가능 | — |
+| 타구가 심판·주자에 맞음(야수 통과 전) | 페어 타구 · 내야수 통과 전 | ~~ball.touch~~ `ev.contact` `sb.bases` `sb.outs` | 심판에 맞음 → 타자 1루·볼데드 / 주자에 맞음 → 그 주자 아웃·타자 1루 | 가능 | 불가 |
+| 자동 고의4구 | 수비 측 신청 | `sb.bases` `sb.count` ~~kw:고의~~ | 투구 없이 타자 1루 & 해설 '고의' → walk(자동 고의4구) | 불가 | — |
+| 인정 2루타 — 바운드 담장 넘음 | 페어 타구 | ~~ball.track~~ `ev.ball_over_fence` `sb.bases` ~~kw:인정2루타~~ | 바운드로 담장 넘음 → 타자·주자 2베이스 (홈런과 구분: 득점 수 < 주자+1) | 가능 | 불가 |
+| 인정 2루타 — 펜스·담쟁이 끼임 | 페어 타구 | ~~ball.dead_area~~ `sb.bases` ~~kw:인정2루타~~ | 펜스·담쟁이에 끼임 → 2베이스 | 불가 | 불가 |
+| 야수 맞고 관중석 | 페어 타구 | ~~ball.touch~~ ~~ball.dead_area~~ `sb.bases` | 야수 맞고 파울 관중석 → 2베이스 | 가능 | 불가 |
+| 야수 맞고 넘어간 홈런 | 페어 뜬공 | ~~ball.touch~~ `ev.ball_over_fence` `sb.score` `kw:홈런` | 야수 맞고 페어 지역 담장 넘음 → 홈런 | 가능 | 불가 |
+| 타석 밖에서 타격 | 타격 | ~~pose.batter_feet~~ `ev.contact` `sb.outs` | 타격 순간 한 발이라도 완전히 타석 밖 → 타자 아웃(불법 타구, 주자 귀루) | 가능 | 불가 |
+| 투수 준비 중 타석 바꿈 | 투수가 투구 준비 완료 | ~~pose.batter_feet~~ `pose.set_stop` `sb.outs` | 투수 준비 뒤 반대 타석으로 이동 → 타자 아웃 | 가능 | 불가 |
+| 타순 착오 | 수비 어필 | ~~ctx.lineup~~ ~~kw:타순~~ `ev.umpire_signal|ump.call` | 다음 투구 전 어필 & 다른 타자가 타석 완료 → 정위 타자 아웃 | 가능 | — |
+| 스리번트 아웃 | 2스트라이크 | `ev.contact` `sb.outs` `sb.count` ~~kw:스리번트~~ | 2S 번트 파울 → 아웃 +1(삼진) | 가능 | — |
+| 파울팁 | 배트에 스침 | `ev.contact` ~~ball.catch~~ `sb.count` ~~kw:파울팁~~ | 포수가 바로 잡음 → 스트라이크 +1(2S면 삼진) | 가능 | 불가 |
+| 배트가 공을 두 번 맞힘 | 페어 타구 | ~~ball.touch~~ `ev.contact` `sb.outs` | 배트가 페어 지역에서 공을 다시 맞힘 → 타자 아웃(부러진 배트 조각 예외) | 가능 | 불가 |
+| 자기 타구에 맞음 | 타구가 타자에 닿음 | ~~ball.touch~~ ~~pose.batter_feet~~ `sb.outs` `sb.count` | 타석 안이면 파울 / 타석 밖이면 아웃 | 가능 | 불가 |
+| 배트 던짐 | 배트가 손에서 날아감 | ~~obj.equipment~~ ~~pose.contact~~ `sb.outs` | 배트가 수비·포구를 방해 → 아웃 / 아니면 무관 | 가능 | 불가 |
+| 체크스윙 | 스윙을 멈춤 | ~~pose.batter_swing~~ `sb.count` `ev.umpire_signal|ump.call` | 배트가 돌았다 → 스트라이크 · 심판 동작이 먼저 | 가능 | 불가 |
+| 타자 타임 제한(피치클락) | 피치클락 시행 리그 | ~~time.clock~~ `sb.count` ~~kw:피치클락~~ | 타자 준비 시한 초과 → 자동 스트라이크 | 불가 | 불가 |
+| 타순 지키기 | — | ~~ctx.lineup~~ `sb.inning` | 이닝 첫 타자 = 직전 이닝 마지막 완료 타자 다음 → 어긋나면 타순 착오 후보 | 불가 | — |
+| 세트 후 타석 이탈 | 투수가 세트·와인드업 진입 | ~~pose.batter_feet~~ `pose.set_stop` `ev.pitcher_stops` | 타자가 타석을 떠나 투수가 멈춤 → 보크 아님(타자 쪽 사유) | 가능 | 불가 |
+| 타석 거부 | 타자 차례 | `ev.umpire_signal` `sb.count` | 타석에 안 들어감 & 투구 없이 스트라이크 +1 → 타석 거부 스트라이크 | 가능 | — |
+| 타석 한 발 유지 | 타석 중 · 예외 상황 아님 | ~~pose.batter_feet~~ ~~time.clock~~ `sb.count` | 두 발 모두 타석 밖 & 예외(스윙·번트·폭투·타임) 아님 → 경고·스트라이크 | 가능 | 불가 |
+| 타자 정위치 | — | ~~pose.batter_feet~~ | 양발이 타석 안(선 포함) → 정위치 | — | 불가 |
+| 타석 완료 | — | `sb.count` `sb.outs` `sb.bases` | 카운트 리셋 & (아웃 +1 또는 타자 출루) → 타석 완료 | 가능 | — |
+| 원바운드 투구 | 투구가 땅에 먼저 닿음 | ~~ball.track~~ `sb.count` `ev.hit_by_pitch` `ev.swing_miss` | 볼 +1 / 타자에 맞으면 사구 / 2S 헛스윙이면 낫아웃 상황 | 가능 | 불가 |
+| 야수 통과 후 심판·주자에 맞은 타구 | 페어 타구 · 야수 통과·접촉 뒤 | ~~ball.touch~~ `sb.bases` | 심판·주자에 맞아도 인플레이 → 아웃 없음 | 가능 | 불가 |
+| 파울 타구 고의로 건드림 | 타자 주루 중 · 파울 지역 굴러가는 공 | ~~ball.touch~~ ~~pose.runner_path~~ `sb.outs` | 타자가 일부러 건드림 → 타자 아웃·볼데드 | 가능 | 불가 |
+| 도루 | 주자 있음 · 같은 타석 | `sb.bases` `ev.slide` `kw:도루` | 주자 한 명 한 베이스 & 폭투·포일 단서 없음 → steal | 가능 | — |
+| 도루 실패 | 주자 있음 · 타격 없음 | `sb.outs` `sb.bases` `ev.slide` `ev.out_at_base` `kw:도루` | 주자 사라짐 & 아웃 +1 & 같은 타석 → caught_stealing | 가능 | — |
+| 홈스틸 | 3루 주자 | `ev.slide` `ev.runner_scores` `sb.score` ~~kw:홈스틸~~ | 타격 없이 슬라이딩 득점 & 포수 놓침 아님 → steal(홈스틸) | 가능 | — |
+| 더블스틸 | 주자 둘 이상 | `sb.bases` `sb.count` `ev.slide` ~~kw:더블스틸~~ | 모든 주자 +1 & 카운트 변함(투구 있음) → 더블스틸 | 가능 | — |
+| 딜레이드 스틸 | 주자 있음 | ~~pose.runner_start~~ `sb.bases` ~~kw:딜레이드~~ | 투구가 포수에게 간 뒤 출발 & 진루 → 딜레이드 스틸 | 불가 | 불가 |
+| 견제사 | 주자 있음 | `ev.pickoff_throw` `ev.out_at_base` `sb.outs` `kw:견제` | 견제구 뒤 주자 아웃 → caught_stealing(견제사) | 가능 | — |
+| 태그업 진루 | 2아웃 전 · 뜬공 | `ev.deep_fly` `sb.outs` `sb.score` ~~pose.runner_start~~ | 포구 뒤 출발 & 진루·득점 → 태그업 | 가능 | 불가 |
+| 태그업 이른 출발 | 뜬공 포구 | ~~pose.runner_start~~ ~~ball.catch~~ `ev.umpire_signal|ump.call` | 포구 전 출발 & 수비 어필 → 아웃 | 가능 | 불가 |
+| 한 베이스에 두 주자 | 두 주자가 한 베이스 | ~~pose.base_touch~~ ~~pose.contact~~ `sb.outs` | 포스 아님 → 앞 주자 권리, 뒤 주자 태그 시 아웃 | 가능 | 불가 |
+| 역순 리터치 | 귀루 중 | ~~pose.base_touch~~ ~~pose.runner_path~~ | 역순으로 안 밟음 → 어필 시 아웃 | — | 불가 |
+| 보크 진루 | 주자 있음 · 투구 없음 | `sb.bases` `sb.count` `kw:보크` `ev.pitcher_stops` | 모든 주자 한 베이스 & 아웃·카운트 그대로 → balk | 가능 | — |
+| 폭투 진루 | 주자 있음 · 투구 있음 | `ev.catcher_miss` `sb.bases` `sb.count` `kw:폭투` | 포수 놓침 & 진루 & 카운트 변함 → wild_pitch | 가능 | — |
+| 포일 진루 | 주자 있음 · 투구 있음 | `ev.catcher_miss` `sb.bases` `sb.count` `kw:포일` | 포수 놓침 & 진루 & 해설 '포일' → passed_ball | 가능 | — |
+| 포구 후 덕아웃·관중석으로 넘어짐 | 뜬공 포구 | ~~ball.catch~~ ~~ball.dead_area~~ `sb.bases` `sb.outs` | 포구 뒤 볼데드 지역으로 넘어짐 → 아웃 +1 & 다른 주자 1베이스 | 가능 | 불가 |
+| 주루방해 진루 | 공 없는 야수가 주자 진로에 | ~~pose.contact~~ ~~pose.runner_path~~ `sb.bases` `sb.score` ~~ball.dead_area~~ `ev.umpire_signal` | 주루방해 동작 → 방해 없었으면 갔을 베이스까지(심판 판정 확인) | 가능 | 불가 |
+| 장비로 페어 타구 터치 | 페어 타구 | ~~obj.equipment~~ ~~ball.touch~~ `sb.bases` `sb.score` ~~ball.dead_area~~ `ev.umpire_signal` | 던진·든 장비로 페어 타구 터치 → 3베이스 | 가능 | 불가 |
+| 장비로 송구 터치 | 송구 | ~~obj.equipment~~ ~~ball.touch~~ `sb.bases` `sb.score` ~~ball.dead_area~~ `ev.umpire_signal` | 장비로 송구 터치 → 2베이스 | 가능 | 불가 |
+| 장비로 홈런 타구 막음 | 담장 넘을 뜬공 | ~~obj.equipment~~ ~~ball.track~~ `sb.score` | 장비를 던져 막음 → 홈런 | 가능 | 불가 |
+| 악송구 볼데드 지역 | 송구 | ~~ball.dead_area~~ `sb.bases` `sb.score` ~~ball.dead_area~~ `ev.umpire_signal` | 송구가 볼데드 지역으로 → 2베이스(송구 순간 기준) | 가능 | 불가 |
+| 투구·견제 볼데드 지역 | 투수판 위 투구·견제 | ~~ball.dead_area~~ `ev.pickoff_throw` `sb.bases` `sb.score` ~~ball.dead_area~~ `ev.umpire_signal` | 볼데드 지역으로 → 1베이스 | 가능 | 불가 |
+| 투구가 마스크·장비에 끼임 | 투구 | ~~ball.dead_area~~ `ev.catcher_miss` `sb.bases` `sb.score` ~~ball.dead_area~~ `ev.umpire_signal` | 마스크·장비에 낌 → 1베이스 | 가능 | 불가 |
+| 주자가 타구에 맞음 | 페어 타구 · 내야수 통과 전 | ~~ball.touch~~ `sb.outs` `sb.bases` | 주자에 맞음 → 그 주자 아웃·타자 1루 | 가능 | 불가 |
+| 내야수 통과 후 맞음 | 페어 타구 · 내야수 통과 뒤 | ~~ball.touch~~ `sb.outs` | 주자에 맞아도 아웃 없음 | 가능 | 불가 |
+| 인필드 플라이 때 베이스 위에서 맞음 | 인필드 플라이 선언 · 주자가 베이스 위 | ~~ball.touch~~ ~~pose.base_touch~~ `sb.outs` | 주자 아웃 없음 · 타자만 아웃 | 가능 | 불가 |
+| 히트앤런 | 주자 있음 | ~~pose.runner_start~~ `ev.contact` `sb.bases` ~~kw:히트앤런~~ | 투구와 동시 출발 + 타격 → 히트앤런 | 가능 | 불가 |
+| 스퀴즈 | 3루 주자 | `ev.contact` `ev.runner_scores` `sb.score` ~~kw:스퀴즈~~ | 번트와 동시에 홈 쇄도 득점 → 스퀴즈 | 가능 | — |
+| 협살 | 주자가 베이스 사이 | ~~pose.runner_path~~ `ev.out_at_base` `sb.outs` ~~kw:협살~~ | 베이스 사이 왕복 + 태그 → 협살 | 가능 | 불가 |
+| 베이스 점유권 | — | ~~pose.base_touch~~ `sb.bases` | 먼저 밟은 주자가 권리(포스로 비워야 할 때까지) | 가능 | 불가 |
+| 포스 상황 한 베이스 두 주자 | 포스 상황 · 한 베이스 두 주자 | ~~pose.base_touch~~ `sb.outs` | 뒤 주자 권리 → 앞 주자 태그·포스 아웃 | 가능 | 불가 |
+| 타자 출루로 밀려 진루 | 볼넷·사구·타격방해 | `sb.bases` `ev.ball_four` `ev.hit_by_pitch` | 밀린 주자만 +1(안 밀린 주자 그대로) → 정상 진루 | 가능 | — |
+| 도루 중 타격방해 | 도루 시도 중 | ~~pose.contact~~ `ev.slide` `sb.bases` ~~kw:타격방해~~ | 포수 방해 → 주자 진루·타자 1루 | 가능 | 불가 |
+| 장비로 투구 터치 | 투구 | ~~obj.equipment~~ ~~ball.touch~~ `sb.bases` `sb.score` ~~ball.dead_area~~ `ev.umpire_signal` | 장비로 투구 터치 → 주자 1베이스 | 가능 | 불가 |
+| 타구가 파울 쪽 관중석·펜스 밑으로 | 페어 타구 | ~~ball.track~~ ~~ball.dead_area~~ `sb.bases` ~~kw:인정2루타~~ | 파울 쪽 관중석·펜스 밑으로 → 2베이스 | 불가 | 불가 |
+| 투구가 홈 쇄도 주자에 맞음 | 주자 홈 쇄도 | ~~ball.touch~~ `ev.slide` `sb.score` | 투구가 주자에 맞음 → 볼데드·진루(득점) | 가능 | 불가 |
+| 2S 홈스틸 주자가 투구에 맞음 | 2S · 3루 주자 홈스틸 | ~~ball.touch~~ ~~ball.zone~~ `sb.outs` `sb.score` | 존 안에서 주자에 맞음 → 삼진 · 2아웃이면 득점 무효 | 가능 | 불가 |
+| 와인드업 포지션 | 와인드업 자세 | `pose.set_stop` ~~pose.pitcher_rubber~~ | 투구·견제(내딛고)·이탈(축발 먼저) 외 동작 → 불법투구 | — | 불가 |
+| 세트 포지션 | 주자 있음 | `pose.set_stop` `pose.no_stop` | 세트 진입 뒤 상체 정지 ≥0.3초 → 합법 세트 / 정지 없음 → balk_13_no_stop | — | 가능 |
+| 피치클락 — 투수 위반 | 피치클락 시행 리그 | ~~time.clock~~ `sb.count` ~~kw:피치클락~~ | 시한 초과 & 투구 없이 볼 +1 → 투수 위반 | 불가 | 불가 |
+| 투수판 이탈 횟수 초과 | 주자 있음 · 이탈 허용 횟수 초과 | `ev.pickoff_throw` `pose.step_off` `sb.bases` `kw:보크` | 초과 이탈·견제 후 주자 생존 → balk(주자 1베이스) | 가능 | 가능 |
+| 투수 교체 | — | `ev.pitching_change` `kw:투수교체` | 새 투수 등판 장면·해설 → pitcher(교체) | 가능 | — |
+| 마운드 방문 | — | `ev.mound_visit` ~~ctx.visits~~ | 같은 이닝 같은 투수 두 번째 방문 → 그 투수 교체 | 가능 | — |
+| 투수 정위치 | 투구 | `pose.set_stop` ~~pose.pitcher_rubber~~ | 와인드업·세트 중 하나 → 합법 / 아니면 불법투구 | — | 불가 |
+| 와인드업에서 투수판 이탈 | 와인드업 자세 | `pose.step_off` `pose.foot_off` | 축발 먼저 → 합법 이탈 / 자유발 먼저·세트 진입 → 보크 | — | 가능 |
+| 축발 빼면 내야수 | — | `pose.step_off` | 축발 먼저 뺌 → 이후 동작은 야수(보크 판정 안 함) | — | 가능 |
+| 경기당 마운드 방문 횟수 | — | `ev.mound_visit` ~~ctx.visits~~ | 방문 횟수 > 한도 → 투수 교체 의무 | 가능 | — |
+| 다른 야수에게 공 돌리며 지연 | 타자 준비 완료 · 주자 없음 | `ev.pitch` ~~ball.track~~ `ctx.game` | 포수 외 야수에게 반복 송구 → 경고(반복 시 교체) | 가능 | 불가 |
+| 투구 동작 중단 | 주자 있음 · 축발 투수판 위 | `pose.double_motion` `pose.kick_aborted` `pose.foot_off` `ev.pitcher_stops` `kw:보크` `sb.bases` | 자세 의심(이중동작·다리 멈춤·자유발 이동) + 해설 '보크' → balk / 점수판 모든 주자 +1이면 확정 | 가능 | 가능 |
+| 1루 견제 페이크 | 주자 있음 · 축발 투수판 위 | ~~ball.release~~ ~~pose.pitcher_turn~~ `ev.pickoff_throw` `kw:보크` `sb.bases` | 1루 쪽 송구 동작 & 공을 놓지 않음 → balk | 가능 | 불가 |
+| 3루 견제 페이크 | 주자 있음 · 축발 투수판 위 | ~~ball.release~~ ~~pose.pitcher_turn~~ `kw:보크` `sb.bases` | 3루 쪽 송구 동작 & 공을 놓지 않음(뒤 1루 견제 포함) → balk · 2루 페이크는 아님 | 가능 | 불가 |
+| 견제 시 발 안 내딛음 | 주자 있음 · 축발 투수판 위 | `pose.pickoff_no_step` `ev.pickoff_throw` `kw:보크` `sb.bases` | 견제 송구 & 자유발을 그 베이스 쪽으로 안 내딛음 → balk | 가능 | 가능 |
+| 빈 베이스 견제 | 주자 있음 · 축발 투수판 위 | `ev.pickoff_throw` ~~pose.pitcher_turn~~ `sb.bases` `kw:보크` | 견제 방향 베이스가 점수판상 비었음 & 플레이 목적 아님 → balk (1루 주자 때 2루는 예외) | 가능 | 불가 |
+| 주자 있을 때 불법투구 | 주자 있음 | ~~time.clock~~ ~~pose.batter_feet~~ `kw:보크` ~~kw:퀵피치~~ | 타자 준비 전 투구(퀵피치) → balk | 가능 | 불가 |
+| 타자를 향하지 않고 투구 | 주자 있음 · 투구 | ~~pose.pitcher_facing~~ `kw:보크` | 타자를 향하지 않고 투구 → balk | 가능 | 불가 |
+| 투수판 밖에서 투구 동작 | 주자 있음 | ~~pose.pitcher_rubber~~ `kw:보크` | 투수판 안 밟고 투구 관련 동작 → balk | 가능 | 불가 |
+| 불필요한 지연 | 주자 있음 | ~~time.clock~~ `kw:보크` ~~kw:지연~~ | 불필요한 지연(해설·심판 선언) → balk | 가능 | 불가 |
+| 공 없이 투수판(은닉구 중) | 주자 있음 · 은닉구 상황 | ~~pose.pitcher_rubber~~ ~~ball.release~~ `kw:보크` | 공 없이 투수판 밟거나 걸침 → balk | 가능 | 불가 |
+| 손 분리 | 주자 있음 · 세트 정지 뒤 | `pose.hands_separated` `kw:보크` `sb.bases` | 투구·견제·이탈 없이 손을 내림 → balk | 가능 | 가능 |
+| 공 떨어뜨림 | 주자 있음 · 축발 투수판 위 | ~~ball.track~~ `ev.fielder_drops_ball` `kw:보크` `sb.bases` | 공을 떨어뜨림(파울라인 안 넘음) → balk | 가능 | 불가 |
+| 포수 보크 | 고의4구 투구 | ~~pose.catcher_pos~~ `kw:보크` `sb.bases` | 공이 손을 떠나기 전 포수가 포수석 밖 → balk | 가능 | 불가 |
+| 세트 정지 없음 | 주자 있음 · 세트 포지션 | `pose.no_stop` `pose.set_stop` `kw:보크` `sb.bases` | 다리 들기 직전 상체 정지 <0.3초 → balk | 가능 | 가능 |
+| 끝내기 보크 | 마지막 회 말 · 3루 주자 · 동점 이하 | `sb.score` `sb.inning` `kw:보크` | 보크로 결승 득점 → 끝내기 보크(balk) | 가능 | — |
+| 퀵리턴 피치 | 타자 준비 전 | ~~pose.batter_feet~~ ~~time.clock~~ ~~kw:퀵피치~~ | 주자 있음 → 보크 / 없음 → 볼 | 불가 | 불가 |
+| 이중동작·홉스텝 | 투구 동작 중 | `pose.double_motion` `pose.foot_off` | 멈칫·발 재딛기 → 불법투구 의심(리그 해석) | — | 가능 |
+| 입에 손 | 투수판 원 안 | ~~pose.pitcher_hand_mouth~~ `sb.count` | 입에 손 & 닦지 않고 투구 → 볼 | 가능 | 불가 |
+| 부정투구(이물질·공 훼손) | — | ~~obj.foreign~~ ~~kw:이물질~~ `ev.umpire_signal|ump.call` | 공에 이물질·흠집 + 심판 확인 → 퇴장 | 가능 | 불가 |
+| 고의 빈볼 | 투구가 타자에 닿음 | `ev.hit_by_pitch` ~~kw:빈볼~~ `ev.umpire_signal|ump.call` | 고의 판단(경고·퇴장 동작) → 퇴장 | 가능 | — |
+| 헤드샷 퇴장 | 직구가 머리에 닿음 | `ev.hit_by_pitch` ~~kw:헤드샷~~ `ev.umpire_signal|ump.call` | 머리 사구 + 퇴장 선언 → 투수 퇴장(KBO) | 가능 | — |
+| 1루 주자 때 몸 돌려 2루 송구 | 1루 주자 | ~~pose.pitcher_turn~~ `ev.pickoff_throw` | 1루 쪽 멈칫 없이 회전 → 2루 송구는 보크 아님 | 가능 | 불가 |
+| 고의4구 때 포수 위치 | 고의4구 투구 | ~~pose.catcher_pos~~ | 공이 손 떠날 때까지 포수석 안 → 합법 / 밖 → balk_12 | — | 불가 |
+| 이물질 소지 | — | ~~obj.foreign~~ `ev.umpire_signal|ump.call` ~~kw:이물질~~ | 심판 점검에서 부착물 확인 → 퇴장 | 가능 | 불가 |
+| 뜬공 아웃 | 뜬공 | `ev.deep_fly` `ev.infield_popup` ~~ball.catch~~ `sb.outs` | 뜬공 장면 & 아웃 +1 → 뜬공 아웃 | 가능 | 불가 |
+| 땅볼 아웃 | 땅볼 | `ev.contact` `ev.out_at_base` `sb.outs` | 1루 아웃 & 타자 사라짐 → 땅볼 아웃 | 가능 | — |
+| 포스아웃 | 포스 상황 | `ev.out_at_base` `sb.outs` `sb.bases` | 진루 의무 주자 사라짐 & 아웃 +1 → 포스아웃 | 가능 | — |
+| 태그아웃 | — | `ev.out_at_base` ~~pose.contact~~ `sb.outs` | 베이스 밖 주자 태그 & 아웃 +1 → 태그아웃 | 가능 | 불가 |
+| 병살 | 주자 있음 | `sb.outs` `ev.out_at_base` `kw:병살` | 아웃 +2(삼진+도루실패 제외) → double_play | 가능 | — |
+| 삼중살 | 주자 둘 이상 · 무사 | `sb.outs` `ev.out_at_base` `kw:삼중살` | 아웃 +3 & 단서 → triple_play | 가능 | — |
+| 무보살 삼중살 | 주자 둘 이상 · 무사 | `sb.outs` `ev.out_at_base` `kw:삼중살` ~~kw:무보살~~ | 한 야수가 아웃 3 → triple_play(무보살) | 가능 | — |
+| 직선타 병살 | 주자 있음 | ~~ball.catch~~ `sb.outs` ~~kw:직선타~~ `kw:병살` | 직선타 포구 + 귀루 못 한 주자 아웃 → double_play | 가능 | 불가 |
+| 인필드 플라이 | 무사·1사 · 1·2루 또는 만루 | `ev.infield_popup` `sb.outs` `sb.bases` `kw:인필드플라이` | 내야 뜬공 & 아웃 +1 & 주자 그대로 → infield_fly | 가능 | — |
+| 인필드 플라이 떨어뜨림 | 인필드 플라이 선언 | `ev.fielder_drops_ball` `sb.outs` `sb.bases` | 떨어뜨려도 타자 아웃 유지 · 주자 진루는 위험 감수 | 가능 | — |
+| 고의낙구 | 무사·1사 · 1루 주자 · 내야 뜬공·직선타 | `ev.fielder_drops_ball` ~~ball.catch~~ ~~kw:고의낙구~~ `ev.umpire_signal|ump.call` | 글러브에 닿은 공을 일부러 떨어뜨림 → 타자 아웃·볼데드·주자 귀루 | 가능 | 불가 |
+| 3피트 라인 위반 | 1루 송구 플레이 | ~~pose.runner_path~~ ~~ball.track~~ ~~kw:3피트~~ | 타자주자가 3피트 라인 밖으로 뛰며 송구 방해 → 타자 아웃 | 불가 | 불가 |
+| 태그 피해 주로 이탈 | 태그 시도 중 | ~~pose.runner_path~~ ~~pose.contact~~ `sb.outs` | 태그 피해 주로에서 3피트 넘게 이탈 → 주자 아웃 | 가능 | 불가 |
+| 주루 포기 | 1루를 밟은 뒤 | ~~pose.runner_path~~ | 진루 포기하고 더그아웃 쪽으로 이탈 → 주자 아웃 | — | 불가 |
+| 주자 고의 송구 방해 | 송구 플레이 | ~~pose.contact~~ ~~ball.touch~~ `sb.outs` `ev.umpire_signal|ump.call` | 주자가 고의로 송구를 막음 → 주자 아웃(병살 방지면 타자도) | 가능 | 불가 |
+| 앞 주자 추월 | 주자 둘 이상 | ~~pose.runner_path~~ `sb.outs` ~~kw:추월~~ | 뒤 주자가 앞 주자를 앞지름 → 뒤 주자 아웃 | 불가 | 불가 |
+| 역주(교란) | 베이스를 얻은 뒤 | ~~pose.runner_path~~ | 수비 혼란 목적 역주 → 아웃 | — | 불가 |
+| 1루 오버런 후 진루 시도 | 1루 오버런 | ~~pose.runner_path~~ ~~pose.contact~~ `sb.outs` | 2루로 가려는 동작 뒤 태그 → 아웃 | 가능 | 불가 |
+| 홈 미터치 | 홈 쇄도 | ~~pose.base_touch~~ ~~pose.contact~~ `sb.score` | 홈 미터치 & 태그·어필 → 아웃 | 가능 | 불가 |
+| 외야수 1루 송구 아웃 | 외야 앞 땅볼 | `ev.out_at_base` ~~ball.track~~ `sb.outs` | 외야수가 1루로 송구해 타자 아웃 | 가능 | 불가 |
+| 동료(주자 외)의 수비 방해 | — | ~~pose.contact~~ ~~pose.coach~~ `sb.outs` | 타자 팀 동료(주자 외)가 수비 방해 → 타자(또는 대상 주자) 아웃 | 가능 | 불가 |
+| 은닉구 아웃 | 주자 베이스 이탈 | `ev.out_at_base` `sb.outs` ~~kw:은닉구~~ | 투구 동작 없이 태그아웃 & 해설 → 은닉구 | 가능 | — |
+| 누의 공과 | 주자 진루·귀루 | ~~pose.base_touch~~ `ev.umpire_signal|ump.call` `sb.outs` | 베이스 미터치 & 수비 어필 → 아웃 | 가능 | 불가 |
+| 오버런 귀루 중 어필 | 1루 오버런 뒤 | ~~pose.runner_path~~ ~~pose.contact~~ `sb.outs` | 즉시 귀루 안 함 & 태그 → 아웃 | 가능 | 불가 |
+| 4번째 아웃 | 3아웃 뒤 · 어필 | `sb.outs` `sb.score` `ev.umpire_signal|ump.call` | 어필로 바꾼 아웃이 득점을 지우면 → 득점 취소 | 가능 | — |
+| 득점 인정 시점 | 3아웃 플레이 중 득점 | ~~time.order~~ `ev.runner_scores` `ev.out_at_base` `sb.score` | 3아웃(포스·타자주자 아님)보다 홈 터치가 먼저 → 득점 인정 | 가능 | 불가 |
+| 앞 주자 누의 공과와 득점 | 앞 주자 누의 공과 어필 · 3아웃 | ~~pose.base_touch~~ `sb.score` `sb.outs` | 어필 3아웃 → 뒤 주자 득점 무효(포스면 앞 주자도) | 가능 | 불가 |
+| 홈 미터치 어필 | 홈 미터치 · 귀루 안 함 | ~~pose.base_touch~~ `ev.umpire_signal|ump.call` `sb.score` | 수비가 홈 태그 & 어필 → 아웃·득점 무효 | 가능 | 불가 |
+| 포스 3아웃 득점 무효 | 3아웃이 포스아웃 | `sb.outs` `sb.score` `ev.out_at_base` | 포스 3아웃 → 같은 플레이 득점 불인정 | 가능 | — |
+| 타자주자 1루 전 3아웃 | 3아웃이 1루 전 타자주자 | `sb.outs` `sb.score` `ev.out_at_base` | 타자주자 1루 전 3아웃 → 득점 불인정 | 가능 | — |
+| 끝내기 밀어내기 | 마지막 회 말 · 만루 · 동점 | `sb.bases` `sb.score` `ev.ball_four` ~~kw:밀어내기~~ | 볼넷·사구로 결승 득점 → walk(끝내기) | 가능 | — |
+| 끝내기 만루홈런 단타 | 마지막 회 말 · 만루 · 담장 넘김 | `ev.ball_over_fence` `sb.score` `ev.celebration` | 결승점 뒤 타자가 베이스를 다 안 돎 → 결승점만·단타 | 가능 | — |
+| 끝내기 희생플라이 | 마지막 회 말 · 2아웃 전 · 3루 주자 | `ev.deep_fly` `sb.score` `sb.outs` `kw:희생플라이` | 뜬공 아웃 + 결승 득점 → sac_fly(끝내기) | 가능 | — |
+| 끝내기 폭투·보크·실책 | 마지막 회 말 · 3루 주자 | `ev.catcher_miss` `sb.score` `kw:폭투` | 폭투·포일·보크·실책으로 결승 득점 → 해당 코드(끝내기) | 가능 | — |
+| 희생플라이 | 2아웃 전 · 3루 주자 | `ev.deep_fly` `sb.outs` `sb.score` `kw:희생플라이` | 아웃 +1 & 득점 +1 → sac_fly | 가능 | — |
+| 낫아웃 후 타자 방해 | 낫아웃 상황 | ~~pose.contact~~ `ev.catcher_miss` `sb.outs` | 타자가 포수의 공 처리를 방해 → 타자 아웃 | 가능 | 불가 |
+| 득점·아웃된 주자의 방해 | 득점·아웃된 주자 | ~~pose.contact~~ ~~pose.runner_path~~ `sb.outs` | 방해 → 플레이 대상 주자 아웃 | 가능 | 불가 |
+| 주자가 수비 우선권 방해 | 야수가 타구 처리 중 | ~~pose.contact~~ `sb.outs` `ev.umpire_signal|ump.call` | 주자가 야수와 충돌·방해 → 주자 아웃 | 가능 | 불가 |
+| 코치 신체 접촉 | — | ~~pose.coach~~ ~~pose.contact~~ `sb.outs` | 코치가 주자를 붙잡거나 밀어 도움 → 주자 아웃 | 가능 | 불가 |
+| 코치가 송구 유도 | 3루 주자 | ~~pose.coach~~ ~~ball.track~~ `sb.outs` | 코치가 홈으로 뛰어 송구 유도 → 주자 아웃 | 가능 | 불가 |
+| 타자가 포수 송구 방해 | 포수 송구·수비 | ~~pose.batter_move~~ ~~pose.contact~~ `sb.outs` `sb.bases` | 타자가 타석 밖으로 움직여 방해 → 타자 아웃·주자 귀루 | 가능 | 불가 |
+| 백스윙이 포수 맞음 | 스윙 뒤 | ~~pose.batter_swing~~ ~~pose.contact~~ `sb.bases` | 백스윙이 포수에 닿음 → 볼데드·주자 귀루 | 가능 | 불가 |
+| 2아웃 전 홈 플레이 타자 방해 | 3루 주자 · 2아웃 전 · 홈 플레이 | ~~pose.batter_move~~ ~~pose.contact~~ `sb.outs` | 타자 방해 → 3루 주자 아웃(2아웃이면 타자 아웃) | 가능 | 불가 |
+| 병살 막는 고의 방해 | 병살 가능 상황 | ~~pose.slide_path~~ ~~pose.contact~~ `sb.outs` `ev.umpire_signal|ump.call` | 주자가 고의로 야수 방해 → 주자 + 타자 아웃 | 가능 | 불가 |
+| 타자주자의 병살 방지 고의 방해 | 병살 가능 상황 | ~~pose.runner_path~~ ~~pose.contact~~ `sb.outs` | 타자주자 고의 방해 → 타자주자 + 홈에 가까운 주자 아웃 | 가능 | 불가 |
+| 공격팀이 베이스 주변에 모여 방해 | — | ~~pose.coach~~ ~~pose.fielder_pos~~ `sb.outs` | 공격팀 여럿이 베이스 주변에 모임 → 그 주자 아웃 | 가능 | 불가 |
+| 타자주자-포수 충돌(번트) | 번트 처리 | ~~pose.contact~~ | 타자주자-포수 접촉 → 대개 무방해(고의만 방해) | — | 불가 |
+| 포수 타격방해 | 타격 시도 | ~~kw:타격방해~~ `sb.bases` `ev.umpire_signal|ump.call` | 포수 미트가 배트에 닿음 → 타자 1루(공격팀 플레이 선택권) | 가능 | — |
+| 스퀴즈 때 포수 방해 | 스퀴즈·홈스틸 시도 | ~~pose.catcher_pos~~ ~~pose.contact~~ `sb.bases` `sb.score` `kw:보크` | 포수가 공 없이 홈 앞으로 → 보크 + 타격방해(주자 진루·타자 1루) | 가능 | 불가 |
+| 비의도적 방해(볼보이 등) | — | ~~ball.touch~~ `sb.bases` `ev.umpire_signal|ump.call` | 볼보이·경호원이 공을 건드림 → 볼데드·심판이 진루 결정 | 가능 | 불가 |
+| 관중 방해 | 공이 경기장 안 | ~~ball.touch~~ `ev.replay_review` `sb.bases` ~~kw:관중~~ | 관중이 공을 건드림 → 심판 결정(판독) | 가능 | 불가 |
+| 심판 방해 | 포수 송구 | ~~pose.contact~~ `sb.bases` | 주심이 포수 송구 방해 → 주자 귀루(송구로 아웃되면 무시) | 가능 | 불가 |
+| 주루방해(플레이 중 주자) | 플레이 대상 주자 | ~~pose.contact~~ ~~pose.runner_path~~ `sb.bases` `sb.score` ~~ball.dead_area~~ `ev.umpire_signal` | 막힌 주자 → 볼데드·최소 1베이스 | 가능 | 불가 |
+| 주루방해(플레이 없는 주자) | 플레이 없는 주자 | ~~pose.contact~~ ~~pose.runner_path~~ `sb.bases` `sb.score` ~~ball.dead_area~~ `ev.umpire_signal` | 플레이 후 막힘 없었을 베이스로 보정 | 가능 | 불가 |
+| 홈 충돌 — 주자 | 홈 쇄도 | ~~pose.runner_path~~ ~~pose.contact~~ `ev.replay_review` `sb.outs` | 주로 이탈해 포수와 충돌 → 주자 아웃 | 가능 | 불가 |
+| 홈 블로킹 — 포수 | 홈 쇄도 · 포수 공 없음 | ~~pose.catcher_pos~~ ~~pose.contact~~ `ev.replay_review` `sb.score` | 공 없이 주로 막음 → 주자 세이프 | 가능 | 불가 |
+| 병살 방지 슬라이딩 위반 | 병살 시도 | ~~pose.slide_path~~ ~~pose.contact~~ `sb.outs` `ev.replay_review` | 정당한 슬라이딩 4조건 미충족 → 주자 + 타자 아웃 | 가능 | 불가 |
+| 정당한 슬라이딩 조건 | 병살 시도 | ~~pose.slide_path~~ ~~pose.base_touch~~ | 베이스 전 시작·베이스 닿으려 함·머무름·경로 유지 → 정당(접촉해도 방해 아님) | — | 불가 |
+| 대타 | — | ~~kw:대타~~ `sb.count` | 해설 '대타' & 새 타자 → sub | 불가 | — |
+| 대주자 | 주자 있음 | ~~kw:대주자~~ `sb.bases` | 해설 '대주자' → 교체(주자 수 그대로) | 불가 | — |
+| 교체 절차 | 볼데드 | ~~kw:교체~~ ~~ctx.lineup~~ | 교체 선수는 교체된 선수 타순 | 불가 | — |
+| 야수 투수 등판 | — | `ev.pitching_change` `kw:투수교체` ~~ctx.lineup~~ | 야수가 투수로 등판 → pitcher(교체) | 가능 | — |
+| 타임 | — | `ev.umpire_signal|ump.call` ~~kw:타임~~ | 타임 동작 뒤 플레이 → 무효 | 가능 | — |
+| 볼데드 | 볼데드 원인 발생 | `ev.umpire_signal|ump.call` `sb.bases` | 볼데드 중 진루 → 주자 귀루 | 가능 | — |
+| 날씨·조명 타임 | — | `ev.umpire_signal|ump.call` ~~kw:우천~~ ~~kw:중단~~ | 날씨·조명으로 중단 → 타임 | 가능 | — |
+| 부상 타임·대주자 완주 | — | `ev.umpire_signal|ump.call` ~~kw:부상~~ `sb.bases` | 부상 타임 · 진루권 주자 부상 → 대주자 완주 | 가능 | — |
+| 감독·심판 요청 타임 | — | `ev.umpire_signal|ump.call` `ev.mound_visit` | 감독·심판 요청 → 타임 | 가능 | — |
+| 퇴장 지시 타임 | — | `ev.umpire_signal|ump.call` ~~kw:퇴장~~ | 퇴장 지시 → 타임 | 가능 | — |
+| 플레이 중 타임 불가·재개 | 플레이 진행 중 | `ev.umpire_signal|ump.call` `ev.pitch` | 플레이 중 타임 없음 · 투수가 투수판에 서고 '플레이' → 재개 | 가능 | — |
+| 벤치클리어링 | — | ~~kw:벤치클리어링~~ ~~pose.contact~~ | 양 팀 선수 그라운드 집결 → 벤치클리어링 | 불가 | 불가 |
+| 감독·선수 퇴장 | — | `ev.umpire_signal|ump.call` ~~kw:퇴장~~ | 퇴장 동작·해설 → 퇴장 | 가능 | — |
+| 관중 선동·모욕 | — | ~~kw:퇴장~~ `ev.umpire_signal|ump.call` | 선동·모욕(해설) + 퇴장 동작 → 퇴장 | 가능 | — |
+| 보크 유도 행위 | 주자 있음 · 인플레이 | `kw:보크` ~~kw:타임~~ `ev.umpire_signal|ump.call` | 공격팀 말·행동으로 투수가 멈춤 → 보크 아님(유도자 퇴장) | 가능 | — |
+| 심판 고의 접촉 | — | ~~pose.contact~~ `ev.umpire_signal|ump.call` ~~kw:퇴장~~ | 심판 접촉 → 퇴장 | 가능 | 불가 |
+| 타자 시야 방해 | — | ~~pose.fielder_pos~~ `ev.umpire_signal|ump.call` | 야수가 타자 시선에서 고의 방해 → 퇴장 | 가능 | 불가 |
+| 벤치 집단 항의 | — | `ev.umpire_signal|ump.call` ~~kw:항의~~ | 벤치 항의 → 경고·퇴장 | 가능 | — |
+| 강우 콜드게임 | 정식 경기 성립 뒤 | ~~kw:콜드~~ ~~kw:우천~~ `sb.inning` `sb.score` | 날씨로 종료 & 5회 이상 → 그 점수로 확정 | 불가 | — |
+| 정식 경기 성립 조건 | — | `sb.inning` `sb.score` | 5회 완료(홈팀 리드면 4회말) → 정식 경기 | 가능 | — |
+| 노게임 | 정식 경기 성립 전 | ~~kw:노게임~~ `sb.inning` | 5회 전 중단 → 노게임 | 불가 | — |
+| 서스펜디드 게임 | — | ~~kw:서스펜디드~~ `sb.inning` | 중단 → 다른 날 그 시점부터 | 불가 | — |
+| 연장·무승부 | 9회 동점 | `sb.inning` `sb.score` | 10회 이후 진행(KBO 11회까지, 동점이면 무승부) | 가능 | — |
+| 승부치기(자동 주자·MLB, KBO 미적용) | 연장 · MLB 정규시즌 | `sb.inning` `sb.bases` | 이닝 시작 2루 주자 있음 → 승부치기 | 가능 | — |
+| 점수 차 콜드게임 | 대회 규정 | `sb.inning` `sb.score` | 점수 차 기준 이상 → 콜드 | 가능 | — |
+| 심판 합의·판정 정정 | — | `ev.umpire_signal|ump.call` `sb.outs` `sb.bases` | 심판 협의 뒤 점수판이 되돌려짐 → 판정 정정 | 가능 | — |
+| 체크스윙 1·3루심 어필 | 체크스윙 | `ev.umpire_signal|ump.call` `sb.count` ~~kw:체크스윙~~ | 누심 판정 → 스윙이면 스트라이크 +1 | 가능 | — |
+| 체크스윙 비디오 판독 | 체크스윙 · KBO 판독 | `ev.replay_review` `sb.count` ~~kw:체크스윙~~ | 판독 뒤 카운트 변경 → 번복 | 가능 | — |
+| 비디오 판독 | — | `ev.replay_review` `sb.outs` `sb.bases` `sb.score` ~~kw:판독~~ | 판독 장면 뒤 점수판 변경 → 번복 / 그대로 → 유지 | 가능 | — |
+| ABS 판정 | KBO | `sb.count` ~~ball.zone~~ | ABS 판정 = 점수판 카운트 | 가능 | 불가 |
+| ABS 챌린지 | 챌린지 시행 리그 | `ev.replay_review` `sb.count` ~~kw:챌린지~~ | 챌린지 뒤 카운트 변경 → 번복 | 가능 | — |
+| 볼카운트 착오 | — | `sb.count` `ctx.game` | 점수판 카운트가 투구 기록과 안 맞음 → 정정 후보 | 가능 | — |
+| 심판이 공에 맞음 | 타구·송구가 심판에 | ~~ball.touch~~ `sb.bases` | 내야수 통과 전 페어 타구 → 볼데드·타자 1루 / 그 외 인플레이 | 가능 | 불가 |
+| 판단 판정은 최종 | — | `ev.umpire_signal|ump.call` | 판단 판정은 그대로 따른다(판독만 예외) | 가능 | — |
+| 규칙 적용 이의 | — | `ev.umpire_signal|ump.call` ~~kw:어필~~ | 규칙 적용 이의 → 심판 협의 결과를 따른다 | 가능 | — |
+| 판정이 엇갈림 | — | `ev.umpire_signal|ump.call` | 엇갈린 동작 → 최종 동작·점수판을 따른다 | 가능 | — |
+| 구장 특별 규칙 | 구장별 | ~~ball.track~~ ~~ball.dead_area~~ `sb.bases` | 구장 특별 규칙 지역(천장·캣워크) 접촉 → 구장 규칙대로 | 가능 | 불가 |
+| 공이 유니폼·장비에 들어감 | — | ~~ball.dead_area~~ `sb.bases` | 공이 옷·장비 속 → 포구 불인정·진루권 | 가능 | 불가 |
+| 수비 시프트 제한 | 투구 순간 | ~~pose.fielder_pos~~ `sb.count` | 2루 한쪽에 내야수 3명·잔디 위 → 볼 또는 결과 선택 | 가능 | 불가 |
+| 몇 루타인가 | 타격 | `sb.bases` `sb.score` ~~kw:2루타~~ ~~kw:3루타~~ | 타자가 안전하게 간 베이스 = 몇 루타(송구 틈 추가 진루 제외) | 불가 | — |
+| 완봉 | 경기 종료 | `ctx.game` `sb.score` | 상대 무득점 & 한 투수 완투 → 완봉 | 가능 | — |
+| 실책 | — | `ev.fielder_drops_ball` ~~kw:실책~~ `sb.bases` | 실수 장면 + 해설 '실책' → 실책 | 가능 | — |
+| 야수선택 | 주자 있음 | `ev.out_at_base` `sb.bases` `sb.outs` ~~kw:야수선택~~ | 다른 주자 아웃 & 타자 출루 → 야수선택 | 가능 | — |
+| 노히트노런·퍼펙트 | — | `ctx.game` | 누적 안타 0 → 노히트(출루 0이면 퍼펙트) | 가능 | — |
+| 사이클링 히트 | — | `ctx.game` | 한 타자 단타·2루타·3루타·홈런 → 사이클 | 가능 | — |
+| 9구 3삼진 | — | `ctx.game` | 한 이닝 9구 3삼진 | 가능 | — |
+| 한 이닝 4삼진 | — | `ctx.game` `ev.catcher_miss` | 한 이닝 삼진 4(낫아웃 출루 포함) | 가능 | — |
+| 연속 타자 홈런 | — | `ctx.game` `ev.ball_over_fence` | 연속 타석 홈런 | 가능 | — |
+
 ## 설명 근거(용어 사전)가 없는 항목
 
 - 없음
