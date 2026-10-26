@@ -88,6 +88,54 @@ def _is_pitching_change(event: RelayEvent, _state: GameState) -> bool:
     return event.kind == KIND_SUB and event.detail.get("sub_type") == "pitcher"
 
 
+# 영상에서 알아본 심판 선언(video_judge.CALL_TABLE) → 카드. (코드, 용어 키, 이름, 왜 설명할 만한가)
+CALL_CARDS = (
+    ("catcher_interference", "catcher_interference", "타격방해",
+     "포수 미트가 배트에 닿아 타자가 그냥 1루로 나간다 — 결과가 아니라 반칙으로 출루한 장면이다"),
+    ("obstruction", "obstruction", "주루방해",
+     "공을 갖지 않은 수비수가 주자의 길을 막아 주자가 베이스를 받는 장면이다"),
+    ("interference", "interference", "수비방해",
+     "공격 쪽 선수가 수비를 방해해 아웃이 선언되는 장면이다"),
+    ("video_review", "video_review", "비디오 판독",
+     "감독이 판정에 이의를 걸어 화면으로 다시 본다 — 판정이 바뀔 수 있다"),
+    ("check_swing", "check_swing", "체크스윙",
+     "방망이를 멈췄는지 돌렸는지로 볼과 스트라이크가 갈린 장면이다"),
+    ("ejection", "ejection", "퇴장",
+     "심판이 선수·감독을 경기에서 내보낸 장면이다"),
+    ("bench_clearing", "bench_clearing", "벤치클리어링",
+     "양 팀 선수들이 그라운드로 몰려나온 장면 — 왜 일어나는지 맥락이 필요하다"),
+    ("ground_rule_double", "ground_rule_double", "인정 2루타",
+     "타구가 담장 밖으로 튀어 나가 주자와 타자가 정해진 두 베이스만 간다"),
+    ("foreign_substance", "foreign_substance", "이물질",
+     "투수가 공에 이물질을 썼는지 검사·제재한 장면이다"),
+    ("pitch_clock", "pitch_clock", "피치클락 위반",
+     "정해진 시간 안에 준비하지 않아 공을 안 던졌는데 볼·스트라이크가 올라간다"),
+    ("squeeze", "squeeze", "스퀴즈",
+     "번트와 동시에 3루 주자가 홈으로 뛰어 점수를 짜내는 작전이다"),
+    ("missed_base", "missed_base", "누의 공과",
+     "베이스를 밟지 않고 지나가 어필로 아웃될 수 있는 장면이다"),
+    ("home_collision", "home_collision", "홈 충돌",
+     "홈에서 주자와 포수가 부딪쳐 충돌 방지 규정을 따진다"),
+    ("slide_rule", "slide_rule", "슬라이딩 규정",
+     "병살을 막으려 수비수에게 슬라이딩해 규정 위반을 따진다"),
+    ("runner_lane", "runner_lane", "3피트 라인",
+     "타자주자가 1루 가는 길 안쪽으로 뛰어 송구를 방해했는지 따진다"),
+    ("fan_interference", "fan_interference", "관중 방해",
+     "관중이 경기 중인 공을 건드려 심판이 결과를 정한다"),
+    ("intentional_drop", "intentional_drop", "고의낙구",
+     "수비수가 병살을 노려 일부러 공을 떨어뜨렸다고 본 장면이다"),
+    ("passing_runner", "passing_runner", "주자 추월",
+     "뒤 주자가 앞 주자를 앞질러 아웃되는 드문 장면이다"),
+    ("called_game", "called_game", "콜드게임·노게임",
+     "경기가 9회를 다 하지 않고 끝나거나 무효가 된다"),
+)
+
+
+def _call_card(code: str, term: str, label: str, why: str) -> "Rule":
+    return Rule(id=code, term_id=term, category=CATEGORY_BASIC, label=label, priority=0.9,
+                matches=_call_is(code), why=lambda e, s, w=why: w)
+
+
 # ── 규칙 테이블 ─────────────────────────────────────────────────────────
 RULES: Sequence[Rule] = (
     Rule(
@@ -232,6 +280,7 @@ RULES: Sequence[Rule] = (
         # 홈런 자체는 매번 카드가 뜬다. 응원 문화 설명은 팀마다 첫 홈런에서 한 번.
         once=lambda e, s: f"homerun_cheer:{s.batting_team}",
     ),
+    *(_call_card(*row) for row in CALL_CARDS),
 )
 
 RULES_BY_ID = {rule.id: rule for rule in RULES}

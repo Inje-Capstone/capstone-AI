@@ -427,8 +427,8 @@
    "observe": "SUA",
    "glossary": "catcher_interference",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "catcher_interference",
+   "tier": 1
   },
   {
    "id": "umpire_hit_ball",
@@ -466,8 +466,8 @@
    "observe": "SVUA",
    "glossary": "ground_rule_double",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "ground_rule_double",
+   "tier": 1
   },
   {
    "id": "ground_rule_lodged",
@@ -479,8 +479,8 @@
    "observe": "VUA",
    "glossary": "ground_rule_double",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "ground_rule_double",
+   "tier": 1
   },
   {
    "id": "ground_rule_deflect",
@@ -492,8 +492,8 @@
    "observe": "VUA",
    "glossary": "ground_rule_double",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "ground_rule_double",
+   "tier": 1
   },
   {
    "id": "hr_off_fielder",
@@ -648,7 +648,7 @@
    "observe": "VU",
    "glossary": "check_swing",
    "detector": null,
-   "video": null,
+   "video": "check_swing",
    "tier": 3
   },
   {
@@ -661,8 +661,8 @@
    "observe": "SUA",
    "glossary": "pitch_clock",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "pitch_clock",
+   "tier": 1
   },
   {
    "id": "batting_order_rule",
@@ -973,7 +973,7 @@
    "observe": "VUA",
    "glossary": "obstruction",
    "detector": null,
-   "video": null,
+   "video": "obstruction",
    "tier": 3
   },
   {
@@ -1116,8 +1116,8 @@
    "observe": "SVA",
    "glossary": "squeeze",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "squeeze",
+   "tier": 1
   },
   {
    "id": "rundown_r",
@@ -1181,7 +1181,7 @@
    "observe": "VUA",
    "glossary": "catcher_interference",
    "detector": null,
-   "video": null,
+   "video": "catcher_interference",
    "tier": 3
   },
   {
@@ -1207,8 +1207,8 @@
    "observe": "VUA",
    "glossary": "ground_rule_double",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "ground_rule_double",
+   "tier": 1
   },
   {
    "id": "pitch_hits_runner",
@@ -1285,8 +1285,8 @@
    "observe": "SUA",
    "glossary": "pitch_clock",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "pitch_clock",
+   "tier": 1
   },
   {
    "id": "disengage",
@@ -1714,8 +1714,8 @@
    "observe": "VUA",
    "glossary": "foreign_substance",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "foreign_substance",
+   "tier": 1
   },
   {
    "id": "beanball",
@@ -1779,8 +1779,8 @@
    "observe": "VUA",
    "glossary": "foreign_substance",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "foreign_substance",
+   "tier": 1
   },
   {
    "id": "foreign_penalty",
@@ -1935,7 +1935,7 @@
    "observe": "VUA",
    "glossary": "intentional_drop",
    "detector": null,
-   "video": null,
+   "video": "intentional_drop",
    "tier": 3
   },
   {
@@ -1948,7 +1948,7 @@
    "observe": "VUA",
    "glossary": "runner_lane",
    "detector": null,
-   "video": null,
+   "video": "runner_lane",
    "tier": 3
   },
   {
@@ -1987,7 +1987,7 @@
    "observe": "VUA",
    "glossary": "interference",
    "detector": null,
-   "video": null,
+   "video": "interference",
    "tier": 3
   },
   {
@@ -2000,7 +2000,7 @@
    "observe": "VUA",
    "glossary": "passing_runner",
    "detector": null,
-   "video": null,
+   "video": "passing_runner",
    "tier": 3
   },
   {
@@ -2091,7 +2091,7 @@
    "observe": "VUA",
    "glossary": "missed_base",
    "detector": null,
-   "video": null,
+   "video": "missed_base",
    "tier": 3
   },
   {
@@ -2156,7 +2156,7 @@
    "observe": "SVUA",
    "glossary": "missed_base",
    "detector": null,
-   "video": null,
+   "video": "missed_base",
    "tier": 3
   },
   {
@@ -2299,7 +2299,7 @@
    "observe": "VUA",
    "glossary": "interference",
    "detector": null,
-   "video": null,
+   "video": "interference",
    "tier": 3
   },
   {
@@ -2338,7 +2338,7 @@
    "observe": "VUA",
    "glossary": "interference",
    "detector": null,
-   "video": null,
+   "video": "interference",
    "tier": 3
   },
   {
@@ -2377,7 +2377,7 @@
    "observe": "VUA",
    "glossary": "interference",
    "detector": null,
-   "video": null,
+   "video": "interference",
    "tier": 3
   },
   {
@@ -2390,7 +2390,7 @@
    "observe": "VUA",
    "glossary": "interference",
    "detector": null,
-   "video": null,
+   "video": "interference",
    "tier": 3
   },
   {
@@ -2429,8 +2429,8 @@
    "observe": "SUA",
    "glossary": "catcher_interference",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "catcher_interference",
+   "tier": 1
   },
   {
    "id": "squeeze_int",
@@ -2468,8 +2468,8 @@
    "observe": "VUA",
    "glossary": "fan_interference",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "fan_interference",
+   "tier": 1
   },
   {
    "id": "umpire_int",
@@ -2494,7 +2494,7 @@
    "observe": "VUA",
    "glossary": "obstruction",
    "detector": null,
-   "video": null,
+   "video": "obstruction",
    "tier": 3
   },
   {
@@ -2507,7 +2507,7 @@
    "observe": "VUA",
    "glossary": "obstruction",
    "detector": null,
-   "video": null,
+   "video": "obstruction",
    "tier": 3
   },
   {
@@ -2520,7 +2520,7 @@
    "observe": "VUA",
    "glossary": "home_collision",
    "detector": null,
-   "video": null,
+   "video": "home_collision",
    "tier": 3
   },
   {
@@ -2533,7 +2533,7 @@
    "observe": "VUA",
    "glossary": "home_collision",
    "detector": null,
-   "video": null,
+   "video": "home_collision",
    "tier": 3
   },
   {
@@ -2546,7 +2546,7 @@
    "observe": "VUA",
    "glossary": "slide_rule",
    "detector": null,
-   "video": null,
+   "video": "slide_rule",
    "tier": 3
   },
   {
@@ -2897,8 +2897,8 @@
    "observe": "VA",
    "glossary": "bench_clearing",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "bench_clearing",
+   "tier": 1
   },
   {
    "id": "ejection_mgr",
@@ -2910,8 +2910,8 @@
    "observe": "VUA",
    "glossary": "ejection",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "ejection",
+   "tier": 1
   },
   {
    "id": "incite_crowd",
@@ -2923,8 +2923,8 @@
    "observe": "VUA",
    "glossary": "ejection",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "ejection",
+   "tier": 1
   },
   {
    "id": "decoy_balk",
@@ -2949,8 +2949,8 @@
    "observe": "VUA",
    "glossary": "ejection",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "ejection",
+   "tier": 1
   },
   {
    "id": "fraternize",
@@ -3001,8 +3001,8 @@
    "observe": "VUA",
    "glossary": "ejection",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "ejection",
+   "tier": 1
   },
   {
    "id": "bench_confine",
@@ -3053,8 +3053,8 @@
    "observe": "UA",
    "glossary": "called_game",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "called_game",
+   "tier": 1
   },
   {
    "id": "regulation_called",
@@ -3066,8 +3066,8 @@
    "observe": "SA",
    "glossary": "called_game",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "called_game",
+   "tier": 1
   },
   {
    "id": "weather_start",
@@ -3092,8 +3092,8 @@
    "observe": "UA",
    "glossary": "called_game",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "called_game",
+   "tier": 1
   },
   {
    "id": "suspended",
@@ -3105,8 +3105,8 @@
    "observe": "UA",
    "glossary": "called_game",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "called_game",
+   "tier": 1
   },
   {
    "id": "forfeit",
@@ -3170,8 +3170,8 @@
    "observe": "SA",
    "glossary": "called_game",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "called_game",
+   "tier": 1
   },
   {
    "id": "doubleheader",
@@ -3196,8 +3196,8 @@
    "observe": "VUA",
    "glossary": "video_review",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "video_review",
+   "tier": 1
   },
   {
    "id": "check_swing_appeal",
@@ -3209,8 +3209,8 @@
    "observe": "VUA",
    "glossary": "check_swing",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "check_swing",
+   "tier": 1
   },
   {
    "id": "check_swing_review",
@@ -3222,8 +3222,8 @@
    "observe": "VUA",
    "glossary": "check_swing",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "video_review",
+   "tier": 1
   },
   {
    "id": "video_review_r",
@@ -3235,8 +3235,8 @@
    "observe": "VUA",
    "glossary": "video_review",
    "detector": null,
-   "video": null,
-   "tier": 2
+   "video": "video_review",
+   "tier": 1
   },
   {
    "id": "abs_call",

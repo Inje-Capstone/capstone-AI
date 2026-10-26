@@ -333,7 +333,76 @@ def judge(
             where = at[-1] if at else (stable[0] if stable else None)
             half = {"inning": where.inning, "half": where.half} if where else {}
             out.append(Judgment(c.t, "sub", "pitcher", 0.6, [_ev(c)], None, half))
+    out += judge_calls(cues, stable)
     return sorted(out, key=lambda j: j.t)
+
+
+# ── 심판 선언·특수 판정 — 해설·자막 낱말 + 확인 (점수판 전이와 따로) ─────────────
+# (코드, 낱말, 확인 장면). 낱말은 무슨 판정인지를, 확인은 실제로 일어났는지를 준다.
+# 해설은 '타격방해 아니었나요?', '스퀴즈 가능성도 있죠'처럼 일어나지 않은 일도 말한다 —
+# 낱말 앞뒤 CALL_SPAN초에 확인 장면(심판 동작·판독 화면 등)이 있거나, 자막에 나왔거나,
+# 60초 안에 두 번 넘게 말했을 때만 낸다. 흔한 말과 겹치는 낱말은 넣지 않는다
+# ('퇴장'은 박수 받으며 퇴장, '블로킹'은 포수가 원바운드를 막는 것과 겹친다).
+_UMPIRE = ("umpire_signal", "replay_review")
+CALL_TABLE = (
+    ("catcher_interference", ("타격방해", "타격 방해", "캐처 인터페어", "포수 인터페어"), _UMPIRE),
+    ("obstruction", ("주루방해", "주루 방해"), _UMPIRE),
+    ("interference", ("수비방해", "수비 방해"), _UMPIRE),
+    ("video_review", ("비디오 판독", "비디오판독"), _UMPIRE),
+    ("check_swing", ("체크스윙", "체크 스윙"), _UMPIRE),
+    ("ejection",
+     ("퇴장 명령", "퇴장 조치", "퇴장을 당", "퇴장당", "퇴장 선언", "퇴장을 선언"), _UMPIRE),
+    ("bench_clearing", ("벤치클리어링", "벤치 클리어링"), _UMPIRE),
+    ("ground_rule_double", ("인정 2루타", "인정2루타"), _UMPIRE + ("ball_over_fence",)),
+    ("foreign_substance", ("이물질",), _UMPIRE),
+    ("pitch_clock", ("피치클락 위반", "피치 클락 위반", "피치클락 바이올레이션"), _UMPIRE),
+    ("squeeze", ("스퀴즈",), ("runner_scores",)),
+    ("missed_base", ("누의 공과", "누의공과"), _UMPIRE),
+    ("home_collision", ("홈 충돌", "충돌 방지 규정", "홈플레이트 충돌"), _UMPIRE),
+    ("slide_rule", ("슬라이딩 규정", "슬라이딩 방해", "병살 방해 슬라이딩"), _UMPIRE),
+    ("runner_lane", ("3피트", "쓰리피트", "스리피트"), _UMPIRE),
+    ("fan_interference", ("관중 방해", "팬 방해", "관중이 공을 건드"), _UMPIRE),
+    ("intentional_drop", ("고의낙구", "고의 낙구"), _UMPIRE),
+    ("passing_runner", ("주자 추월", "앞 주자를 추월", "추월 아웃"), _UMPIRE),
+    ("called_game", ("콜드게임", "콜드 게임", "강우 콜드", "노게임", "서스펜디드"), _UMPIRE),
+)
+CALL_SPAN = 20.0
+CALL_GAP = 60.0  # 같은 판정을 다시 내지 않는 간격(다시보기·해설 반복)
+
+
+def _confirmation(c: Cue, cues: Sequence[Cue], words: Sequence[str],
+                  kinds: Sequence[str]) -> Optional[tuple[float, str]]:
+    """(확신도, 근거) — 그 말이 실제로 일어난 일이라는 확인. 없으면 None."""
+    if c.text.startswith("[자막]"):
+        return 0.75, "중계 자막"
+    seen = next((x for x in cues if x.kind in kinds and abs(x.t - c.t) <= CALL_SPAN), None)
+    if seen is not None:
+        return 0.75, _ev(seen)
+    again = [x for x in cues if x is not c and x.kind == "speech" and 0 < x.t - c.t <= CALL_GAP
+             and any(_says(x.text.lower(), w) for w in words)]
+    if again:
+        return 0.5, f"해설이 다시 말함 ({again[0].t:.0f}s)"
+    return None
+
+
+def judge_calls(cues: Sequence[Cue], stable: Sequence[Reading] = ()) -> list[Judgment]:
+    """심판 선언·특수 판정 — 점수판 모양이 없거나 한 가지로 정해지지 않는 규칙들."""
+    out: list[Judgment] = []
+    speech = sorted((c for c in cues if c.kind == "speech"), key=lambda c: c.t)
+    for code, words, kinds in CALL_TABLE:
+        last = -1e9
+        for c in speech:
+            if c.t - last < CALL_GAP or not any(_says(c.text.lower(), w) for w in words):
+                continue
+            found = _confirmation(c, cues, words, kinds)
+            if found is None:
+                continue
+            last = c.t
+            at = [r for r in stable if r.t <= c.t]
+            where = at[-1] if at else (stable[0] if stable else None)
+            half = {"inning": where.inning, "half": where.half} if where else {}
+            out.append(Judgment(c.t, "call", code, found[0], [_ev(c), found[1]], None, half))
+    return out
 
 
 # 점수판 없이 단서만으로 (직캠·느린 화면 위주 하이라이트). 드문 것부터 — 흔한 말("삼진")이
@@ -473,6 +542,13 @@ _CODE_TEXT = {
     "infield_fly": "인필드플라이", "hbp": "몸에 맞는 공",
     "dropped_third_strike": "낫아웃", "walk": "볼넷", "strikeout": "삼진", "out": "아웃",
     "reach": "출루", "pitcher": "투수 교체",
+    "catcher_interference": "타격방해", "obstruction": "주루방해", "interference": "수비방해",
+    "video_review": "비디오 판독", "check_swing": "체크스윙", "ejection": "퇴장",
+    "bench_clearing": "벤치클리어링", "ground_rule_double": "인정 2루타",
+    "foreign_substance": "이물질", "pitch_clock": "피치클락 위반", "squeeze": "스퀴즈",
+    "missed_base": "누의 공과", "home_collision": "홈 충돌", "slide_rule": "슬라이딩 규정",
+    "runner_lane": "3피트 라인", "fan_interference": "관중 방해", "intentional_drop": "고의낙구",
+    "passing_runner": "주자 추월", "called_game": "콜드게임·노게임",
 }
 
 
@@ -506,7 +582,16 @@ def to_relay_events(
             ))
             continue
         tr = j.transition
-        assert tr is not None
+        if tr is None:  # 심판 선언 — 점수판 상태는 바꾸지 않는다
+            if j.confidence >= min_confidence:
+                events.append(RelayEvent(
+                    id=f"v{n}", t=int(j.t), inning=j.detail.get("inning", 1),
+                    half=j.detail.get("half", "top"), kind="call",
+                    text=f"{_CODE_TEXT.get(j.code, j.code)} (영상 판정, 확신도 {j.confidence:.2f})",
+                    detail={"call": j.code, "evidence": j.evidence,
+                            "confidence": round(j.confidence, 2), "source": "video"},
+                ))
+            continue
         confident = j.confidence >= min_confidence
         code = j.code if confident else ("out" if tr.outs_made else "reach")
         kind = j.kind if confident else "result"
