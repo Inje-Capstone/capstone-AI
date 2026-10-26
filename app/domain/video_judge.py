@@ -145,20 +145,28 @@ def judge_transition(
         not tr.count_reset or (tr.before.balls, tr.before.strikes) == (0, 0)
     ) and not _has(near, "contact")
     if mid_pa and tr.outs_made == 0 and b != a:
+        # 보크(6.02(a))는 투구 없이 모든 주자가 한 베이스씩 — 볼카운트가 그대로다.
+        # 폭투·포일·더블스틸도 같은 진루 모양이지만 투구가 있어 카운트가 바뀐다.
+        same_count = (tr.before.balls, tr.before.strikes) == (tr.after.balls, tr.after.strikes)
         balk_cue = _speech(near, "보크") or _has(near, "pitcher_stops")
-        if advanced_all_one_base(b, a) and balk_cue:
+        if advanced_all_one_base(b, a) and balk_cue and (same_count or _speech(near, "보크")):
             return make("call", "balk", 0.5, [balk_cue, _speech(near, "보크")])
         steal_cue = _has(near, "slide") or _speech(near, "도루")
         if single_runner_advance(b, a) and steal_cue and not _speech(near, "폭투", "포일"):
             return make("steal", "steal", 0.5, [steal_cue, _speech(near, "도루")],
                         base=single_runner_advance(b, a))
+        double = advanced_all_one_base(b, a) and not same_count and sum(b) >= 2
+        if double and steal_cue and not _speech(near, "폭투", "포일"):  # 더블스틸 — 투구가 있었다
+            return make("steal", "steal", 0.5, [steal_cue, _speech(near, "도루")], double=True)
+        # 폭투·포일(9.13)은 투구가 있었다 — 카운트가 그대로면(점수판이 늦게 바뀐 경우) 확신을 낮춘다
+        prior = 0.4 if same_count else 0.5
         wp = _speech(near, "폭투")
         if wp:
-            return make("call", "wild_pitch", 0.5, [wp])
+            return make("call", "wild_pitch", prior, [wp])
         pb = _speech(near, "포일")
         if pb:
-            return make("call", "passed_ball", 0.5, [pb])
-        if advanced_all_one_base(b, a):  # 모양은 보크인데 단서가 없다
+            return make("call", "passed_ball", prior, [pb])
+        if advanced_all_one_base(b, a) and same_count:  # 모양은 보크인데 단서가 없다
             return make("call", "balk", 0.3)
         if not tr.count_reset:
             return make("call", "runner", 0.4)
@@ -181,20 +189,21 @@ def judge_transition(
     hr = _has(near, "ball_over_fence") or _speech(near, "홈런")
     if tr.runs >= 1 and tr.runs == tr.runners_before + 1 and not any(a) and hr:
         return make("result", "homerun", 0.5, [hr, _speech(near, "홈런")])
-    if tr.outs_made == 1 and tr.runs >= 1:
+    if tr.outs_made == 1 and tr.runs >= 1 and tr.before.outs <= 1:  # 9.08(d) 2아웃 전
         sf = _has(near, "deep_fly") or _speech(near, "희생플라이", "희생 플라이")
         if sf:
             return make("result", "sac_fly", 0.5, [sf])
     if tr.outs_made == 1 and b == a and not tr.half_change:
         iff = _speech(near, "인필드플라이", "인필드 플라이") or _has(near, "infield_popup")
-        if iff and any(b[:2]):
+        if iff and b[0] and b[1] and tr.before.outs <= 1:  # 5.09(a)(5) 무사·1사 1·2루/만루
             return make("call", "infield_fly", 0.4, [iff, _speech(near, "인필드")])
     if tr.outs_made == 0 and tr.count_reset and a[0]:
         hbp = _has(near, "hit_by_pitch") or _speech(near, "몸에 맞", "사구", "데드볼")
         if hbp:
             return make("result", "hbp", 0.5, [hbp])
         dts = _has(near, "catcher_miss") or _speech(near, "낫아웃", "낫 아웃")
-        if dts:  # 2스트라이크가 점수판에 보였으면 확신도를 더 준다(놓친 투구 판독 대비)
+        # 낫아웃은 1루가 비었거나 2아웃일 때만(5.09(a)(3)). 2스트라이크가 보였으면 확신도를 더 준다
+        if dts and dts_possible(tr.before):
             prior = 0.5 if tr.before.strikes == 2 else 0.3
             return make("call", "dropped_third_strike", prior,
                         [dts, _speech(near, "낫아웃", "낫 아웃")])
@@ -205,7 +214,7 @@ def judge_transition(
             return make("result", "walk", 0.5, [walk_speech])
     if tr.outs_made == 1 and tr.before.strikes == 2:
         dts = _has(near, "catcher_miss") or _speech(near, "낫아웃", "낫 아웃")
-        if dts:  # 낫아웃 상황이었지만 1루에서 아웃
+        if dts and dts_possible(tr.before):  # 낫아웃 상황이었지만 1루에서 아웃
             return make("call", "dropped_third_strike", 0.5, [dts], out=True)
         k = _has(near, "swing_miss") or _has(near, "strikeout") or _speech(near, "삼진")
         if k:
@@ -214,6 +223,11 @@ def judge_transition(
     if tr.count_reset or tr.half_change or tr.outs_made or tr.runs:
         return make("result", "out" if tr.outs_made else "reach", 0.5)
     return None
+
+
+def dts_possible(before: Reading) -> bool:
+    """낫아웃 성립 조건(5.09(a)(3)): 1루가 비었거나 2아웃. 아니면 공을 놓쳐도 타자는 아웃이다."""
+    return not before.bases[0] or before.outs == 2
 
 
 def is_walk_off(tr: Transition) -> bool:
@@ -336,7 +350,8 @@ def _event_judgment(cues: Sequence[Cue]) -> Optional[Judgment]:
             return make("sac_fly", "result", score, "외야 뜬공을 잡은 뒤 득점")
         slide = next((c for c in before if c.kind == "slide" and score.t - c.t <= 5), None)
         contact = any(c.kind == "contact" and score.t - c.t <= 10 for c in before)
-        if slide and not contact:
+        missed = any(c.kind in ("catcher_miss", "fielder_drops_ball") for c in before)
+        if slide and not contact and not missed:  # 포수가 놓쳤으면 폭투·포일 득점
             return make("steal", "steal", score, "타격 없이 슬라이딩 득점(홈스틸)")
     if len(outs) == 2:
         return make("double_play", "result", outs[0], "베이스 아웃 2번이 15초 안에")

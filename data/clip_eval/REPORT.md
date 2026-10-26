@@ -5,13 +5,13 @@
 | 지표 | 값 |
 |---|---|
 | 클립 | 28개 |
-| 판정 정답 (영상 판정이 정답 코드를 냄) | 10/24 (42%) |
+| 판정 정답 (영상 판정이 정답 코드를 냄) | 11/24 (46%) |
 | 단서 포착 (VLM 관찰에 정답 키워드) | 16/28 (57%) |
 | 점수판을 하나도 못 읽은 클립 | 5개 |
 
 | 리그 | 판정 | 단서 |
 |---|---|---|
-| KBO | 10/24 (42%) | 16/28 (57%) |
+| KBO | 11/24 (46%) | 16/28 (57%) |
 
 | 판정 코드 | 정답 |
 |---|---|
@@ -22,7 +22,7 @@
 | hbp | 1/2 (50%) |
 | homerun | 2/2 (100%) |
 | sac_fly | 1/2 (50%) |
-| steal | 2/4 (50%) |
+| steal | 3/4 (75%) |
 | strikeout | 1/1 (100%) |
 | triple_play | 1/4 (25%) |
 
@@ -39,7 +39,7 @@
 | kbo_foultip_k_walkoff | strikeout | ✓ | strikeout | ✗ | 2 |
 | kbo_dts_walkoff | dropped_third_strike | ✗ | - | ✗ | 2 |
 | kbo_dts_wp_hong | dropped_third_strike | ✗ | triple_play | ✗ | 1 |
-| kbo_homesteal_lee | steal | ✗ | sac_fly | ✗ | 2 |
+| kbo_homesteal_lee | steal | ✓ | out, steal | ✗ | 2 |
 | kbo_homesteal_hwang | steal | ✓ | steal | ✗ | 2 |
 | kbo_doublesteal_kt | steal | ✗ | double_play | 도루 | 2 |
 | kbo_doublesteal_japan | steal | ✓ | pitcher, steal | ✗ | 1 |

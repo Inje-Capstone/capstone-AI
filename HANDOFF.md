@@ -5,7 +5,9 @@
 ## 1. 지금 상태
 
 - main: PR #1~#28 머지, CI(test 3.9·3.12 + docker) 통과, pytest 229 · ruff clean
-- **하이라이트 클립 평가(KBO 24개)**: 영상 판정 0% → **42%** (`data/clip_eval/REPORT.md`). 점수판 전용 판독 + Whisper 해설 받아쓰기 + 지시문 v3. **MVP는 KBO만** — MLB는 MVP 이후
+- **판정 로직 재점검(2026-10-26)**: 모든 영상 판정 코드에 근거 조항·성립 조건을 붙여 저장 규칙과 대조 — [RULES_COVERAGE.md](RULES_COVERAGE.md) '영상 판정 로직', '보크·투구 반칙 — 동작 판정 방법'. 코드와 표가 어긋나면 빌드 실패
+- **투수 자세 보크 판정(실험)**: `scripts/balk_check.py` (선택 설치 `[pose]`) — 해설 + 동작으로 판정, 점수판은 검증. 정확도 실측 전
+- **하이라이트 클립 평가(KBO 24개)**: 영상 판정 0% → **46%** (`data/clip_eval/REPORT.md`). 점수판 전용 판독 + Whisper 해설 받아쓰기 + 지시문 v3. **MVP는 KBO만** — MLB는 MVP 이후
 - **야구 규칙 전체 목록 212개**(`data/rules_catalog.json`)와 엔진 커버리지 보고서 [RULES_COVERAGE.md](RULES_COVERAGE.md) — 설명 100% · 영상 결과 인식 22%. 규칙·영상을 새로 받으면 목록부터 고친다(§5-0)
 - 온보딩 진단 퀴즈·개인화 가중치를 백엔드 DTO 모양으로 제공: `/api/backend/onboarding/*` (README "백엔드 온보딩 연동")
 - **코드로 할 수 있는 건 끝났다. 다음은 실제 경기 영상 실측.** (§5)
