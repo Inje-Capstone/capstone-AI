@@ -130,6 +130,12 @@ def test_scene_double_play_with_triple_play_commentary_is_a_triple_play():
     assert judge_from_cues(cues[:2]).code == "double_play"
 
 
+def test_more_than_three_outs_in_a_burst_is_not_a_triple_play():
+    """반 이닝 아웃은 셋뿐(5.09(e)) — 15초에 아웃 여섯은 장면을 되풀이해 지어낸 관찰이다."""
+    assert judge_from_cues([ev(140 + 5 * i, "out_at_base") for i in range(6)]) is None
+    assert judge_from_cues([ev(140 + 5 * i, "out_at_base") for i in range(3)]).code == "triple_play"
+
+
 def test_juggled_foul_tip_is_a_strikeout_not_a_dropped_third_strike():
     """포수가 저글링해 '놓친' 것처럼 보여도 해설이 파울팁이면 잡은 것이다."""
     cues = [ev(1, "swing_miss"), ev(2, "catcher_miss"), say(3, "끝내기 파울TV입니다")]

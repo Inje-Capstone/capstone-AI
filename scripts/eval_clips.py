@@ -127,6 +127,9 @@ def score_clip(label: dict[str, Any], snap: dict[str, Any]) -> dict[str, Any]:
         "expect": expect,
         "judged": expect in shown if expect else None,
         "judged_low": (expect in every and expect not in shown) if expect else None,
+        # 정답이 아닌 구체 판정을 냈나 — 정답률만으론 지어낸 판정이 안 보인다
+        "wrong": sorted({c for c in shown if c not in GENERIC_CODES and c != expect})
+        if expect else [],
         "codes": every,
         "cue_hit": bool(hits),
         "hits": hits,
@@ -147,6 +150,7 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "clips": len(rows),
         "judge_hit": sum(1 for r in judged if r["judged"]),
         "judge_total": len(judged),
+        "wrong": sum(1 for r in judged if r["wrong"]),
         "cue_hit": sum(1 for r in rows if r["cue_hit"]),
         "no_scoreboard": sum(1 for r in rows if r["readings"] == 0),
         "by_code": {
@@ -181,6 +185,7 @@ def render(rows: list[dict[str, Any]], meta: dict[str, str]) -> str:
         "|---|---|",
         f"| 클립 | {s['clips']}개 |",
         f"| 판정 정답 (영상 판정이 정답 코드를 냄) | {pct(s['judge_hit'], s['judge_total'])} |",
+        f"| 오판 (정답이 아닌 판정 코드를 냄) | {pct(s['wrong'], s['judge_total'])} |",
         f"| 단서 포착 (VLM 관찰에 정답 키워드) | {pct(s['cue_hit'], s['clips'])} |",
         f"| 점수판을 하나도 못 읽은 클립 | {s['no_scoreboard']}개 |",
         "",

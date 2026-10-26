@@ -367,7 +367,9 @@ def _event_judgment(cues: Sequence[Cue]) -> Optional[Judgment]:
         return Judgment(cue.t, kind, code, 0.5, [f"장면 순서: {why}"])
 
     outs = _cluster(cues, "out_at_base", 15.0)
-    if len(outs) >= 3:
+    if len(outs) > 3:  # 아웃은 반 이닝에 셋뿐(5.09(e)) — 넘으면 같은 장면을 되풀이해 지어낸 것
+        outs = []
+    if len(outs) == 3:
         return make("triple_play", "result", outs[0], f"베이스 아웃 {len(outs)}번이 15초 안에")
     over = _has(cues, "ball_over_fence")
     if over:

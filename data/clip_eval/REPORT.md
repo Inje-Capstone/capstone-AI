@@ -6,6 +6,7 @@
 |---|---|
 | 클립 | 28개 |
 | 판정 정답 (영상 판정이 정답 코드를 냄) | 13/24 (54%) |
+| 오판 (정답이 아닌 판정 코드를 냄) | 4/24 (17%) |
 | 단서 포착 (VLM 관찰에 정답 키워드) | 16/28 (57%) |
 | 점수판을 하나도 못 읽은 클립 | 5개 |
 
@@ -38,7 +39,7 @@
 | kbo_lddp_son | double_play | ✗ | - | ✗ | 0 |
 | kbo_foultip_k_walkoff | strikeout | ✓ | out, strikeout | ✗ | 2 |
 | kbo_dts_walkoff | dropped_third_strike | ✗ | - | ✗ | 2 |
-| kbo_dts_wp_hong | dropped_third_strike | ✗ | triple_play | ✗ | 1 |
+| kbo_dts_wp_hong | dropped_third_strike | ✗ | - | ✗ | 1 |
 | kbo_homesteal_lee | steal | ✓ | out, steal | ✗ | 2 |
 | kbo_homesteal_hwang | steal | ✓ | steal | ✗ | 2 |
 | kbo_doublesteal_kt | steal | ✗ | out, sac_fly | 도루 | 2 |
