@@ -4,9 +4,12 @@
 - 설명: 용어 사전(data/glossary_seed.json)에 키가 있는가
 - 카드: 감지 규칙(app/domain/detectors.RULES)에 있는가
 - 영상: 영상 판정(app/domain/video_judge.py)이 내는 코드인가
+- 조항: 공식 야구규칙(data/obr_provisions.json, 번호만)의 모든 조항이 어느 행엔가 걸리는가
 
 사용: python scripts/build_rules_catalog.py   (원본: scripts/rules_catalog_src.py)
 """
+
+from __future__ import annotations
 
 import json
 import re
@@ -18,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from rules_catalog_src import JUDGE, MOTION, R  # noqa: E402
+from rules_catalog_src import COVERS, JUDGE, MOTION, R  # noqa: E402
 
 from app.adapters.glossary.seed import load_glossary  # noqa: E402
 from app.domain.detectors import RULES  # noqa: E402
@@ -26,6 +29,8 @@ from app.domain.pitch_motion import PITCH_ONLY_RULES  # noqa: E402
 
 CATALOG_PATH = ROOT / "data" / "rules_catalog.json"
 REPORT_PATH = ROOT / "RULES_COVERAGE.md"
+PROVISIONS_PATH = ROOT / "data" / "obr_provisions.json"
+REF = re.compile(r"\d\.\d\d(?:\([a-zA-Z0-9]+\))*")
 FIELDS = ("id", "chapter", "rule", "name", "action", "ruling", "observe",
           "glossary", "detector", "video", "tier")
 OBSERVE = {"S": "점수판", "V": "화면 동작", "A": "해설", "U": "심판·판독 화면", "X": "영상 불가"}
@@ -44,6 +49,35 @@ def video_codes() -> set[str]:
     found |= set(re.findall(r'\("(\w+)", "(?:call|result|steal)", \(', src))  # 단서만 판정표
     found |= set(re.findall(r'make\("(\w+)", "(?:call|result|steal)"', src))  # 장면 순서 판정
     return (found - {"call", "result"}) | {"sub", "pitcher", "out", "reach"}
+
+
+def provisions() -> list[str]:
+    """공식 야구규칙 조항 번호 (부모가 자식보다 먼저 온다)."""
+    return json.loads(PROVISIONS_PATH.read_text(encoding="utf-8"))["provisions"]
+
+
+def refs(row: dict) -> list[str]:
+    """행이 덮는 조항 — 조항 칸의 번호 + COVERS(묶음). '*'로 끝나면 그 번호로 시작하는 전부."""
+    return REF.findall(row["rule"]) + list(COVERS.get(row["id"], ()))
+
+
+def parent(pid: str) -> str | None:
+    return pid.rsplit("(", 1)[0] if "(" in pid else None
+
+
+def coverage(rows: list[dict]) -> list[str]:
+    """어느 행에도 안 걸린 조항. 하위 조항이 모두 걸리면 제목 조항도 걸린 것으로 본다."""
+    ids = provisions()
+    exact = {x for r in rows for x in refs(r) if not x.endswith("*")}
+    prefixes = tuple(x[:-1] for r in rows for x in refs(r) if x.endswith("*"))
+    covered = {p for p in ids if p in exact or p.startswith(prefixes)}
+    kids: dict[str, list[str]] = {}
+    for p in ids:
+        kids.setdefault(parent(p) or "", []).append(p)
+    for p in reversed(ids):
+        if kids.get(p) and all(k in covered for k in kids[p]):
+            covered.add(p)
+    return [p for p in ids if p not in covered]
 
 
 def load_catalog() -> list[dict]:
@@ -69,13 +103,20 @@ def validate(rows: list[dict]) -> list[str]:
             errors.append(f"{r['id']}: 영상 판정에 없는 코드 {r['video']}")
         if r["tier"] not in TIERS or set(r["observe"]) - set(OBSERVE):
             errors.append(f"{r['id']}: 단계·보이는 방법 값 오류")
-    codes = video_codes()
+    known = set(provisions())
+    ids = {r["id"] for r in rows}
+    for r in rows:
+        for x in refs(r):
+            if not x.endswith("*") and x not in known:
+                errors.append(f"{r['id']}: 공식 규칙에 없는 조항 번호 {x}")
+    for rid in COVERS:
+        if rid not in ids:
+            errors.append(f"묶음 커버: 카탈로그에 없는 id {rid}")
     for code in sorted(codes - set(JUDGE) - {"sub"}):
         errors.append(f"판정 로직표에 없는 영상 판정 코드: {code}")
     for r in rows:
         if r["video"] and r["video"] != "sub" and r["video"] not in JUDGE:
             errors.append(f"{r['id']}: 판정 로직표에 없는 코드 {r['video']}")
-    ids = {r["id"] for r in rows}
     for rid, (how, _why) in MOTION.items():
         if rid not in ids:
             errors.append(f"동작 판정표: 카탈로그에 없는 id {rid}")
@@ -118,6 +159,8 @@ def report(rows: list[dict]) -> str:
         f"| 설명할 수 있다 (용어 사전 근거) | {pct(has_g, total)} |",
         f"| 문자 데이터로 카드를 띄운다 (감지 규칙) | {pct(has_d, total)} |",
         f"| 영상에서 결과를 알아본다 (영상 판정 코드) | {pct(has_v, total)} |",
+        f"| 공식 야구규칙 조항 (OBR {len(provisions())}개) | "
+        f"{pct(len(provisions()) - len(coverage(rows)), len(provisions()))} |",
         "",
         "| 단계 | 뜻 | 개수 |",
         "|---|---|---|",
