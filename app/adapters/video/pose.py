@@ -26,6 +26,9 @@ CAM_POINTS = 150  # 따라갈 배경 특징점 수
 CAM_INLIERS = 12  # 같은 움직임에 맞는 특징점이 이보다 적으면(흐림) 앞 움직임을 이어 쓴다
 CAM_HOLD = 6  # 앞 움직임은 이 프레임까지만 이어 쓴다 — 밋밋한 잔디 화면에서 밀려가지 않게
 CUT_HIST = 0.5  # 앞 프레임과 색 분포 상관 — 이보다 낮으면 화면 전환
+# 한 프레임(1/30초)에 화면이 이 배 넘게 커지거나 작아지면 줌이 아니라 화면 전환(와이프·로고 넘김).
+# 실측(2026-10-27): 중계 줌은 3초에 4배 = 프레임당 1.016배, 와이프는 한 번에 1.3배 튀었다.
+ZOOM_JUMP = 1.1
 
 
 def field_ratio(img: Any) -> float:
@@ -172,7 +175,7 @@ class PeoplePoseExtractor(_PoseRunner):
         self, video: Path, start: float = 0.0, end: Optional[float] = None
     ) -> list[PeopleFrame]:
         return [
-            PeopleFrame(round(t, 3), tuple(tuple(p) for p in people))
+            PeopleFrame(round(t, 3), tuple(tuple(p) for p in people), height=self.size[1])
             for t, people in self._people(video, start, end)
             if people is not None
         ]
@@ -223,7 +226,9 @@ def camera_motion(
             if prev_gray is not None:
                 move, inliers = _similarity(cv2, np, prev_gray, gray)
                 same = cv2.compareHist(prev_hist, hist, cv2.HISTCMP_CORREL)
-                cut = same < CUT_HIST or (inliers < CAM_INLIERS and same < 0.9)
+                zoom = (move[0, 0] ** 2 + move[1, 0] ** 2) ** 0.5
+                jump = inliers >= CAM_INLIERS and not 1 / ZOOM_JUMP <= zoom <= ZOOM_JUMP
+                cut = same < CUT_HIST or (inliers < CAM_INLIERS and same < 0.9) or jump
                 if cut:
                     total, step, blind = np.eye(3), np.eye(3), 0
                 else:
@@ -273,7 +278,7 @@ def attach_camera(
             k += 1
             cut = cut or (n > 0 and motion[k][2])
         a, b, tx, ty = motion[k][1]
-        out.append(PeopleFrame(f.t, f.people, (a, b, tx, ty), cut))
+        out.append(PeopleFrame(f.t, f.people, (a, b, tx, ty), cut, f.height))
     return out
 
 
@@ -305,10 +310,12 @@ def people_to_json(frames: list[PeopleFrame], size: tuple[int, int]) -> dict[str
 
 
 def people_from_json(doc: dict[str, Any]) -> list[PeopleFrame]:
+    height = int((doc.get("size") or [0, 0])[1])
     return [
         PeopleFrame(
             float(f["t"]),
             tuple(tuple(tuple(p) for p in person) for person in f["people"]),
+            height=height,
         )
         for f in doc["frames"]
     ]

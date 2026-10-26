@@ -47,16 +47,21 @@ def detected(summary: dict[str, Any]) -> dict[str, list[tuple[float, float]]]:
     return out
 
 
-def score(truth: list[float], found: list[tuple[float, float]], tol: float = TOLERANCE,
+def _span(x: Any) -> tuple[float, float]:
+    """정답 한 개 — 시각 하나 또는 [시작, 끝](다이빙 뒤 누워 있다 일어나기까지 이어진 한 장면)."""
+    return (float(x[0]), float(x[1])) if isinstance(x, (list, tuple)) else (float(x), float(x))
+
+
+def score(truth: Sequence[Any], found: list[tuple[float, float]], tol: float = TOLERANCE,
           unsure: Sequence[Sequence[float]] = ()) -> tuple[int, int, int]:
-    """(맞힘, 헛것, 놓침). 잡은 구간 앞뒤 tol초 안에 정답 시각이 있으면 맞힘(정답 하나에 하나).
+    """(맞힘, 헛것, 놓침). 잡은 구간 앞뒤 tol초가 정답 장면과 겹치면 맞힘(정답 하나에 하나).
 
     unsure: 눈으로 봐도 갈리지 않은 구간 [시작, 끝] — 여기 걸친 검출은 셈에서 뺀다.
     """
-    left = sorted(truth)
+    left = sorted((_span(x) for x in truth), key=lambda span: span[1])
     hit = false = 0
     for t0, t1 in sorted(found, key=lambda span: span[1]):  # 끝이 이른 구간부터 — 최적 매칭
-        match = next((x for x in left if t0 - tol <= x <= t1 + tol), None)
+        match = next((x for x in left if t0 - tol <= x[1] and x[0] <= t1 + tol), None)
         if match is not None:
             left.remove(match)
             hit += 1
@@ -155,20 +160,21 @@ def main() -> None:
     args = parser.parse_args()
     report: dict[str, Any] = {}
     truth = json.loads(args.truth.read_text(encoding="utf-8"))["clips"] if args.truth else None
-    totals = {k: [0, 0, 0] for k in KINDS}
+    totals: dict[tuple[str, str], list[int]] = {}  # (묶음, 종류) → [맞힘, 헛것, 놓침]
     for video in args.videos:
         if truth is not None:
             if video.stem not in truth:
                 continue
             found_by_kind = detected(summarize(video, args))
+            gold = truth[video.stem]
             line = []
             for k in KINDS:
-                gold = truth[video.stem]
                 h, f, m = score(gold.get(k, []), found_by_kind[k],
                                 unsure=gold.get("unsure", {}).get(k, []))
-                totals[k] = [a + b for a, b in zip(totals[k], (h, f, m))]
+                key = (gold.get("split", "-"), k)
+                totals[key] = [a + b for a, b in zip(totals.get(key, [0, 0, 0]), (h, f, m))]
                 line.append(f"{k} 맞힘{h} 헛것{f} 놓침{m}")
-            print(f"== {video.stem}: " + " · ".join(line))
+            print(f"== {video.stem} [{gold.get('split', '-')}]: " + " · ".join(line))
             continue
         frames, height = load_frames(video, args)
         sc, found, slid = analyze(frames, min_scale=args.min_scale * height)
@@ -195,10 +201,11 @@ def main() -> None:
             for s in slid:
                 print(f"  slide     {s.t0:.1f}~{s.t1:.1f}s 사람 {s.who} 거리 {s.distance}몸길이")
     if truth is not None:
-        for k, (h, f, m) in totals.items():
+        for (split, k), (h, f, m) in sorted(totals.items()):
             precision = f"{h / (h + f):.0%}" if h + f else "—"
             recall = f"{h / (h + m):.0%}" if h + m else "—"
-            print(f"{k}: 정밀도 {precision} ({h}/{h + f}) · 재현율 {recall} ({h}/{h + m})")
+            print(f"[{split}] {k}: 정밀도 {precision} ({h}/{h + f})"
+                  f" · 재현율 {recall} ({h}/{h + m})")
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=1))
 

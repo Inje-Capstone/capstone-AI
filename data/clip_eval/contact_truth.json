@@ -4,29 +4,274 @@
   "V0lBwrR3ulc": {
    "split": "tune",
    "situation": "홈 송구 보살",
-   "slide": [7.5, 9.8, 43.0, 48.0, 51.0, 69.5],
-   "slide_tag": [9.6, 42.7, 50.6],
+   "slide": [
+    7.5,
+    9.8,
+    43.0,
+    48.0,
+    51.0,
+    69.5
+   ],
+   "slide_tag": [
+    9.6,
+    42.7,
+    50.6
+   ],
    "collision": [],
-   "unsure": {"slide_tag": [[69.0, 72.5]]}
+   "unsure": {
+    "slide_tag": [
+     [
+      69.0,
+      72.5
+     ]
+    ]
+   }
   },
   "Ctt1C-2ap2o": {
    "split": "tune",
    "situation": "끝내기 희생플라이",
-   "slide": [28.2, 46.4, 66.5, 149.9],
-   "slide_tag": [66.7],
+   "slide": [
+    28.2,
+    46.4,
+    66.5,
+    149.9
+   ],
+   "slide_tag": [
+    66.7
+   ],
    "collision": [],
-   "unsure": {"slide": [[29.5, 31.5]], "slide_tag": [[45.5, 47.0]]}
+   "unsure": {
+    "slide": [
+     [
+      29.5,
+      31.5
+     ]
+    ],
+    "slide_tag": [
+     [
+      45.5,
+      47.0
+     ]
+    ]
+   }
   },
   "xMQ6X7EAXHw": {
    "split": "tune",
    "situation": "홈스틸",
-   "slide": [121.6, 154.5, 161.2],
-   "slide_tag": [161.0],
+   "slide": [
+    121.6,
+    154.5,
+    161.2
+   ],
+   "slide_tag": [
+    161.0
+   ],
    "collision": [],
-   "unsure": {"slide_tag": [[121.0, 122.5], [154.0, 155.5]]}
+   "unsure": {
+    "slide_tag": [
+     [
+      121.0,
+      122.5
+     ],
+     [
+      154.0,
+      155.5
+     ]
+    ]
+   }
   },
-  "-dJhkDUqvXw": {"split": "tune", "situation": "홈런", "slide": [], "slide_tag": [], "collision": []},
-  "YWbcNKwUZHo": {"split": "tune", "situation": "스퀴즈", "slide": [], "slide_tag": [], "collision": []},
-  "diE0AsXaO2o": {"split": "tune", "situation": "만루홈런", "slide": [], "slide_tag": [], "collision": []}
+  "-dJhkDUqvXw": {
+   "split": "tune",
+   "situation": "홈런",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "YWbcNKwUZHo": {
+   "split": "tune",
+   "situation": "스퀴즈",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "diE0AsXaO2o": {
+   "split": "tune",
+   "situation": "만루홈런",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "_rdOd3VO64w": {
+   "split": "test",
+   "situation": "견제사",
+   "slide": [
+    [
+     5.4,
+     9.0
+    ],
+    [
+     20.9,
+     24.1
+    ],
+    [
+     59.3,
+     60.9
+    ],
+    [
+     70.4,
+     71.2
+    ],
+    [
+     80.0,
+     80.8
+    ]
+   ],
+   "slide_tag": [
+    [
+     5.4,
+     9.0
+    ],
+    [
+     20.9,
+     24.1
+    ],
+    [
+     59.3,
+     60.9
+    ]
+   ],
+   "collision": [],
+   "unsure": {
+    "slide": [
+     [
+      94.5,
+      95.5
+     ]
+    ],
+    "slide_tag": [
+     [
+      70.0,
+      72.0
+     ],
+     [
+      79.5,
+      81.5
+     ]
+    ]
+   }
+  },
+  "xUHsYIUxgrA": {
+   "split": "test",
+   "situation": "더블스틸(홈)",
+   "slide": [
+    [
+     76.3,
+     78.4
+    ],
+    [
+     108.5,
+     110.3
+    ],
+    [
+     110.5,
+     114.5
+    ]
+   ],
+   "slide_tag": [
+    [
+     76.3,
+     78.4
+    ],
+    [
+     108.5,
+     110.3
+    ],
+    [
+     110.5,
+     114.5
+    ]
+   ],
+   "collision": []
+  },
+  "frDtAaQFrXc": {
+   "split": "test",
+   "situation": "홈스틸",
+   "slide": [
+    [
+     101.0,
+     101.8
+    ]
+   ],
+   "slide_tag": [],
+   "collision": []
+  },
+  "ZtV4DERr2o4": {
+   "split": "test",
+   "situation": "끝내기 보크(1루 귀루)",
+   "slide": [
+    [
+     2.6,
+     4.8
+    ]
+   ],
+   "slide_tag": [],
+   "collision": []
+  },
+  "las9824qg4o": {
+   "split": "test",
+   "situation": "체크스윙 비디오 판독",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "LO8Hv6ehWl0": {
+   "split": "test",
+   "situation": "병살",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "7gqiPYCMUVM": {
+   "split": "test",
+   "situation": "헤드샷 몸에 맞는 공",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "UwDErGYy0fU": {
+   "split": "test",
+   "situation": "보크",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "swnqODxkvws": {
+   "split": "test",
+   "situation": "낫아웃 폭투",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "ApMILQrLJCI": {
+   "split": "test",
+   "situation": "끝내기 희생플라이",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "8Jp6NqkycwQ": {
+   "split": "test",
+   "situation": "보크",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "VHun21viMYk": {
+   "split": "test",
+   "situation": "더블스틸(국제대회)",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  }
  }
 }

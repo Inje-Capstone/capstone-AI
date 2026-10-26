@@ -17,7 +17,7 @@ VLM 장면 v4로 '충돌'을 받아 보려 했더니 세리머니·물 뿌리기
 """
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Optional
 
 Point = tuple[float, float, float]
@@ -51,6 +51,7 @@ SLIDE_MIN = 0.2  # 이 시간 이상 누워 있어야(10fps 세 프레임)
 SLIDE_INTO = 0.5  # 슬라이딩이 끝나고 이 시간 안에 닿아야 '미끄러져 들어와 닿음'
 TRACK_JUMP = 0.6  # 추적: 0.1초에 키의 이 비율 넘게 움직이면 다른 사람(세상 좌표)
 CUT = 0.5  # 프레임 사이가 이보다 비면 장면 전환 — 추적을 새로 시작
+EDGE = 3  # 화면 아래 끝에서 이 px 안에 발(몸 아래)이 걸리면 잘린 사람 — 앞줄 관중(실측 2026-10-27)
 
 
 @dataclass(frozen=True)
@@ -59,6 +60,7 @@ class PeopleFrame:
     people: tuple[Person, ...]
     cam: Camera = STILL  # 장면 시작 화면 → 이 화면의 카메라 변환(패닝·줌)
     cut: bool = False  # 바로 앞 프레임과 다른 장면(화면 전환)
+    height: int = 0  # 화면 높이(px) — 0이면 모름
 
 
 @dataclass(frozen=True)
@@ -71,6 +73,7 @@ class Body:
     y1: float
     pts: tuple[Optional[XY], ...]
     cam: Camera = STILL
+    edge: bool = False  # 화면 아래 끝에 잘림 — 자세를 다 못 본다
 
     @property
     def joints(self) -> tuple[XY, ...]:
@@ -102,7 +105,7 @@ class Body:
 
     @property
     def lying(self) -> bool:
-        if (self.x1 - self.x0) < LYING * max(self.y1 - self.y0, 1.0):
+        if self.edge or (self.x1 - self.x0) < LYING * max(self.y1 - self.y0, 1.0):
             return False
         shoulders = [p for p in self.pts[5:7] if p is not None]
         hips = [p for p in self.pts[11:13] if p is not None]
@@ -153,6 +156,8 @@ def bodies(frame: PeopleFrame, min_scale: float = 0.0) -> list[Optional[Body]]:
         if b is not None and (b.scale < min_scale or any(
                 o is not None and duplicate(b, o) for o in out)):
             b = None
+        if b is not None and frame.height and b.y1 >= frame.height - EDGE:
+            b = replace(b, edge=True)
         out.append(b)
     return out
 
@@ -284,13 +289,13 @@ def _slides(sc: Scene) -> list[tuple[Slide, Body]]:
 
 
 def _merge(found: list[tuple[Slide, Body]]) -> list[Slide]:
-    """추적이 끊겨 한 슬라이딩이 두 사람 번호로 잡힌 것을 하나로 — 시간이 이어지고 같은 자리."""
+    """한 슬라이딩이 여러 번 잡힌 것을 하나로 — 1초 안에 이어지고 같은 사람이거나 같은 자리."""
     out: list[tuple[Slide, Body]] = []
     for s, b in found:
         for k in range(len(out) - 1, -1, -1):
             p, pb = out[k]
             near = _dist(pb.world, b.world) <= 2 * max(pb.world_scale, b.world_scale)
-            if (s.who == p.who and s.t0 <= p.t1 + 1.0) or (s.t0 <= p.t1 + JOIN and near):
+            if (s.who == p.who or near) and s.t0 <= p.t1 + 1.0:
                 out[k] = (Slide(p.t0, max(p.t1, s.t1), p.who, max(p.distance, s.distance)), pb)
                 break
         else:

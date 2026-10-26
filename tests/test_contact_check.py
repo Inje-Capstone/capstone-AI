@@ -49,3 +49,9 @@ def test_long_video_is_summarized_window_by_window(monkeypatch):
     out = contact_check.summarize_long(Path("g.mp4"), None, 0.0, 1300.0, window=600.0)
     assert seen == [(0.0, 600.0), (600.0, 1200.0), (1200.0, 1300.0)]
     assert [s["t0"] for s in out["slides"]] == [1.0, 601.0, 1201.0]
+
+
+def test_truth_can_be_a_scene_span():
+    """다이빙(5.4초) 뒤 누워 있다 일어나는(9.0초) 한 장면 — 그 안 어디서 잡아도 같은 정답."""
+    assert contact_check.score([[5.4, 9.0]], [(7.6, 9.0)]) == (1, 0, 0)
+    assert contact_check.score([[5.4, 9.0]], [(7.6, 8.0), (8.5, 9.0)]) == (1, 1, 0)

@@ -61,6 +61,14 @@ def test_skeleton_mixing_two_people_is_dropped():
     assert body(tuple(p)) is None
 
 
+def test_person_cut_by_bottom_edge_is_not_lying():
+    """앞줄 관중처럼 화면 아래 끝에 걸린 사람은 누웠는지 모른다."""
+    p = person(300, ground=480, lying=True)
+    assert bodies(PeopleFrame(0.0, (p,)))[0].lying
+    assert not bodies(PeopleFrame(0.0, (p,), height=480))[0].lying
+    assert bodies(PeopleFrame(0.0, (person(300, ground=400, lying=True),), height=480))[0].lying
+
+
 def test_lying_needs_torso_seen():
     """가로로 넓어도 어깨·엉덩이를 못 봤으면 누웠는지 모른다."""
     p = [(x, y, 0.0 if k in (5, 6, 11, 12) else s)
