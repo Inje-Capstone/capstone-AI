@@ -117,3 +117,48 @@ def test_whisper_pieces_cover_clip():
 
     assert plan_pieces(65.5, 30) == [(0.0, 30.0), (30.0, 30.0), (60.0, 5.5)]
     assert plan_pieces(0.5, 30) == []
+
+
+def test_pose_slide_is_a_scene_cue_but_not_commentary():
+    """관절로 잰 슬라이딩은 장면 단서 — 타구 없이 슬라이딩 득점이면 홈스틸."""
+    snap = {
+        "scoreboard": [],
+        "events": [{"t_start": 9.0, "event_type": "runner_scores", "description": ""}],
+        "speech": [],
+    }
+    label = {"id": "h", "league": "KBO", "situation": "steal_home", "expect": "steal",
+             "keywords": []}
+    assert eval_clips.score_clip(label, snap)["judged"] is False
+    snap["pose"] = {"slides": [{"t0": 7.5, "t1": 8.2, "distance": 1.8}],
+                    "contacts": [{"t0": 8.2, "t1": 8.3, "kind": "slide_tag", "why": "x"}]}
+    row = eval_clips.score_clip(label, snap)
+    assert row["judged"] is True and row["codes"] == ["steal"]
+
+
+def test_ablation_splits_sound_from_screen():
+    """해설만 = 소리(받아쓰기), 화면만 = 점수판·장면·화면 자막 — 같은 판정 규칙에 입력만 바꾼다."""
+    snap = {
+        "scoreboard": [_sb(1, 0, [1])],
+        "events": [{"t_start": 2.0, "event_type": "slide", "description": ""}],
+        "speech": [{"t": 3, "text": "[자막] 도루 성공"}, {"t": 4, "text": "VLM 받아쓰기"}],
+        "asr": {"segments": [{"t": 0, "text": "도루!"}]},
+        "scorebug": {"scoreboard": [_sb(1, 0, [1])]},
+        "pose": {"slides": []},
+    }
+    talk = eval_clips.commentary_only(snap)
+    assert talk["scoreboard"] == [] and talk["events"] == [] and "scorebug" not in talk
+    assert [s["text"] for s in talk["speech"]] == ["VLM 받아쓰기"]
+    assert talk["asr"] and "pose" not in talk
+    screen = eval_clips.screen_only(snap)
+    assert "asr" not in screen and [s["text"] for s in screen["speech"]] == ["[자막] 도루 성공"]
+    assert screen["events"] and screen["scorebug"]
+
+
+def test_ablation_report_counts_what_the_screen_added():
+    label = {"id": "a", "league": "KBO", "situation": "s", "expect": "triple_play", "keywords": []}
+    snap = {"scoreboard": [], "events": [], "speech": [],
+            "asr": {"segments": [{"t": 0, "text": "트리플 플레이!"}]}}
+    report = eval_clips.render_ablation([(label, snap)])
+    assert "| 화면 + 해설 | 1/1 (100%) | 0/1 |" in report
+    assert "| 해설만 | 1/1 (100%) | 0/1 |" in report and "| 화면만 | 0/1 (0%) | 0/1 |" in report
+    assert "화면이 더한 클립 0개" in report

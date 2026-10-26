@@ -12,6 +12,9 @@ API를 다시 부르지 않는다. 요약만 data/clip_eval/REPORT.md로 남긴�
     python scripts/eval_clips.py --clips "../clips_private" --limit 3      # 앞 3개만 시험
     python scripts/eval_clips.py --clips "../clips_private"                # 전체
     python scripts/eval_clips.py --clips "../clips_private" --report-only  # 캐시로 보고서만
+    python scripts/eval_clips.py --clips "../clips_private" --report-only --pose  # + 관절 단서
+    python scripts/eval_clips.py --clips "../clips_private" --report-only --ablation
+        # 해설만 / 화면만 / 둘 다 비교 → data/clip_eval/ABLATION.md
 """
 
 import argparse
@@ -34,11 +37,14 @@ from analyze_video import (  # noqa: E402
     plan_clips,
     probe_duration,
 )
+from contact_check import MIN_SCALE  # noqa: E402
+from contact_check import summarize as contact_summary  # noqa: E402
 
 from app.adapters.video.base import PROMPT_VERSION, VideoAnalyzerError, VideoClip  # noqa: E402
 from app.domain.video_judge import (  # noqa: E402
     GENERIC_CODES,
     MIN_CONFIDENCE,
+    POSE_TAG,
     Cue,
     from_snapshot,
     judge,
@@ -47,6 +53,7 @@ from app.domain.video_judge import (  # noqa: E402
 
 LABELS = ROOT / "data" / "clip_eval" / "labels.json"
 REPORT = ROOT / "data" / "clip_eval" / "REPORT.md"
+ABLATION = ROOT / "data" / "clip_eval" / "ABLATION.md"
 CLIP_WINDOW = 600.0
 SCOREBUG_VERSION = "scorebug-crop-v1"
 ASR_VERSION = "whisper-large-v3-ko-30s"
@@ -104,9 +111,14 @@ def score_clip(label: dict[str, Any], snap: dict[str, Any]) -> dict[str, Any]:
     readings = consistent(readings)
     if CLIP_MODE == "endpoints":
         readings = endpoints(readings)
-    if DESC_CUES:  # 장면 설명도 해설처럼 단서로 (클립에선 해설이 드물다)
+    if DESC_CUES:  # 장면 설명도 해설처럼 단서로 (클립에선 해설이 드물다) — 관절 단서는 빼고
         cues = sorted(
-            cues + [Cue(c.t, "speech", c.text) for c in cues if c.kind != "speech" and c.text],
+            cues
+            + [
+                Cue(c.t, "speech", c.text)
+                for c in cues
+                if c.kind != "speech" and c.text and not c.text.startswith(POSE_TAG)
+            ],
             key=lambda c: c.t,
         )
     # 클립: 점수판이 몇 번 안 나오고(min_repeat 1), 단서는 클립 어디에 있든 본다
@@ -136,6 +148,76 @@ def score_clip(label: dict[str, Any], snap: dict[str, Any]) -> dict[str, Any]:
         "readings": len(readings),
         "transitions": len(judgments),
     }
+
+
+def _caption(s: dict[str, Any]) -> bool:
+    return str(s.get("text", "")).startswith("[자막]")
+
+
+def commentary_only(snap: dict[str, Any]) -> dict[str, Any]:
+    """해설(소리)만 — 점수판·장면·화면 자막·관절 없이. '해설이 있는데 영상이 왜?'의 기준선."""
+    out = {k: v for k, v in snap.items() if k not in ("scorebug", "pose")}
+    out["scoreboard"], out["events"] = [], []
+    out["speech"] = [s for s in snap.get("speech") or [] if not _caption(s)]
+    return out
+
+
+def screen_only(snap: dict[str, Any]) -> dict[str, Any]:
+    """화면만 — 점수판·장면 종류·화면 자막(·관절). 해설 소리(Whisper·VLM 받아쓰기)는 뺀다.
+
+    VLM은 소리를 함께 들은 클립을 봤다 — 장면 설명 글에 해설이 섞일 수 있어 설명은 비운다.
+    """
+    out = {k: v for k, v in snap.items() if k != "asr"}
+    out["speech"] = [s for s in snap.get("speech") or [] if _caption(s)]
+    out["events"] = [{**e, "description": ""} for e in snap.get("events") or []]
+    return out
+
+
+ABLATIONS = (("화면 + 해설", None), ("해설만", commentary_only), ("화면만", screen_only))
+
+
+def render_ablation(pairs: list[tuple[dict[str, Any], dict[str, Any]]]) -> str:
+    """같은 클립·같은 판정 규칙으로 입력만 바꿔 본다 — 정답 코드가 있는 클립만."""
+    pairs = [(label, snap) for label, snap in pairs if label.get("expect")]
+    table = {name: [score_clip(label, fn(snap) if fn else snap) for label, snap in pairs]
+             for name, fn in ABLATIONS}
+    out = [
+        "# 해설만 vs 화면만 vs 둘 다",
+        "",
+        "> 같은 클립·같은 판정 규칙에 입력만 바꿨다. 해설 = 중계 소리(Whisper 받아쓰기),"
+        " 화면 = 점수판·장면 종류(VLM)·화면 자막 — VLM이 소리도 들었으니 화면만에선 장면 설명 글을"
+        " 뺐다. `python scripts/eval_clips.py --ablation`로 재생성.",
+        "",
+        "| 입력 | 판정 정답 | 오판 |",
+        "|---|---|---|",
+    ]
+    n = len(pairs)
+    for name, rows in table.items():
+        hit = sum(1 for r in rows if r["judged"])
+        wrong = sum(1 for r in rows if r["wrong"])
+        out.append(f"| {name} | {hit}/{n} ({hit / n:.0%}) | {wrong}/{n} |" if n else
+                   f"| {name} | 0/0 | 0/0 |")
+    both, talk = table["화면 + 해설"], table["해설만"]
+    added = [b["id"] for b, c in zip(both, talk) if b["judged"] and not c["judged"]]
+    lost = [b["id"] for b, c in zip(both, talk) if c["judged"] and not b["judged"]]
+    out += [
+        "",
+        f"- 화면이 더한 클립 {len(added)}개: " + (", ".join(added) or "없음"),
+        f"- 화면 때문에 놓친 클립 {len(lost)}개: " + (", ".join(lost) or "없음"),
+        "",
+        "## 클립별",
+        "",
+        "| 클립 | 정답 | " + " | ".join(name for name, _ in ABLATIONS) + " |",
+        "|---|---|" + "---|" * len(ABLATIONS),
+    ]
+
+    def mark(r: dict[str, Any]) -> str:
+        return "✓" if r["judged"] else ("✗ " + ",".join(r["wrong"]) if r["wrong"] else "✗")
+
+    for i, (label, _snap) in enumerate(pairs):
+        cells = " | ".join(mark(table[name][i]) for name, _ in ABLATIONS)
+        out.append(f"| {label['id']} | {label['expect']} | {cells} |")
+    return "\n".join(out) + "\n"
 
 
 def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -298,6 +380,14 @@ def main() -> None:
     parser.add_argument(
         "--asr", action="store_true", help="해설을 Whisper로 받아 적는다 ([asr] 설치)"
     )
+    parser.add_argument(
+        "--pose",
+        action="store_true",
+        help="영상 옆 관절 캐시(contact_check.py)로 슬라이딩·충돌 단서를 더한다",
+    )
+    parser.add_argument(
+        "--ablation", action="store_true", help="해설만·화면만·둘 다를 비교해 ABLATION.md로"
+    )
     parser.add_argument("--clip-sec", type=float, default=60.0)
     parser.add_argument("--height", type=int, default=480)
     parser.add_argument("--fps", type=float, default=2.0)
@@ -319,10 +409,11 @@ def main() -> None:
     results_dir = args.clips / "results"
     results_dir.mkdir(parents=True, exist_ok=True)
 
+    pose_args = argparse.Namespace(fps=10.0, mode="balanced", min_scale=MIN_SCALE)
     analyzer: Optional[Any] = None
     reader: Optional[Any] = None
     transcriber: Optional[Any] = None
-    rows, meta = [], {}
+    rows, meta, pairs = [], {}, []
     for i, label in enumerate(labels, 1):
         cache = results_dir / f"{label['id']}.json"
         snap = json.loads(cache.read_text(encoding="utf-8")) if cache.exists() else None
@@ -375,18 +466,32 @@ def main() -> None:
                 segs = transcriber.transcribe(video, probe_duration(ffprobe, video))
                 snap["asr"] = {"version": ASR_VERSION, "segments": segs}
                 cache.write_text(json.dumps(snap, ensure_ascii=False, indent=1), encoding="utf-8")
+        if args.pose:
+            video = args.clips / "videos" / f"{label['yt']}.mp4"
+            if all(video.with_suffix(s).exists() for s in (".people.json", ".cam.json")):
+                try:  # 캐시만 읽는다 — 관절 추출·카메라 계산은 contact_check.py가 한다
+                    snap["pose"] = contact_summary(video, pose_args)
+                except (VideoAnalyzerError, ValueError, KeyError) as exc:
+                    print(f"[{i}] {label['id']} 관절 캐시 읽기 실패: {exc}")
+            else:
+                print(f"[{i}] {label['id']} 관절 캐시 없음 (scripts/contact_check.py)")
         meta = {
             "model": snap.get("model", "?"),
             "thinking": "켬" if snap.get("thinking") else "끔",
             "scorebug": ("점수판 전용 판독" if args.scorebug else "영상 통째 판독")
-            + (" · 해설 Whisper" if args.asr else ""),
+            + (" · 해설 Whisper" if args.asr else "")
+            + (" · 관절(슬라이딩·충돌)" if args.pose else ""),
         }
         row = score_clip(label, snap)
         rows.append(row)
+        pairs.append((label, snap))
         print(
             f"[{i}/{len(labels)}] {label['id']}: 판정 {row['judged']} 단서 {row['hits'] or '없음'} "
             f"코드 {row['codes']}"
         )
+    if pairs and args.ablation:
+        ABLATION.write_text(render_ablation(pairs), encoding="utf-8")
+        print(f"→ {ABLATION.name}")
     if rows:
         REPORT.write_text(render(rows, meta), encoding="utf-8")
         s = summarize(rows)

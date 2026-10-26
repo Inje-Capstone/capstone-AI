@@ -48,6 +48,10 @@ FOUL_TIP_WORDS = ("파울팁", "파울 팁", "파울tv", "파울 tv")
 TRIPLE_WORDS = ("삼중살", "트리플 플레이", "트리플플레이")
 HBP_WORDS = ("몸에 맞", "사구", "데드볼", "헤드샷")  # 5.05(b)(2)
 
+# 관절로 잰 동작 단서의 설명 머리말 — 카드 '영상 근거'에 그대로 나간다
+POSE_TAG = "[관절] "
+POSE_TEXT = {"slide_tag": "미끄러져 들어와 닿음(태그)", "collision": "빠르게 부딪혀 넘어짐"}
+
 # 단서 종류 (VLM 프롬프트 v2와 같은 어휘)
 CUE_KINDS = (
     "pitch", "swing_miss", "contact", "slide", "pickoff_throw", "pitcher_stops",
@@ -129,7 +133,11 @@ def _speech(cues: Sequence[Cue], *words: str) -> Optional[Cue]:
 
 
 def _ev(c: Cue) -> str:
-    return f"해설 '{c.text}' ({c.t:.0f}s)" if c.kind == "speech" else f"장면 {c.kind} ({c.t:.0f}s)"
+    if c.kind == "speech":
+        return f"해설 '{c.text}' ({c.t:.0f}s)"
+    if c.text.startswith(POSE_TAG):  # 관절로 잰 동작 — 무엇을 봤는지 그대로
+        return f"{c.text} ({c.t:.0f}s)"
+    return f"장면 {c.kind} ({c.t:.0f}s)"
 
 
 def _confidence(base: float, supports: Sequence[Optional[Cue]]) -> tuple[float, list[str]]:
@@ -346,8 +354,8 @@ def judge(
 _UMPIRE = ("umpire_signal", "replay_review")
 CALL_TABLE = (
     ("catcher_interference", ("타격방해", "타격 방해", "캐처 인터페어", "포수 인터페어"), _UMPIRE),
-    ("obstruction", ("주루방해", "주루 방해"), _UMPIRE),
-    ("interference", ("수비방해", "수비 방해"), _UMPIRE),
+    ("obstruction", ("주루방해", "주루 방해"), _UMPIRE + ("collision",)),
+    ("interference", ("수비방해", "수비 방해"), _UMPIRE + ("collision",)),
     ("video_review", ("비디오 판독", "비디오판독"), _UMPIRE),
     ("check_swing", ("체크스윙", "체크 스윙"), _UMPIRE),
     ("ejection",
@@ -359,8 +367,11 @@ CALL_TABLE = (
     ("pitch_clock", ("피치클락 위반", "피치 클락 위반", "피치클락 바이올레이션"), _UMPIRE),
     ("squeeze", ("스퀴즈", "스쿠즈"), ("runner_scores",)),  # Whisper '스쿠즈'(실측)
     ("missed_base", ("누의 공과", "누의공과"), _UMPIRE),
-    ("home_collision", ("홈 충돌", "충돌 방지 규정", "홈플레이트 충돌"), _UMPIRE),
-    ("slide_rule", ("슬라이딩 규정", "슬라이딩 방해", "병살 방해 슬라이딩"), _UMPIRE),
+    # 관절로 잰 충돌·미끄러져 닿음(contact.py)도 '실제로 부딪혔다'는 확인이 된다
+    ("home_collision", ("홈 충돌", "충돌 방지 규정", "홈플레이트 충돌"),
+     _UMPIRE + ("collision", "slide_tag")),
+    ("slide_rule", ("슬라이딩 규정", "슬라이딩 방해", "병살 방해 슬라이딩"),
+     _UMPIRE + ("slide_tag", "collision")),
     ("runner_lane", ("3피트", "쓰리피트", "스리피트"), _UMPIRE),
     ("fan_interference", ("관중 방해", "팬 방해", "관중이 공을 건드"), _UMPIRE),
     ("intentional_drop", ("고의낙구", "고의 낙구"), _UMPIRE),
@@ -468,7 +479,8 @@ def _event_judgment(cues: Sequence[Cue]) -> Optional[Judgment]:
         if caught_fly:
             return make("sac_fly", "result", score, "외야 뜬공을 잡은 뒤 득점")
         slide = next((c for c in before if c.kind == "slide" and score.t - c.t <= 5), None)
-        contact = any(c.kind == "contact" and score.t - c.t <= 10 for c in before)
+        # 득점 전 15초 안에 타구가 있었으면 홈스틸이 아니다(2루타에 홈 슬라이딩)
+        contact = any(c.kind == "contact" for c in before)
         missed = any(c.kind in ("catcher_miss", "fielder_drops_ball") for c in before)
         if slide and not contact and not missed:  # 포수가 놓쳤으면 폭투·포일 득점
             return make("steal", "steal", score, "타격 없이 슬라이딩 득점(홈스틸)")
@@ -522,7 +534,16 @@ def from_snapshot(snap: dict) -> tuple[list[Reading], list[Cue]]:
             for e in snap.get("events") or [] if e.get("event_type") in CUE_KINDS]
     cues += [Cue(float(s["t"]), "speech", s["text"]) for s in snap.get("speech") or []
              if not is_echoed_keyword(s.get("text", ""))]
-    return readings, sorted(cues, key=lambda c: c.t)
+    return readings, sorted(cues + pose_cues(snap.get("pose") or {}), key=lambda c: c.t)
+
+
+def pose_cues(pose: dict) -> list[Cue]:
+    """관절 분석(contact.py · scripts/contact_check.py) → 장면 단서. VLM 'slide'와 같은 종류."""
+    cues = [Cue(float(s["t0"]), "slide", f"{POSE_TAG}슬라이딩·다이빙 {s['t0']:.1f}~{s['t1']:.1f}초")
+            for s in pose.get("slides") or []]
+    cues += [Cue(float(c["t0"]), c["kind"], POSE_TAG + POSE_TEXT[c["kind"]])
+             for c in pose.get("contacts") or [] if c.get("kind") in POSE_TEXT]
+    return cues
 
 
 def is_echoed_keyword(text: str) -> bool:

@@ -1,0 +1,32 @@
+{
+ "_note": "선수 접촉·슬라이딩 정답 표 — 사람이 프레임을 직접 보고 적은 시각(초). 키는 영상 id(labels.json의 yt). slide = 슬라이딩·다이빙(느린 화면·클로즈업 포함), slide_tag = 미끄러져 들어와 수비에 닿음, collision = 빠르게 부딪혀 넘어짐. unsure = 봐도 갈리지 않은 구간(검출돼도 헛것으로 세지 않음). split: tune = 기준값을 정할 때 본 클립, test = 기준값을 정한 뒤 처음 본 클립. python scripts/contact_check.py <영상들> --truth data/clip_eval/contact_truth.json",
+ "clips": {
+  "V0lBwrR3ulc": {
+   "split": "tune",
+   "situation": "홈 송구 보살",
+   "slide": [7.5, 9.8, 43.0, 48.0, 51.0, 69.5],
+   "slide_tag": [9.6, 42.7, 50.6],
+   "collision": [],
+   "unsure": {"slide_tag": [[69.0, 72.5]]}
+  },
+  "Ctt1C-2ap2o": {
+   "split": "tune",
+   "situation": "끝내기 희생플라이",
+   "slide": [28.2, 46.4, 66.5, 149.9],
+   "slide_tag": [66.7],
+   "collision": [],
+   "unsure": {"slide": [[29.5, 31.5]], "slide_tag": [[45.5, 47.0]]}
+  },
+  "xMQ6X7EAXHw": {
+   "split": "tune",
+   "situation": "홈스틸",
+   "slide": [121.6, 154.5, 161.2],
+   "slide_tag": [161.0],
+   "collision": [],
+   "unsure": {"slide_tag": [[121.0, 122.5], [154.0, 155.5]]}
+  },
+  "-dJhkDUqvXw": {"split": "tune", "situation": "홈런", "slide": [], "slide_tag": [], "collision": []},
+  "YWbcNKwUZHo": {"split": "tune", "situation": "스퀴즈", "slide": [], "slide_tag": [], "collision": []},
+  "diE0AsXaO2o": {"split": "tune", "situation": "만루홈런", "slide": [], "slide_tag": [], "collision": []}
+ }
+}
