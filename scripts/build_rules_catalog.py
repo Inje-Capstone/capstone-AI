@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from rules_catalog_src import MOTION, R  # noqa: E402
+from rules_catalog_src import JUDGE, MOTION, R  # noqa: E402
 
 from app.adapters.glossary.seed import load_glossary  # noqa: E402
 from app.domain.detectors import RULES  # noqa: E402
@@ -40,7 +40,10 @@ TIERS = {
 def video_codes() -> set[str]:
     """video_judge가 실제로 내는 판정 코드 (make("kind", "code", …) + 교체)."""
     src = (ROOT / "app" / "domain" / "video_judge.py").read_text(encoding="utf-8")
-    return set(re.findall(r'make\("\w+", "(\w+)"', src)) | {"sub"}
+    found = set(re.findall(r'make\("\w+", "(\w+)"', src))
+    found |= set(re.findall(r'\("(\w+)", "(?:call|result|steal)", \(', src))  # 단서만 판정표
+    found |= set(re.findall(r'make\("(\w+)", "(?:call|result|steal)"', src))  # 장면 순서 판정
+    return (found - {"call", "result"}) | {"sub", "pitcher", "out", "reach"}
 
 
 def load_catalog() -> list[dict]:
@@ -66,6 +69,12 @@ def validate(rows: list[dict]) -> list[str]:
             errors.append(f"{r['id']}: 영상 판정에 없는 코드 {r['video']}")
         if r["tier"] not in TIERS or set(r["observe"]) - set(OBSERVE):
             errors.append(f"{r['id']}: 단계·보이는 방법 값 오류")
+    codes = video_codes()
+    for code in sorted(codes - set(JUDGE) - {"sub"}):
+        errors.append(f"판정 로직표에 없는 영상 판정 코드: {code}")
+    for r in rows:
+        if r["video"] and r["video"] != "sub" and r["video"] not in JUDGE:
+            errors.append(f"{r['id']}: 판정 로직표에 없는 코드 {r['video']}")
     ids = {r["id"] for r in rows}
     for rid, (how, _why) in MOTION.items():
         if rid not in ids:
@@ -139,6 +148,13 @@ def report(rows: list[dict]) -> str:
                 f"{r['video'] or '·'} | {r['tier']} |"
             )
         out.append("")
+    out += ["## 영상 판정 로직 — 저장 규칙 대조", "",
+            "`app/domain/video_judge.py`가 내는 코드마다 근거 조항·점수판 모양·단서·성립 조건. "
+            "성립 조건이 안 맞으면 그 판정을 내지 않는다.", "",
+            "| 코드 | 조항 | 점수판 모양 | 단서 | 성립 조건 |", "|---|---|---|---|---|"]
+    for code, (rule, shape, cues, cond) in JUDGE.items():
+        out.append(f"| {code} | {rule} | {shape} | {cues} | {cond} |")
+    out.append("")
     names = {r["id"]: (r["rule"], r["name"]) for r in rows}
     out += ["## 보크·투구 반칙 — 동작 판정 방법", "",
             "성립 조건: 축발이 투수판에 닿아 있고(먼저 빼면 보크 아님) 주자가 있을 때. "

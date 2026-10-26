@@ -43,8 +43,10 @@ def one(before, after, cues=()):
 # ── 점수판 ─────────────────────────────────────────────────────────────
 def test_stabilize_drops_single_frame_misreads_and_impossible_values():
     good = twice(R(0), R(10, outs=1))
-    noise = [R(5, outs=2, bases=(True, True, True)),  # 한 번만 보인 오독
-             Reading(6.0, 3, "top", 4, 0, 0, E, 0, 0)]  # 4볼 — 불가능
+    noise = [
+        R(5, outs=2, bases=(True, True, True)),  # 한 번만 보인 오독
+        Reading(6.0, 3, "top", 4, 0, 0, E, 0, 0),
+    ]  # 4볼 — 불가능
     stable = stabilize(good + noise)
     assert [r.outs for r in stable] == [0, 1]
 
@@ -55,7 +57,7 @@ def test_stabilize_rejects_score_going_down_and_inning_going_back():
 
 
 def test_half_change_counts_remaining_outs_and_top_to_bot_is_forward():
-    tr, = transitions(stabilize(twice(R(0, outs=1), R(10, half="bot"))))
+    (tr,) = transitions(stabilize(twice(R(0, outs=1), R(10, half="bot"))))
     assert tr.half_change and tr.outs_made == 2
 
 
@@ -70,8 +72,10 @@ def test_base_shapes():
 
 # ── 판정 규칙 ───────────────────────────────────────────────────────────
 def test_balk_needs_all_runners_one_base_and_a_cue():
-    before, after = R(0, bases=(True, False, False), balls=1), R(10, bases=(False, True, False),
-                                                                  balls=1)
+    before, after = (
+        R(0, bases=(True, False, False), balls=1),
+        R(10, bases=(False, True, False), balls=1),
+    )
     j = one(before, after, [Cue(8, "speech", "보크")])
     assert (j.kind, j.code) == ("call", "balk") and j.confidence >= 0.5
     assert any("보크" in e for e in j.evidence)
@@ -79,21 +83,25 @@ def test_balk_needs_all_runners_one_base_and_a_cue():
 
 
 def test_steal_vs_wild_pitch_by_cue():
-    before, after = R(0, bases=(True, False, False), strikes=1), R(10, bases=(False, True, False),
-                                                                     strikes=1)
+    before, after = (
+        R(0, bases=(True, False, False), strikes=1),
+        R(10, bases=(False, True, False), strikes=1),
+    )
     assert one(before, after, [Cue(7, "slide")]).code == "steal"
     assert one(before, after, [Cue(7, "slide"), Cue(9, "speech", "폭투")]).code == "wild_pitch"
 
 
 def test_steal_at_zero_zero_count_is_not_mistaken_for_a_new_batter():
-    j = one(R(0, bases=(True, False, False)), R(10, bases=(False, True, False)),
-            [Cue(6, "speech", "2루 도루 성공")])
+    j = one(
+        R(0, bases=(True, False, False)),
+        R(10, bases=(False, True, False)),
+        [Cue(6, "speech", "2루 도루 성공")],
+    )
     assert j.code == "steal"
 
 
 def test_caught_stealing():
-    j = one(R(0, bases=(True, False, False), balls=1), R(10, outs=1, balls=1),
-            [Cue(7, "slide")])
+    j = one(R(0, bases=(True, False, False), balls=1), R(10, outs=1, balls=1), [Cue(7, "slide")])
     assert (j.kind, j.code, j.detail["caught"]) == ("steal", "caught_stealing", True)
 
 
@@ -116,18 +124,22 @@ def test_homerun_sac_fly_infield_fly_double_play():
     assert hr.code == "homerun"
     sf = one(R(0, bases=(False, False, True)), R(10, outs=1, away=1), [Cue(5, "deep_fly")])
     assert sf.code == "sac_fly"
-    iff = one(R(0, bases=(True, True, False)), R(10, outs=1, bases=(True, True, False)),
-              [Cue(8, "speech", "인필드플라이")])
+    iff = one(
+        R(0, bases=(True, True, False)),
+        R(10, outs=1, bases=(True, True, False)),
+        [Cue(8, "speech", "인필드플라이")],
+    )
     assert iff.code == "infield_fly"
     dp = one(R(0, bases=(True, False, False)), R(10, outs=2))
     assert dp.code == "double_play"
-    k_cs = one(R(0, bases=(True, False, False), strikes=2), R(10, outs=2),
-               [Cue(5, "speech", "삼진")])
+    k_cs = one(
+        R(0, bases=(True, False, False), strikes=2), R(10, outs=2), [Cue(5, "speech", "삼진")]
+    )
     assert k_cs.code == "strikeout"  # 삼진+도루실패는 병살타 카드가 아니다
 
 
 def test_pitch_only_transition_is_not_a_play():
-    tr, = transitions(stabilize(twice(R(0), R(10, balls=1))))
+    (tr,) = transitions(stabilize(twice(R(0), R(10, balls=1))))
     assert judge_transition(tr, []) is None
 
 
@@ -141,7 +153,9 @@ def test_pitching_change_takes_half_from_scoreboard():
 # ── 기존 엔진으로 연결 ──────────────────────────────────────────────────
 def test_events_replay_in_game_sim_and_fire_detectors():
     readings = twice(
-        R(0, inning=1), R(30, inning=1, balls=3), R(60, inning=1, bases=(True, False, False)),
+        R(0, inning=1),
+        R(30, inning=1, balls=3),
+        R(60, inning=1, bases=(True, False, False)),
         R(90, inning=1, bases=(False, True, False)),
         R(120, inning=1, outs=1, bases=(False, True, False)),
     )
@@ -158,8 +172,9 @@ def test_events_replay_in_game_sim_and_fire_detectors():
 
 
 def test_low_confidence_keeps_state_but_drops_the_label():
-    readings = twice(R(0, bases=(True, False, False), balls=1),
-                     R(10, bases=(False, True, False), balls=1))
+    readings = twice(
+        R(0, bases=(True, False, False), balls=1), R(10, bases=(False, True, False), balls=1)
+    )
     (ev,) = to_relay_events(judge(readings, []))  # 단서 없음 → '주자 진루'(0.4)
     assert ev.kind == "result" and ev.detail["result"] == "reach"
     assert ev.detail["bases_after"] == [2]
@@ -170,8 +185,17 @@ def _sit(rule, t):
     from app.domain.models import GameState, Situation
 
     st = GameState(away_team="A", home_team="H")
-    return Situation(id=f"{rule}{t}", t=t, rule_id=rule, term_id=rule, category="basic_rules",
-                     label=rule, trigger_text="", event_ids=[], state=st)
+    return Situation(
+        id=f"{rule}{t}",
+        t=t,
+        rule_id=rule,
+        term_id=rule,
+        category="basic_rules",
+        label=rule,
+        trigger_text="",
+        event_ids=[],
+        state=st,
+    )
 
 
 def test_grade_matches_within_tolerance_once():
@@ -182,8 +206,9 @@ def test_grade_matches_within_tolerance_once():
     assert scores["steal"].matched == 0
     total = summary(list(scores.values()))
     assert total["matched"] == 2
-    windowed = {s.rule_id: s for s in grade(truth, video, offset=300, tolerance=15,
-                                             window=(0, 450))}
+    windowed = {
+        s.rule_id: s for s in grade(truth, video, offset=300, tolerance=15, window=(0, 450))
+    }
     assert windowed["balk"].expected == 1  # 영상이 덮지 않은 구간의 정답은 세지 않는다
 
 
@@ -191,15 +216,20 @@ def test_grade_matches_within_tolerance_once():
 @pytest.fixture(scope="module")
 def sim():
     spec = importlib.util.spec_from_file_location(
-        "simulate_video_judge", ROOT / "scripts" / "simulate_video_judge.py")
+        "simulate_video_judge", ROOT / "scripts" / "simulate_video_judge.py"
+    )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
 
 
 def test_perfect_eye_on_real_games_matches_the_relay(sim):
-    totals = sim.run(["20260920HHLG02026", "20260920HTNC02026", "20260920OBKT02026"],
-                     cue_drop=0.0, misread=0.0, seed=0)
+    totals = sim.run(
+        ["20260920HHLG02026", "20260920HTNC02026", "20260920OBKT02026"],
+        cue_drop=0.0,
+        misread=0.0,
+        seed=0,
+    )
     expected = sum(v[0] for v in totals.values())
     matched = sum(v[2] for v in totals.values())
     found = sum(v[1] for v in totals.values())
@@ -208,8 +238,12 @@ def test_perfect_eye_on_real_games_matches_the_relay(sim):
 
 
 def test_noise_degrades_gracefully(sim):
-    totals = sim.run(["20260920HHLG02026", "20260920HTNC02026", "20260920OBKT02026"],
-                     cue_drop=0.3, misread=0.1, seed=3)
+    totals = sim.run(
+        ["20260920HHLG02026", "20260920HTNC02026", "20260920OBKT02026"],
+        cue_drop=0.3,
+        misread=0.1,
+        seed=3,
+    )
     expected = sum(v[0] for v in totals.values())
     matched = sum(v[2] for v in totals.values())
     found = sum(v[1] for v in totals.values())
@@ -224,40 +258,87 @@ def test_parse_analysis_scoreboard_speech_and_events(tmp_path):
     from app.adapters.video.base import VideoClip, parse_analysis
 
     clip = VideoClip(tmp_path / "c.mp4", 600.0, 60.0)
-    text = "<think>..</think><answer>" + json.dumps({
-        "scoreboard": [
-            {"t": 2, "inning": 3, "half": "말", "balls": 1, "strikes": 2, "outs": 1,
-             "bases": "1,3", "away": 2, "home": 4},
-            {"t": 5, "inning": 3, "half": "bot", "balls": 1, "strikes": 2, "outs": 1,
-             "bases": [True, False, True], "away": 2, "home": 4},
-            {"t": 9, "inning": "?", "half": "top", "balls": 0, "strikes": 0, "outs": 0,
-             "bases": [], "away": 0, "home": 0},  # 못 읽은 값 — 버린다
-        ],
-        "events": [{"start": 8, "end": 9, "type": "slide", "description": "2루 슬라이딩"}],
-        "speech": [{"t": 8.5, "text": "도루 성공입니다"}, {"t": 99, "text": "청크 밖"}],
-    }, ensure_ascii=False) + "</answer>"
+    text = (
+        "<think>..</think><answer>"
+        + json.dumps(
+            {
+                "scoreboard": [
+                    {
+                        "t": 2,
+                        "inning": 3,
+                        "half": "말",
+                        "balls": 1,
+                        "strikes": 2,
+                        "outs": 1,
+                        "bases": "1,3",
+                        "away": 2,
+                        "home": 4,
+                    },
+                    {
+                        "t": 5,
+                        "inning": 3,
+                        "half": "bot",
+                        "balls": 1,
+                        "strikes": 2,
+                        "outs": 1,
+                        "bases": [True, False, True],
+                        "away": 2,
+                        "home": 4,
+                    },
+                    {
+                        "t": 9,
+                        "inning": "?",
+                        "half": "top",
+                        "balls": 0,
+                        "strikes": 0,
+                        "outs": 0,
+                        "bases": [],
+                        "away": 0,
+                        "home": 0,
+                    },  # 못 읽은 값 — 버린다
+                ],
+                "events": [{"start": 8, "end": 9, "type": "slide", "description": "2루 슬라이딩"}],
+                "speech": [{"t": 8.5, "text": "도루 성공입니다"}, {"t": 99, "text": "청크 밖"}],
+            },
+            ensure_ascii=False,
+        )
+        + "</answer>"
+    )
     a = parse_analysis(text, clip, "p", "m")
     assert [(r["t"], r["half"], r["bases"]) for r in a.scoreboard] == [
-        (602.0, "bot", [1, 3]), (605.0, "bot", [1, 3])]
+        (602.0, "bot", [1, 3]),
+        (605.0, "bot", [1, 3]),
+    ]
     assert [(e.t_start, e.event_type) for e in a.events] == [(608.0, "slide")]
     assert a.speech == [{"t": 608.5, "text": "도루 성공입니다"}]
 
 
 def test_build_video_feed_from_snapshot_serves_through_engine(tmp_path):
     spec = importlib.util.spec_from_file_location(
-        "build_video_feed", ROOT / "scripts" / "build_video_feed.py")
+        "build_video_feed", ROOT / "scripts" / "build_video_feed.py"
+    )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
     def board(t, **kw):
-        base = {"t": t, "inning": 1, "half": "top", "balls": 0, "strikes": 0, "outs": 0,
-                "bases": [], "away": 0, "home": 0}
+        base = {
+            "t": t,
+            "inning": 1,
+            "half": "top",
+            "balls": 0,
+            "strikes": 0,
+            "outs": 0,
+            "bases": [],
+            "away": 0,
+            "home": 0,
+        }
         return [{**base, **kw}, {**base, **kw, "t": t + 1}]
 
     snap = {
-        "provider": "fake", "model": "fake", "prompt_version": "video-scoreboard-v2",
-        "scoreboard": board(10) + board(40, balls=3) + board(70, bases=[1])
-        + board(100, bases=[2]),
+        "provider": "fake",
+        "model": "fake",
+        "prompt_version": "video-scoreboard-v2",
+        "scoreboard": board(10) + board(40, balls=3) + board(70, bases=[1]) + board(100, bases=[2]),
         "events": [{"t_start": 95, "t_end": 96, "event_type": "slide", "description": "슬라이딩"}],
         "speech": [{"t": 97, "text": "도루!"}],
     }
@@ -286,11 +367,21 @@ def test_enrich_adds_names_pitch_type_and_atbats_without_using_data_results():
         return RelayEvent(id=id_, t=t, inning=1, half="top", kind=kind, text="", **kw)
 
     data = [
-        ev("a1", 100, "atbat", batter="가나다", pitcher="투수A",
-           detail={"stats": {"season_avg": "0.300", "today": "오늘 첫 타석"}}),
+        ev(
+            "a1",
+            100,
+            "atbat",
+            batter="가나다",
+            pitcher="투수A",
+            detail={"stats": {"season_avg": "0.300", "today": "오늘 첫 타석"}},
+        ),
         ev("p1", 110, "pitch", detail={"result": "ball", "pitch_type": "직구", "speed": 145}),
-        ev("p2", 125, "pitch", detail={"result": "swing_strike", "pitch_type": "포크볼",
-                                       "speed": 132}),
+        ev(
+            "p2",
+            125,
+            "pitch",
+            detail={"result": "swing_strike", "pitch_type": "포크볼", "speed": 132},
+        ),
         ev("r1", 125, "result", detail={"result": "strikeout"}),  # 데이터의 결과 — 쓰면 안 된다
         ev("s1", 200, "sub", detail={"sub_type": "pitcher", "pitcher": "투수B"}),
     ]
@@ -318,8 +409,11 @@ def test_enrich_without_scoreboard_returns_video_only():
     from app.domain.enrich import enrich
     from app.domain.models import RelayEvent
 
-    v = [RelayEvent(id="v1", t=1, inning=1, half="top", kind="result", text="",
-                    detail={"result": "walk"})]
+    v = [
+        RelayEvent(
+            id="v1", t=1, inning=1, half="top", kind="result", text="", detail={"result": "walk"}
+        )
+    ]
     assert enrich(v, [], offset=0, stable=[]) == v
 
 
@@ -379,3 +473,55 @@ def test_cue_only_trusts_captions_then_event_order():
     assert judge_from_cues(sf).code == "sac_fly"
     steal = [Cue(3, "slide", "홈으로 슬라이딩"), Cue(4, "runner_scores", "득점")]
     assert judge_from_cues(steal).code == "steal"
+
+
+# ── 규칙 성립 조건 (2026-10-26 저장 규칙 대조) ──────────────────────────
+def test_dropped_third_strike_needs_first_base_open_or_two_outs():
+    """5.09(a)(3): 1루 주자가 있고 2아웃 전이면 공을 놓쳐도 타자는 아웃이다."""
+    blocked = one(
+        R(0, outs=1, bases=(True, False, False), strikes=2),
+        R(10, outs=1, bases=(True, True, False)),
+        [Cue(8, "catcher_miss")],
+    )
+    assert blocked is None or blocked.code != "dropped_third_strike"
+    open_first = one(
+        R(0, outs=1, strikes=2), R(10, outs=1, bases=(True, False, False)), [Cue(8, "catcher_miss")]
+    )
+    assert open_first.code == "dropped_third_strike"
+
+
+def test_infield_fly_needs_first_and_second_with_less_than_two_outs():
+    cue = [Cue(8, "speech", "인필드 플라이 선언")]
+    only_first = one(
+        R(0, outs=0, bases=(True, False, False)), R(10, outs=1, bases=(True, False, False)), cue
+    )
+    assert only_first.code != "infield_fly"
+    first_second = one(
+        R(0, outs=0, bases=(True, True, False)), R(10, outs=1, bases=(True, True, False)), cue
+    )
+    assert first_second.code == "infield_fly"
+
+
+def test_balk_keeps_the_count_but_wild_pitch_and_double_steal_add_a_pitch():
+    bases = (True, True, False)
+    balk = one(
+        R(0, bases=bases, balls=1),
+        R(10, bases=(False, True, True), balls=1),
+        [Cue(8, "pitcher_stops")],
+    )
+    assert balk.code == "balk"
+    double = one(
+        R(0, bases=bases, balls=1), R(10, bases=(False, True, True), balls=2), [Cue(8, "slide")]
+    )
+    assert (double.code, double.detail.get("double")) == ("steal", True)
+    shape_only = one(R(0, bases=bases, balls=1), R(10, bases=(False, True, True), balls=2))
+    assert shape_only.code != "balk"
+
+
+def test_sac_fly_needs_less_than_two_outs_before():
+    two_outs = one(
+        R(0, outs=2, bases=(False, False, True)),
+        R(10, outs=0, home=1, half="bot"),
+        [Cue(5, "deep_fly")],
+    )
+    assert two_outs is None or two_outs.code != "sac_fly"
