@@ -1,5 +1,5 @@
 {
- "_note": "선수 접촉·슬라이딩 정답 표 — 사람이 프레임을 직접 보고 적은 시각(초). 키는 영상 id(labels.json의 yt). slide = 슬라이딩·다이빙(느린 화면·클로즈업 포함), slide_tag = 미끄러져 들어와 수비에 닿음, collision = 빠르게 부딪혀 넘어짐. unsure = 봐도 갈리지 않은 구간(검출돼도 헛것으로 세지 않음). split: tune = 기준값을 정할 때 본 클립, test = 기준값을 정한 뒤 처음 본 클립. python scripts/contact_check.py <영상들> --truth data/clip_eval/contact_truth.json",
+ "_note": "선수 접촉·슬라이딩 정답 표 — 사람이 프레임을 직접 보고 적은 시각(초). 키는 영상 id(labels.json의 yt). slide = 슬라이딩·다이빙(느린 화면·클로즈업 포함), slide_tag = 미끄러져 들어와 수비에 닿음, collision = 빠르게 부딪혀 넘어짐. unsure = 봐도 갈리지 않은 구간(검출돼도 헛것으로 세지 않음). split: tune = 기준값을 정할 때 본 클립, test = 1차 기준 뒤 처음 본 클립(여기서 나온 오탐으로 2차 수정), final = 2차 기준을 고정한 뒤 검출을 가리고 분류한 클립. python scripts/contact_check.py <영상들> --truth data/clip_eval/contact_truth.json",
  "clips": {
   "V0lBwrR3ulc": {
    "split": "tune",
@@ -269,6 +269,111 @@
   "VHun21viMYk": {
    "split": "test",
    "situation": "더블스틸(국제대회)",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "bkZCesrSoQ4": {
+   "split": "final",
+   "situation": "병살(직캠)",
+   "slide": [
+    [
+     15.1,
+     15.3
+    ]
+   ],
+   "slide_tag": [],
+   "collision": []
+  },
+  "00NXRlCm2O8": {
+   "split": "final",
+   "situation": "병살",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "9gnIgwwBPBc": {
+   "split": "final",
+   "situation": "끝내기 파울팁 삼진",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "FgnEsLJkoTg": {
+   "split": "final",
+   "situation": "끝내기 낫아웃",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "unsure": {
+    "slide": [
+     [
+      16.0,
+      17.2
+     ]
+    ]
+   }
+  },
+  "YqjuJCM1vj0": {
+   "split": "final",
+   "situation": "삼중살",
+   "slide": [
+    [
+     38.5,
+     39.6
+    ],
+    [
+     60.8,
+     65.1
+    ]
+   ],
+   "slide_tag": [],
+   "collision": []
+  },
+  "oWPpQehNiYM": {
+   "split": "final",
+   "situation": "삼중살",
+   "slide": [
+    [
+     14.5,
+     15.1
+    ],
+    [
+     61.2,
+     65.6
+    ],
+    [
+     67.3,
+     71.2
+    ]
+   ],
+   "slide_tag": [],
+   "collision": []
+  },
+  "xyAcE0_cfxk": {
+   "split": "final",
+   "situation": "삼중살",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "BxDqaZYfn00": {
+   "split": "final",
+   "situation": "삼중살",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "nBRT66_Odok": {
+   "split": "final",
+   "situation": "끝내기 몸에 맞는 공",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "W-APlBjm8AI": {
+   "split": "final",
+   "situation": "ABS 퇴장",
    "slide": [],
    "slide_tag": [],
    "collision": []
