@@ -5,13 +5,13 @@
 | 지표 | 값 |
 |---|---|
 | 클립 | 28개 |
-| 판정 정답 (영상 판정이 정답 코드를 냄) | 11/24 (46%) |
+| 판정 정답 (영상 판정이 정답 코드를 냄) | 13/24 (54%) |
 | 단서 포착 (VLM 관찰에 정답 키워드) | 16/28 (57%) |
 | 점수판을 하나도 못 읽은 클립 | 5개 |
 
 | 리그 | 판정 | 단서 |
 |---|---|---|
-| KBO | 11/24 (46%) | 16/28 (57%) |
+| KBO | 13/24 (54%) | 16/28 (57%) |
 
 | 판정 코드 | 정답 |
 |---|---|
@@ -24,7 +24,7 @@
 | sac_fly | 1/2 (50%) |
 | steal | 3/4 (75%) |
 | strikeout | 1/1 (100%) |
-| triple_play | 1/4 (25%) |
+| triple_play | 3/4 (75%) |
 
 ## 클립별
 
@@ -36,18 +36,18 @@
 | kbo_lddp_park | double_play | ✗ | - | ✗ | 0 |
 | kbo_lddp_austin | double_play | ✗ | - | ✗ | 2 |
 | kbo_lddp_son | double_play | ✗ | - | ✗ | 0 |
-| kbo_foultip_k_walkoff | strikeout | ✓ | strikeout | ✗ | 2 |
+| kbo_foultip_k_walkoff | strikeout | ✓ | out, strikeout | ✗ | 2 |
 | kbo_dts_walkoff | dropped_third_strike | ✗ | - | ✗ | 2 |
 | kbo_dts_wp_hong | dropped_third_strike | ✗ | triple_play | ✗ | 1 |
 | kbo_homesteal_lee | steal | ✓ | out, steal | ✗ | 2 |
 | kbo_homesteal_hwang | steal | ✓ | steal | ✗ | 2 |
-| kbo_doublesteal_kt | steal | ✗ | double_play | 도루 | 2 |
+| kbo_doublesteal_kt | steal | ✗ | out, sac_fly | 도루 | 2 |
 | kbo_doublesteal_japan | steal | ✓ | pitcher, steal | ✗ | 1 |
 | kbo_pickoff_ahn | caught_stealing | ✗ | double_play | 견제 | 1 |
 | kbo_tp_kiwoom | triple_play | ✓ | triple_play | 트리플 | 2 |
 | kbo_tp_kt | triple_play | ✗ | out, homerun | 트리플 | 2 |
-| kbo_tp_lg | triple_play | ✗ | reach, double_play | 트리플 | 2 |
-| kbo_tp_lotte | triple_play | ✗ | double_play | 트리플 | 2 |
+| kbo_tp_lg | triple_play | ✓ | reach, triple_play | 트리플 | 2 |
+| kbo_tp_lotte | triple_play | ✓ | triple_play | 트리플 | 2 |
 | kbo_hbp_walkoff_ssg | hbp | ✗ | - | ✗ | 1 |
 | kbo_headshot_kim | hbp | ✓ | pitcher, hbp | 헤드샷 | 2 |
 | kbo_sf_walkoff_nc | sac_fly | ✗ | dropped_third_strike | 희생플라이 | 2 |

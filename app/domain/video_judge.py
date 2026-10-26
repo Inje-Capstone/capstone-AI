@@ -43,6 +43,9 @@ SPEECH_KEYWORDS = (
 WALK_WORDS = (
     "볼넷", "포볼", "밀어내기", "고의사구", "고의 사구", "고의4구", "고의 4구", "자동 고의",
 )
+# 파울팁(정의: 배트에 스친 공을 포수가 바로 잡음) — Whisper가 '파울TV'로 받아 적는다(실측)
+FOUL_TIP_WORDS = ("파울팁", "파울 팁", "파울tv", "파울 tv")
+TRIPLE_WORDS = ("삼중살", "트리플 플레이", "트리플플레이")
 HBP_WORDS = ("몸에 맞", "사구", "데드볼", "헤드샷")  # 5.05(b)(2)
 
 # 단서 종류 (VLM 프롬프트 v2와 같은 어휘)
@@ -156,6 +159,10 @@ def judge_transition(
             kind = "result" if code in ("homerun", "walk", "hbp", "sac_fly") else "call"
             return make(kind, code, 0.5, [cue], walk_off=True)
 
+    # 한 플레이로 설명이 안 되면(여러 플레이가 한 전이로 합쳐짐) 종류를 말하지 않는다
+    if not one_play(tr):
+        return make("result", "out" if tr.outs_made else "reach", 0.5, merged=True)
+
     # 같은 타석 안의 주자 움직임 (카운트 유지 — 0-0 카운트면 리셋처럼 보여도 단서로 가른다)
     mid_pa = not tr.half_change and (
         not tr.count_reset or (tr.before.balls, tr.before.strikes) == (0, 0)
@@ -199,7 +206,7 @@ def judge_transition(
             return make("result", "strikeout", 0.5, [k])
         return make("result", "double_play", 0.8, [_speech(near, "병살")])
     if tr.outs_made == 3:  # 판독 누락으로도 생긴다 — 해설이 있을 때만 삼중살
-        tp = _speech(near, "삼중살", "트리플 플레이", "트리플플레이")
+        tp = _speech(near, *TRIPLE_WORDS)
         if tp:
             return make("result", "triple_play", 0.6, [tp])
     hr = _has(near, "ball_over_fence") or _speech(near, "홈런")
@@ -239,6 +246,16 @@ def judge_transition(
     if tr.count_reset or tr.half_change or tr.outs_made or tr.runs:
         return make("result", "out" if tr.outs_made else "reach", 0.5)
     return None
+
+
+def one_play(tr: Transition) -> bool:
+    """한 플레이로 설명되나 — 직전 주자와 타자는 아웃·득점·베이스 중 하나로 끝난다(사람 수 보존).
+    아웃 + 득점 + 남은 주자가 직전 주자 + 타자 한 명보다 많으면 타자가 둘 이상 지나간 것이다
+    (실측: 2분짜리 클립의 처음·끝 점수판 '무사 1·2루 → 2사 1·2루 3득점'을 병살로 냈다).
+    이닝이 바뀌면 남은 주자를 알 수 없어 따지지 않는다."""
+    if tr.half_change:
+        return True
+    return tr.outs_made + tr.runs + tr.runners_after <= tr.runners_before + 1
 
 
 def dts_possible(before: Reading) -> bool:
@@ -308,7 +325,7 @@ def judge(
 # 점수판 없이 단서만으로 (직캠·느린 화면 위주 하이라이트). 드문 것부터 — 흔한 말("삼진")이
 # 드문 판정("낫아웃")을 덮지 않게.
 _CUE_ONLY = (
-    ("triple_play", "call", ("삼중살", "트리플 플레이", "트리플플레이")),
+    ("triple_play", "call", TRIPLE_WORDS),
     ("balk", "call", ("보크",)),
     ("dropped_third_strike", "call", ("낫아웃", "낫 아웃")),
     ("infield_fly", "call", ("인필드 플라이", "인필드플라이")),
@@ -374,6 +391,9 @@ def _event_judgment(cues: Sequence[Cue]) -> Optional[Judgment]:
     k = _has(cues, "strikeout") or _has(cues, "swing_miss")
     miss = _has(cues, "catcher_miss") or _has(cues, "fielder_drops_ball")
     if k and miss and abs(k.t - miss.t) <= 5:
+        tip = _speech(cues, *FOUL_TIP_WORDS)
+        if tip:  # 파울팁은 포수가 잡은 것 — 놓친 게 아니라 저글링(5.09(a)(2) 삼진)
+            return make("strikeout", "result", tip, "헛스윙·포수 저글링 + 해설 '파울팁'")
         return make("dropped_third_strike", "call", miss, "헛스윙 직후 포수가 공을 놓침")
     return None
 
@@ -386,9 +406,14 @@ def judge_from_cues(cues: Sequence[Cue]) -> Optional[Judgment]:
     '도루 조심해야죠'처럼 일어나지 않은 일도 말한다.
     """
     captions = [c for c in cues if c.kind == "speech" and c.text.startswith("[자막]")]
-    return (_keyword_judgment(captions, 0.6, "자막")
-            or _event_judgment(cues)
-            or _keyword_judgment([c for c in cues if c not in captions], 0.5, "해설·설명"))
+    found = _keyword_judgment(captions, 0.6, "자막")
+    if found is None:
+        found = _event_judgment(cues)
+        tp = _speech(cues, *TRIPLE_WORDS) if found and found.code == "double_play" else None
+        if found and tp:  # 삼중살 안에 아웃 두 개가 들어 있다 — 장면이 하나를 놓쳤다
+            found = Judgment(found.t, "result", "triple_play", 0.5,
+                             found.evidence + [f"해설이 더 구체적: {_ev(tp)}"])
+    return found or _keyword_judgment([c for c in cues if c not in captions], 0.5, "해설·설명")
 
 
 # ── 분석 스냅샷(analyze_video.py) → 판독·단서 ───────────────────────────
