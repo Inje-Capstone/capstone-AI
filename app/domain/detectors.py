@@ -11,6 +11,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Callable, Optional
 
+from app.domain.balk_judge import TYPE_PLAIN
 from app.domain.game_state import KIND_SUB, states_by_event
 from app.domain.models import (
     CATEGORY_BASIC,
@@ -131,6 +132,13 @@ CALL_CARDS = (
 )
 
 
+def _balk_why(event: RelayEvent, state: GameState) -> str:
+    """입문자는 '보크'라는 말만으로 어떤 동작이 반칙인지 모른다 — 해설이 설명한 동작을 붙인다."""
+    why = f"심판이 보크를 선언했고, {state.fielding_team} 투수의 반칙으로 주자가 그냥 진루했다"
+    plain = TYPE_PLAIN.get(event.detail.get("balk_kind") or "")
+    return f"{why} — 반칙 동작: {plain}" if plain else why
+
+
 def _call_card(code: str, term: str, label: str, why: str) -> "Rule":
     return Rule(id=code, term_id=term, category=CATEGORY_BASIC, label=label, priority=0.9,
                 matches=_call_is(code), why=lambda e, s, w=why: w)
@@ -145,9 +153,7 @@ RULES: Sequence[Rule] = (
         label="보크",
         priority=1.0,
         matches=_call_is("balk"),
-        why=lambda e, s: (
-            f"심판이 보크를 선언했고, {s.fielding_team} 투수의 반칙으로 주자가 그냥 진루했다"
-        ),
+        why=_balk_why,
     ),
     Rule(
         id="dropped_third_strike",

@@ -395,6 +395,42 @@ def test_pose_slide_reaches_the_card_as_evidence(tmp_path):
     assert any(r.startswith(said) for r in steal.reasons)
 
 
+def test_balk_card_says_which_action_was_the_balk(tmp_path):
+    """입문자는 '보크'만 들어선 무슨 동작이 반칙인지 모른다 — 다시보기 해설의 설명이 카드 근거로."""
+    import json
+
+    from app.adapters.relay.fixture import _parse_fixture
+
+    spec = importlib.util.spec_from_file_location(
+        "build_video_feed", ROOT / "scripts" / "build_video_feed.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    base = {"inning": 3, "half": "bot", "balls": 1, "strikes": 1, "outs": 1, "away": 0, "home": 0}
+    snap = {
+        "provider": "fake", "model": "fake", "prompt_version": "video-scoreboard-v2",
+        "scoreboard": [{**base, "t": t, "bases": bases}
+                       for t, bases in ((10, [1]), (11, [1]), (40, [2]), (41, [2]))],
+        "events": [],
+        "speech": [{"t": 30, "text": "아 보크 선언이 나오네요"},
+                   {"t": 55, "text": "다시 보면 세트 들어가다 한 번 멈췄다가 움직였어요 보크죠"}],
+    }
+    feed = mod.build("G3", snap, {"away_team": "A", "home_team": "H"})
+    assert feed["analysis"]["judgments"] == {"balk": 1}
+    path = tmp_path / "video_G3.json"
+    path.write_text(json.dumps(feed, ensure_ascii=False), encoding="utf-8")
+    balk = next(s for s in detect(_parse_fixture(path)) if s.rule_id == "balk")
+    assert any("반칙 동작: 세트 자세로 들어가다 한 번 멈췄다가" in r for r in balk.reasons)
+    assert any("해설이 말한 동작: 이중 동작" in r for r in balk.reasons)
+
+
+def test_balk_without_described_action_keeps_the_plain_reason():
+    readings = twice(R(10, bases=(True, False, False)), R(40, bases=(False, True, False)))
+    j = judge(readings, [Cue(30, "speech", "보크입니다")])[0]
+    assert j.code == "balk" and "balk_kind" not in j.detail
+    assert "balk_kind" not in to_relay_events([j])[0].detail
+
+
 # ── 영상 판정 + 데이터 보강 (선수·구종·기록은 데이터) ─────────────────────
 def test_enrich_adds_names_pitch_type_and_atbats_without_using_data_results():
     from app.domain.enrich import enrich
