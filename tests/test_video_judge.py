@@ -552,7 +552,8 @@ def test_pose_slide_supports_steal_and_shows_what_was_seen():
     assert [c.kind for c in cues] == ["slide", "slide_tag"]
     [j] = judge(readings, cues, min_repeat=1)
     assert j.code == "steal"
-    assert any("[관절] 슬라이딩·다이빙 6.0~6.6초" in e for e in j.evidence)
+    said = "[관절] 슬라이딩·다이빙 — 누운 채 몸길이 1.7배 미끄러짐, 6.0~6.6초"
+    assert any(said in e for e in j.evidence)
 
 
 def test_scoring_slide_after_a_hit_is_not_home_steal():
@@ -569,3 +570,10 @@ def test_pose_collision_confirms_home_collision_call():
     assert judge_calls([said]) == []
     [j] = judge_calls([said, Cue(9.5, "collision", "[관절] 빠르게 부딪혀 넘어짐")])
     assert j.code == "home_collision" and "[관절] 빠르게 부딪혀 넘어짐 (10s)" in j.evidence
+
+
+def test_thrown_dive_evidence_says_it_was_thrown():
+    """몸을 던진 다이빙은 누운 뒤엔 거의 안 움직인다 — 누운 채 미끄러졌다고 쓰지 않는다."""
+    [cue] = from_snapshot({"pose": {"slides": [
+        {"t0": 0.8, "t1": 1.5, "distance": 1.7, "thrown": True}]}})[1]
+    assert cue.text == "[관절] 슬라이딩·다이빙 — 달려와 몸을 던져 몸길이 1.7배 이동, 0.8~1.5초"

@@ -1,5 +1,5 @@
 {
- "_note": "선수 접촉·슬라이딩 정답 표 — 사람이 프레임을 직접 보고 적은 시각(초). 키는 영상 id(labels.json의 yt). slide = 슬라이딩·다이빙(느린 화면·클로즈업 포함), slide_tag = 미끄러져 들어와 수비에 닿음, collision = 빠르게 부딪혀 넘어짐. unsure = 봐도 갈리지 않은 구간(검출돼도 헛것으로 세지 않음). split: tune = 기준값을 정할 때 본 클립, test = 1차 기준 뒤 처음 본 클립(여기서 나온 오탐으로 2차 수정), final = 2차 기준을 고정한 뒤 검출을 가리고 분류한 클립. python scripts/contact_check.py <영상들> --truth data/clip_eval/contact_truth.json",
+ "_note": "선수 접촉·슬라이딩 정답 표 — 사람이 프레임을 직접 보고 적은 시각(초). 키는 영상 id(labels.json의 yt). slide = 슬라이딩·다이빙(느린 화면·클로즈업 포함), slide_tag = 미끄러져 들어와 수비에 닿음, collision = 빠르게 부딪혀 넘어짐. unsure = 봐도 갈리지 않은 구간(검출돼도 헛것으로 세지 않음). split: tune = 기준값을 정할 때 본 클립, test = 1차 기준 뒤 처음 본 클립(여기서 나온 오탐으로 2차 수정), final = 2차 기준을 고정한 뒤 검출을 가리고 분류한 클립. python scripts/contact_check.py <영상들> --truth data/clip_eval/contact_truth.json 3차(2026-10-27): 세 묶음을 모두 본 뒤 다듬었다 — 달려와 몸 던짐·느린 화면 슬라이딩·손목 태그 기준은 기준·검증 값으로 정하고 최종 묶음으로 확인했지만, 처음 보는 클립은 더 없다(새 클립으로 다시 재야 한다).",
  "clips": {
   "V0lBwrR3ulc": {
    "split": "tune",
@@ -203,7 +203,15 @@
     ]
    ],
    "slide_tag": [],
-   "collision": []
+   "collision": [],
+   "unsure": {
+    "slide_tag": [
+     [
+      101.2,
+      101.9
+     ]
+    ]
+   }
   },
   "ZtV4DERr2o4": {
    "split": "test",
