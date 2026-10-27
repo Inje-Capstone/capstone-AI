@@ -68,3 +68,17 @@ def test_commentary_describing_a_fake_pickoff_without_saying_balk():
 
 def test_whisper_mishearing_of_balk():
     assert judge_balk([], [(80.0, "보쿠예요? 보쿠는 부정 투구 동작을 말하는 건데요")])
+
+
+def test_commentary_kind_beats_pose_kind():
+    """해설이 동작을 설명하면 그 종류 — 자세 종류는 해설과 9건 중 2건만 같았다(실측)."""
+    said = "세트모션이 들어가고 나서 왼발이 빠졌죠 그러면 피차보크입니다"
+    calls = judge_balk([_motion(200, "hands_separated")], [(200.0, said)])
+    assert [(c.kind, c.confidence) for c in calls] == [("foot_off", 0.8)]
+    assert "동작 200s" in calls[0].evidence  # 언제 움직였는지는 자세가 그대로 남긴다
+
+
+def test_speech_type_ordinal_and_upper_body_first():
+    assert speech_type("두 번째 복구 장면입니다 지금도 지나갔어요") == "unknown"
+    assert speech_type("발이 빠지기 전에 상체가 먼저 움직였어요 그래서 보크") == "upper_body"
+    assert speech_type("한 번 멈췄다가 들어가면 이중 동작") == "double_motion"

@@ -5,8 +5,12 @@
 
 확신도
 - 해설이 '보크'라고 했고(또는 1·3루 견제 시늉을 설명했고) 그 앞뒤에 동작 의심이 있다 → 0.8
-  (종류는 동작이 준다)
+  (종류는 해설이 동작을 설명했으면 해설, 아니면 동작)
 - 해설만 → 0.5 (종류는 해설 말에서 고른다)
+
+종류 실측(2026-10-27 보크 클립 18개): 해설이 종류를 말한 19건 중 말 분류가 맞은 것 약 15건,
+같은 때 자세가 고른 종류는 해설과 9건 중 2건만 같았다 — 자세는 보크 뒤 손을 푸는 동작을
+'손 분리'로 잡거나, 뒤로 빼는 발(카메라 쪽 깊이 이동)을 못 잰다. 그래서 해설이 우선이다.
 - 동작만 → 0.35 — 화면에 띄우지 않는 후보. 와인드업(주자 없음)도 '정지 없음'처럼 보인다
 - 점수판 검증: 주자가 한 베이스씩 → +0.15 / 주자가 그대로인 채 투구가 이어짐 → -0.2
 """
@@ -24,7 +28,10 @@ BALK_WORDS = re.compile(r"보크|복구|보컬|복크|버크|볼크|보쿠")
 # '보크'라는 말 없이 반칙 동작을 설명하는 해설 — 1·3루 견제 시늉(6.02(a)(2), 2루 시늉은 합법)
 FAKE_THROW = re.compile(r"(1루|3루|일루|삼루|견제).{0,25}(던지지 않|안 던지|던지는 척|시늉)")
 SPEECH_TYPES = (
-    ("double_motion", re.compile(r"이중|두 번|투 ?모션|멈췄다가|멈춤 동작이 있")),
+    # '발이 빠지기 전에 상체가 먼저 움직였다' — 발 이야기가 섞여도 반칙은 상체(실측)
+    ("upper_body", re.compile(r"상체[가를]? 먼저|빠지기 전에 상체")),
+    # '두 번째 장면'은 순서일 뿐 이중 동작이 아니다(실측)
+    ("double_motion", re.compile(r"이중|두 번(?!째)|투 ?모션|멈췄다가|멈춤 동작이 있")),
     ("no_stop", re.compile(r"정지|멈추지|안 멈|멈춤 ?동작이 없|스톱이 없")),
     ("foot_off", re.compile(r"발을 빼|발이 빠|발 빼|다리를 빼|다리를 풀")),
     ("upper_body", re.compile(r"상체|어깨|고개")),
@@ -42,6 +49,18 @@ TYPE_LABELS = {
     "unoccupied_base": "빈 베이스로 송구 (6.02(a)(4))",
     "fake_throw": "1·3루 견제 시늉만 (6.02(a)(2))",
     "unknown": "종류 미상",
+}
+# 입문자에게 '어떤 동작이 반칙이었나'를 한 줄로 — 카드 근거에 그대로 들어간다
+TYPE_PLAIN = {
+    "no_stop": "주자가 있으면 손을 모으고 완전히 멈춘 뒤 던져야 하는데, 멈추지 않고 바로 던졌다",
+    "double_motion": "세트 자세로 들어가다 한 번 멈췄다가 다시 움직였다 — 주자를 속이는 동작이다",
+    "kick_aborted": "다리를 들어 던지려다 중간에 멈췄다 — 던지는 척으로 본다",
+    "foot_off": "손을 모은 뒤 멈추려면 투수판을 밟은 발(축발)부터 뒤로 빼야 하는데 다른 발을 뺐다",
+    "hands_separated": "손을 모아 멈춘 뒤 던지지도 견제하지도 않고 손을 풀었다",
+    "pickoff_no_step": "견제하면서 공을 던질 베이스 쪽으로 발을 내딛지 않았다",
+    "upper_body": "던지기 전에 상체·어깨를 움직였다가 멈췄다 — 던지는 척으로 본다",
+    "unoccupied_base": "주자가 없는 베이스로 공을 던졌다",
+    "fake_throw": "1루나 3루로 던지는 척만 하고 공을 던지지 않았다",
 }
 BEFORE, AFTER = 20.0, 10.0  # 해설 앞뒤로 동작을 찾는 범위(초)
 MERGE = 20.0  # 이 안의 후보는 같은 보크(다시보기·해설 반복)
@@ -109,9 +128,8 @@ def judge_balk(
         if near:
             m = suspects[near[0]]
             used.update(near)
-            calls.append(
-                BalkCall(m.t_move or m.t_set, m.suspect or said, 0.8, [quote] + m.evidence)
-            )
+            kind = said if said != "unknown" else (m.suspect or said)  # 해설이 우선(모듈 설명)
+            calls.append(BalkCall(m.t_move or m.t_set, kind, 0.8, [quote] + m.evidence))
         else:
             calls.append(BalkCall(t, said, 0.5, [quote]))
     for k, m in enumerate(suspects):

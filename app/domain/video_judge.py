@@ -15,6 +15,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Optional
 
+from app.domain.balk_judge import BALK_WORDS, TYPE_LABELS, speech_type
 from app.domain.models import RelayEvent
 from app.domain.scorebug import (
     Reading,
@@ -32,6 +33,8 @@ CUE_BEFORE = 20.0
 CUE_AFTER = 6.0
 MIN_CONFIDENCE = 0.5
 SUB_LOOKAHEAD = 10.0
+# 보크가 '어떤 동작'이었는지는 해설이 다시보기 때 설명한다 — 판정 뒤로 더 길게(balk_judge와 같은 폭)
+BALK_TALK = (20.0, 30.0)
 
 # 해설에서 들어야 할 말 (Omni 모델은 음성을 같이 듣는다) — VLM 지시문(adapters/video/base)이 쓴다
 SPEECH_KEYWORDS = (
@@ -343,7 +346,27 @@ def judge(
             half = {"inning": where.inning, "half": where.half} if where else {}
             out.append(Judgment(c.t, "sub", "pitcher", 0.6, [_ev(c)], None, half))
     out += judge_calls(cues, stable)
+    for j in out:
+        _balk_kind(j, cues)
     return sorted(out, key=lambda j: j.t)
+
+
+def _balk_kind(j: Judgment, cues: Sequence[Cue]) -> None:
+    """보크 판정에 '어떤 동작이 반칙이었나'를 붙인다 — 해설이 동작을 설명했을 때만.
+
+    자세로 고른 종류는 해설과 9건 중 2건만 같아(balk_judge 실측) 쓰지 않는다. '보크'라는 말이
+    같이 나온 설명만 — VLM 장면 글 '투수가 몸을 정지시킵니다'가 '정지 없음'으로 읽혔다(실측).
+    """
+    if j.code != "balk" or "balk_kind" in j.detail:
+        return
+    talk = [(c, speech_type(c.text)) for c in _near(cues, j.t, *BALK_TALK)
+            if c.kind == "speech" and BALK_WORDS.search(c.text)]
+    talk = [(c, k) for c, k in talk if k != "unknown"]
+    if not talk:
+        return
+    c, kind = min(talk, key=lambda ck: abs(ck[0].t - j.t))
+    j.detail["balk_kind"] = kind
+    j.evidence.append(f"해설이 말한 동작: {TYPE_LABELS[kind]} ({c.t:.0f}s)")
 
 
 # ── 심판 선언·특수 판정 — 해설·자막 낱말 + 확인 (점수판 전이와 따로) ─────────────
@@ -519,7 +542,10 @@ def judge_from_cues(cues: Sequence[Cue]) -> Optional[Judgment]:
         if found and tp:  # 삼중살 안에 아웃 두 개가 들어 있다 — 장면이 하나를 놓쳤다
             found = Judgment(found.t, "result", "triple_play", 0.5,
                              found.evidence + [f"해설이 더 구체적: {_ev(tp)}"])
-    return found or _keyword_judgment([c for c in cues if c not in captions], 0.5, "해설·설명")
+    found = found or _keyword_judgment([c for c in cues if c not in captions], 0.5, "해설·설명")
+    if found is not None:
+        _balk_kind(found, cues)
+    return found
 
 
 # ── 분석 스냅샷(analyze_video.py) → 판독·단서 ───────────────────────────
@@ -586,6 +612,11 @@ _CODE_TEXT = {
 }
 
 
+def _call_extra(j: Judgment) -> dict:
+    """카드 설명에 쓰는 판정 세부 — 지금은 보크 동작 종류만."""
+    return {"balk_kind": j.detail["balk_kind"]} if "balk_kind" in j.detail else {}
+
+
 def _bases_list(bases: tuple) -> list[int]:
     return [n for n, on in zip((1, 2, 3), bases) if on]
 
@@ -623,7 +654,8 @@ def to_relay_events(
                     half=j.detail.get("half", "top"), kind="call",
                     text=f"{_CODE_TEXT.get(j.code, j.code)} (영상 판정, 확신도 {j.confidence:.2f})",
                     detail={"call": j.code, "evidence": j.evidence,
-                            "confidence": round(j.confidence, 2), "source": "video"},
+                            "confidence": round(j.confidence, 2), "source": "video",
+                            **_call_extra(j)},
                 ))
             continue
         confident = j.confidence >= min_confidence
@@ -650,7 +682,7 @@ def to_relay_events(
                                      detail={"result": "infield_fly", **delta}, **base))
         elif kind == "call":
             events.append(RelayEvent(id=f"v{n}", t=int(j.t), kind="call", text=text,
-                                     detail={"call": code, **delta}, **base))
+                                     detail={"call": code, **delta, **_call_extra(j)}, **base))
         elif kind == "steal":
             extra = {"caught": True} if j.detail.get("caught") else {"base": j.detail.get("base")}
             events.append(RelayEvent(id=f"v{n}", t=int(j.t), kind="steal", text=text,
