@@ -366,6 +366,35 @@ def test_build_video_feed_from_snapshot_serves_through_engine(tmp_path):
     assert "영상 판정" in steal.reasons[0]
 
 
+def test_pose_slide_reaches_the_card_as_evidence(tmp_path):
+    """VLM이 슬라이딩을 못 봐도 관절 슬라이딩이 도루를 받치고, 카드 근거에 무엇을 봤는지 남는다."""
+    spec = importlib.util.spec_from_file_location(
+        "build_video_feed", ROOT / "scripts" / "build_video_feed.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    base = {"inning": 1, "half": "top", "balls": 1, "strikes": 0, "outs": 0, "away": 0, "home": 0}
+    snap = {
+        "provider": "fake", "model": "fake", "prompt_version": "video-scoreboard-v2",
+        "scoreboard": [{**base, "t": t, "bases": bases}
+                       for t, bases in ((10, [1]), (11, [1]), (40, [2]), (41, [2]))],
+        "events": [], "speech": [],
+        "pose": {"slides": [{"t0": 30.2, "t1": 31.0, "distance": 1.6, "thrown": False}],
+                 "contacts": [{"t0": 30.9, "t1": 31.1, "kind": "slide_tag", "why": ""}]},
+    }
+    feed = mod.build("G2", snap, {"away_team": "A", "home_team": "H"})
+    assert feed["analysis"]["judgments"] == {"steal": 1}
+    import json
+
+    from app.adapters.relay.fixture import _parse_fixture
+
+    path = tmp_path / "video_G2.json"
+    path.write_text(json.dumps(feed, ensure_ascii=False), encoding="utf-8")
+    steal = next(s for s in detect(_parse_fixture(path)) if s.rule_id == "steal")
+    said = "영상 근거: [관절] 슬라이딩·다이빙 — 누운 채 몸길이 1.6배 미끄러짐, 30.2~31.0초"
+    assert any(r.startswith(said) for r in steal.reasons)
+
+
 # ── 영상 판정 + 데이터 보강 (선수·구종·기록은 데이터) ─────────────────────
 def test_enrich_adds_names_pitch_type_and_atbats_without_using_data_results():
     from app.domain.enrich import enrich
