@@ -102,7 +102,8 @@ def summarize(video: Path, args: argparse.Namespace, start: float = 0.0,
     frames, height = load_frames(video, args, start, end)
     _sc, found, slid = analyze(frames, min_scale=args.min_scale * height)
     return {
-        "slides": [{"t0": s.t0, "t1": s.t1, "distance": s.distance} for s in slid],
+        "slides": [{"t0": s.t0, "t1": s.t1, "distance": s.distance, "thrown": s.thrown}
+                   for s in slid],
         "contacts": [
             {"t0": c.t0, "t1": c.t1, "kind": c.kind, "why": c.why}
             for c in found if c.kind != "contact"

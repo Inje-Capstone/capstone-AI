@@ -50,7 +50,8 @@ HBP_WORDS = ("몸에 맞", "사구", "데드볼", "헤드샷")  # 5.05(b)(2)
 
 # 관절로 잰 동작 단서의 설명 머리말 — 카드 '영상 근거'에 그대로 나간다
 POSE_TAG = "[관절] "
-POSE_TEXT = {"slide_tag": "미끄러져 들어와 닿음(태그)", "collision": "빠르게 부딪혀 넘어짐"}
+POSE_TEXT = {"slide_tag": "미끄러져 들어온 주자에게 수비 손이 닿음(태그)",
+             "collision": "두 선수가 빠르게 부딪혀 한 명이 넘어짐"}
 
 # 단서 종류 (VLM 프롬프트 v2와 같은 어휘)
 CUE_KINDS = (
@@ -537,9 +538,20 @@ def from_snapshot(snap: dict) -> tuple[list[Reading], list[Cue]]:
     return readings, sorted(cues + pose_cues(snap.get("pose") or {}), key=lambda c: c.t)
 
 
+def _slide_text(s: dict) -> str:
+    far = s.get("distance")
+    if far is None:
+        how = ""
+    elif s.get("thrown"):
+        how = f" — 달려와 몸을 던져 몸길이 {far:.1f}배 이동"
+    else:
+        how = f" — 누운 채 몸길이 {far:.1f}배 미끄러짐"
+    return f"슬라이딩·다이빙{how}, {s['t0']:.1f}~{s['t1']:.1f}초"
+
+
 def pose_cues(pose: dict) -> list[Cue]:
     """관절 분석(contact.py · scripts/contact_check.py) → 장면 단서. VLM 'slide'와 같은 종류."""
-    cues = [Cue(float(s["t0"]), "slide", f"{POSE_TAG}슬라이딩·다이빙 {s['t0']:.1f}~{s['t1']:.1f}초")
+    cues = [Cue(float(s["t0"]), "slide", POSE_TAG + _slide_text(s))
             for s in pose.get("slides") or []]
     cues += [Cue(float(c["t0"]), c["kind"], POSE_TAG + POSE_TEXT[c["kind"]])
              for c in pose.get("contacts") or [] if c.get("kind") in POSE_TEXT]
