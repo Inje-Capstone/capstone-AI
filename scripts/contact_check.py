@@ -33,6 +33,7 @@ from app.domain.contact import Body, Scene, analyze  # noqa: E402
 
 MIN_SCALE = 0.1  # 화면 높이 대비 — 이보다 작은 사람(먼 외야·관중석)은 접촉을 가릴 수 없다
 WINDOW = 600.0  # 경기 전체는 이만큼씩 잘라 관절을 뽑고 잰다
+FPS, MODE = 10.0, "balanced"  # 관절 추출 기본 — 다르면 캐시를 따로 둔다
 KINDS = ("slide", "slide_tag", "collision")
 TOLERANCE = 1.0  # 정답 시각과 이만큼(초) 안이면 같은 동작
 REVIEW = 1.0  # 그냥 접촉도 이 속도(키/초) 이상 다가왔으면 프레임을 남긴다 — 놓친 충돌 찾기
@@ -75,16 +76,19 @@ def _boxes_at(sc: Scene, t: float, who: tuple[int, ...]) -> dict[int, Body]:
     return {tid: b for b, tid in zip(sc.bodies[k], sc.ids[k]) if tid in who and b is not None}
 
 
-def caches(video: Path, start: float = 0.0, end: Optional[float] = None) -> tuple[Path, Path]:
-    """(관절, 카메라) 캐시 경로. 구간을 잘라 보면 구간마다 따로."""
+def caches(video: Path, start: float = 0.0, end: Optional[float] = None,
+           fps: float = FPS, mode: str = MODE) -> tuple[Path, Path]:
+    """(관절, 카메라) 캐시 경로. 구간을 잘라 보면 구간마다, 관절 모델·fps가 기본과 다르면 따로."""
     span = "" if start == 0 and end is None else f".{start:g}-{end:g}"
-    return video.with_suffix(f"{span}.people.json"), video.with_suffix(f"{span}.cam.json")
+    model = "" if (fps, mode) == (FPS, MODE) else f".{mode}{fps:g}"
+    return (video.with_suffix(f"{span}{model}.people.json"),
+            video.with_suffix(f"{span}.cam.json"))  # 카메라는 원본 프레임마다라 모델과 무관
 
 
 def load_frames(video: Path, extractor_args: argparse.Namespace, start: float = 0.0,
                 end: Optional[float] = None) -> tuple[list, int]:
     """(카메라 이동을 붙인 사람 관절 프레임, 화면 높이) — 없으면 뽑아서 캐시한다."""
-    cache, cam_cache = caches(video, start, end)
+    cache, cam_cache = caches(video, start, end, extractor_args.fps, extractor_args.mode)
     if not cache.exists():
         extractor = PeoplePoseExtractor(fps=extractor_args.fps, mode=extractor_args.mode)
         doc = people_to_json(extractor.extract(video, start, end), extractor.size)
@@ -148,10 +152,8 @@ def save_shot(video: Path, t: float, boxes: dict[int, Body], dest: Path, label: 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("videos", nargs="+", type=Path)
-    parser.add_argument("--fps", type=float, default=10.0)
-    parser.add_argument(
-        "--mode", default="balanced", help="lightweight | balanced | performance"
-    )
+    parser.add_argument("--fps", type=float, default=FPS)
+    parser.add_argument("--mode", default=MODE, help="lightweight | balanced | performance")
     parser.add_argument("--shots", type=Path, default=None, help="후보 순간 프레임을 저장할 폴더")
     parser.add_argument(
         "--min-scale", type=float, default=MIN_SCALE, help="화면 높이 대비 최소 사람 키"
@@ -170,6 +172,8 @@ def main() -> None:
             gold = truth[video.stem]
             line = []
             for k in KINDS:
+                if k != "slide" and gold.get("tags_checked") is False:  # 태그·충돌은 아직 안 봄
+                    continue
                 h, f, m = score(gold.get(k, []), found_by_kind[k],
                                 unsure=gold.get("unsure", {}).get(k, []))
                 key = (gold.get("split", "-"), k)

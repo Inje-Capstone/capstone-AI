@@ -523,18 +523,18 @@ def test_two_players_sliding_at_the_same_base_stay_two():
     assert len(slides(frames(runner, other, n=18))) == 2
 
 
-def test_running_into_a_standing_catcher_and_falling_is_collision():
-    """서 있는 포수에게 빠르게(2키/초) 달려와 닿자 그 자리에 쓰러진다 — 태그가 아니라 충돌."""
-    def catcher(k):
-        return person(300)
-
+def test_fielder_diving_into_a_sliding_runner_is_tag_not_collision():
+    """주자가 미끄러져 들어오고 수비가 몸을 날려 태그하다 함께 넘어진다 — 충돌이 아니라 태그."""
     def runner(k):
-        if k < 9:
-            return person(700 - 40 * k)
-        return person(700 - 40 * 8 - 30, lying=True)
+        return person(100 + 30 * min(k, 9), lying=True)
 
-    kinds = [c.kind for c in contacts(frames(catcher, runner, n=20))]
-    assert "collision" in kinds and "slide_tag" not in kinds
+    def fielder(k):
+        if k < 9:
+            return person(500)
+        return person(470, lying=True)  # 태그하며 넘어짐
+
+    kinds = [c.kind for c in contacts(frames(runner, fielder, n=24))]
+    assert "slide_tag" in kinds and "collision" not in kinds
 
 
 def test_walking_then_falling_forward_is_not_slide():
@@ -611,3 +611,16 @@ def test_one_tag_when_one_runner_is_detected_twice():
     assert [(c.a, c.b) for c in _one_tag_per_slide(tags, merged)] == [(0, 2)]
     alone = [Slide(0.0, 2.0, 0, 1.5), Slide(0.0, 2.0, 1, 1.5)]  # 합치지 않았으면 둘
     assert len(_one_tag_per_slide(tags, alone)) == 2
+
+
+
+def test_thrown_needs_the_run_up_seen_right_before_lying():
+    """달리던 모습이 0.5초 끊겼다 다른 자리에 누워 나타난다(무더기 속 추적) — 던진 게 아니다."""
+    def player(k):
+        if k < 4:
+            return person(100 + 30 * k)
+        if k < 9:
+            return None
+        return person(600, lying=True)
+
+    assert slides(frames(player, n=14)) == []

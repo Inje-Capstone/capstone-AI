@@ -36,6 +36,8 @@ def test_cache_names_split_by_span():
     video = Path("g.mp4")
     assert contact_check.caches(video) == (Path("g.people.json"), Path("g.cam.json"))
     assert contact_check.caches(video, 600.0, 1200.0)[0] == Path("g.600-1200.people.json")
+    light = contact_check.caches(video, fps=10.0, mode="lightweight")
+    assert light == (Path("g.lightweight10.people.json"), Path("g.cam.json"))
 
 
 def test_long_video_is_summarized_window_by_window(monkeypatch):
