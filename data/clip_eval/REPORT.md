@@ -1,6 +1,6 @@
 # 하이라이트 클립 평가
 
-> 모델 nvidia/nemotron-3-nano-omni-30b-a3b-reasoning · 프롬프트 video-scoreboard-v3 · 추론 끔 · 점수판 전용 판독 · 해설 Whisper · `python scripts/eval_clips.py`로 재생성. 정답은 영상 제목 기준(사람 확인 전).
+> 모델 nvidia/nemotron-3-nano-omni-30b-a3b-reasoning · 프롬프트 video-scoreboard-v3 · 추론 끔 · 점수판 전용 판독 · 해설 Whisper · 관절(슬라이딩·충돌) · `python scripts/eval_clips.py`로 재생성. 정답은 영상 제목 기준(사람 확인 전).
 
 | 지표 | 값 |
 |---|---|

@@ -17,7 +17,15 @@ from app.domain.scorebug import (
     stabilize,
     transitions,
 )
-from app.domain.video_judge import Cue, judge, judge_transition, to_relay_events
+from app.domain.video_judge import (
+    Cue,
+    from_snapshot,
+    judge,
+    judge_calls,
+    judge_from_cues,
+    judge_transition,
+    to_relay_events,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 E = (False, False, False)
@@ -525,3 +533,39 @@ def test_sac_fly_needs_less_than_two_outs_before():
         [Cue(5, "deep_fly")],
     )
     assert two_outs is None or two_outs.code != "sac_fly"
+
+
+def test_pose_slide_supports_steal_and_shows_what_was_seen():
+    """관절로 잰 슬라이딩은 VLM 'slide'와 같은 단서 — 카드 근거에 무엇을 봤는지 남긴다."""
+    snap = {
+        "scoreboard": [
+            {"t": 0, "inning": 3, "half": "top", "balls": 1, "strikes": 0, "outs": 0,
+             "bases": [1], "away": 0, "home": 0},
+            {"t": 10, "inning": 3, "half": "top", "balls": 1, "strikes": 1, "outs": 0,
+             "bases": [2], "away": 0, "home": 0},
+        ],
+        "pose": {"slides": [{"t0": 6.0, "t1": 6.6, "distance": 1.7}],
+                 "contacts": [{"t0": 6.6, "t1": 6.7, "kind": "slide_tag", "why": ""},
+                              {"t0": 7.0, "t1": 7.1, "kind": "contact", "why": ""}]},
+    }
+    readings, cues = from_snapshot(snap)
+    assert [c.kind for c in cues] == ["slide", "slide_tag"]
+    [j] = judge(readings, cues, min_repeat=1)
+    assert j.code == "steal"
+    assert any("[관절] 슬라이딩·다이빙 6.0~6.6초" in e for e in j.evidence)
+
+
+def test_scoring_slide_after_a_hit_is_not_home_steal():
+    """2루타에 1루 주자가 홈으로 슬라이딩 — 타구가 12초 전이어도 홈스틸이 아니다."""
+    cues = [Cue(0.0, "contact"), Cue(11.0, "slide", "[관절] 슬라이딩·다이빙 11.0~11.5초"),
+            Cue(12.0, "runner_scores")]
+    assert judge_from_cues(cues) is None
+    assert judge_from_cues(cues[1:]).code == "steal"  # 타구가 없었으면 홈스틸
+
+
+def test_pose_collision_confirms_home_collision_call():
+    """해설 '홈 충돌' + 관절로 잰 충돌 → 실제로 부딪힌 것이 확인된 심판 선언."""
+    said = Cue(10.0, "speech", "홈 충돌 상황입니다")
+    assert judge_calls([said]) == []
+    [j] = judge_calls([said, Cue(9.5, "collision", "[관절] 빠르게 부딪혀 넘어짐")])
+    assert j.code == "home_collision" and "[관절] 빠르게 부딪혀 넘어짐 (10s)" in j.evidence

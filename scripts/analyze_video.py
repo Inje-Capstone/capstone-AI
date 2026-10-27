@@ -224,6 +224,8 @@ def main() -> int:
     parser.add_argument("--ffmpeg", default=None)
     parser.add_argument("--ffprobe", default=None)
     parser.add_argument("--out-dir", type=Path, default=None, help="기본: ROOKIE_VIDEO_DIR")
+    parser.add_argument("--pose", action="store_true",
+                        help="관절로 슬라이딩·충돌을 잰다([pose] 설치, CPU면 영상 길이의 수 배)")
     args = parser.parse_args()
 
     if not args.video.exists():
@@ -246,8 +248,16 @@ def main() -> int:
     out_path = (args.out_dir or settings.video_dir) / f"{args.game_id}.json"
     snap = run(args.game_id, args.video, analyzer, clips, cut, out_path)
 
+    if args.pose and clips:  # 판정 신호: 해설·VLM 말 없이 동작을 직접 잰다(contact.py)
+        from contact_check import MIN_SCALE, summarize_long
+
+        pose_args = argparse.Namespace(fps=10.0, mode="balanced", min_scale=MIN_SCALE)
+        span = (clips[0][0], clips[-1][0] + clips[-1][1])  # VLM이 본 구간만(--limit·--start·--end)
+        snap["pose"] = summarize_long(args.video, pose_args, *span)
+        save(out_path, snap)
     print(f"저장: {out_path} (점수판 {len(snap.get('scoreboard', []))} · "
-          f"장면 {len(snap['events'])} · 해설 {len(snap.get('speech', []))})")
+          f"장면 {len(snap['events'])} · 해설 {len(snap.get('speech', []))}"
+          f" · 관절 슬라이딩 {len((snap.get('pose') or {}).get('slides', []))})")
     try:  # 채점용: 같은 경기 정답지가 있으면 영상 오프셋을 추정해 둔다
         truth = FixtureRelaySource(settings.truth_dir).load(args.game_id)
     except RelaySourceError:

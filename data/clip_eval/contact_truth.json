@@ -1,0 +1,382 @@
+{
+ "_note": "선수 접촉·슬라이딩 정답 표 — 사람이 프레임을 직접 보고 적은 시각(초). 키는 영상 id(labels.json의 yt). slide = 슬라이딩·다이빙(느린 화면·클로즈업 포함), slide_tag = 미끄러져 들어와 수비에 닿음, collision = 빠르게 부딪혀 넘어짐. unsure = 봐도 갈리지 않은 구간(검출돼도 헛것으로 세지 않음). split: tune = 기준값을 정할 때 본 클립, test = 1차 기준 뒤 처음 본 클립(여기서 나온 오탐으로 2차 수정), final = 2차 기준을 고정한 뒤 검출을 가리고 분류한 클립. python scripts/contact_check.py <영상들> --truth data/clip_eval/contact_truth.json",
+ "clips": {
+  "V0lBwrR3ulc": {
+   "split": "tune",
+   "situation": "홈 송구 보살",
+   "slide": [
+    7.5,
+    9.8,
+    43.0,
+    48.0,
+    51.0,
+    69.5
+   ],
+   "slide_tag": [
+    9.6,
+    42.7,
+    50.6
+   ],
+   "collision": [],
+   "unsure": {
+    "slide_tag": [
+     [
+      69.0,
+      72.5
+     ]
+    ]
+   }
+  },
+  "Ctt1C-2ap2o": {
+   "split": "tune",
+   "situation": "끝내기 희생플라이",
+   "slide": [
+    28.2,
+    46.4,
+    66.5,
+    149.9
+   ],
+   "slide_tag": [
+    66.7
+   ],
+   "collision": [],
+   "unsure": {
+    "slide": [
+     [
+      29.5,
+      31.5
+     ]
+    ],
+    "slide_tag": [
+     [
+      45.5,
+      47.0
+     ]
+    ]
+   }
+  },
+  "xMQ6X7EAXHw": {
+   "split": "tune",
+   "situation": "홈스틸",
+   "slide": [
+    121.6,
+    154.5,
+    161.2
+   ],
+   "slide_tag": [
+    161.0
+   ],
+   "collision": [],
+   "unsure": {
+    "slide_tag": [
+     [
+      121.0,
+      122.5
+     ],
+     [
+      154.0,
+      155.5
+     ]
+    ]
+   }
+  },
+  "-dJhkDUqvXw": {
+   "split": "tune",
+   "situation": "홈런",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "YWbcNKwUZHo": {
+   "split": "tune",
+   "situation": "스퀴즈",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "diE0AsXaO2o": {
+   "split": "tune",
+   "situation": "만루홈런",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "_rdOd3VO64w": {
+   "split": "test",
+   "situation": "견제사",
+   "slide": [
+    [
+     5.4,
+     9.0
+    ],
+    [
+     20.9,
+     24.1
+    ],
+    [
+     59.3,
+     60.9
+    ],
+    [
+     70.4,
+     71.2
+    ],
+    [
+     80.0,
+     80.8
+    ]
+   ],
+   "slide_tag": [
+    [
+     5.4,
+     9.0
+    ],
+    [
+     20.9,
+     24.1
+    ],
+    [
+     59.3,
+     60.9
+    ]
+   ],
+   "collision": [],
+   "unsure": {
+    "slide": [
+     [
+      94.5,
+      95.5
+     ]
+    ],
+    "slide_tag": [
+     [
+      70.0,
+      72.0
+     ],
+     [
+      79.5,
+      81.5
+     ]
+    ]
+   }
+  },
+  "xUHsYIUxgrA": {
+   "split": "test",
+   "situation": "더블스틸(홈)",
+   "slide": [
+    [
+     76.3,
+     78.4
+    ],
+    [
+     108.5,
+     110.3
+    ],
+    [
+     110.5,
+     114.5
+    ]
+   ],
+   "slide_tag": [
+    [
+     76.3,
+     78.4
+    ],
+    [
+     108.5,
+     110.3
+    ],
+    [
+     110.5,
+     114.5
+    ]
+   ],
+   "collision": []
+  },
+  "frDtAaQFrXc": {
+   "split": "test",
+   "situation": "홈스틸",
+   "slide": [
+    [
+     101.0,
+     101.8
+    ]
+   ],
+   "slide_tag": [],
+   "collision": []
+  },
+  "ZtV4DERr2o4": {
+   "split": "test",
+   "situation": "끝내기 보크(1루 귀루)",
+   "slide": [
+    [
+     2.6,
+     4.8
+    ]
+   ],
+   "slide_tag": [],
+   "collision": []
+  },
+  "las9824qg4o": {
+   "split": "test",
+   "situation": "체크스윙 비디오 판독",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "LO8Hv6ehWl0": {
+   "split": "test",
+   "situation": "병살",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "7gqiPYCMUVM": {
+   "split": "test",
+   "situation": "헤드샷 몸에 맞는 공",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "UwDErGYy0fU": {
+   "split": "test",
+   "situation": "보크",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "swnqODxkvws": {
+   "split": "test",
+   "situation": "낫아웃 폭투",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "ApMILQrLJCI": {
+   "split": "test",
+   "situation": "끝내기 희생플라이",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "8Jp6NqkycwQ": {
+   "split": "test",
+   "situation": "보크",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "VHun21viMYk": {
+   "split": "test",
+   "situation": "더블스틸(국제대회)",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "bkZCesrSoQ4": {
+   "split": "final",
+   "situation": "병살(직캠)",
+   "slide": [
+    [
+     15.1,
+     15.3
+    ]
+   ],
+   "slide_tag": [],
+   "collision": []
+  },
+  "00NXRlCm2O8": {
+   "split": "final",
+   "situation": "병살",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "9gnIgwwBPBc": {
+   "split": "final",
+   "situation": "끝내기 파울팁 삼진",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "FgnEsLJkoTg": {
+   "split": "final",
+   "situation": "끝내기 낫아웃",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "unsure": {
+    "slide": [
+     [
+      16.0,
+      17.2
+     ]
+    ]
+   }
+  },
+  "YqjuJCM1vj0": {
+   "split": "final",
+   "situation": "삼중살",
+   "slide": [
+    [
+     38.5,
+     39.6
+    ],
+    [
+     60.8,
+     65.1
+    ]
+   ],
+   "slide_tag": [],
+   "collision": []
+  },
+  "oWPpQehNiYM": {
+   "split": "final",
+   "situation": "삼중살",
+   "slide": [
+    [
+     14.5,
+     15.1
+    ],
+    [
+     61.2,
+     65.6
+    ],
+    [
+     67.3,
+     71.2
+    ]
+   ],
+   "slide_tag": [],
+   "collision": []
+  },
+  "xyAcE0_cfxk": {
+   "split": "final",
+   "situation": "삼중살",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "BxDqaZYfn00": {
+   "split": "final",
+   "situation": "삼중살",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "nBRT66_Odok": {
+   "split": "final",
+   "situation": "끝내기 몸에 맞는 공",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  },
+  "W-APlBjm8AI": {
+   "split": "final",
+   "situation": "ABS 퇴장",
+   "slide": [],
+   "slide_tag": [],
+   "collision": []
+  }
+ }
+}
