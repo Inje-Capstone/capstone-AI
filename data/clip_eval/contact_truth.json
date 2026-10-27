@@ -1,5 +1,5 @@
 {
- "_note": "선수 접촉·슬라이딩 정답 표 — 사람이 프레임을 직접 보고 적은 시각(초). 키는 영상 id(labels.json의 yt). slide = 슬라이딩·다이빙(느린 화면·클로즈업 포함), slide_tag = 미끄러져 들어와 수비에 닿음, collision = 빠르게 부딪혀 넘어짐. unsure = 봐도 갈리지 않은 구간(검출돼도 헛것으로 세지 않음). split: tune = 기준값을 정할 때 본 클립, test = 1차 기준 뒤 처음 본 클립(여기서 나온 오탐으로 2차 수정), final = 2차 기준을 고정한 뒤 검출을 가리고 분류한 클립. python scripts/contact_check.py <영상들> --truth data/clip_eval/contact_truth.json 3차(2026-10-27): 세 묶음을 모두 본 뒤 다듬었다 — 달려와 몸 던짐·느린 화면 슬라이딩·손목 태그 기준은 기준·검증 값으로 정하고 최종 묶음으로 확인했지만, 처음 보는 클립은 더 없다(새 클립으로 다시 재야 한다).",
+ "_note": "선수 접촉·슬라이딩 정답 표 — 사람이 프레임을 직접 보고 적은 시각(초). 키는 영상 id(labels.json의 yt). slide = 슬라이딩·다이빙(느린 화면·클로즈업 포함), slide_tag = 미끄러져 들어와 수비에 닿음, collision = 빠르게 부딪혀 넘어짐. unsure = 봐도 갈리지 않은 구간(검출돼도 헛것으로 세지 않음). split: tune = 기준값을 정할 때 본 클립, test = 1차 기준 뒤 처음 본 클립(여기서 나온 오탐으로 2차 수정), final = 2차 기준을 고정한 뒤 검출을 가리고 분류한 클립. python scripts/contact_check.py <영상들> --truth data/clip_eval/contact_truth.json 3차(2026-10-27): 세 묶음을 모두 본 뒤 다듬었다 — 달려와 몸 던짐·느린 화면 슬라이딩·손목 태그 기준은 기준·검증 값으로 정하고 최종 묶음으로 확인했지만, 처음 보는 클립은 더 없다(새 클립으로 다시 재야 한다). holdout(2026-10-27): MLB 클립 — 3차 기준(main 64fccbf)을 고정한 채 검출을 가린 후보 띠로 분류. tags_checked가 false면 태그·충돌은 아직 안 봐서 채점에서 뺀다. holdout 첫 채점(3차 기준 고정, 고치기 전): 슬라이딩 14/17 · 14/23, 태그 4/6 · 4/8, 충돌 오탐 2. holdout을 본 뒤 고침(4차): 몸 날린 수비의 태그(둘 다 누움)·슬라이딩이 끼면 충돌 아님·던지기 직전까지 보여야 함 → holdout 슬라이딩 14/16 · 14/23, 태그 5/8 · 5/8. 다리로 누움을 보는 안은 정밀도가 떨어져 버림.",
  "clips": {
   "V0lBwrR3ulc": {
    "split": "tune",
@@ -385,6 +385,432 @@
    "slide": [],
    "slide_tag": [],
    "collision": []
+  },
+  "dOlihOEDXgE": {
+   "split": "holdout",
+   "situation": "2013 월드시리즈 주루방해(3루 다이빙·홈 슬라이딩)",
+   "slide": [
+    [
+     9.2,
+     11.0
+    ],
+    [
+     16.0,
+     16.8
+    ],
+    [
+     75.5,
+     78.7
+    ],
+    [
+     83.8,
+     85.1
+    ],
+    [
+     111.2,
+     115.3
+    ],
+    [
+     117.9,
+     121.2
+    ],
+    [
+     121.6,
+     123.2
+    ]
+   ],
+   "slide_tag": [
+    [
+     16.0,
+     16.8
+    ],
+    [
+     83.5,
+     84.6
+    ],
+    [
+     111.0,
+     112.0
+    ],
+    [
+     117.7,
+     118.5
+    ],
+    [
+     121.9,
+     123.5
+    ]
+   ],
+   "collision": [],
+   "tags_checked": true,
+   "unsure": {
+    "slide": [
+     [
+      17.8,
+      19.1
+     ]
+    ],
+    "slide_tag": [
+     [
+      9.0,
+      11.0
+     ],
+     [
+      119.5,
+      120.5
+     ]
+    ]
+   }
+  },
+  "O5_TOPzB6DA": {
+   "split": "holdout",
+   "situation": "끝내기 타격방해",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "4FP4DpHQApw": {
+   "split": "holdout",
+   "situation": "끝내기 보크",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "Q-rwhUUoCOk": {
+   "split": "holdout",
+   "situation": "끝내기 보크",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "VMdUID0IHg4": {
+   "split": "holdout",
+   "situation": "끝내기 폭투",
+   "slide": [
+    [
+     23.8,
+     24.6
+    ],
+    [
+     59.6,
+     59.8
+    ]
+   ],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "Dv3uVVz_7nQ": {
+   "split": "holdout",
+   "situation": "포일",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "NivYt99x3WU": {
+   "split": "holdout",
+   "situation": "이머큘릿 이닝(삼진 3개)",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "903F6ePxZSw": {
+   "split": "holdout",
+   "situation": "몸에 맞는 공·퇴장",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "ErUZ_H2stAs": {
+   "split": "holdout",
+   "situation": "끝내기 보크",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "qkQaAMq2X8A": {
+   "split": "holdout",
+   "situation": "끝내기 희생플라이",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "RobwH_fQu1A": {
+   "split": "holdout",
+   "situation": "포일 득점",
+   "slide": [
+    [
+     10.8,
+     12.5
+    ],
+    [
+     38.3,
+     41.1
+    ],
+    [
+     45.5,
+     47.7
+    ]
+   ],
+   "slide_tag": [
+    [
+     11.6,
+     12.9
+    ]
+   ],
+   "collision": [],
+   "tags_checked": true,
+   "unsure": {
+    "slide_tag": [
+     [
+      46.0,
+      46.8
+     ]
+    ]
+   }
+  },
+  "d21KhbC8DDU": {
+   "split": "holdout",
+   "situation": "그라운드 홈런(외야 다이빙·홈 슬라이딩)",
+   "slide": [
+    [
+     16.0,
+     16.7
+    ],
+    [
+     19.1,
+     20.0
+    ]
+   ],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true,
+   "unsure": {
+    "collision": [
+     [
+      14.8,
+      16.2
+     ]
+    ]
+   }
+  },
+  "HsApj2l8Z7M": {
+   "split": "holdout",
+   "situation": "끝내기 피치클락 볼넷",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "upqNiPIRlmA": {
+   "split": "holdout",
+   "situation": "끝내기 보크",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "TFohZAuKPq4": {
+   "split": "holdout",
+   "situation": "인필드 플라이",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "teHbSBPX_eY": {
+   "split": "holdout",
+   "situation": "라인드라이브 병살(1루 귀루 다이빙)",
+   "slide": [
+    [
+     5.3,
+     7.0
+    ]
+   ],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "_VaplZYehQ0": {
+   "split": "holdout",
+   "situation": "라인드라이브 병살(2루 귀루)",
+   "slide": [
+    [
+     8.9,
+     9.5
+    ],
+    [
+     27.0,
+     27.8
+    ]
+   ],
+   "slide_tag": [
+    [
+     8.9,
+     9.5
+    ],
+    [
+     27.0,
+     28.3
+    ]
+   ],
+   "collision": [],
+   "tags_checked": true
+  },
+  "mgZHqT2-r3Q": {
+   "split": "holdout",
+   "situation": "딜레이드 스틸(발 먼저 2루 슬라이딩 — 상체가 서 있음)",
+   "slide": [
+    [
+     6.0,
+     7.0
+    ],
+    [
+     27.8,
+     28.5
+    ]
+   ],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true,
+   "unsure": {
+    "slide_tag": [
+     [
+      6.0,
+      7.5
+     ],
+     [
+      27.8,
+      28.6
+     ]
+    ]
+   }
+  },
+  "Bt9-RIBR04o": {
+   "split": "holdout",
+   "situation": "인정 2루타",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "PPOMdrsigpA": {
+   "split": "holdout",
+   "situation": "인정 2루타(펜스)",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "Szon6fXKZag": {
+   "split": "holdout",
+   "situation": "파울팁 삼진",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "gljVeyRWaIU": {
+   "split": "holdout",
+   "situation": "딜레이드 스틸(2루 슬라이딩)",
+   "slide": [
+    [
+     4.9,
+     5.5
+    ],
+    [
+     22.3,
+     25.4
+    ]
+   ],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true,
+   "unsure": {
+    "slide_tag": [
+     [
+      22.0,
+      22.8
+     ]
+    ]
+   }
+  },
+  "a_nVHxDUKqs": {
+   "split": "holdout",
+   "situation": "병살 슬라이딩 방해(2루 수비에게 미끄러져 들어감)",
+   "slide": [
+    [
+     7.2,
+     8.0
+    ],
+    [
+     37.8,
+     38.8
+    ]
+   ],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true,
+   "unsure": {
+    "slide_tag": [
+     [
+      7.2,
+      8.0
+     ],
+     [
+      37.1,
+      39.1
+     ]
+    ]
+   }
+  },
+  "WkPN-wvXyhE": {
+   "split": "holdout",
+   "situation": "번트 파울 삼진",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "yqP6epldseI": {
+   "split": "holdout",
+   "situation": "피치클락 삼진",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "MCLKGUMbP_Y": {
+   "split": "holdout",
+   "situation": "인필드 플라이",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "mF89sM9XtnU": {
+   "split": "holdout",
+   "situation": "3볼 볼넷 오인",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
+  },
+  "WUcqrwaPRyU": {
+   "split": "holdout",
+   "situation": "볼넷",
+   "slide": [],
+   "slide_tag": [],
+   "collision": [],
+   "tags_checked": true
   }
  }
 }

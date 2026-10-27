@@ -57,7 +57,9 @@ JOIN = 0.35  # 접촉·누운 구간 사이 이만큼 끊겨도 한 구간(관�
 LOOK_BACK = 0.5  # 닿기 이만큼 전과 비교해 다가온 속도를 잰다
 CLOSING = 1.5  # 다가온 속도(키/초) — 이상이면 '빠르게 부딪힘'
 LYING = 1.2  # 관절 범위 가로/세로 — 이상이면 누움(넘어짐·슬라이딩)
-TORSO_FLAT = 1.0  # 어깨→엉덩이 가로/세로 — 이상이면 상체가 눕혀짐(45°). 허리 숙인 수비는 서 있다
+# 어깨→엉덩이 가로/세로 — 이상이면 상체가 눕혀짐(45°). 다리(엉덩이→발목)로 보면 상체를 세운 발 먼저
+# 슬라이딩도 잡지만 다리 벌린 투수·수비가 섞여 정밀도 93%→78%(56클립 실측) — 상체만 본다
+TORSO_FLAT = 1.0
 # 슬라이딩·다이빙 = 누운 채 몸길이의 SLIDE_DIST배 넘게 미끄러짐(세상 좌표). 속도로 가르면 느린
 # 화면(다시보기)·클로즈업 슬라이딩을 놓친다 — 실측(2026-10-27, 6클립 누운 후보 20개):
 # 슬라이딩 0.41~3.4배, 넘어져 있음·포수 몸 날림·일어나기 0.11~0.37배.
@@ -389,7 +391,7 @@ def _thrown(before: Run, run: Run, scale: float) -> Optional[float]:
     선 몸 중심과 누운 몸 중심은 자세만 바꿔도 몸길이 0.3~0.5배 차이가 난다 — 그래서 눕기 전에
     실제로 달리고 있었는지(RUN_SPEED)도 본다. 선 모습을 한 번밖에 못 봤으면 거리를 두 배로 요구한다.
     """
-    if not before:
+    if not before or run[0][0] - before[-1][0] > JOIN:  # 던지기 직전까지 보여야(끊긴 추적 아님)
         return None
     entry = max(_dist(before[0][1].world, b.world) for _t, b in run) / scale
     standing = [(t, b) for t, b in before if not b.lying]
@@ -560,7 +562,10 @@ def _describe(pa, pb, a: int, b: int, t0: float, t1: float, slid: Sequence[Slide
     lying_at_start = bool((now_a and now_a.lying) or (now_b and now_b.lying))
     knocked = (closing is not None and closing >= CLOSING and fell
                and _legs(now_a) and _legs(now_b))
-    if knocked and not lying_at_start:  # 서서 빠르게 부딪힌 뒤에 쓰러졌다 — 미끄러져 온 게 아니다
+    # 서서 빠르게 부딪힌 뒤에 쓰러졌고, 둘 다 미끄러져 온 게 아니면 충돌. 몸을 날려 태그하는 수비도
+    # 함께 넘어진다(실측 MLB 홈·2루 태그 2건이 충돌로 갔다) — 슬라이딩이 끼면 태그 쪽으로 본다.
+    # 달려와 부딪혀 쓰러진 것과 몸을 던져 닿은 것은 관절만으로 갈리지 않는다(한계)
+    if knocked and not lying_at_start and not slid_in:
         kind = "collision"
     elif slid_in and lying and hand is not None and hand <= TAG_HAND:  # 손목을 봐야 태그
         kind = "slide_tag"
@@ -575,21 +580,21 @@ def _hand(pa, pb, t0: float, t1: float) -> Optional[float]:
     """닿아 있는 동안(+HAND_AFTER) 서 있는 사람 손목 ↔ 누운 사람 최소 거리 / 작은 사람 키.
 
     태그는 글러브로 한다. 주자 뒤에 선 심판은 화면에서 겹쳐도 손이 주자에게 가지 않는다
-    (실측: 태그 0.03~0.21, 심판 0.44~0.45).
+    (실측: 태그 0.03~0.21, 심판 0.44~0.45). 수비가 몸을 날려 둘 다 누웠으면 서로의 손목을 본다.
     """
     best: Optional[float] = None
     for t, a in pa:
         if not t0 - 0.05 <= t <= min(t1 + HAND_AFTER, t0 + HAND_WINDOW):
             continue
         b = _at(pb, t, tol=0.05)
-        if b is None or a.lying == b.lying:
+        if b is None or not (a.lying or b.lying):
             continue
-        lying, standing = (a, b) if a.lying else (b, a)
-        wrists = [p for p in standing.pts[9:11] if p is not None]
-        if not wrists:
-            continue
-        d = min(_dist(p, q) for p in wrists for q in lying.joints) / min(a.scale, b.scale)
-        best = d if best is None else min(best, d)
+        pairs = [(b, a), (a, b)] if a.lying and b.lying else [((b, a) if a.lying else (a, b))]
+        for tagger, runner in pairs:
+            wrists = [p for p in tagger.pts[9:11] if p is not None]
+            if wrists:
+                d = min(_dist(p, q) for p in wrists for q in runner.joints) / min(a.scale, b.scale)
+                best = d if best is None else min(best, d)
     return best
 
 

@@ -210,6 +210,28 @@ data/
 실경기 3개 38/38 일치, 단서 30% 누락 + 점수판 10% 오독에서 재현율 92%·정밀도 97%.
 **실제 정확도는 경기 영상 실측으로만 말한다.** 구종(결정구 변화구 카드)은 영상 판정 범위 밖이다.
 
+### 관절로 직접 재는 동작(판단 신호)
+
+해설·VLM 말 없이 화면 속 모든 사람의 관절(rtmlib, CPU)로 동작을 잰다 — `app/domain/contact.py`.
+- **슬라이딩·다이빙**: 상체가 눕혀진 채 미끄러짐, 달려오다 몸을 던짐, 느린 화면 다시보기
+- **태그**: 미끄러져 들어온 주자에게 서 있는 사람 손목이 닿음(주자 뒤 심판 제외), **충돌**: 서서 빠르게 부딪혀 쓰러짐
+- 중계 카메라 패닝·줌은 배경 광류 + RANSAC으로 되돌린 '세상 좌표'로 잰다. 화면 전환·디졸브에서 다시 시작
+- 판정 단서·카드 근거로 들어간다: `[관절] 슬라이딩·다이빙 — 누운 채 몸길이 1.7배 미끄러짐, 7.6~9.0초`
+
+```bash
+.venv/bin/python scripts/contact_check.py clip.mp4 --shots out/        # 관절 캐시 + 후보 프레임
+.venv/bin/python scripts/contact_check.py clips/*.mp4 --truth data/clip_eval/contact_truth.json  # 채점
+.venv/bin/python scripts/analyze_video.py G game.mp4 --pose            # 경기 분석에 관절 단서(10분 구간씩)
+```
+
+정답 표(사람이 프레임을 보고 분류, `data/clip_eval/contact_truth.json`):
+- KBO 28클립(기준값을 맞춘 데이터): 슬라이딩 정밀도 23/23·재현율 23/29, 태그 9/10·9/11
+- **MLB 28클립(기준값을 고정한 채 처음 본 데이터)**: 슬라이딩 14/17·14/23, 태그 4/6·4/8 — 일반화 수치.
+  여기서 본 실패로 고친 뒤 14/16·14/23, 태그 5/8·5/8
+- 못 잡는 것: 상체를 세운 발 먼저 슬라이딩(다리로 보면 잡지만 오탐이 늘어 정밀도 우선), 멀리 작게 찍힌 짧은 슬라이딩
+
+해설만 / 화면만 / 둘 다 판정 비교(`eval_clips.py --ablation` → `data/clip_eval/ABLATION.md`): 37% / 26% / 63%.
+
 - VLM: VSS 풀스택 대신 **VSS 계열 VLM을 NVIDIA 호스팅 API로 직접** 부른다(GPU 불필요, 기술 조사서 권고안).
   기본 `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`(VSS 3.2 Omni, 영상+음성). 무료가 막히거나 품질이
   모자라면 GPU 1장을 분석할 때만 빌려 `--base-url http://host:8000/v1`로 붙인다. VSS 서버면 `--backend vss`
