@@ -97,38 +97,24 @@ cp .env.example .env                      # 키는 git에 없다 — 직접 채�
 .venv/bin/python scripts/eval_outputs.py 20260823LGOB    # LLM 출력 규칙 검사
 ```
 
-## 4-1. 영상 판독 비용 단계 — 무료 API → GPU 직접
+## 4-1. 영상 판독 비용 — 무료 API + CPU (GPU 없음)
 
-**1단계 (지금): NVIDIA 무료 호스팅 API** — `.env`의 `NVIDIA_API_KEY`만 있으면 된다.
+> 2026-10-27: 학교가 GPU 대여를 승인하지 않았다. 분석은 **NVIDIA 무료 호스팅 API(VLM·Whisper) + 이 PC CPU(관절)**로만 한다.
+> 경기 영상은 미리 분석해 두고, 시연은 녹화본을 실제 속도로 재생한다.
+
+**NVIDIA 무료 호스팅 API** — `.env`의 `NVIDIA_API_KEY`만 있으면 된다.
 - 크레딧: 가입 시 1,000 (프로필에서 "Request More"로 최대 5,000 요청). 회사 메일이면 90일 AI Enterprise 체험 + 4,000 추가. 분당 40회 제한
-- 다 쓰면 자동 충전은 없다 → 2단계로
+- 다 쓰면 자동 충전은 없다 → 아래 '크레딧 아끼는 법'
 - 소모 추정(요청 1회 = 1크레딧 가정): 리플레이 3시간 경기 60초 조각 ≈ 180회 / **실시간 5초 조각 ≈ 2,160회 → 1,000크레딧으로 실시간 한 경기를 다 못 돈다**
 
-**2단계: GPU를 분석할 때만 빌려 직접 띄운다** — 코드 수정 없음, 주소만 바꾼다.
-- 모델: 같은 모델(Nemotron 3 Nano Omni) 가중치가 Hugging Face에 공개돼 있다. 라이선스 NVIDIA Open Model Agreement — 상업 이용까지 허용
-  - NVIDIA NIM 컨테이너(`nvcr.io/nim/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`)도 있지만 별도 평가 라이선스. 개발자 프로그램 회원은 연구·개발·테스트 용도로 GPU 16장까지 무료 → 캡스톤은 해당. **기본은 vLLM + HF 가중치**(로그인 불필요, FP8이 L40S에 들어감)
-- GPU: FP8(약 33GB) = **L40S 48GB 1장** / BF16(약 62GB) = H100·A100 80GB 1장. 디스크 70GB 이상
-- 요금(2026-10 조사, 바뀜): 해외 RunPod L40S 시간당 약 $0.8~1.1 · H100 약 $2~3 / 국내 엘리스클라우드 H100 GPU당 ₩4,270 · A100 80GB ₩1,970
-  - 국내 업체 종량제는 지원금 규정(해외·구독 금지)에 안 걸릴 수도 있다 — 학교 담당자 확인 필요
-- 경기당 추정(실측 전): 리플레이 = 모델 받기 10~20분 + 분석 수십 분 → L40S로 $1 안팎. 실시간 = 경기 3시간 내내 켜야 함
+**크레딧 아끼는 법**
+- 시연 경기는 리플레이(60초 조각)로 한 번만 분석해 `data/video/{id}.json`에 남긴다 — 판정 규칙을 고쳐 다시 볼 땐 `build_video_feed.py`만 돌리면 API를 부르지 않는다
+- 실시간 모드(5초 조각, 리플레이의 약 12배 소모)는 짧은 구간 시연에만
+- 모자라면 프로필에서 "Request More"(최대 5,000)
 
-```bash
-# GPU 서버 (RunPod이면 템플릿 이미지 vllm/vllm-openai:v0.20.0)
-VLM_API_KEY=<아무 긴 문자열> bash scripts/gpu_serve.sh          # FP8 · L40S
-MODEL_VARIANT=BF16 VLM_API_KEY=<...> bash scripts/gpu_serve.sh  # H100·A100 80GB
+**관절(rtmlib)은 CPU** — 기본 모델이 영상 길이의 약 2배 시간(3시간 경기 ≈ 6시간, 6코어 실측). 시연 전에 돌려 둔다. 가벼운 모델은 정확도가 크게 떨어져 쓰지 않는다
 
-# 일반 GPU 서버(docker)라면
-docker run --gpus all --ipc host -p 8000:8000 -v ~/.cache/huggingface:/root/.cache/huggingface \
-  -v $PWD/scripts:/s -e VLM_API_KEY=<...> --entrypoint bash vllm/vllm-openai:v0.20.0 /s/gpu_serve.sh
-
-# 분석 PC — .env의 키 대신 위에서 정한 문자열을 넘긴다(환경변수가 .env보다 우선)
-NVIDIA_API_KEY=<같은 문자열> .venv/bin/python scripts/analyze_video.py <ID> game.mp4 --base-url http://<서버IP>:8000/v1 --limit 3
-NVIDIA_API_KEY=<같은 문자열> .venv/bin/python scripts/live_video.py LIVE1 game.mp4 --away 한화 --home LG --base-url http://<서버IP>:8000/v1
-```
-
-- 첫 실행은 가중치 다운로드로 오래 걸린다. 디스크(볼륨)를 남겨 두면 다음엔 바로 뜬다(볼륨 보관비만 듦)
-- **끝나면 GPU(Pod)를 반드시 정지** — 켜 둔 시간만큼 과금
-- 이 절차는 아직 실제 GPU로 돌려 보지 않았다. 첫 실행 때 `--limit 3`으로 응답 형식부터 확인
+**GPU 절차는 보관만** — `scripts/gpu_serve.sh`와 `--base-url`(vLLM·NIM 같은 OpenAI 호환 서버 주소)은 코드에 남아 있다. 승인이 나면 PR #43 머지 시점(`1ccf40c`)의 이 문서 §4-1 'GPU를 분석할 때만 빌려 직접 띄운다'(L40S 1장, vLLM + 공개 가중치 FP8)를 그대로 쓴다
 
 ## 5. 다음 할 일 (순서대로)
 
@@ -161,10 +147,11 @@ NVIDIA_API_KEY=<같은 문자열> .venv/bin/python scripts/live_video.py LIVE1 g
 |---|---|---|
 | 09-27 | VSS 풀스택 대신 VSS 계열 VLM 호스팅 API | GPU·서버 부담(기술 조사서 권고) |
 | 10-02 | 플레이는 영상, 선수·구종·기록은 데이터, 데이터 결과는 채점만 | "영상 분석"이 실제 판정을 하게 + 정확도를 숫자로 |
-| 10-02 | GPU는 무료 API가 막히거나 품질·저작권 문제 시에만, 분석할 때만 켬 | 상시 가동 월 180만 원 |
+| 10-02 | (10-27 폐기) GPU는 무료 API가 막히거나 품질·저작권 문제 시에만, 분석할 때만 켬 | 상시 가동 월 180만 원 |
 | 10-02 | 실시간: 5초 조각 + VLM 추론 끔 | 응답 실측 1.5~2.2초(켜면 3.6~65초) |
-| 10-10 | 무료 크레딧 소진 후엔 GPU 1장(L40S)에 vLLM + 공개 가중치(FP8)로 직접 띄움 | 같은 모델이라 코드 수정 없음, 상업 이용 허용 라이선스, 경기당 $1 안팎 추정 |
+| 10-10 | (10-27 폐기) 무료 크레딧 소진 후엔 GPU 1장(L40S)에 vLLM + 공개 가중치(FP8)로 직접 띄움 | 같은 모델이라 코드 수정 없음, 상업 이용 허용 라이선스, 경기당 $1 안팎 추정 |
 | 10-02 | AI 비용은 캡스톤 지원금으로 처리 안 함 | 해외·프로그램·구독 금지(국고). 위장 세금계산서는 허위 증빙 |
+| 10-27 | GPU 대여 안 함 — NVIDIA 무료 API + CPU, 경기 영상은 미리 분석해 두고 재생 | 학교 승인 불가 |
 
 ## 8. 함정 (실측으로 알게 된 것)
 
