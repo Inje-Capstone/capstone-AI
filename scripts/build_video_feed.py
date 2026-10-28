@@ -29,9 +29,12 @@ from app.domain.enrich import enrich  # noqa: E402
 from app.domain.models import GameFeed  # noqa: E402
 from app.domain.scorebug import stabilize  # noqa: E402
 from app.domain.video_judge import (  # noqa: E402
+    GENERIC_CODES,
     MIN_CONFIDENCE,
-    from_snapshot,
     judge,
+    merge_states,
+    observe,
+    state_events,
     to_relay_events,
 )
 
@@ -56,12 +59,15 @@ def build(
     min_confidence: float = MIN_CONFIDENCE,
     data: Optional[GameFeed] = None, offset: Optional[float] = None,
 ) -> dict[str, Any]:
-    readings, cues = from_snapshot(snap)
-    judgments = judge(readings, cues)
+    # 점수판 전용 판독·Whisper 해설이 있으면 그걸로 — 클립 평가(eval_clips)와 같은 입력
+    readings, cues, min_repeat = observe(snap)
+    judgments = judge(readings, cues, min_repeat=min_repeat)
     events = to_relay_events(judgments, min_confidence)
+    stable = stabilize(readings, min_repeat)
     enriched = data is not None and offset is not None
     if enriched:
-        events = enrich(events, data.events, offset, stabilize(readings))
+        events = enrich(events, data.events, offset, stable)
+    events = merge_states(events, state_events(stable))  # 화면 스코어보드 = 중계 점수판
     last = max((r.t for r in readings), default=0)
     return {
         "_note": ("플레이 판정은 영상(점수판 판독 × 장면·해설 단서)" +
@@ -70,6 +76,12 @@ def build(
         "source": "video",
         "analysis": {"provider": snap.get("provider"), "model": snap.get("model"),
                      "prompt_version": snap.get("prompt_version"),
+                     "scoreboard_source": (
+                         "crop" if (snap.get("scorebug") or {}).get("scoreboard") else "frame"),
+                     "min_repeat": min_repeat,
+                     "speech_source": "whisper" if any(
+                         s.get("text") for s in (snap.get("asr") or {}).get("segments") or []
+                     ) else "vlm",
                      "readings": len(readings), "cues": len(cues),
                      "judgments": dict(Counter(j.code for j in judgments)),
                      "min_confidence": min_confidence,
@@ -82,6 +94,26 @@ def build(
         },
         "events": [e.model_dump() for e in events],
     }
+
+
+def demo_moments(feed: dict[str, Any], min_confidence: float = MIN_CONFIDENCE) -> list[str]:
+    """카드가 뜰 장면 — 프론트에 넘길 '대표 시점' 후보. 'mm:ss 판정 (확신도)' 시간순.
+
+    아웃·출루처럼 종류를 못 가린 판정은 카드가 없어 뺀다.
+    """
+    out = []
+    for e in feed["events"]:
+        d = e.get("detail") or {}
+        code = d.get("result") or d.get("call")
+        if e.get("kind") == "steal":
+            code = "caught_stealing" if d.get("caught") else "steal"
+        if d.get("source") != "video" or not code or code in GENERIC_CODES:
+            continue
+        if d.get("confidence", 0) < min_confidence:
+            continue
+        t = int(e["t"])
+        out.append(f"{t // 60:02d}:{t % 60:02d} {code} ({d['confidence']:.2f})")
+    return out
 
 
 def main() -> int:
@@ -104,8 +136,8 @@ def main() -> int:
     if not snap_path.exists():
         raise SystemExit(f"영상 분석 스냅샷이 없다: {snap_path} — analyze_video.py부터")
     snap = json.loads(snap_path.read_text(encoding="utf-8"))
-    if not snap.get("scoreboard"):
-        raise SystemExit("점수판 판독이 없다 — prompt v2로 다시 분석해야 한다")
+    if not (snap.get("scoreboard") or (snap.get("scorebug") or {}).get("scoreboard")):
+        raise SystemExit("점수판 판독이 없다 — analyze_video.py --scorebug로 다시 분석한다")
 
     data = None if args.no_data else load_data(args.game_id)
     meta = data_meta(data)
@@ -132,6 +164,11 @@ def main() -> int:
     print(f"판독 {a['readings']} · 단서 {a['cues']} · 이벤트 {len(feed['events'])}")
     print("판정:", ", ".join(f"{k} {v}" for k, v in sorted(a["judgments"].items())))
     print("데이터:", f"네이버 (오프셋 {offset:+.1f}s)" if a["data"] else "없음 — 영상 판정만")
+    print(f"점수판 {a['scoreboard_source']} · 해설 {a['speech_source']}")
+    moments = demo_moments(feed, args.min_confidence)
+    print(f"카드가 뜰 장면 {len(moments)}개 (프론트 대표 시점 후보):")
+    for line in moments:
+        print("  " + line)
     return 0
 
 

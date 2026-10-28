@@ -126,6 +126,19 @@ def _events(client):
     return [e.model_dump() for e in get_live_source().get("L1").feed.events]
 
 
+def test_live_scoreboard_starts_from_what_the_broadcast_shows(client):
+    """실시간은 늘 경기 중간에서 시작한다 — 첫 업데이트의 스코어보드가 중계 점수판 그대로."""
+    client.post("/api/live/L2", json={"away_team": "한화", "home_team": "LG"}, headers=H)
+    board = {"inning": 3, "half": "top", "balls": 2, "strikes": 1, "outs": 1, "bases": [2],
+             "away": 1, "home": 0}
+    body = {"scoreboard": [{**board, "t": 5.0}, {**board, "t": 6.0}], "events": [], "speech": []}
+    assert client.post("/api/live/L2/ingest", json=body, headers=H).status_code == 200
+    client.post("/api/live/L2/end", headers=H)
+    with client.stream("GET", "/api/live/L2/stream") as res:
+        msgs = [json.loads(ln[6:]) for ln in res.iter_lines() if ln.startswith("data: ")]
+    assert msgs[0]["scoreboard"] == "한화 1 : 0 LG · 3회초 · B2 S1 O1"
+
+
 def test_unknown_live_game_404(client):
     assert client.get("/api/live/nope/stream").status_code == 404
     assert client.post("/api/live/nope/ingest", json={}, headers=H).status_code == 404

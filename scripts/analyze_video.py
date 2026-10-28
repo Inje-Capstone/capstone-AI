@@ -11,9 +11,12 @@ grade_video.py가 한다. 같은 경기 정답지(문자중계)가 있으면 채
   cosmos  NVIDIA 호스팅 NIM VLM (기본 Nemotron 3 Nano Omni — VSS 3.2 Omni). NVIDIA_API_KEY 필요.
   vss     VSS LVS 서버 (--vss-url, --clip-base-url: VSS가 청크를 읽어 갈 주소)
 
+점수판·해설은 클립 평가(63%)와 같은 경로로 따로 받는다 — `--scorebug`(점수판만 잘라 바뀔 때마다
+한 장씩), `--asr`(Whisper). build_video_feed.py가 있으면 그것을 우선 쓴다(video_judge.observe).
+
 사용:
     python scripts/analyze_video.py 20260920HHLG02026 game.mp4 --limit 3        # 앞 3청크만 시험
-    python scripts/analyze_video.py 20260920HHLG02026 game.mp4
+    python scripts/analyze_video.py 20260920HHLG02026 game.mp4 --scorebug --asr  # 시연 경기
 """
 
 import argparse
@@ -192,6 +195,49 @@ def build_analyzer(args: argparse.Namespace) -> VideoAnalyzer:
     )
 
 
+def build_reader(args: argparse.Namespace) -> Any:
+    from app.adapters.video.cosmos import DEFAULT_BASE_URL, DEFAULT_MODEL
+    from app.adapters.video.scorebug_layout import Layout
+    from app.adapters.video.scorebug_reader import ScorebugReader
+
+    return ScorebugReader(
+        os.getenv("NVIDIA_API_KEY", "").strip(),
+        args.base_url or DEFAULT_BASE_URL,
+        args.model or DEFAULT_MODEL,
+        max_reads=args.max_reads,
+        ffmpeg=find_tool("ffmpeg", args.ffmpeg),
+        every=getattr(args, "read_every", None),  # 클립 평가는 없음(바뀔 때마다)
+        layout=Layout.load(args.layout) if getattr(args, "layout", None) else None,
+    )
+
+
+def build_transcriber(args: argparse.Namespace) -> Any:
+    from app.adapters.video.speech_asr import WhisperTranscriber
+
+    return WhisperTranscriber(
+        os.getenv("NVIDIA_API_KEY", "").strip(), ffmpeg=find_tool("ffmpeg", args.ffmpeg)
+    )
+
+
+def dedicated_pass(
+    snap: dict[str, Any], key: str, version: str, span: tuple[float, float], read: Any
+) -> bool:
+    """점수판 전용 판독·Whisper 받아쓰기를 VLM이 본 구간에 한 번 — 같은 판·같은 구간이면 건너뛴다.
+
+    `read(start, length)`가 결과 dict를 돌려준다. 실패하면 스냅샷은 그대로 두고 False.
+    """
+    cached = snap.get(key) or {}
+    if cached.get("version") == version and cached.get("span") == list(span):
+        return True
+    try:
+        result = read(span[0], span[1] - span[0])
+    except VideoAnalyzerError as exc:
+        print(f"{key} 실패: {exc}", file=sys.stderr)
+        return False
+    snap[key] = {**result, "version": version, "span": list(span)}
+    return True
+
+
 def report(estimate: Optional[OffsetEstimate]) -> None:
     if estimate is None:
         print("오프셋 추정 불가 — 중계와 짝지을 영상 관찰이 없다")
@@ -212,10 +258,14 @@ def main() -> int:
     parser.add_argument("--start", type=float, default=0.0)
     parser.add_argument("--end", type=float, default=None)
     parser.add_argument("--limit", type=int, default=None, help="앞에서부터 N청크만 (시험용)")
-    parser.add_argument("--height", type=int, default=360)
+    # 클립 평가(63%)와 같은 설정 — 480p, 추론 끔. 추론을 켜면 생각 글이 출력 한도를 먹어 JSON이
+    # 잘렸다(리허설 2026-10-28: 청크 4개 중 1개는 생각 글만, 나머지는 503·시간 초과)
+    parser.add_argument("--height", type=int, default=480)
     parser.add_argument("--fps", type=float, default=2.0)
-    parser.add_argument("--no-think", action="store_true",
-                        help="VLM 추론 끄기 (빠름, 품질 확인 필요)")
+    parser.add_argument("--think", dest="no_think", action="store_false",
+                        help="VLM 추론 켜기 (느림 — 기본은 클립 평가처럼 끈다)")
+    parser.add_argument("--no-think", dest="no_think", action="store_true",
+                        help=argparse.SUPPRESS)  # 예전 명령 호환
     parser.add_argument("--no-audio", action="store_true", help="청크에서 음성(해설)을 뺀다")
     parser.add_argument("--model", default=None)
     parser.add_argument("--base-url", default=None, help="cosmos: 로컬 NIM이면 http://host:8000/v1")
@@ -226,6 +276,16 @@ def main() -> int:
     parser.add_argument("--out-dir", type=Path, default=None, help="기본: ROOKIE_VIDEO_DIR")
     parser.add_argument("--pose", action="store_true",
                         help="관절로 슬라이딩·충돌을 잰다([pose] 설치, CPU면 영상 길이의 수 배)")
+    parser.add_argument("--scorebug", action="store_true",
+                        help="점수판만 잘라 읽는다(클립 평가와 같은 방식) — 바뀔 때마다 요청 1회")
+    parser.add_argument("--read-every", type=float, default=8.0,
+                        help="점수판이 보이는 동안 몇 초마다 읽나 (투구 간격 15~25초)")
+    parser.add_argument("--layout", type=Path, default=None,
+                        help="중계사 점수판 위치(data/scorebug_layouts/) — 주자·아웃을 화소로")
+    parser.add_argument("--max-reads", type=int, default=600,
+                        help="점수판 판독 요청 상한 (무료 크레딧 보호)")
+    parser.add_argument("--asr", action="store_true",
+                        help="해설을 Whisper로 받아 적는다([asr] 설치) — 30초마다 요청 1회")
     args = parser.parse_args()
 
     if not args.video.exists():
@@ -248,16 +308,43 @@ def main() -> int:
     out_path = (args.out_dir or settings.video_dir) / f"{args.game_id}.json"
     snap = run(args.game_id, args.video, analyzer, clips, cut, out_path)
 
-    if args.pose and clips:  # 판정 신호: 해설·VLM 말 없이 동작을 직접 잰다(contact.py)
+    span = (clips[0][0], clips[-1][0] + clips[-1][1]) if clips else None  # VLM이 본 구간만
+    if args.scorebug and span:
+        from app.adapters.video.scorebug_reader import VERSION as SCOREBUG_VERSION
+
+        reader = build_reader(args)
+        version = f"{SCOREBUG_VERSION}-every{args.read_every:g}" + (
+            f"-{args.layout.stem}" if args.layout else "")
+        if dedicated_pass(snap, "scorebug", version, span,
+                          lambda s, n: reader.read(args.video, n, s)):
+            save(out_path, snap)
+        if reader.requests >= args.max_reads:
+            print(f"점수판 판독이 상한({args.max_reads})에 걸렸다 — 빠진 구간이 있다. "
+                  "--max-reads를 올려 다시 돌린다", file=sys.stderr)
+    if args.asr and span:
+        from app.adapters.video.speech_asr import VERSION as ASR_VERSION
+
+        try:
+            transcriber = build_transcriber(args)
+        except VideoAnalyzerError as exc:  # [asr] 미설치 — VLM 받아쓰기로 간다
+            print(f"해설 받아쓰기 건너뜀: {exc}", file=sys.stderr)
+        else:
+            if dedicated_pass(snap, "asr", ASR_VERSION, span, lambda s, n: {
+                    "segments": transcriber.transcribe(args.video, n, s)}):
+                save(out_path, snap)
+    if args.pose and span:  # 판정 신호: 해설·VLM 말 없이 동작을 직접 잰다(contact.py)
         from contact_check import MIN_SCALE, summarize_long
 
         pose_args = argparse.Namespace(fps=10.0, mode="balanced", min_scale=MIN_SCALE)
-        span = (clips[0][0], clips[-1][0] + clips[-1][1])  # VLM이 본 구간만(--limit·--start·--end)
         snap["pose"] = summarize_long(args.video, pose_args, *span)
         save(out_path, snap)
+    crop = (snap.get("scorebug") or {}).get("scoreboard") or []
+    whisper = [s for s in (snap.get("asr") or {}).get("segments") or [] if s.get("text")]
     print(f"저장: {out_path} (점수판 {len(snap.get('scoreboard', []))} · "
           f"장면 {len(snap['events'])} · 해설 {len(snap.get('speech', []))}"
-          f" · 관절 슬라이딩 {len((snap.get('pose') or {}).get('slides', []))})")
+          f" · 관절 슬라이딩 {len((snap.get('pose') or {}).get('slides', []))}"
+          + (f" · 점수판 전용 {len(crop)}" if args.scorebug else "")
+          + (f" · Whisper {len(whisper)}" if args.asr else "") + ")")
     try:  # 채점용: 같은 경기 정답지가 있으면 영상 오프셋을 추정해 둔다
         truth = FixtureRelaySource(settings.truth_dir).load(args.game_id)
     except RelaySourceError:
