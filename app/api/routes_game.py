@@ -17,6 +17,7 @@ from app.api.deps import (
 from app.api.schemas import CardOut, CardsOut, GameOut, MatchupOut, MomentOut, StateOut
 from app.domain.game_state import replay
 from app.domain.models import Card, ExplainProfile
+from app.domain.profile import select
 from app.domain.timeline import Timeline
 
 router = APIRouter(prefix="/api/games", tags=["game"])
@@ -48,9 +49,11 @@ def game_cards(
     timeline = Timeline(feed.meta.relay_video_offset_sec)
     service = get_card_service()
     cards = service.cards(feed.meta.id, t, profile)
-    # 감지된 상황은 있는데 카드가 하나도 안 나왔다면 생성이 죽은 것이다.
-    detected = service.situations(feed.meta.id, t)
-    degraded = bool(detected) and not cards
+    # 이 사용자에게 보일 상황은 있는데 카드가 하나도 안 나왔다면 생성이 죽은 것이다.
+    # 프로필이 거른 상황(입문자에게 작전 카드 등)은 고장이 아니다 — 리허설에서 입문 난이도의
+    # 도루 하나뿐인 시점이 degraded로 나왔다(2026-10-28).
+    shown = select(service.situations(feed.meta.id, t), profile)
+    degraded = bool(shown) and not cards
     return CardsOut(
         game_id=feed.meta.id,
         t=t,

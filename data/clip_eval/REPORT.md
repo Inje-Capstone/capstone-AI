@@ -50,12 +50,12 @@
 | kbo_pickoff_ahn | caught_stealing | ✓ | caught_stealing | 견제 | 1 |
 | kbo_tp_kiwoom | triple_play | ✓ | triple_play | 트리플 | 2 |
 | kbo_tp_kt | triple_play | ✓ | out, triple_play | 트리플 | 2 |
-| kbo_tp_lg | triple_play | ✓ | reach, triple_play | 트리플 | 2 |
+| kbo_tp_lg | triple_play | ✓ | triple_play | 트리플 | 2 |
 | kbo_tp_lotte | triple_play | ✓ | triple_play | 트리플 | 2 |
 | kbo_hbp_walkoff_ssg | hbp | ✗ | - | ✗ | 1 |
 | kbo_headshot_kim | hbp | ✓ | pitcher, hbp | 헤드샷 | 2 |
 | kbo_sf_walkoff_nc | sac_fly | ✗ | dropped_third_strike | 희생플라이 | 2 |
-| kbo_sf_walkoff_lg | sac_fly | ✓ | reach, sac_fly | ✗ | 2 |
+| kbo_sf_walkoff_lg | sac_fly | ✓ | sac_fly | ✗ | 2 |
 | kbo_hr_kim | homerun | ✓ | out, homerun | 홈런, home run | 2 |
 | kbo_hr_slam_hilliard | homerun | ✓ | pitcher, homerun | 홈런, 만루 | 2 |
 | kbo_squeeze_kia | squeeze | ✗ | reach, strikeout | 번트 | 2 |

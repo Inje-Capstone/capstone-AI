@@ -16,13 +16,16 @@ from app.adapters.video.base import VideoAnalyzerError
 
 RIVA_SERVER = "grpc.nvcf.nvidia.com:443"
 WHISPER_FUNCTION_ID = "b702f636-f60c-4a3d-a6f4-f3568c13bd7d"  # build.nvidia.com whisper-large-v3
+VERSION = "whisper-large-v3-ko-30s"  # 스냅샷 캐시 키 — 모델·조각 길이를 바꾸면 올린다
 
 
-def plan_pieces(duration: float, piece_sec: float) -> list[tuple[float, float]]:
-    """[(시작, 길이)] — 1초 미만 꼬리는 버린다."""
+def plan_pieces(
+    duration: float, piece_sec: float, start: float = 0.0
+) -> list[tuple[float, float]]:
+    """[(시작, 길이)] — 시작은 영상 기준 초. 1초 미만 꼬리는 버린다."""
     pieces, t = [], 0.0
     while duration - t >= 1.0:
-        pieces.append((round(t, 3), round(min(piece_sec, duration - t), 3)))
+        pieces.append((round(start + t, 3), round(min(piece_sec, duration - t), 3)))
         t += piece_sec
     return pieces
 
@@ -76,7 +79,10 @@ class WhisperTranscriber:
             check=True,
         )
 
-    def transcribe(self, video: Path, duration: float) -> list[dict[str, Any]]:
+    def transcribe(
+        self, video: Path, duration: float, start: float = 0.0
+    ) -> list[dict[str, Any]]:
+        """영상의 [start, start+duration) 구간 — 경기 영상은 분석한 구간만 받아 적는다."""
         config = self._riva.RecognitionConfig(
             language_code=self.language,
             max_alternatives=1,
@@ -85,18 +91,18 @@ class WhisperTranscriber:
         )
         segments = []
         with tempfile.TemporaryDirectory() as tmp:
-            for start, length in plan_pieces(duration, self.piece_sec):
-                wav = Path(tmp) / f"a_{int(start):05d}.wav"
+            for at, length in plan_pieces(duration, self.piece_sec, start):
+                wav = Path(tmp) / f"a_{int(at):05d}.wav"
                 try:
-                    self._wav(video, start, length, wav)
+                    self._wav(video, at, length, wav)
                     self.requests += 1
                     resp = self._asr.offline_recognize(wav.read_bytes(), config)
                 except Exception as exc:  # noqa: BLE001 — gRPC·ffmpeg 오류 모두 조각 하나만 버린다
-                    segments.append({"t": start, "text": "", "error": str(exc)[:200]})
+                    segments.append({"t": at, "text": "", "error": str(exc)[:200]})
                     continue
                 text = " ".join(
                     r.alternatives[0].transcript.strip() for r in resp.results if r.alternatives
                 ).strip()
                 if text:
-                    segments.append({"t": start, "text": text})
+                    segments.append({"t": at, "text": text})
         return segments

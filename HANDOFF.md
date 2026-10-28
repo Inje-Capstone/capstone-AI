@@ -68,8 +68,11 @@ cp .env.example .env                      # 키는 git에 없다 — 직접 채�
 **리플레이 (경기 끝난 영상)**
 ```bash
 .venv/bin/python scripts/import_naver_relay.py <네이버ID>                 # 데이터(선수·구종·채점 정답)
-.venv/bin/python scripts/analyze_video.py <네이버ID> game.mp4 --limit 3   # 먼저 3분만 시험
-.venv/bin/python scripts/analyze_video.py <네이버ID> game.mp4             # 전체 (재실행하면 이어서)
+.venv/bin/pip install -e ".[asr]"                                          # 해설 Whisper (한 번)
+.venv/bin/python scripts/scorebug_layout.py game.mp4 data/scorebug_layouts/sbs_sports.json 30:12:1  # 중계사 점수판 위치 확인(시각:주자:아웃)
+L=data/scorebug_layouts/sbs_sports.json
+.venv/bin/python scripts/analyze_video.py <네이버ID> game.mp4 --scorebug --asr --layout $L --limit 3   # 먼저 3분만 시험
+.venv/bin/python scripts/analyze_video.py <네이버ID> game.mp4 --scorebug --asr --layout $L --pose      # 전체 (재실행하면 이어서)
 .venv/bin/python scripts/build_video_feed.py <네이버ID>                   # 영상 판정 + 데이터 → data/fixtures/video_<ID>.json
 .venv/bin/python scripts/grade_video.py <네이버ID>                        # 정확도(규칙별 재현율·정밀도)
 .venv/bin/python scripts/build_cards.py <네이버ID> && .venv/bin/python scripts/build_moments.py <네이버ID>  # 시연용 사전 생성
@@ -90,6 +93,12 @@ cp .env.example .env                      # 키는 git에 없다 — 직접 채�
 ```
 - 점수판: `app/adapters/video/scorebug_reader.py` — 모서리를 잘라 3배 키워 한 장씩 읽고, 언제 읽을지는 로컬 썸네일 비교로 정한다
 - 해설: `app/adapters/video/speech_asr.py` — NVIDIA 호스팅 Whisper large-v3, 같은 NVIDIA_API_KEY
+- 경기 영상도 같은 입력을 쓴다: `analyze_video.py --scorebug --asr` → `build_video_feed.py`가 `video_judge.observe`로 점수판 전용 판독·Whisper를 우선한다
+- **경기 영상 점수판 리허설(2026-10-28, 3분 중계 클립을 녹화본처럼)**:
+  - 바뀔 때마다 읽는 하이라이트 방식은 모서리 배경까지 '점수판'으로 잡아 1초마다 읽었다(3분 87회 → 경기 1시간 약 1,600회). 경기 영상은 `--read-every 8`(보이는 동안 8초마다 + 다시 나타날 때) → 3분 23회, 같은 상태를 여러 번 읽으니 안정화 2
+  - VLM은 볼카운트·점수·이닝(1080p)은 맞히지만 **아웃 점·주자 다이아몬드는 지시문을 바꿔도 0~1/6**. 위치를 한 번 재 두고 화소 색으로 읽으면 7/7(1080p·480p 둘 다) → `--layout data/scorebug_layouts/<중계사>.json`. 새 중계사는 `scripts/scorebug_layout.py`로 재고 확인
+  - NVIDIA 호스팅 VLM은 그날 장면 청크 4개가 모두 503·깨진 출력·시간 초과 — 다시 돌리면 실패한 청크만 이어서 한다. 점수판·Whisper는 따로라 살아 있었다
+  - 안정화 1(하이라이트)은 앞뒤와 주자·아웃·득점 수지가 안 맞는 한 장을 버린다(`scorebug.possible_step`), 같은 반 이닝에서 아웃이 주는 판독은 버린다 — 예전엔 아웃 오독 하나로 경기 상태가 3아웃을 넘어 깨졌다(시뮬레이션 실측)
 
 **점검**
 ```bash
@@ -130,7 +139,7 @@ cp .env.example .env                      # 키는 git에 없다 — 직접 채�
 0. **경기 전체 분석(analyze_video)에도 점수판 전용 판독·Whisper 해설을 붙인다** — 지금은 클립 평가에만 연결돼 있다
 1. **경기 영상 확보** → `analyze_video.py --limit 3`으로 점수판·장면·해설 판독 품질 확인 → `app/adapters/video/base.py`의 프롬프트 조정
    - **한국어 해설을 알아듣는지 먼저 확인** — 모델 안내에 언어 지원이 영어로만 적혀 있다(§8). 안 되면 `--no-audio`로 점수판·장면만 쓰거나 한국어 음성인식을 따로 붙인다
-2. 같은 경기를 **추론 켬/끔**(`--no-think`)으로 각각 분석 → `grade_video.py`로 정확도 비교 → 실시간 기본값 확정
+2. 같은 경기를 **추론 끔(기본)·켬**(`--think`)으로 각각 분석 → `grade_video.py`로 정확도 비교 → 실시간 기본값 확정
 3. 판정 규칙·확신도 조정(`video_judge.py`) → 시연 경기 카드·요약 사전 생성 → 커밋
 4. 백엔드 compose에 ai-engine 추가(아래 §6)
 5. (생중계 소스가 생기면) 영상↔데이터 시간차 초기값을 네이버 투구 시각으로 — 지금은 장면 단서로 약 14분 뒤 고정

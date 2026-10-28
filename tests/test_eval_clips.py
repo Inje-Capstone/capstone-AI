@@ -117,6 +117,8 @@ def test_whisper_pieces_cover_clip():
 
     assert plan_pieces(65.5, 30) == [(0.0, 30.0), (30.0, 30.0), (60.0, 5.5)]
     assert plan_pieces(0.5, 30) == []
+    # 경기 영상은 분석한 구간만 — 시각은 영상 기준
+    assert plan_pieces(40, 30, start=600) == [(600.0, 30.0), (630.0, 10.0)]
 
 
 def test_pose_slide_is_a_scene_cue_but_not_commentary():

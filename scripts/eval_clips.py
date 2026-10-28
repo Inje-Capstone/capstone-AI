@@ -32,6 +32,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from analyze_video import (  # noqa: E402
     build_analyzer,
+    build_reader,
+    build_transcriber,
     ffmpeg_cut_cmd,
     find_tool,
     plan_clips,
@@ -41,22 +43,22 @@ from contact_check import MIN_SCALE  # noqa: E402
 from contact_check import summarize as contact_summary  # noqa: E402
 
 from app.adapters.video.base import PROMPT_VERSION, VideoAnalyzerError, VideoClip  # noqa: E402
+from app.adapters.video.scorebug_reader import VERSION as SCOREBUG_VERSION  # noqa: E402
+from app.adapters.video.speech_asr import VERSION as ASR_VERSION  # noqa: E402
 from app.domain.video_judge import (  # noqa: E402
     GENERIC_CODES,
     MIN_CONFIDENCE,
     POSE_TAG,
     Cue,
-    from_snapshot,
     judge,
     judge_from_cues,
+    observe,
 )
 
 LABELS = ROOT / "data" / "clip_eval" / "labels.json"
 REPORT = ROOT / "data" / "clip_eval" / "REPORT.md"
 ABLATION = ROOT / "data" / "clip_eval" / "ABLATION.md"
 CLIP_WINDOW = 600.0
-SCOREBUG_VERSION = "scorebug-crop-v1"
-ASR_VERSION = "whisper-large-v3-ko-30s"
 
 
 # ── 순수 함수 (테스트 대상) ───────────────────────────────────────────────
@@ -98,16 +100,8 @@ DESC_CUES = True
 
 
 def score_clip(label: dict[str, Any], snap: dict[str, Any]) -> dict[str, Any]:
-    readings, cues = from_snapshot(snap)
-    asr = [s for s in (snap.get("asr") or {}).get("segments") or [] if s.get("text")]
-    if asr:  # 해설은 Whisper 받아쓰기로 (VLM 받아쓰기는 지어낸 문장이 많다) — 자막은 남긴다
-        cues = [c for c in cues if c.kind != "speech" or c.text.startswith("[자막]")]
-        cues = sorted(
-            cues + [Cue(float(s["t"]), "speech", s["text"]) for s in asr], key=lambda c: c.t
-        )
-    crop = (snap.get("scorebug") or {}).get("scoreboard") or []
-    if crop:  # 점수판 전용 판독이 있으면 그것을 쓴다 (영상 통째 판독보다 정확)
-        readings, _ = from_snapshot({"scoreboard": crop})
+    # 점수판 전용 판독·Whisper 해설 우선 — 경기 분석(build_video_feed)과 같은 함수
+    readings, cues, _ = observe(snap)
     readings = consistent(readings)
     if CLIP_MODE == "endpoints":
         readings = endpoints(readings)
@@ -333,31 +327,6 @@ def analyze_clip(
     for key, t in (("events", "t_start"), ("scoreboard", "t"), ("speech", "t")):
         snap[key].sort(key=lambda x: x[t])
     return snap
-
-
-def build_reader(args: argparse.Namespace) -> Any:
-    import os
-
-    from app.adapters.video.cosmos import DEFAULT_BASE_URL, DEFAULT_MODEL
-    from app.adapters.video.scorebug_reader import ScorebugReader
-
-    return ScorebugReader(
-        os.getenv("NVIDIA_API_KEY", "").strip(),
-        args.base_url or DEFAULT_BASE_URL,
-        args.model or DEFAULT_MODEL,
-        max_reads=args.max_reads,
-        ffmpeg=find_tool("ffmpeg", args.ffmpeg),
-    )
-
-
-def build_transcriber(args: argparse.Namespace) -> Any:
-    import os
-
-    from app.adapters.video.speech_asr import WhisperTranscriber
-
-    return WhisperTranscriber(
-        os.getenv("NVIDIA_API_KEY", "").strip(), ffmpeg=find_tool("ffmpeg", args.ffmpeg)
-    )
 
 
 def main() -> None:
