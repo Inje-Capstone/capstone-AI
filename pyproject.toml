@@ -20,6 +20,7 @@ asr = [
 pose = [
     "rtmlib>=0.0.13",
     "onnxruntime>=1.17",
+    "av>=12",  # 프레임 읽기 — 없으면 OpenCV로 읽어 느리다 (adapters/video/frames.py)
 ]
 dev = [
     "pytest>=8.0",
