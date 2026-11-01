@@ -6,7 +6,7 @@ from typing import Any, Optional
 from fastapi import Query
 
 from app.adapters.diagnostic.seed import load_diagnostic
-from app.adapters.glossary.seed import load_glossary
+from app.adapters.glossary.seed import load_glossary, load_rules
 from app.adapters.llm import build_llm_client
 from app.adapters.relay.fixture import FixtureRelaySource
 from app.adapters.stats.fixture import FixtureStatsSource
@@ -21,6 +21,7 @@ from app.services.live_service import LiveRelaySource
 from app.services.matchup_service import MatchupService
 from app.services.moment_service import MomentService
 from app.services.quiz_service import QuizService
+from app.services.rule_service import RuleService
 
 
 @lru_cache(maxsize=1)
@@ -73,6 +74,11 @@ def get_glossary_service() -> GlossaryService:
 
 
 @lru_cache(maxsize=1)
+def get_rule_service() -> RuleService:
+    return RuleService(load_rules())
+
+
+@lru_cache(maxsize=1)
 def get_quiz_service() -> QuizService:
     return QuizService(load_glossary(), build_llm_client())
 
@@ -102,6 +108,7 @@ def reset_services() -> None:
         get_chat_service,
         get_matchup_service,
         get_glossary_service,
+        get_rule_service,
         get_video_notes,
         get_quiz_service,
         get_moment_service,

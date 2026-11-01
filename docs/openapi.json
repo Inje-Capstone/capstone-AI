@@ -1167,6 +1167,61 @@
         "title": "QuizOut",
         "type": "object"
       },
+      "RuleOut": {
+        "description": "S5 규칙 탭 1행. 규칙 한 줄이 곧 한 항목이다 — 용어 사전과 합치지 않는다.",
+        "properties": {
+          "action": {
+            "description": "상황",
+            "title": "Action",
+            "type": "string"
+          },
+          "category_label": {
+            "description": "사전 화면의 버튼 — 기본 룰, 구종 · 투구, 심판 콜 등",
+            "title": "Category Label",
+            "type": "string"
+          },
+          "chapter": {
+            "description": "규칙 목록의 장",
+            "title": "Chapter",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "rule_ref": {
+            "description": "근거 조항 — 조항이 없는 규칙은 빈 값",
+            "title": "Rule Ref",
+            "type": "string"
+          },
+          "ruling": {
+            "description": "판정",
+            "title": "Ruling",
+            "type": "string"
+          },
+          "term_id": {
+            "description": "관련 용어 — 용어 사전 딥링크 키",
+            "title": "Term Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "chapter",
+          "category_label",
+          "rule_ref",
+          "action",
+          "ruling",
+          "term_id"
+        ],
+        "title": "RuleOut",
+        "type": "object"
+      },
       "StateOut": {
         "description": "S4 좌측 하단 스코어보드.",
         "properties": {
@@ -2846,6 +2901,77 @@
         "summary": "오늘 본 룰 퀴즈 (하루 5문제)",
         "tags": [
           "quiz"
+        ]
+      }
+    },
+    "/api/rules": {
+      "get": {
+        "operationId": "list_rules_api_rules_get",
+        "parameters": [
+          {
+            "description": "기본 룰 | 구종 | 전술 · 기록 | 심판 콜 | 응원 문화 (생략: 전체)",
+            "in": "query",
+            "name": "category",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "기본 룰 | 구종 | 전술 · 기록 | 심판 콜 | 응원 문화 (생략: 전체)",
+              "title": "Category"
+            }
+          },
+          {
+            "description": "name: 가나다 오름차순(기본) | -name: 가나다 내림차순",
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "name",
+              "description": "name: 가나다 오름차순(기본) | -name: 가나다 내림차순",
+              "enum": [
+                "name",
+                "-name"
+              ],
+              "title": "Sort",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RuleOut"
+                  },
+                  "title": "Response List Rules Api Rules Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "규칙 목록 — 버튼별, 이름순 (S5)",
+        "tags": [
+          "rules"
         ]
       }
     },

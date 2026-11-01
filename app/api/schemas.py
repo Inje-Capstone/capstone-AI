@@ -206,6 +206,35 @@ class TermOut(TermSummaryOut):
     related: list[TermSummaryOut]
 
 
+NO_CLAUSE = "—"  # 카탈로그에서 조항이 없는 규칙(전술·응원)의 표시
+
+
+class RuleOut(BaseModel):
+    """S5 규칙 탭 1행. 규칙 한 줄이 곧 한 항목이다 — 용어 사전과 합치지 않는다."""
+
+    id: str
+    name: str
+    chapter: str = Field(description="규칙 목록의 장")
+    category_label: str = Field(description="사전 화면의 버튼 — 기본 룰, 구종 · 투구, 심판 콜 등")
+    rule_ref: str = Field(description="근거 조항 — 조항이 없는 규칙은 빈 값")
+    action: str = Field(description="상황")
+    ruling: str = Field(description="판정")
+    term_id: str = Field(description="관련 용어 — 용어 사전 딥링크 키")
+
+    @classmethod
+    def of(cls, rule: dict[str, Any], category_label: str) -> "RuleOut":
+        return cls(
+            id=rule["id"],
+            name=rule["name"],
+            chapter=rule["chapter"],
+            category_label=category_label,
+            rule_ref="" if rule["rule"] == NO_CLAUSE else rule["rule"],
+            action=rule["action"],
+            ruling=rule["ruling"],
+            term_id=rule["glossary"],
+        )
+
+
 class TodayRuleOut(BaseModel):
     """오늘 이 경기에서 카드로 본 룰 1개 — 시청 종료 팝업·퀴즈 재료."""
 

@@ -82,6 +82,7 @@ curl localhost:8000/health
 | `POST /api/games/{id}/chat` | S4 하단 챗봇 |
 | `GET /api/glossary?q=&category=` | S5 용어 사전 목록·검색 |
 | `GET /api/glossary/{term_id}?level=` | S5 용어 상세 (카드 `term_id` 딥링크) |
+| `GET /api/rules?category=&sort=` | S5 규칙 목록 — 버튼별, 이름 오름·내림차순 (용어와 따로) |
 | `GET /api/games/{id}/today-rules?t=&level=&category=` | 시청 종료 팝업 — 이 경기에서 카드로 본 룰 (LLM 호출 없음) |
 | `POST /api/quiz` | 오늘 본 룰 퀴즈 (하루 5문제). `term_ids`는 백엔드가 그날 본 것을 모아 넘기고, `seed`(사용자ID+날짜)로 같은 날 같은 문제 |
 | `GET /api/games/{id}/moment?t=&level=` | S4 방금 장면 한 줄 요약 (Haiku 4.5, 모델 없으면 중계 원문 조립 — 항상 응답) |
