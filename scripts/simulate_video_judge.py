@@ -27,8 +27,14 @@ from app.domain.detectors import detect  # noqa: E402
 from app.domain.game_state import KIND_SUB, states_by_event  # noqa: E402
 from app.domain.grading import GRADED_RULES, grade  # noqa: E402
 from app.domain.models import GameFeed, RelayEvent  # noqa: E402
-from app.domain.scorebug import Reading  # noqa: E402
-from app.domain.video_judge import Cue, judge, to_relay_events  # noqa: E402
+from app.domain.scorebug import Reading, stabilize  # noqa: E402
+from app.domain.video_judge import (  # noqa: E402
+    Cue,
+    judge,
+    merge_states,
+    state_events,
+    to_relay_events,
+)
 
 # 중계 문장 키워드 → (장면 단서, 해설 키워드)
 _TEXT_CUES = (
@@ -49,9 +55,13 @@ _TEXT_CUES = (
 
 
 def perfect_eye(
-    events: Sequence[RelayEvent], away: str, home: str
+    events: Sequence[RelayEvent], away: str, home: str, reads: int = 2
 ) -> tuple[list[Reading], list[Cue]]:
-    """중계 → 점수판 판독(이벤트마다 두 번 — 안정화 통과) + 단서."""
+    """중계 → 점수판 판독(이벤트마다 `reads`번) + 단서.
+
+    영상 통째 판독은 같은 점수판을 여러 번 읽는다(2). 점수판 전용 판독(scorebug_reader)은
+    점수판이 보이는 구간마다 한 장만 읽는다 — 상태마다 한 번이 최악의 경우다(1).
+    """
     readings: list[Reading] = []
     cues: list[Cue] = []
     last_t = -1.0
@@ -64,7 +74,7 @@ def perfect_eye(
                     s.bases, s.away_score, s.home_score)
         if s.outs >= 3:  # 경기 끝 3아웃 — 전광판엔 3아웃이 잠깐 보인다
             r = Reading(r.t, r.inning, r.half, 0, 0, 3, r.bases, r.away, r.home)
-        readings += [r, Reading(r.t + 0.1, *r.key())]
+        readings += [r] + [Reading(r.t + 0.1 * k, *r.key()) for k in range(1, reads)]
         if e.kind == "pitch":
             res = e.detail.get("result")
             if res == "in_play":
@@ -97,21 +107,31 @@ def add_noise(
     return noisy, kept
 
 
-def video_feed(feed: GameFeed, readings: list[Reading], cues: list[Cue]) -> GameFeed:
-    events = to_relay_events(judge(readings, cues))
+def video_feed(
+    feed: GameFeed, readings: list[Reading], cues: list[Cue], min_repeat: int = 2
+) -> GameFeed:
+    # 서비스 피드와 같게 — 판정 이벤트 + 점수판 상태(build_video_feed)
+    events = merge_states(
+        to_relay_events(judge(readings, cues, min_repeat=min_repeat)),
+        state_events(stabilize(readings, min_repeat)),
+    )
     meta = feed.meta.model_copy(update={"id": feed.meta.id + "-video"})
     return GameFeed(meta=meta, events=events)
 
 
-def run(game_ids: Sequence[str], cue_drop: float, misread: float, seed: int) -> dict:
+def run(
+    game_ids: Sequence[str], cue_drop: float, misread: float, seed: int,
+    reads: int = 2, min_repeat: int = 2,
+) -> dict:
     source = FixtureRelaySource(get_settings().truth_dir)
     rng = random.Random(seed)
     totals: dict[str, list[int]] = {r: [0, 0, 0] for r in GRADED_RULES}
     for gid in game_ids:
         feed = source.load(gid)
-        readings, cues = perfect_eye(feed.events, feed.meta.away_team, feed.meta.home_team)
+        readings, cues = perfect_eye(
+            feed.events, feed.meta.away_team, feed.meta.home_team, reads)
         readings, cues = add_noise(readings, cues, cue_drop, misread, rng)
-        vfeed = video_feed(feed, readings, cues)
+        vfeed = video_feed(feed, readings, cues, min_repeat)
         for s in grade(detect(feed), detect(vfeed), offset=0, tolerance=30):
             totals[s.rule_id][0] += s.expected
             totals[s.rule_id][1] += s.found
@@ -126,11 +146,14 @@ def main() -> int:
     parser.add_argument("--cue-drop", type=float, default=0.0, help="단서 누락 비율 (0~1)")
     parser.add_argument("--misread", type=float, default=0.0, help="점수판 오독 비율 (0~1)")
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--reads", type=int, default=2,
+                        help="상태마다 판독 수 (점수판 전용 판독은 최악 1)")
+    parser.add_argument("--min-repeat", type=int, default=2, help="judge의 안정화 기준")
     args = parser.parse_args()
 
-    totals = run(args.games, args.cue_drop, args.misread, args.seed)
+    totals = run(args.games, args.cue_drop, args.misread, args.seed, args.reads, args.min_repeat)
     print(f"경기 {len(args.games)}개 · 단서 누락 {args.cue_drop:.0%}"
-          f" · 점수판 오독 {args.misread:.0%}")
+          f" · 점수판 오독 {args.misread:.0%} · 판독 {args.reads}번 · 안정화 {args.min_repeat}")
     header = ("규칙", "정답", "판정", "일치", "재현율", "정밀도")
     print(f"{header[0]:<22}" + "".join(f"{h:>5}" for h in header[1:4])
           + "".join(f"{h:>8}" for h in header[4:]))

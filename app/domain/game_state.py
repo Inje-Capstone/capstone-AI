@@ -13,6 +13,7 @@ from app.domain.models import (
     KIND_CALL,
     KIND_PITCH,
     KIND_RESULT,
+    KIND_STATE,
     KIND_STEAL,
     GameState,
     RelayEvent,
@@ -68,6 +69,8 @@ class GameSim:
             self._apply_delta(event)
             self._reset_count()
             self._check_half_end()
+        elif event.kind == KIND_STATE:
+            self._apply_state(event)
         # 알 수 없는 kind는 무시한다 — 어댑터가 새 이벤트를 흘려도 엔진이 죽지 않게.
 
         self.state.last_event_id = event.id
@@ -144,6 +147,18 @@ class GameSim:
             self.state.bases = bases_from_list(detail["bases_after"])
 
         self._check_walk_off()
+
+    def _apply_state(self, event: RelayEvent) -> None:
+        """영상 점수판에 보인 그대로 맞춘다 — 녹화가 경기 중간에서 시작해도 점수·아웃·주자가 맞게.
+
+        판정 이벤트는 변화량만 싣는다. 시작 상태가 없으면 녹화 첫 장면의 2아웃·주자 1·2루가
+        0아웃·주자 없음으로 보였다(리허설 2026-10-28). 판정·경기 종료는 건드리지 않는다.
+        """
+        d = event.detail
+        self.state.balls, self.state.strikes = int(d["balls"]), int(d["strikes"])
+        self.state.outs = int(d["outs"])
+        self.state.bases = bases_from_list(d.get("bases") or [])
+        self.state.away_score, self.state.home_score = int(d["away"]), int(d["home"])
 
     def _reset_count(self) -> None:
         self.state.balls = 0

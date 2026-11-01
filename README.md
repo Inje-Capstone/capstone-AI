@@ -190,8 +190,8 @@ data/
 
 ```bash
 # .env에 NVIDIA_API_KEY (build.nvidia.com) — 서버 런타임은 쓰지 않는다
-.venv/bin/python scripts/analyze_video.py 20260920HHLG02026 game.mp4 --limit 3   # 앞 3분만 시험
-.venv/bin/python scripts/analyze_video.py 20260920HHLG02026 game.mp4            # 전체 (재실행하면 이어서)
+.venv/bin/python scripts/analyze_video.py 20260920HHLG02026 game.mp4 --scorebug --asr --limit 3  # 앞 3분만 시험
+.venv/bin/python scripts/analyze_video.py 20260920HHLG02026 game.mp4 --scorebug --asr  # 전체 (재실행하면 이어서)
 .venv/bin/python scripts/build_video_feed.py 20260920HHLG02026                  # 판정 → data/fixtures/video_{id}.json
 .venv/bin/python scripts/grade_video.py 20260920HHLG02026                       # 문자중계로 채점
 ```
@@ -199,6 +199,10 @@ data/
 1. **분석**(`analyze_video.py`): 60초 청크(360p, 해설 음성 유지)를 VLM에 보내 세 가지를 받는다 —
    **점수판 판독**(이닝·볼카운트·아웃·주자·점수), **장면 단서**(슬라이딩·포수 놓침·담장 넘김…),
    **해설 키워드**("보크", "도루"…). VLM은 판정하지 않는다. `data/video/{id}.json`에 청크 단위로 누적.
+   `--scorebug`(점수판만 잘라 8초마다)·`--asr`(Whisper 해설)을 주면 판정은 그쪽을 쓴다 —
+   클립 평가(63%)와 같은 입력(`video_judge.observe`). VLM 통째 판독·받아쓰기보다 정확했다.
+   주자 다이아몬드·아웃 점은 VLM이 못 읽어(리허설 0~1/6) 중계사별 위치 파일로 화소 색을 읽는다
+   (`--layout data/scorebug_layouts/sbs_sports.json`, 7/7 — `scripts/scorebug_layout.py`로 확인).
 2. **판정**(`app/domain/video_judge.py`): 점수판 변화의 모양 × 단서로 보크·도루·도루 실패·폭투·볼넷·사구·
    낫아웃·인필드플라이·희생플라이·병살·홈런·투수 교체를 가른다. 확신도와 근거를 남기고, 확신이 모자라면
    상태만 반영하고 종류는 붙이지 않는다(카드 안 뜸). 결과는 기존 엔진(GameSim → 감지 규칙 → 카드·챗봇·퀴즈)이
@@ -208,6 +212,7 @@ data/
 
 판정 로직 상한(`scripts/simulate_video_judge.py`, 실경기 중계로 "완벽한 눈" 판독·단서를 합성):
 실경기 3개 38/38 일치, 단서 30% 누락 + 점수판 10% 오독에서 재현율 92%·정밀도 97%.
+점수판 전용 판독처럼 상태마다 한 장만 읽으면(`--reads 1 --min-repeat 1`) 같은 조건에서 79~82%.
 **실제 정확도는 경기 영상 실측으로만 말한다.** 구종(결정구 변화구 카드)은 영상 판정 범위 밖이다.
 
 ### 관절로 직접 재는 동작(판단 신호)

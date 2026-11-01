@@ -22,7 +22,13 @@ from app.domain.enrich import enrich
 from app.domain.game_state import replay
 from app.domain.models import GameFeed, GameMeta, RelayEvent, Situation
 from app.domain.scorebug import stabilize
-from app.domain.video_judge import from_snapshot, judge, to_relay_events
+from app.domain.video_judge import (
+    from_snapshot,
+    judge,
+    merge_states,
+    state_events,
+    to_relay_events,
+)
 from app.domain.video_sync import Anchor, estimate_offset
 
 
@@ -75,8 +81,11 @@ class LiveGame:
                                         "speech": self.speech})
         events = to_relay_events(judge(readings, cues))
         self._estimate_offset()
+        stable = stabilize(readings)
         if self.offset is not None and self.data_events:
-            events = enrich(events, self.data_events, self.offset, stabilize(readings))
+            events = enrich(events, self.data_events, self.offset, stable)
+        # 실시간은 늘 경기 중간에서 시작한다 — 스코어보드는 점수판 그대로
+        events = merge_states(events, state_events(stable))
         last = max((r.t for r in readings), default=0)
         meta = self.meta.model_copy(update={"video_duration_sec": int(last)})
         self.feed = GameFeed(meta=meta, events=events)

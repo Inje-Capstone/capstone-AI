@@ -12,6 +12,7 @@ from app.domain.models import GameFeed, GameMeta
 from app.domain.scorebug import (
     Reading,
     advanced_all_one_base,
+    possible_step,
     runner_removed,
     single_runner_advance,
     stabilize,
@@ -24,6 +25,7 @@ from app.domain.video_judge import (
     judge_calls,
     judge_from_cues,
     judge_transition,
+    observe,
     to_relay_events,
 )
 
@@ -62,6 +64,43 @@ def test_stabilize_drops_single_frame_misreads_and_impossible_values():
 def test_stabilize_rejects_score_going_down_and_inning_going_back():
     readings = twice(R(0, away=2), R(10, away=1), R(20, inning=2), R(30, away=3))
     assert [(r.away, r.inning) for r in stabilize(readings)] == [(2, 3), (3, 3)]
+
+
+def test_stabilize_never_lets_outs_go_down_within_a_half():
+    """같은 반 이닝에서 아웃이 줄면 오독 — 받아들이면 다음 판독에서 아웃을 또 센다."""
+    readings = twice(R(0, outs=1), R(10, outs=0, balls=1), R(20, outs=2))
+    assert [r.outs for r in stabilize(readings)] == [1, 2]
+
+
+def test_possible_step_checks_runner_out_run_bookkeeping():
+    on1 = (True, False, False)
+    assert possible_step(R(0), R(1, strikes=1))  # 투구 하나
+    assert possible_step(R(0, strikes=2), R(1, outs=1))  # 삼진 — 새 타자
+    assert possible_step(R(0, balls=3), R(1, bases=on1))  # 볼넷 — 타자가 주자로
+    assert possible_step(R(0, bases=on1), R(1, bases=(False, True, False)))  # 도루
+    assert not possible_step(R(0), R(1, outs=2, balls=1))  # 아웃 둘이 갑자기
+    assert not possible_step(R(0, strikes=2), R(1))  # 새 타자인데 아무 일도 없음
+    assert not possible_step(R(0, bases=on1), R(1))  # 주자가 그냥 사라짐
+    assert possible_step(R(0, outs=2), R(1, half="bot"))  # 반 이닝이 바뀌면 순서만
+
+
+def test_single_read_spike_is_dropped_and_replay_never_overflows_outs():
+    """점수판 전용 판독은 상태마다 한 장 — 튄 한 장이 아웃을 두 번 세게 하면 경기 상태가 깨졌다.
+
+    시뮬레이션(scripts/simulate_video_judge.py --reads 1 --min-repeat 1 --misread 0.1) 실측:
+    GameStateError '아웃 카운트가 3을 넘는다'. 앞뒤와 수지가 안 맞는 한 장을 버린다.
+    """
+    readings = [
+        R(0),
+        R(10, outs=1),
+        R(20, outs=2),
+        R(30, balls=1),  # 튄 판독 — 2아웃에서 0아웃으로
+        R(40, outs=2, strikes=1),  # 예전엔 여기서 아웃 둘을 또 셌다 (2 + 2)
+        R(50, half="bot"),
+    ]
+    assert [r.outs for r in stabilize(readings, min_repeat=1)] == [0, 1, 2, 2, 0]
+    events = to_relay_events(judge(readings, [], min_repeat=1))
+    replay(events, "A", "H")  # 예전엔 GameStateError
 
 
 def test_half_change_counts_remaining_outs_and_top_to_bot_is_forward():
@@ -364,6 +403,80 @@ def test_build_video_feed_from_snapshot_serves_through_engine(tmp_path):
     steal = next(s for s in situations if s.rule_id == "steal")
     assert any(r.startswith("영상 근거:") and "slide" in r for r in steal.reasons)
     assert "영상 판정" in steal.reasons[0]
+
+
+def test_full_game_feed_prefers_crop_scoreboard_and_whisper_like_clip_eval():
+    """경기 분석도 클립 평가(63%)와 같은 입력 — 점수판 전용 판독(상태마다 한 장) · Whisper 해설.
+
+    VLM은 해설을 '보크'로 지어냈고(실측 유형), 주자 한 명 한 베이스는 보크 모양과도 같다.
+    Whisper가 들은 '도루'가 이겨야 한다. 화면 자막은 Whisper가 있어도 남는다.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "build_video_feed", ROOT / "scripts" / "build_video_feed.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    def read(t, **kw):
+        base = {"t": t, "inning": 1, "half": "top", "balls": 0, "strikes": 0, "outs": 0,
+                "bases": [], "away": 0, "home": 0}
+        return {**base, **kw}
+
+    snap = {
+        "provider": "fake", "model": "fake", "prompt_version": "video-scoreboard-v2",
+        "scoreboard": [read(5, inning=7, outs=2)],  # 영상 통째 판독 — 틀렸고 한 번뿐
+        "scorebug": {"scoreboard": [read(10), read(40, balls=3), read(70, bases=[1]),
+                                    read(100, bases=[2])]},
+        "events": [{"t_start": 95, "t_end": 96, "event_type": "slide", "description": "슬라이딩"}],
+        "speech": [{"t": 97, "text": "보크입니다"}, {"t": 98, "text": "[자막] 도루 성공"}],
+        "asr": {"segments": [{"t": 90, "text": "뛰었습니다 도루!"}, {"t": 120, "text": ""}]},
+    }
+    readings, cues, min_repeat = observe(snap)
+    assert min_repeat == 1 and [r.t for r in readings] == [10, 40, 70, 100]
+    # 경기 영상 방식(N초마다)은 같은 상태를 여러 번 읽었다 → 반복으로 거른다
+    periodic = {**snap, "scorebug": {**snap["scorebug"], "every": 8}}
+    assert observe(periodic)[2] == 2
+    speech = [c.text for c in cues if c.kind == "speech"]
+    assert speech == ["뛰었습니다 도루!", "[자막] 도루 성공"]
+
+    feed = mod.build("G1", snap, {"away_team": "A", "home_team": "H"})
+    a = feed["analysis"]
+    assert (a["scoreboard_source"], a["speech_source"]) == ("crop", "whisper")
+    assert a["judgments"] == {"walk": 1, "steal": 1}
+    # 프론트에 넘길 대표 시점 후보 — 카드가 뜰 장면만, 영상 타임코드로
+    assert [m.split(" (")[0] for m in mod.demo_moments(feed)] == ["01:10 walk", "01:40 steal"]
+
+
+def test_feed_scoreboard_matches_broadcast_when_recording_starts_mid_game():
+    """녹화가 5회말 2아웃 1·2루 3:2에서 시작해도 화면 스코어보드가 그대로 — 예전엔 0:0 0아웃."""
+    from app.domain.models import RelayEvent
+
+    spec = importlib.util.spec_from_file_location(
+        "build_video_feed", ROOT / "scripts" / "build_video_feed.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    def read(t, **kw):
+        base = {"t": t, "inning": 5, "half": "bot", "balls": 1, "strikes": 1, "outs": 2,
+                "bases": [1, 2], "away": 3, "home": 2}
+        return {**base, **kw}
+
+    snap = {  # 경기 영상 방식(8초마다) — 상태마다 두 번 이상 읽힘
+        "provider": "fake", "model": "fake", "prompt_version": "v",
+        "scorebug": {"every": 8, "scoreboard": [
+            read(10), read(18), read(26, strikes=2), read(34, strikes=2),
+            read(42, balls=0, strikes=0, bases=[2, 3]), read(50, balls=0, strikes=0, bases=[2, 3]),
+        ]},
+    }
+    feed = mod.build("G1", snap, {"away_team": "A", "home_team": "H"})
+    events = [RelayEvent(**e) for e in feed["events"]]
+    at = {t: replay(events, "A", "H", until_t=t) for t in (20, 40)}
+    assert (at[20].away_score, at[20].home_score, at[20].outs) == (3, 2, 2)
+    assert (at[20].inning, at[20].half, at[20].bases) == (5, "bot", (True, True, False))
+    assert (at[40].balls, at[40].strikes) == (1, 2)
+    final = replay(events, "A", "H")
+    assert final.bases == (False, True, True) and final.outs == 2
 
 
 def test_pose_slide_reaches_the_card_as_evidence(tmp_path):

@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from app.domain.balk_judge import BALK_WORDS, TYPE_LABELS, speech_type
-from app.domain.models import RelayEvent
+from app.domain.models import KIND_STATE, RelayEvent
 from app.domain.scorebug import (
     Reading,
     Transition,
@@ -564,6 +564,29 @@ def from_snapshot(snap: dict) -> tuple[list[Reading], list[Cue]]:
     return readings, sorted(cues + pose_cues(snap.get("pose") or {}), key=lambda c: c.t)
 
 
+def observe(snap: dict) -> tuple[list[Reading], list[Cue], int]:
+    """스냅샷 → (점수판 판독, 단서, 안정화 기준). 클립 평가와 경기 분석이 같은 입력을 쓰게 한다.
+
+    점수판 전용 판독(scorebug_reader)이 있으면 영상 통째 판독 대신 쓴다 — 더 정확하다.
+    하이라이트 방식(바뀔 때마다 한 장)은 상태마다 한 장이라 안정화 1(앞뒤와 수지가 안 맞는 한 장은
+    stabilize가 버린다), 경기 영상 방식(`every`초마다)은 같은 상태를 여러 번 읽어 안정화 2.
+    Whisper 받아쓰기가 있으면 VLM 받아쓰기 대신 쓴다 — VLM은 한국어 해설을 지어냈다(실측).
+    화면 자막은 남긴다.
+    """
+    readings, cues = from_snapshot(snap)
+    asr = [s for s in (snap.get("asr") or {}).get("segments") or [] if s.get("text")]
+    if asr:
+        cues = [c for c in cues if c.kind != "speech" or c.text.startswith("[자막]")]
+        cues = sorted(
+            cues + [Cue(float(s["t"]), "speech", s["text"]) for s in asr], key=lambda c: c.t
+        )
+    crop = (snap.get("scorebug") or {}).get("scoreboard") or []
+    if crop:
+        readings, _ = from_snapshot({"scoreboard": crop})
+        return readings, cues, 2 if snap["scorebug"].get("every") else 1
+    return readings, cues, 2
+
+
 def _slide_text(s: dict) -> str:
     far = s.get("distance")
     if far is None:
@@ -619,6 +642,32 @@ def _call_extra(j: Judgment) -> dict:
 
 def _bases_list(bases: tuple) -> list[int]:
     return [n for n, on in zip((1, 2, 3), bases) if on]
+
+
+def state_events(stable: Sequence[Reading]) -> list[RelayEvent]:
+    """안정된 점수판 상태마다 그대로 — 화면 스코어보드가 중계 점수판과 같게(점수판이 뼈대다).
+
+    판정 이벤트는 변화량만 싣는다. 이것이 없으면 경기 중간에서 시작한 녹화본의 점수·아웃·주자가
+    0에서 시작하고, 볼카운트는 늘 0-0이었다. 판정이 아니라 카드·장면 요약에는 쓰이지 않는다.
+    같은 시각이면 판정 이벤트 뒤에 와야 한다 — `merge_states`.
+    """
+    out, used = [], set()
+    for r in stable:
+        n = f"st{int(round(r.t * 10))}"
+        while n in used:
+            n += "b"
+        used.add(n)
+        out.append(RelayEvent(
+            id=n, t=int(r.t), inning=r.inning, half=r.half, kind=KIND_STATE, text="점수판 (영상)",
+            detail={"balls": r.balls, "strikes": r.strikes, "outs": r.outs,
+                    "bases": _bases_list(r.bases), "away": r.away, "home": r.home},
+        ))
+    return out
+
+
+def merge_states(events: Sequence[RelayEvent], states: Sequence[RelayEvent]) -> list[RelayEvent]:
+    """판정 이벤트 + 점수판 상태 — 시각순, 같은 시각이면 상태가 뒤(판정 변화량 다음 절댓값)."""
+    return sorted([*events, *states], key=lambda e: (e.t, e.kind == KIND_STATE))
 
 
 def to_relay_events(

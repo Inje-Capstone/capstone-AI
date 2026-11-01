@@ -121,6 +121,15 @@ def test_cards_before_any_situation_are_empty_but_not_degraded(client):
     assert body["degraded"] is False  # 감지된 상황 자체가 없는 것이지 고장이 아니다
 
 
+def test_cards_filtered_out_by_profile_are_not_degraded(client):
+    """상황은 감지됐지만 이 사용자에겐 안 보이는 것(프로필이 거름)은 고장이 아니다."""
+    body = client.get(
+        f"/api/games/{GAME_ID}/cards", params={"t": BALK_T, "threshold": 2.0}
+    ).json()
+    assert body["cards"] == []
+    assert body["degraded"] is False
+
+
 def test_level_changes_the_sentence_not_just_the_selection(client):
     """개인화 실증 — 같은 상황, 같은 시점, 난이도만 다르면 문장이 달라야 한다."""
     beginner = client.get(

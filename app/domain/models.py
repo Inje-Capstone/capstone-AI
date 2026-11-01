@@ -40,6 +40,7 @@ KIND_PITCH = "pitch"  # 투구 1구
 KIND_CALL = "call"  # 심판 콜 (보크·인필드플라이·낫아웃 등)
 KIND_RESULT = "result"  # 타석 결과
 KIND_STEAL = "steal"  # 도루
+KIND_STATE = "state"  # 영상 점수판 그대로 (볼카운트·아웃·주자·점수 절댓값) — 판정 아님
 
 
 class RelayEvent(BaseModel):

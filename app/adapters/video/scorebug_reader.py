@@ -19,6 +19,7 @@ from typing import Any, Optional
 
 from app.adapters.video.base import VideoAnalyzerError, _json_payload
 from app.adapters.video.http import completion_text, post_json
+from app.adapters.video.scorebug_layout import Layout, decode, rgb_sampler
 
 # 모서리 후보 (x, y, w, h — 화면 비율)
 CORNERS = {
@@ -27,7 +28,9 @@ CORNERS = {
     "bottom_left": (0.0, 0.68, 0.45, 0.32),
     "bottom_right": (0.55, 0.68, 0.45, 0.32),
 }
+VERSION = "scorebug-crop-v1"  # 스냅샷 캐시 키 — 판독 방식·지시문을 바꾸면 올린다
 THUMB_W, THUMB_H = 96, 48
+RGB_W, RGB_H = 1280, 720  # 주자·아웃 화소 읽기용 프레임 크기 (scorebug_layout)
 PIXEL_TOL = 30  # 같은 화소로 볼 밝기 차
 MASK_MIN = 0.3  # 기준과 같은 값으로 이 비율 이상 나온 화소 = 점수판 그래픽
 MAYBE_VISIBLE = 0.55  # 기준 화면과 이만큼 닮으면 점수판이 보일 수 있다 (배경이 바뀌어도)
@@ -46,6 +49,23 @@ READ_PROMPT = (
     "Korean broadcasts: ▲ or 초 = top, ▼ or 말 = bottom; the count is balls-strikes (e.g. 3-1); "
     "outs are filled dots; occupied bases are highlighted squares in the diamond. MLB: TOP/BOT or "
     "arrows, '1 OUT', count like 2-2. The away team is listed first. "
+    'If no score bug: {"visible": false}.'
+)
+READ_PROMPT_V2 = (
+    "This is an enlarged corner of a baseball TV broadcast. If a score bug is visible "
+    "(team scores, inning, ball-strike count, outs, base runners), read it. Answer JSON only: "
+    '{"visible": true|false, "inning": int, "half": "top"|"bot", "balls": int, "strikes": int, '
+    '"outs": int, "bases": [occupied bases among 1,2,3], "away": int, "home": int}. '
+    "How to read it: "
+    "INNING is the number next to the ▲/▼ arrow (▲ or 초 = top, ▼ or 말 = bottom). Ignore other "
+    "numbers such as batting order ('5. Name'), pitch counts and averages. "
+    "COUNT is balls-strikes, e.g. 1-2 means 1 ball and 2 strikes. "
+    "OUTS: Korean broadcasts show two small out dots near the count. Count only the FILLED "
+    "(solid colored) dots: both filled = 2 outs, one = 1, none (hollow or pale) = 0. "
+    "BASES: three small diamonds placed like the infield. The TOP diamond is 2nd base, the RIGHT "
+    "diamond is 1st base, the LEFT diamond is 3rd base. A solid colored diamond = runner on that "
+    "base; a white, hollow or dashed diamond = empty. Decide each diamond by its position. "
+    "The away team is listed first. MLB: TOP/BOT or arrows, '1 OUT'. "
     'If no score bug: {"visible": false}.'
 )
 
@@ -105,6 +125,36 @@ def plan_reads(thumbs: Sequence[bytes], ref: int, max_reads: int = 10) -> list[t
     return [(start, at) for start, at, _ in picks]
 
 
+def plan_periodic(
+    thumbs: Sequence[bytes], ref: int, every: float, max_reads: int = 600
+) -> list[tuple[int, int]]:
+    """긴 경기 영상 — 점수판이 보이는 동안 `every`초마다 한 장, 가렸다 다시 나타나면 바로 한 장.
+
+    리허설 실측(2026-10-28, 3분 중계): 모서리 배경(관중석)이 대부분 기준 화면과 같아 '점수판
+    그래픽' 마스크가 모서리의 94%가 됐다. 카메라가 움직일 때마다 바뀜으로 잡혀 1초마다 읽었다
+    (3분에 87번 — 경기 1시간이면 1,600번). 상태는 투구마다(15~25초) 바뀌니 일정 간격으로 읽고,
+    같은 상태가 두 번 읽혀야 믿는다(안정화 2 — 한 장 오독을 반복으로 거른다).
+    """
+    mask = graphic_mask(thumbs, ref)
+    if not mask:
+        return []
+    vis = [_match(t, thumbs[ref], mask) for t in thumbs]
+    picks: list[tuple[int, int]] = []
+    last, hidden = -1, 2
+    for i, v in enumerate(vis):
+        if v < MAYBE_VISIBLE:
+            hidden += 1
+            continue
+        if hidden >= 2 or i - last >= every:  # 2초 넘게 가려졌다 나타남 = 새 장면
+            picks.append((i, i))
+            last = i
+        hidden = 0
+    if len(picks) > max_reads:  # 상한이면 고르게 솎는다(시간순 유지)
+        step = len(picks) / max_reads
+        picks = [picks[int(k * step)] for k in range(max_reads)]
+    return picks
+
+
 def normalize_reading(raw: Any, t: float) -> Optional[dict[str, Any]]:
     if not isinstance(raw, dict) or not raw.get("visible", True):
         return None
@@ -136,10 +186,21 @@ def normalize_reading(raw: Any, t: float) -> Optional[dict[str, Any]]:
 # ── 실행 ────────────────────────────────────────────────────────────────
 class ScorebugReader:
     def __init__(
-        self, api_key: str, base_url: str, model: str, max_reads: int = 10, ffmpeg: str = "ffmpeg"
+        self,
+        api_key: str,
+        base_url: str,
+        model: str,
+        max_reads: int = 10,
+        ffmpeg: str = "ffmpeg",
+        every: Optional[float] = None,
+        layout: Optional[Layout] = None,
     ) -> None:
+        """`every`: 경기 영상이면 그 간격(초)마다 읽는다(plan_periodic). 없으면 하이라이트 방식.
+        `layout`: 중계사 점수판 위치 — 있으면 주자·아웃은 화소 색으로 읽는다(VLM이 못 읽었다).
+        """
         self.api_key, self.model, self.max_reads, self.ffmpeg = api_key, model, max_reads, ffmpeg
         self.base_url = base_url.rstrip("/")
+        self.every, self.layout = every, layout
         self.requests = 0
 
     def _ask(self, images: Sequence[bytes], text: str, max_tokens: int) -> Any:
@@ -191,7 +252,34 @@ class ScorebugReader:
             )
             return out.read_bytes()
 
-    def _thumbs(self, video: Path, corner: str) -> list[bytes]:
+    def _rgb(self, video: Path, t: float) -> bytes:
+        """원본 프레임을 RGB_W×RGB_H rgb24로 — 위치는 비율이라 크기를 고정해도 된다."""
+        return subprocess.run(
+            [
+                self.ffmpeg,
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-ss",
+                f"{t:.2f}",
+                "-i",
+                str(video),
+                "-frames:v",
+                "1",
+                "-vf",
+                f"scale={RGB_W}:{RGB_H}",
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "rgb24",
+                "-",
+            ],
+            capture_output=True,
+            check=True,
+        ).stdout
+
+    def _thumbs(self, video: Path, corner: str, start: float, duration: float) -> list[bytes]:
+        """[start, start+duration) 구간을 1초마다 — i번째 썸네일은 영상 start+i초."""
         x, y, w, h = CORNERS[corner]
         vf = f"fps=1,crop=iw*{w}:ih*{h}:iw*{x}:ih*{y},scale={THUMB_W}:{THUMB_H},format=gray"
         raw = subprocess.run(
@@ -200,6 +288,10 @@ class ScorebugReader:
                 "-hide_banner",
                 "-loglevel",
                 "error",
+                "-ss",
+                f"{start:.2f}",
+                "-t",
+                f"{duration:.2f}",
                 "-i",
                 str(video),
                 "-vf",
@@ -216,9 +308,11 @@ class ScorebugReader:
         size = THUMB_W * THUMB_H
         return [raw[i : i + size] for i in range(0, len(raw) - size + 1, size)]
 
-    def pick_corner(self, video: Path, duration: float) -> tuple[Optional[str], float]:
+    def pick_corner(
+        self, video: Path, duration: float, start: float = 0.0
+    ) -> tuple[Optional[str], float]:
         for t in (1.0, duration * 0.3, duration * 0.6):
-            t = min(max(0.0, t), max(0.0, duration - 0.5))
+            t = start + min(max(0.0, t), max(0.0, duration - 0.5))
             images = [self._frame(video, t, crop_filter(c, 2.0)) for c in CORNERS]
             answer = self._ask(images, PICK_PROMPT, 64) or {}
             try:
@@ -229,26 +323,39 @@ class ScorebugReader:
                 return list(CORNERS)[k - 1], t
         return None, 0.0
 
-    def read(self, video: Path, duration: float) -> dict[str, Any]:
-        """영상 → {"corner", "scoreboard": [판독…], "requests"}. 시각은 영상 시작 기준 초."""
+    def read(self, video: Path, duration: float, start: float = 0.0) -> dict[str, Any]:
+        """영상의 [start, start+duration) → {"corner", "scoreboard": [판독…], "requests"}.
+
+        시각은 영상 시작 기준 초. 경기 영상은 VLM이 본 구간(--start·--end·--limit)만 읽는다.
+        """
         try:
-            corner, t_ref = self.pick_corner(video, duration)
+            corner, t_ref = self.pick_corner(video, duration, start)
             if corner is None:
                 return {"corner": None, "scoreboard": [], "requests": self.requests}
-            thumbs = self._thumbs(video, corner)
+            thumbs = self._thumbs(video, corner, start, duration)
             if not thumbs:
                 return {"corner": corner, "scoreboard": [], "requests": self.requests}
-            ref = min(int(t_ref), len(thumbs) - 1)
+            ref = min(int(t_ref - start), len(thumbs) - 1)
             readings, failed = [], 0
-            for start, at in plan_reads(thumbs, ref, self.max_reads):
+            plan = (
+                plan_periodic(thumbs, ref, self.every, self.max_reads)
+                if self.every
+                else plan_reads(thumbs, ref, self.max_reads)
+            )
+            for first, at in plan:
                 try:  # 한 장 실패(503 등)로 클립 전체를 버리지 않는다
                     answer = self._ask(
-                        [self._frame(video, at + 0.5, crop_filter(corner))], READ_PROMPT, 256
+                        [self._frame(video, start + at + 0.5, crop_filter(corner))],
+                        READ_PROMPT,
+                        256,
                     )
                 except VideoAnalyzerError:
                     failed += 1
                     continue
-                r = normalize_reading(answer, float(start))
+                r = normalize_reading(answer, start + first)
+                if r and self.layout is not None:
+                    px = self._rgb(video, start + at + 0.5)
+                    r["bases"], r["outs"] = decode(self.layout, rgb_sampler(px, RGB_W, RGB_H))
                 if r:
                     readings.append(r)
         except (subprocess.CalledProcessError, VideoAnalyzerError) as exc:
@@ -258,4 +365,6 @@ class ScorebugReader:
             "scoreboard": readings,
             "requests": self.requests,
             "failed_reads": failed,
+            "every": self.every,  # 있으면 같은 상태를 여러 번 읽었다 → 안정화 2 (observe)
+            "layout": self.layout.name if self.layout else None,
         }

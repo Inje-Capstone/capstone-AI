@@ -315,3 +315,26 @@ def test_prompt_v3_reads_captions_and_does_not_list_keywords():
     analysis = parse_analysis(text, clip, "p", "m")
     assert [s["text"] for s in analysis.speech] == ["와!", "[자막] 삼중살!"]
     assert analysis.speech[1]["t"] == 105.0
+
+
+def test_dedicated_pass_runs_once_per_span_and_keeps_snapshot_on_failure():
+    """점수판 전용 판독·Whisper는 구간마다 한 번 — 다시 돌려도 크레딧을 또 쓰지 않는다."""
+    calls = []
+
+    def read(start, length):
+        calls.append((start, length))
+        return {"scoreboard": [{"t": start}]}
+
+    snap: dict = {}
+    assert analyze_video.dedicated_pass(snap, "scorebug", "v1", (0.0, 180.0), read)
+    assert analyze_video.dedicated_pass(snap, "scorebug", "v1", (0.0, 180.0), read)
+    assert calls == [(0.0, 180.0)] and snap["scorebug"]["span"] == [0.0, 180.0]
+    # --limit로 시험한 뒤 전체를 돌리면 구간이 달라 다시 읽는다
+    assert analyze_video.dedicated_pass(snap, "scorebug", "v1", (0.0, 600.0), read)
+    assert calls[-1] == (0.0, 600.0)
+
+    def broken(start, length):
+        raise VideoAnalyzerError("503")
+
+    assert not analyze_video.dedicated_pass(snap, "scorebug", "v2", (0.0, 600.0), broken)
+    assert snap["scorebug"]["version"] == "v1"  # 실패해도 이전 판독은 남는다

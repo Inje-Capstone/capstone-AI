@@ -64,22 +64,48 @@ def _plausible(r: Reading) -> bool:
     )
 
 
+def possible_step(a: Reading, b: Reading) -> bool:
+    """점수판이 a에서 b로 한 번에 바뀔 수 있나 — 주자·아웃·득점 수지가 맞나.
+
+    같은 반 이닝에서 아웃은 줄지 않고, 주자는 아웃·득점 없이 사라지지 않으며, 늘어도 타자
+    한 명까지다. 볼카운트가 줄었으면(새 타자) 타석 하나가 끝난 것 — 타자 한 명이 주자·아웃·
+    득점 중 하나가 됐어야 한다. 반 이닝이 바뀌면 순서만 본다.
+    """
+    if b.away < a.away or b.home < a.home:
+        return False
+    if _half_order(b) != _half_order(a):
+        return _half_order(b) > _half_order(a)
+    if b.outs < a.outs:
+        return False
+    after = b.runners() + (b.outs - a.outs) + (b.away - a.away) + (b.home - a.home)
+    if b.balls < a.balls or b.strikes < a.strikes:
+        return after == a.runners() + 1
+    return a.runners() <= after <= a.runners() + 1
+
+
 def stabilize(readings: Sequence[Reading], min_repeat: int = 2) -> list[Reading]:
     """튀는 판독을 걸러 낸 안정 상태 열. 각 상태의 첫 등장 판독을 돌려준다.
 
     VLM은 한두 프레임을 잘못 읽는다. 같은 상태가 `min_repeat`번 연속 보여야 인정한다.
     물리적으로 불가능한 값(4볼·3스트라이크 표시, 음수)은 먼저 버린다.
     점수는 줄어들 수 없다 — 점수가 줄어든 판독은 오독으로 본다.
+    같은 반 이닝에서 아웃도 줄 수 없다 — 받아들이면 다음 판독에서 아웃을 또 세어 경기 상태가
+    3아웃을 넘는다(시뮬레이션 실측).
+
+    `min_repeat` 1(점수판 전용 판독 — 상태마다 한 장)은 반복으로 거를 수 없어, 앞뒤 판독과
+    수지가 안 맞는 한 장을 버린다: 앞→뒤는 가능한데 앞→이것 또는 이것→뒤가 불가능할 때.
     """
     clean = [r for r in sorted(readings, key=lambda r: r.t) if _plausible(r)]
+    runs: list[tuple[Reading, int]] = []
+    for r in clean:
+        if runs and runs[-1][0].key() == r.key():
+            runs[-1] = (runs[-1][0], runs[-1][1] + 1)
+        else:
+            runs.append((r, 1))
+    if min_repeat <= 1:
+        runs = _drop_spikes(runs)
     stable: list[Reading] = []
-    i = 0
-    while i < len(clean):
-        j = i
-        while j + 1 < len(clean) and clean[j + 1].key() == clean[i].key():
-            j += 1
-        run = j - i + 1
-        candidate = clean[i]
+    for candidate, run in runs:
         accepted = run >= min_repeat
         if accepted and stable:
             prev = stable[-1]
@@ -89,10 +115,22 @@ def stabilize(readings: Sequence[Reading], min_repeat: int = 2) -> list[Reading]
                 accepted = False
             elif _half_order(candidate) < _half_order(prev):  # 이닝은 되돌아가지 않는다
                 accepted = False
+            elif _half_order(candidate) == _half_order(prev) and candidate.outs < prev.outs:
+                accepted = False
         if accepted:
             stable.append(candidate)
-        i = j + 1
     return stable
+
+
+def _drop_spikes(runs: list[tuple[Reading, int]]) -> list[tuple[Reading, int]]:
+    out: list[tuple[Reading, int]] = []
+    for i, (r, n) in enumerate(runs):
+        if out and i + 1 < len(runs):
+            a, c = out[-1][0], runs[i + 1][0]
+            if possible_step(a, c) and not (possible_step(a, r) and possible_step(r, c)):
+                continue
+        out.append((r, n))
+    return out
 
 
 def _half_order(r: Reading) -> tuple[int, int]:
