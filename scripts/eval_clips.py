@@ -51,8 +51,10 @@ from app.domain.video_judge import (  # noqa: E402
     POSE_TAG,
     Cue,
     judge,
+    judge_checked,
     judge_from_cues,
     observe,
+    split_cues,
 )
 
 LABELS = ROOT / "data" / "clip_eval" / "labels.json"
@@ -168,6 +170,43 @@ def screen_only(snap: dict[str, Any]) -> dict[str, Any]:
 
 
 ABLATIONS = (("화면 + 해설", None), ("해설만", commentary_only), ("화면만", screen_only))
+CHECK_LABELS = (("confirmed", "영상·해설 일치"), ("video_only", "영상만(해설 말 없음)"),
+                ("refined", "해설이 종류를 댐"), ("speech_only", "해설뿐(영상 판정 없음)"),
+                ("conflict", "불일치 — 카드 보류"))
+
+
+def check_rows(pairs: list[tuple[dict[str, Any], dict[str, Any]]]) -> dict[str, list[str]]:
+    """영상 먼저 판정 → 해설 대조. 정답이 어떤 대조 결과로 나왔나.
+
+    점수판 전이 판정(`judge_checked`)과, 점수판으로 못 가린 클립의 단서 대체 판정(`cue:` 앞머리)을
+    가른다. 단서 대체는 서비스 경로가 아니라 같은 방식의 대조를 `_cue_check`에서 흉내 낸 값이다.
+    """
+    keys = [f"{way}{key}" for key, _ in CHECK_LABELS for way in ("", "cue:")]
+    rows: dict[str, list[str]] = {key: [] for key in keys}
+    rows["missed"] = []
+    clip = (CLIP_WINDOW, CLIP_WINDOW)
+    for label, snap in pairs:
+        readings, cues, _ = observe(snap)
+        readings = endpoints(consistent(readings))
+        expect = label["expect"]
+        found = [j for j in judge_checked(readings, cues, 1, clip, check_window=clip)
+                 if expect in (j.code, j.detail.get("video_code"))]
+        where = found[0].detail["check"] if found else _cue_check(cues, expect)
+        rows[where].append(label["id"])
+    return rows
+
+
+def _cue_check(cues: list[Cue], expect: str) -> str:
+    """점수판 전이로 못 가린 클립 — 단서만의 판정끼리 같은 대조를 한다."""
+    seen, heard = split_cues(cues)
+    video, talk = judge_from_cues(seen), judge_from_cues(heard)
+    if video is not None and video.code == expect:
+        if talk is None:
+            return "cue:video_only"
+        return "cue:confirmed" if talk.code == expect else "cue:conflict"
+    if talk is None or talk.code != expect:
+        return "missed"
+    return "cue:speech_only" if video is None else "cue:conflict"
 
 
 def render_ablation(pairs: list[tuple[dict[str, Any], dict[str, Any]]]) -> str:
@@ -194,10 +233,23 @@ def render_ablation(pairs: list[tuple[dict[str, Any], dict[str, Any]]]) -> str:
     both, talk = table["화면 + 해설"], table["해설만"]
     added = [b["id"] for b, c in zip(both, talk) if b["judged"] and not c["judged"]]
     lost = [b["id"] for b, c in zip(both, talk) if c["judged"] and not b["judged"]]
+    checks = check_rows(pairs)
     out += [
         "",
         f"- 화면이 더한 클립 {len(added)}개: " + (", ".join(added) or "없음"),
         f"- 화면 때문에 놓친 클립 {len(lost)}개: " + (", ".join(lost) or "없음"),
+        "",
+        "## 영상 먼저 판정 → 해설 대조",
+        "",
+        "> 해설 없이 판정한 뒤 해설과 맞춘다. 정답 코드가 나온 대조 결과별 클립 수. 위 표와 달리"
+        " 장면 설명 글을 단서로 넣지 않는다. 점수판 전이는 서비스가 쓰는 `judge_checked` 결과이고,"
+        " 단서 대체는 하이라이트 클립 전용 판정을 같은 방식으로 맞춰 본 값이다.",
+        "",
+        "| 대조 결과 | 점수판 전이 | 단서 대체 |",
+        "|---|---|---|",
+        *[f"| {name} | {len(checks[key])} | {len(checks['cue:' + key])} |"
+          for key, name in CHECK_LABELS],
+        f"| 정답 코드 없음 | {len(checks['missed'])}/{n} | |",
         "",
         "## 클립별",
         "",

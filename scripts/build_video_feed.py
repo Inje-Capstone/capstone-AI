@@ -29,9 +29,10 @@ from app.domain.enrich import enrich  # noqa: E402
 from app.domain.models import GameFeed  # noqa: E402
 from app.domain.scorebug import stabilize  # noqa: E402
 from app.domain.video_judge import (  # noqa: E402
+    CHECK_CONFLICT,
     GENERIC_CODES,
     MIN_CONFIDENCE,
-    judge,
+    judge_checked,
     merge_states,
     observe,
     state_events,
@@ -61,7 +62,7 @@ def build(
 ) -> dict[str, Any]:
     # 점수판 전용 판독·Whisper 해설이 있으면 그걸로 — 클립 평가(eval_clips)와 같은 입력
     readings, cues, min_repeat = observe(snap)
-    judgments = judge(readings, cues, min_repeat=min_repeat)
+    judgments = judge_checked(readings, cues, min_repeat=min_repeat)
     events = to_relay_events(judgments, min_confidence)
     stable = stabilize(readings, min_repeat)
     enriched = data is not None and offset is not None
@@ -109,7 +110,7 @@ def demo_moments(feed: dict[str, Any], min_confidence: float = MIN_CONFIDENCE) -
             code = "caught_stealing" if d.get("caught") else "steal"
         if d.get("source") != "video" or not code or code in GENERIC_CODES:
             continue
-        if d.get("confidence", 0) < min_confidence:
+        if d.get("confidence", 0) < min_confidence or d.get("check") == CHECK_CONFLICT:
             continue
         t = int(e["t"])
         out.append(f"{t // 60:02d}:{t % 60:02d} {code} ({d['confidence']:.2f})")

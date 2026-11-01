@@ -23,8 +23,9 @@ from app.domain.game_state import replay
 from app.domain.models import GameFeed, GameMeta, RelayEvent, Situation
 from app.domain.scorebug import stabilize
 from app.domain.video_judge import (
+    CUE_AFTER,
     from_snapshot,
-    judge,
+    judge_checked,
     merge_states,
     state_events,
     to_relay_events,
@@ -79,7 +80,7 @@ class LiveGame:
     def _rebuild(self) -> list[Situation]:
         readings, cues = from_snapshot({"scoreboard": self.scoreboard, "events": self.events,
                                         "speech": self.speech})
-        events = to_relay_events(judge(readings, cues))
+        events = to_relay_events(judge_checked(readings, cues))
         self._estimate_offset()
         stable = stabilize(readings)
         if self.offset is not None and self.data_events:
@@ -89,7 +90,9 @@ class LiveGame:
         last = max((r.t for r in readings), default=0)
         meta = self.meta.model_copy(update={"video_duration_sec": int(last)})
         self.feed = GameFeed(meta=meta, events=events)
-        fresh = [s for s in detect(self.feed) if s.id not in self._seen]
+        # 내보낸 카드는 거둘 수 없다 — 해설 대조가 끝난 장면만 내보낸다
+        fresh = [s for s in detect(self.feed)
+                 if s.id not in self._seen and s.t + CUE_AFTER <= last]
         self._seen.update(s.id for s in fresh)
         state = replay(events, meta.away_team, meta.home_team)
         self.updates.append({
