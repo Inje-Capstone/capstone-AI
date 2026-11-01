@@ -18,6 +18,7 @@ from app.api import (
     routes_live,
     routes_onboarding,
     routes_quiz,
+    routes_rules,
 )
 from app.api.deps import get_relay_source
 from app.config import get_settings
@@ -47,6 +48,7 @@ app.add_middleware(
 app.include_router(routes_game.router)
 app.include_router(routes_chat.router)
 app.include_router(routes_glossary.router)
+app.include_router(routes_rules.router)
 app.include_router(routes_quiz.router)
 app.include_router(routes_onboarding.router)
 app.include_router(routes_live.router)
