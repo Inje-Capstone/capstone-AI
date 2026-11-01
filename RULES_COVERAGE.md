@@ -473,7 +473,7 @@
 
 원본 `scripts/action_logic_src.py`. 판정은 두 길이다 — **인식**: 점수판·장면·해설·심판 동작으로 심판이 내린 판정을 알아본다 · **판단**: 자세·공·물체·시간으로 동작을 직접 본다(심판 판정과 어긋나면 심판을 따른다). 상태는 코드에서 센다. ~~취소선~~ 신호는 아직 못 본다.
 
-영상 대상 233개 — 인식 가능 191 · 불가 36 / 판단 가능 9 · 불가 124 · 판단 신호 없음 100
+영상 대상 233개 — 인식 가능 191 · 불가 36 / 판단 가능 11 · 불가 122 · 판단 신호 없음 100
 
 ### 미구현 신호 — 막힌 규칙 수 (구현 우선순위)
 
@@ -497,7 +497,6 @@
 | `pose.pitcher_turn` | 투수 회전 방향·견제 쪽 멈칫 | 4 |
 | `pose.catcher_pos` | 포수 위치(포수석 안·홈플레이트 앞) | 4 |
 | `pose.coach` | 코치 위치·주자 접촉 | 4 |
-| `pose.batter_swing` | 배트 회전 각도(체크스윙) | 3 |
 | `ball.release` | 공을 놓았는지(송구 vs 시늉) | 3 |
 | `pose.slide_path` | 슬라이딩 시작점·방향·베이스 도달 | 3 |
 | `pose.fielder_pos` | 야수 위치(시프트·시야 방해) | 3 |
@@ -601,7 +600,7 @@
 | 몸에 맞는 공 | 타격 시도 없음 | `ev.hit_by_pitch` `sb.bases` `kw:몸에맞는공` `ev.umpire_signal|ump.call` | 타자 1루 & 아웃 그대로 → hbp | 가능 | — |
 | 존 안 공에 맞음 | 투구가 타자에 닿음 | `ev.hit_by_pitch` ~~ball.zone~~ `sb.count` `ev.umpire_signal|ump.call` | 닿은 위치가 존 안 → 스트라이크(출루 없음) | 가능 | 불가 |
 | 피하지 않은 사구 | 투구가 타자에 닿음 · 존 밖 | `ev.hit_by_pitch` ~~pose.batter_avoid~~ `sb.count` `ev.umpire_signal|ump.call` | 피하는 동작 없음 → 볼(출루 없음) — 심판 재량이라 '의심'만 | 가능 | 불가 |
-| 헛스윙 중 몸에 맞음 | 투구가 타자에 닿음 | `ev.hit_by_pitch` ~~pose.batter_swing~~ `ev.swing_miss` `sb.count` `ev.umpire_signal|ump.call` | 스윙 중 맞음 → 스트라이크(2S면 삼진) | 가능 | 불가 |
+| 헛스윙 중 몸에 맞음 | 투구가 타자에 닿음 | `ev.hit_by_pitch` `pose.batter_swing` `ev.swing_miss` `sb.count` `ev.umpire_signal|ump.call` | 스윙 중 맞음 → 스트라이크(2S면 삼진) | 가능 | 가능 |
 | 타격방해 출루 | 타격 시도 | `sb.bases` `ev.umpire_signal|ump.call` `kw:타격방해` | 타자 1루 & 해설 '타격방해' → 포수 타격방해 · 해설·자막 '타격방해' + 확인(심판 동작·판독·자막·반복) → catcher_interference | 가능 | — |
 | 타구가 심판·주자에 맞음(야수 통과 전) | 페어 타구 · 내야수 통과 전 | ~~ball.touch~~ `ev.contact` `sb.bases` `sb.outs` `ev.umpire_signal|ump.call` ~~kw:심판~~ | 심판에 맞음 → 타자 1루·볼데드 / 주자에 맞음 → 그 주자 아웃·타자 1루 | 가능 | 불가 |
 | 자동 고의4구 | 수비 측 신청 | `sb.bases` `sb.count` `kw:고의4구` `ev.umpire_signal|ump.call` | 투구 없이 타자 1루 & 해설 '고의' → walk(자동 고의4구) | 가능 | — |
@@ -617,7 +616,7 @@
 | 배트가 공을 두 번 맞힘 | 페어 타구 | ~~ball.touch~~ `ev.contact` `sb.outs` `ev.umpire_signal|ump.call` | 배트가 페어 지역에서 공을 다시 맞힘 → 타자 아웃(부러진 배트 조각 예외) | 가능 | 불가 |
 | 자기 타구에 맞음 | 타구가 타자에 닿음 | ~~ball.touch~~ ~~pose.batter_feet~~ `sb.outs` `sb.count` `ev.umpire_signal|ump.call` | 타석 안이면 파울 / 타석 밖이면 아웃 | 가능 | 불가 |
 | 배트 던짐 | 배트가 손에서 날아감 | ~~obj.equipment~~ ~~pose.contact~~ `sb.outs` `ev.umpire_signal|ump.call` | 배트가 수비·포구를 방해 → 아웃 / 아니면 무관 | 가능 | 불가 |
-| 체크스윙 | 스윙을 멈춤 | ~~pose.batter_swing~~ `sb.count` `ev.umpire_signal|ump.call` `kw:체크스윙` | 배트가 돌았다 → 스트라이크 · 심판 동작이 먼저 · 해설·자막 '체크스윙' + 확인(심판 동작·판독·자막·반복) → check_swing | 가능 | 불가 |
+| 체크스윙 | 스윙을 멈춤 | `pose.batter_swing` `sb.count` `ev.umpire_signal|ump.call` `kw:체크스윙` | 배트가 돌았다 → 스트라이크 · 심판 동작이 먼저 · 해설·자막 '체크스윙' + 확인(심판 동작·판독·자막·반복) → check_swing | 가능 | 가능 |
 | 타자 타임 제한(피치클락) | 피치클락 시행 리그 | ~~time.clock~~ `sb.count` `ev.umpire_signal|ump.call` `kw:피치클락위반` | 타자 준비 시한 초과 → 자동 스트라이크 · 해설·자막 '피치클락 위반' + 확인(심판 동작·판독·자막·반복) → pitch_clock | 가능 | 불가 |
 | 타순 지키기 | — | ~~ctx.lineup~~ `sb.inning` ~~kw:타순~~ | 이닝 첫 타자 = 직전 이닝 마지막 완료 타자 다음 → 어긋나면 타순 착오 후보 | 불가 | — |
 | 세트 후 타석 이탈 | 투수가 세트·와인드업 진입 | ~~pose.batter_feet~~ `pose.set_stop` `ev.pitcher_stops` `ev.umpire_signal|ump.call` | 타자가 타석을 떠나 투수가 멈춤 → 보크 아님(타자 쪽 사유) | 가능 | 불가 |
@@ -739,7 +738,7 @@
 | 코치 신체 접촉 | — | ~~pose.coach~~ ~~pose.contact~~ `sb.outs` `ev.umpire_signal|ump.call` | 코치가 주자를 붙잡거나 밀어 도움 → 주자 아웃 | 가능 | 불가 |
 | 코치가 송구 유도 | 3루 주자 | ~~pose.coach~~ ~~ball.track~~ `sb.outs` `ev.umpire_signal|ump.call` | 코치가 홈으로 뛰어 송구 유도 → 주자 아웃 | 가능 | 불가 |
 | 타자가 포수 송구 방해 | 포수 송구·수비 | ~~pose.batter_move~~ ~~pose.contact~~ `sb.outs` `sb.bases` `ev.umpire_signal|ump.call` `kw:수비방해` | 타자가 타석 밖으로 움직여 방해 → 타자 아웃·주자 귀루 · 해설·자막 '수비방해' + 확인(심판 동작·판독·자막·반복) → interference | 가능 | 불가 |
-| 백스윙이 포수 맞음 | 스윙 뒤 | ~~pose.batter_swing~~ ~~pose.contact~~ `sb.bases` `ev.umpire_signal|ump.call` | 백스윙이 포수에 닿음 → 볼데드·주자 귀루 | 가능 | 불가 |
+| 백스윙이 포수 맞음 | 스윙 뒤 | `pose.batter_swing` ~~pose.contact~~ `sb.bases` `ev.umpire_signal|ump.call` | 백스윙이 포수에 닿음 → 볼데드·주자 귀루 | 가능 | 불가 |
 | 2아웃 전 홈 플레이 타자 방해 | 3루 주자 · 2아웃 전 · 홈 플레이 | ~~pose.batter_move~~ ~~pose.contact~~ `sb.outs` `ev.umpire_signal|ump.call` | 타자 방해 → 3루 주자 아웃(2아웃이면 타자 아웃) | 가능 | 불가 |
 | 병살 막는 고의 방해 | 병살 가능 상황 | ~~pose.slide_path~~ ~~pose.contact~~ `sb.outs` `ev.umpire_signal|ump.call` `kw:수비방해` | 주자가 고의로 야수 방해 → 주자 + 타자 아웃 · 해설·자막 '수비방해' + 확인(심판 동작·판독·자막·반복) → interference | 가능 | 불가 |
 | 타자주자의 병살 방지 고의 방해 | 병살 가능 상황 | ~~pose.runner_path~~ ~~pose.contact~~ `sb.outs` `ev.umpire_signal|ump.call` `kw:수비방해` | 타자주자 고의 방해 → 타자주자 + 홈에 가까운 주자 아웃 · 해설·자막 '수비방해' + 확인(심판 동작·판독·자막·반복) → interference | 가능 | 불가 |

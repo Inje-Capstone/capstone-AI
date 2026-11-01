@@ -27,6 +27,7 @@ from app.domain.video_judge import (
     judge_from_cues,
     judge_transition,
     observe,
+    pose_cues,
     split_cues,
     to_relay_events,
 )
@@ -842,6 +843,69 @@ def test_call_event_of_a_two_part_judgment_carries_the_check():
                          [Cue(5, "catcher_miss"), Cue(6, "speech", "낫아웃입니다")])
     call, result = to_relay_events([j])
     assert call.detail["check"] == result.detail["check"] == "confirmed"
+
+
+def test_batter_took_strike_three_needs_no_commentary():
+    cues = [Cue(5, "no_swing", "[관절] 타자가 공을 그냥 보냄")]
+    j = one(R(0, strikes=2), R(10, outs=1), cues)
+    assert (j.code, j.detail["looking"]) == ("strikeout", True)
+    assert j.confidence >= 0.5
+    assert "[관절] 타자가 공을 그냥 보냄" in j.evidence[1]
+
+
+def test_slow_replay_of_a_swing_is_not_a_take():
+    cues = [Cue(5, "swing"), Cue(9, "no_swing")]
+    j = one(R(0, strikes=2), R(12, outs=1), cues)
+    assert j.code == "out"
+
+
+def test_swing_on_an_earlier_pitch_does_not_hide_the_take():
+    cues = [Cue(0.5, "swing"), Cue(15, "no_swing")]
+    j = one(R(0, strikes=2), R(18, outs=1), cues)
+    assert j.code == "strikeout"
+
+
+def test_take_on_an_earlier_pitch_says_nothing_about_the_out():
+    assert one(R(0, strikes=2), R(19, outs=1), [Cue(1, "no_swing")]).code == "out"
+
+
+def test_slow_replay_after_the_scoreboard_change_is_ignored():
+    cues = [Cue(100, "swing"), Cue(109.5, "no_swing")]
+    assert one(R(90, strikes=2), R(104, outs=1), cues).code == "out"
+
+
+def test_out_on_two_strikes_without_swing_cues_stays_generic():
+    assert one(R(0, strikes=2), R(10, outs=1)).code == "out"
+
+
+def test_runner_out_on_two_strikes_is_not_a_called_third_strike():
+    cues = [Cue(5, "no_swing")]
+    j = one(R(0, bases=FIRST, strikes=2), R(10, outs=1, strikes=2), cues)
+    assert j.code != "strikeout"
+
+
+def test_take_during_a_steal_of_home_is_not_a_called_third_strike():
+    cues = [Cue(5, "no_swing")]
+    third = (False, False, True)
+    j = one(R(0, bases=third, strikes=2), R(10, outs=1, away=1), cues)
+    assert j.code != "strikeout"
+
+
+def test_swing_on_ball_three_means_a_hit_not_a_walk():
+    cues = [Cue(5, "swing")]
+    assert one(R(0, balls=3), R(10, bases=FIRST), cues).code == "reach"
+
+
+def test_take_on_ball_three_backs_the_walk():
+    j = one(R(0, balls=3), R(10, bases=FIRST), [Cue(5, "no_swing", "[관절] 타자가 공을 그냥 보냄")])
+    assert j.code == "walk"
+    assert j.confidence > 0.6
+
+
+def test_pose_cues_turn_swings_into_cues_and_skip_unclear_ones():
+    pose = {"swings": [{"t": 3.0, "swing": True}, {"t": 9.0, "swing": False},
+                       {"t": 20.0, "swing": False, "clear": False}]}
+    assert [(c.t, c.kind) for c in pose_cues(pose)] == [(3.0, "swing"), (9.0, "no_swing")]
 
 
 def test_call_only_heard_in_commentary_is_marked_for_moving_to_video():

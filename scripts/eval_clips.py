@@ -41,6 +41,7 @@ from analyze_video import (  # noqa: E402
 )
 from contact_check import MIN_SCALE  # noqa: E402
 from contact_check import summarize as contact_summary  # noqa: E402
+from swing_check import load_cached as load_swings  # noqa: E402
 
 from app.adapters.video.base import PROMPT_VERSION, VideoAnalyzerError, VideoClip  # noqa: E402
 from app.adapters.video.scorebug_reader import VERSION as SCOREBUG_VERSION  # noqa: E402
@@ -496,6 +497,9 @@ def main() -> None:
                     print(f"[{i}] {label['id']} 관절 캐시 읽기 실패: {exc}")
             else:
                 print(f"[{i}] {label['id']} 관절 캐시 없음 (scripts/contact_check.py)")
+            swings = load_swings(video)  # 스윙은 scripts/swing_check.py가 영상 옆에 둔다
+            if swings:
+                snap["pose"] = {**(snap.get("pose") or {}), "swings": swings}
         meta = {
             "model": snap.get("model", "?"),
             "thinking": "켬" if snap.get("thinking") else "끔",
