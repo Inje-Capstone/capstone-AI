@@ -56,7 +56,11 @@ HBP_WORDS = ("몸에 맞", "사구", "데드볼", "헤드샷")  # 5.05(b)(2)
 # 관절로 잰 동작 단서의 설명 머리말 — 카드 '영상 근거'에 그대로 나간다
 POSE_TAG = "[관절] "
 POSE_TEXT = {"slide_tag": "미끄러져 들어온 주자에게 수비 손이 닿음(태그)",
-             "collision": "두 선수가 빠르게 부딪혀 한 명이 넘어짐"}
+             "collision": "두 선수가 빠르게 부딪혀 한 명이 넘어짐",
+             "swing": "타자가 배트를 휘두름",
+             "no_swing": "타자가 공을 그냥 보냄"}
+SWING_GAP = 8.0  # 투구 간격보다 짧다 — 이 안의 스윙은 같은 공(다시보기·이어진 화면)이다
+LAST_PITCH_SEC = 12.0  # 점수판 전이보다 이만큼 앞선 공은 그 플레이의 공으로 보지 않는다
 
 # 단서 종류 (VLM 프롬프트 v2와 같은 어휘)
 CUE_KINDS = (
@@ -65,6 +69,7 @@ CUE_KINDS = (
     "pitching_change", "mound_visit", "replay_review", "celebration", "crowd_cheer",
     "strikeout", "ball_four", "out_at_base", "runner_scores", "fielder_drops_ball",
     "umpire_signal",
+    "swing", "no_swing",  # 관절로 잰 타자 손 움직임(domain/swing.py)
     "speech",  # 해설 키워드 — text에 "보크", "도루" 등
 )
 
@@ -249,8 +254,9 @@ def judge_transition(
             return make("call", "dropped_third_strike", prior,
                         [dts, _speech(near, "낫아웃", "낫 아웃")])
         walk_speech = _speech(near, *WALK_WORDS) or _has(near, "ball_four")
-        if tr.before.balls == 3 and not _has(near, "contact"):
-            return make("result", "walk", 0.6, [walk_speech])
+        batted = _has(near, "contact") or _swung_last_pitch(near, tr.t)
+        if tr.before.balls == 3 and not batted:
+            return make("result", "walk", 0.6, [walk_speech, _took_last_pitch(near, tr.t)])
         if walk_speech:
             return make("result", "walk", 0.5, [walk_speech])
     if tr.outs_made == 1 and tr.before.strikes == 2:
@@ -260,10 +266,37 @@ def judge_transition(
         k = _has(near, "swing_miss") or _has(near, "strikeout") or _speech(near, "삼진")
         if k:
             return make("result", "strikeout", 0.5, [k])
+        took = _took_last_pitch(near, tr.t)
+        # 안 쳤는데 아웃 — 3스트라이크뿐이다. 주자가 움직였으면 다른 플레이가 섞였다(홈스틸 실측)
+        if took and (tr.count_reset or tr.half_change) and b == a and not tr.runs:
+            return make("result", "strikeout", 0.5, [took], looking=True)
     # 나머지 타석 결과는 종류를 모른다 — 상태는 반영하되 카드는 띄우지 않는다
     if tr.count_reset or tr.half_change or tr.outs_made or tr.runs:
         return make("result", "out" if tr.outs_made else "reach", 0.5)
     return None
+
+
+def _last_pitch(cues: Sequence[Cue], t: float) -> list[Cue]:
+    """전이 시각 `t` 직전의 공에 속한 스윙 단서들. 전이 뒤의 것은 다시보기다."""
+    seen = [c for c in cues if c.kind in ("swing", "no_swing")
+            and t - LAST_PITCH_SEC <= c.t <= t]
+    if not seen:
+        return []
+    last = max(c.t for c in seen)
+    return [c for c in seen if last - c.t <= SWING_GAP]
+
+
+def _took_last_pitch(cues: Sequence[Cue], t: float) -> Optional[Cue]:
+    """마지막 공을 그냥 보냈나. 같은 공에 스윙이 하나라도 보이면 아니다 — 느린 다시보기는 손이
+    느려 '안 침'으로 재진다."""
+    pitch = _last_pitch(cues, t)
+    if not pitch or any(c.kind == "swing" for c in pitch):
+        return None
+    return pitch[-1]
+
+
+def _swung_last_pitch(cues: Sequence[Cue], t: float) -> Optional[Cue]:
+    return next((c for c in _last_pitch(cues, t) if c.kind == "swing"), None)
 
 
 def _strike_three_miss(cues: Sequence[Cue]) -> Optional[Cue]:
@@ -689,11 +722,15 @@ def _slide_text(s: dict) -> str:
 
 
 def pose_cues(pose: dict) -> list[Cue]:
-    """관절 분석(contact.py · scripts/contact_check.py) → 장면 단서. VLM 'slide'와 같은 종류."""
+    """관절 분석(contact.py·swing.py) → 장면 단서. 슬라이딩은 VLM 'slide'와 같은 종류."""
     cues = [Cue(float(s["t0"]), "slide", POSE_TAG + _slide_text(s))
             for s in pose.get("slides") or []]
     cues += [Cue(float(c["t0"]), c["kind"], POSE_TAG + POSE_TEXT[c["kind"]])
              for c in pose.get("contacts") or [] if c.get("kind") in POSE_TEXT]
+    for s in pose.get("swings") or []:
+        if s.get("clear", True):  # 경계에 걸친 값은 어느 쪽 단서로도 쓰지 않는다
+            kind = "swing" if s["swing"] else "no_swing"
+            cues.append(Cue(float(s["t"]), kind, POSE_TAG + POSE_TEXT[kind]))
     return cues
 
 

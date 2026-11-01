@@ -337,12 +337,16 @@ def main() -> int:
 
         pose_args = argparse.Namespace(fps=10.0, mode="balanced", min_scale=MIN_SCALE)
         snap["pose"] = summarize_long(args.video, pose_args, *span)
+        from app.adapters.video.pitch_view import SwingExtractor
+
+        snap["pose"]["swings"] = SwingExtractor().extract(args.video, *span)
         save(out_path, snap)
     crop = (snap.get("scorebug") or {}).get("scoreboard") or []
     whisper = [s for s in (snap.get("asr") or {}).get("segments") or [] if s.get("text")]
     print(f"저장: {out_path} (점수판 {len(snap.get('scoreboard', []))} · "
           f"장면 {len(snap['events'])} · 해설 {len(snap.get('speech', []))}"
           f" · 관절 슬라이딩 {len((snap.get('pose') or {}).get('slides', []))}"
+          f" · 투구 {len((snap.get('pose') or {}).get('swings', []))}"
           + (f" · 점수판 전용 {len(crop)}" if args.scorebug else "")
           + (f" · Whisper {len(whisper)}" if args.asr else "") + ")")
     try:  # 채점용: 같은 경기 정답지가 있으면 영상 오프셋을 추정해 둔다

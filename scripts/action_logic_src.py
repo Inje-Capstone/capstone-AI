@@ -68,7 +68,7 @@ SIGNALS = {
     "pose.pitcher_rubber": ("투수 자세", "축발과 투수판 접촉(밟음·걸침)", ""),
     "pose.pitcher_turn": ("투수 자세", "투수 회전 방향·견제 쪽 멈칫", ""),
     "pose.batter_feet": ("타자 자세", "타자 발과 타석 선의 위치", ""),
-    "pose.batter_swing": ("타자 자세", "배트 회전 각도(체크스윙)", ""),
+    "pose.batter_swing": ("타자 자세", "손 이동량으로 스윙·안 침을 가름", "app/domain/swing.py"),
     "pose.batter_avoid": ("타자 자세", "투구를 피하려는 동작", ""),
     "pose.batter_move": ("타자 자세", "타자가 홈플레이트·포수 쪽으로 움직임", ""),
     "pose.catcher_pos": ("포수 자세", "포수 위치(포수석 안·홈플레이트 앞)", ""),

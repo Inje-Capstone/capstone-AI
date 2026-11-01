@@ -227,6 +227,7 @@ data/
 ```bash
 .venv/bin/python scripts/contact_check.py clip.mp4 --shots out/        # 관절 캐시 + 후보 프레임
 .venv/bin/python scripts/contact_check.py clips/*.mp4 --truth data/clip_eval/contact_truth.json  # 채점
+.venv/bin/python scripts/swing_check.py clip.mp4                       # 투구 화면 + 타자 스윙
 .venv/bin/python scripts/analyze_video.py G game.mp4 --pose            # 경기 분석에 관절 단서(10분 구간씩)
 ```
 
