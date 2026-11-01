@@ -89,10 +89,10 @@ def test_live_game_grows_and_is_served_like_any_game(client):
     # 실시간(청크마다 다시 판정)과 한꺼번에 판정한 결과가 같아야 한다
     from app.domain.detectors import detect
     from app.domain.models import GameFeed, GameMeta
-    from app.domain.video_judge import from_snapshot, judge, to_relay_events
+    from app.domain.video_judge import from_snapshot, judge_checked, to_relay_events
 
     whole = {k: [x for b in chunks for x in b[k]] for k in ("scoreboard", "events", "speech")}
-    batch = to_relay_events(judge(*from_snapshot(whole)))
+    batch = to_relay_events(judge_checked(*from_snapshot(whole)))
     meta = GameMeta(id="B", date="", stadium="", away_team="한화", home_team="LG")
     expected = [s.rule_id for s in detect(GameFeed(meta=meta, events=batch))]
     assert sorted(new_rules) == sorted(expected) and "walk" in new_rules

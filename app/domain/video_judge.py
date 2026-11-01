@@ -8,6 +8,8 @@
 모양만으로 정해지는 것(병살·볼넷)은 단서 없이도 판정한다. 결과는 문자중계와 같은
 RelayEvent 형식이라 GameSim·detectors·카드가 그대로 받는다.
 
+순서는 영상 먼저, 해설은 검사다(`judge_checked`): 해설 없이 판정한 뒤 해설과 맞는지 본다.
+
 판정 규칙표는 docs/exec-plans의 07-video-judge 계획과 1:1이다.
 """
 
@@ -351,6 +353,94 @@ def judge(
     return sorted(out, key=lambda j: j.t)
 
 
+# ── 영상 먼저, 해설은 검사 ────────────────────────────────────────────────
+# 영상 판정은 해설을 보지 않고 끝낸다. 해설은 그 판정이 맞는지 되묻는 데만 쓴다.
+CHECK_CONFIRMED = "confirmed"  # 영상 판정을 해설이 뒷받침
+CHECK_VIDEO_ONLY = "video_only"  # 해설이 말이 없다 — 영상 판정 그대로
+CHECK_REFINED = "refined"  # 영상은 일반 결과까지, 종류는 해설이 댔다 — 서로 어긋나지 않는다
+# (아래 둘은 영상 신호가 늘면 줄어야 할 몫 — 지금은 카드를 띄운다. 해설뿐인 판정을 막으면
+#  클립 평가에서 정답이 그만큼 빠진다: data/clip_eval/ABLATION.md)
+CHECK_SPEECH_ONLY = "speech_only"  # 영상 판정 없이 해설 낱말로만 — 영상으로 옮겨야 할 몫
+CHECK_CONFLICT = "conflict"  # 영상과 해설이 다른 판정 — 카드를 보류한다
+HOLD_CONFIDENCE = 0.4  # 보류 — MIN_CONFIDENCE 아래라 상태만 반영하고 카드는 안 뜬다
+CHECK_WINDOW = (10.0, CUE_AFTER)  # 해설을 대조할 범위 — 지난 일 언급을 덜 받게 판정보다 좁다
+# 이름은 달라도 같은 판정: (영상, 해설)이 이 짝이면 어긋난 것이 아니다
+SAME_KIND = frozenset({("strikeout", "dropped_third_strike"), ("caught_stealing", "steal")})
+
+
+def split_cues(cues: Sequence[Cue]) -> tuple[list[Cue], list[Cue]]:
+    """(화면에서 본 단서, 귀로 들은 해설). 자막은 화면에 있는 글자라 본 쪽이다."""
+    def heard(c: Cue) -> bool:
+        return c.kind == "speech" and not c.text.startswith("[자막]")
+
+    return [c for c in cues if not heard(c)], [c for c in cues if heard(c)]
+
+
+def _same_play(j: Judgment, video: Sequence[Judgment]) -> Optional[Judgment]:
+    if j.transition is not None:
+        return next((v for v in video if v.transition is not None and v.t == j.t), None)
+    return next((v for v in video if v.transition is None and v.code == j.code
+                 and abs(v.t - j.t) <= CALL_GAP), None)
+
+
+def _commentary_says(t: float, heard: Sequence[Cue], window: tuple[float, float]) -> set[str]:
+    """그 장면 앞뒤로 해설이 말한 판정 코드."""
+    near = _near(heard, t, *window)
+    return {code for code, _, words in _CUE_ONLY if _speech(near, *words)}
+
+
+def _agrees(code: str, said: set[str]) -> bool:
+    return code in said or any((code, s) in SAME_KIND or (s, code) in SAME_KIND for s in said)
+
+
+def _check_play(j: Judgment, v: Judgment, said: set[str]) -> Judgment:
+    """점수판 전이 판정 하나의 대조 — 영상이 종류까지 낸 판정은 해설이 말한 것과 맞춘다."""
+    if v.code in GENERIC_CODES or v.confidence < MIN_CONFIDENCE:
+        if v.code == j.code:
+            j.detail["check"] = CHECK_VIDEO_ONLY
+        else:
+            j.detail.update(check=CHECK_REFINED, video_code=v.code)
+    elif _agrees(v.code, said):
+        j.detail["check"] = CHECK_CONFIRMED
+    elif said:
+        j.detail.update(check=CHECK_CONFLICT, video_code=v.code)
+        j.evidence.append(f"영상은 {_CODE_TEXT.get(v.code, v.code)} — 해설과 달라 보류")
+        j.confidence = min(j.confidence, HOLD_CONFIDENCE)
+    else:  # 대조 범위 밖의 말이 판정을 바꿨다 — 영상 판정을 그대로 둔다
+        v.detail["check"] = CHECK_VIDEO_ONLY
+        return v
+    return j
+
+
+def judge_checked(
+    readings: Sequence[Reading],
+    cues: Sequence[Cue],
+    min_repeat: int = 2,
+    window: tuple[float, float] = (CUE_BEFORE, CUE_AFTER),
+    check_window: tuple[float, float] = CHECK_WINDOW,
+) -> list[Judgment]:
+    """영상 판정 → 해설 대조. 판정마다 `detail["check"]`에 대조 결과를 단다.
+
+    영상 판정은 해설 없이 끝낸 뒤, 그 장면 앞뒤로 해설이 말한 판정과 맞춘다. 해설이 다른 판정을
+    말하면 보류한다(점수판 상태는 그대로 반영하고 카드만 안 뜬다). 해설까지 넣은 판정(merged)은
+    영상이 일반 결과까지만 냈을 때 종류를 대는 데 쓴다.
+    """
+    seen, heard = split_cues(cues)
+    video = judge(readings, seen, min_repeat, window)
+    out = []
+    for j in judge(readings, cues, min_repeat, window):
+        v = _same_play(j, video)
+        if v is None:
+            j.detail["check"] = CHECK_SPEECH_ONLY
+        elif j.transition is not None:
+            j = _check_play(j, v, _commentary_says(j.t, heard, check_window))
+        else:  # 교체·심판 선언 — 함께 일어날 수 있어 서로 어긋난다고 보지 않는다
+            backed = set(j.evidence) - set(v.evidence)
+            j.detail["check"] = CHECK_CONFIRMED if backed else CHECK_VIDEO_ONLY
+        out.append(j)
+    return out
+
+
 def _balk_kind(j: Judgment, cues: Sequence[Cue]) -> None:
     """보크 판정에 '어떤 동작이 반칙이었나'를 붙인다 — 해설이 동작을 설명했을 때만.
 
@@ -640,6 +730,11 @@ def _call_extra(j: Judgment) -> dict:
     return {"balk_kind": j.detail["balk_kind"]} if "balk_kind" in j.detail else {}
 
 
+def _check_extra(j: Judgment) -> dict:
+    """영상↔해설 대조 결과 — judge_checked를 거친 판정에만 있다."""
+    return {"check": j.detail["check"]} if "check" in j.detail else {}
+
+
 def _bases_list(bases: tuple) -> list[int]:
     return [n for n, on in zip((1, 2, 3), bases) if on]
 
@@ -692,7 +787,7 @@ def to_relay_events(
                 id=f"v{n}", t=int(j.t), inning=j.detail.get("inning", 1),
                 half=j.detail.get("half", "top"), kind="sub",
                 text="투수 교체 (영상)", detail={"sub_type": "pitcher", "evidence": j.evidence,
-                                             "confidence": j.confidence},
+                                             "confidence": j.confidence, **_check_extra(j)},
             ))
             continue
         tr = j.transition
@@ -704,29 +799,31 @@ def to_relay_events(
                     text=f"{_CODE_TEXT.get(j.code, j.code)} (영상 판정, 확신도 {j.confidence:.2f})",
                     detail={"call": j.code, "evidence": j.evidence,
                             "confidence": round(j.confidence, 2), "source": "video",
-                            **_call_extra(j)},
+                            **_call_extra(j), **_check_extra(j)},
                 ))
             continue
-        confident = j.confidence >= min_confidence
+        confident = (j.confidence >= min_confidence
+                     and j.detail.get("check") != CHECK_CONFLICT)
         code = j.code if confident else ("out" if tr.outs_made else "reach")
         kind = j.kind if confident else "result"
         delta = {
             "outs_made": tr.outs_made, "runs": tr.runs,
             "bases_after": _bases_list(tr.after.bases),
             "evidence": j.evidence, "confidence": round(j.confidence, 2), "source": "video",
+            **_check_extra(j),
         }
         base = dict(inning=tr.before.inning, half=tr.before.half)
         label = _CODE_TEXT.get(code, code)
         text = f"{label} (영상 판정, 확신도 {j.confidence:.2f})"
         if kind == "call" and code == "dropped_third_strike":
             events.append(RelayEvent(id=f"v{n}c", t=int(j.t), kind="call", text=text,
-                                     detail={"call": code}, **base))
+                                     detail={"call": code, **_check_extra(j)}, **base))
             result = "strikeout" if j.detail.get("out") else "dropped_third_strike_safe"
             events.append(RelayEvent(id=f"v{n}", t=int(j.t), kind="result", text=text,
                                      detail={"result": result, **delta}, **base))
         elif kind == "call" and code == "infield_fly":
             events.append(RelayEvent(id=f"v{n}c", t=int(j.t), kind="call", text=text,
-                                     detail={"call": code}, **base))
+                                     detail={"call": code, **_check_extra(j)}, **base))
             events.append(RelayEvent(id=f"v{n}", t=int(j.t), kind="result", text=text,
                                      detail={"result": "infield_fly", **delta}, **base))
         elif kind == "call":

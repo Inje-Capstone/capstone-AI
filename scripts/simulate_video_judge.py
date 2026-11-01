@@ -30,7 +30,7 @@ from app.domain.models import GameFeed, RelayEvent  # noqa: E402
 from app.domain.scorebug import Reading, stabilize  # noqa: E402
 from app.domain.video_judge import (  # noqa: E402
     Cue,
-    judge,
+    judge_checked,
     merge_states,
     state_events,
     to_relay_events,
@@ -112,7 +112,7 @@ def video_feed(
 ) -> GameFeed:
     # 서비스 피드와 같게 — 판정 이벤트 + 점수판 상태(build_video_feed)
     events = merge_states(
-        to_relay_events(judge(readings, cues, min_repeat=min_repeat)),
+        to_relay_events(judge_checked(readings, cues, min_repeat=min_repeat)),
         state_events(stabilize(readings, min_repeat)),
     )
     meta = feed.meta.model_copy(update={"id": feed.meta.id + "-video"})

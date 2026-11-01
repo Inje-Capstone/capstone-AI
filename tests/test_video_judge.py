@@ -23,9 +23,11 @@ from app.domain.video_judge import (
     from_snapshot,
     judge,
     judge_calls,
+    judge_checked,
     judge_from_cues,
     judge_transition,
     observe,
+    split_cues,
     to_relay_events,
 )
 
@@ -755,3 +757,94 @@ def test_thrown_dive_evidence_says_it_was_thrown():
     [cue] = from_snapshot({"pose": {"slides": [
         {"t0": 0.8, "t1": 1.5, "distance": 1.7, "thrown": True}]}})[1]
     assert cue.text == "[관절] 슬라이딩·다이빙 — 달려와 몸을 던져 몸길이 1.7배 이동, 0.8~1.5초"
+
+
+# ── 영상 먼저, 해설은 검사 ─────────────────────────────────────────────────
+FIRST = (True, False, False)
+SECOND = (False, True, False)
+
+
+def checked(cues, same_count=False):
+    after = R(10, bases=SECOND, balls=0 if same_count else 1)
+    (j,) = judge_checked(twice(R(0, bases=FIRST), after), cues)
+    return j
+
+
+def test_split_cues_keeps_captions_with_what_was_seen():
+    slide, caption = Cue(1, "slide"), Cue(2, "speech", "[자막] 보크")
+    talk = Cue(3, "speech", "보크")
+    assert split_cues([slide, caption, talk]) == ([slide, caption], [talk])
+
+
+def test_video_judgment_stands_when_commentary_is_silent():
+    j = checked([Cue(5, "slide")])
+    assert (j.code, j.detail["check"]) == ("steal", "video_only")
+
+
+def test_caption_alone_does_not_count_as_commentary():
+    j = checked([Cue(5, "slide"), Cue(6, "speech", "[자막] 도루 성공")])
+    assert (j.code, j.detail["check"]) == ("steal", "video_only")
+
+
+def test_commentary_confirms_video_judgment():
+    j = checked([Cue(5, "slide"), Cue(6, "speech", "도루 성공입니다")])
+    assert (j.code, j.detail["check"]) == ("steal", "confirmed")
+
+
+def test_commentary_names_a_kind_the_video_left_generic():
+    j = checked([Cue(6, "speech", "도루 성공입니다")])
+    assert (j.code, j.detail["check"], j.detail["video_code"]) == ("steal", "refined", "runner")
+
+
+def test_disagreement_holds_the_card_but_keeps_the_score_state():
+    j = checked([Cue(5, "slide"), Cue(6, "speech", "폭투로 주자가 갑니다")])
+    assert (j.code, j.detail["check"], j.detail["video_code"]) == (
+        "wild_pitch", "conflict", "steal")
+    assert j.confidence < 0.5
+    (event,) = to_relay_events([j])
+    assert event.detail["result"] == "reach"
+    assert event.detail["bases_after"] == [2]
+    assert event.detail["check"] == "conflict"
+
+
+def test_commentary_naming_another_play_holds_even_if_the_rule_ignored_it():
+    j = checked([Cue(5, "pitcher_stops"), Cue(6, "speech", "2루 도루 성공입니다")], same_count=True)
+    assert (j.detail["check"], j.detail["video_code"]) == ("conflict", "balk")
+    assert j.confidence < 0.5
+
+
+def test_commentary_the_rule_never_read_still_confirms():
+    (j,) = judge_checked(twice(R(0, balls=1), R(10, bases=FIRST)),
+                         [Cue(5, "hit_by_pitch"), Cue(6, "speech", "몸에 맞는 공입니다")])
+    assert (j.code, j.detail["check"]) == ("hbp", "confirmed")
+
+
+def test_old_talk_outside_the_check_window_does_not_change_the_video_judgment():
+    j = checked([Cue(-8, "speech", "아까 폭투로 한 점 줬었죠"), Cue(5, "slide")])
+    assert (j.code, j.detail["check"]) == ("steal", "video_only")
+
+
+def test_more_specific_name_of_the_same_play_is_not_a_disagreement():
+    (j,) = judge_checked(twice(R(0, strikes=2), R(10, outs=1)),
+                         [Cue(5, "swing_miss"), Cue(6, "speech", "낫아웃입니다")])
+    assert j.detail["check"] == "confirmed"
+    assert j.confidence >= 0.5
+
+
+def test_hold_survives_a_lower_card_threshold():
+    j = checked([Cue(5, "slide"), Cue(6, "speech", "폭투로 주자가 갑니다")])
+    (event,) = to_relay_events([j], min_confidence=0.3)
+    assert event.detail["result"] == "reach"
+
+
+def test_call_event_of_a_two_part_judgment_carries_the_check():
+    (j,) = judge_checked(twice(R(0, strikes=2), R(10, bases=FIRST)),
+                         [Cue(5, "catcher_miss"), Cue(6, "speech", "낫아웃입니다")])
+    call, result = to_relay_events([j])
+    assert call.detail["check"] == result.detail["check"] == "confirmed"
+
+
+def test_call_only_heard_in_commentary_is_marked_for_moving_to_video():
+    cues = [Cue(5, "umpire_signal"), Cue(6, "speech", "비디오 판독 들어갑니다")]
+    (j,) = judge_checked(twice(R(0), R(10)), cues)
+    assert (j.code, j.detail["check"]) == ("video_review", "speech_only")

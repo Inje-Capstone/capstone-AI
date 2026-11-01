@@ -11,6 +11,19 @@
 - 화면이 더한 클립 9개: kbo_balk_cuevas, kbo_foultip_k_walkoff, kbo_homesteal_lee, kbo_homesteal_hwang, kbo_doublesteal_japan, kbo_pickoff_ahn, kbo_sf_walkoff_lg, kbo_hr_kim, kbo_checkswing_review
 - 화면 때문에 놓친 클립 2개: kbo_doublesteal_kt, kbo_sf_walkoff_nc
 
+## 영상 먼저 판정 → 해설 대조
+
+> 해설 없이 판정한 뒤 해설과 맞춘다. 정답 코드가 나온 대조 결과별 클립 수. 위 표와 달리 장면 설명 글을 단서로 넣지 않는다. 점수판 전이는 서비스가 쓰는 `judge_checked` 결과이고, 단서 대체는 하이라이트 클립 전용 판정을 같은 방식으로 맞춰 본 값이다.
+
+| 대조 결과 | 점수판 전이 | 단서 대체 |
+|---|---|---|
+| 영상·해설 일치 | 0 | 1 |
+| 영상만(해설 말 없음) | 0 | 6 |
+| 해설이 종류를 댐 | 1 | 0 |
+| 해설뿐(영상 판정 없음) | 2 | 2 |
+| 불일치 — 카드 보류 | 0 | 6 |
+| 정답 코드 없음 | 9/27 | |
+
 ## 클립별
 
 | 클립 | 정답 | 화면 + 해설 | 해설만 | 화면만 |
