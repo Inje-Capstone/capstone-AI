@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from app.adapters.video.base import VideoAnalyzerError
+from app.adapters.video.frames import open_frames, video_size
 from app.domain.contact import PeopleFrame
 from app.domain.pitch_motion import PoseFrame
 
@@ -104,40 +105,17 @@ class _PoseRunner:
         self, video: Path, start: float, end: Optional[float]
     ) -> Iterator[tuple[float, Optional[list[Person]]]]:
         """(시각, 사람들) — 경기장이 아닌 화면(스튜디오·해설자)은 사람들 대신 None."""
-        import cv2
-
-        cap = cv2.VideoCapture(str(video))
-        if not cap.isOpened():
-            raise VideoAnalyzerError(f"영상을 열 수 없다: {video}")
-        src_fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
-        step = max(1, round(src_fps / self.fps))
-        self.size = (
-            int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
-        )
-        cap.set(cv2.CAP_PROP_POS_MSEC, start * 1000)
-        idx = 0
-        try:
-            while True:
-                ok, img = cap.read()
-                if not ok:
-                    break
-                t = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000
-                if end is not None and t > end:
-                    break
-                idx += 1
-                if idx % step:
-                    continue
-                if field_ratio(img) < FIELD_MIN:
-                    yield t, None
-                    continue
-                keypoints, scores = self._body(img)
-                yield t, [
-                    [(float(x), float(y), float(s)) for (x, y), s in zip(kp, sc)]
-                    for kp, sc in zip(keypoints, scores)
-                ]
-        finally:
-            cap.release()
+        source = open_frames(video, start, end, target_fps=self.fps)
+        self.size = source.size
+        for t, img in source.frames:
+            if field_ratio(img) < FIELD_MIN:
+                yield t, None
+                continue
+            keypoints, scores = self._body(img)
+            yield t, [
+                [(float(x), float(y), float(s)) for (x, y), s in zip(kp, sc)]
+                for kp, sc in zip(keypoints, scores)
+            ]
 
 
 class PitcherPoseExtractor(_PoseRunner):
@@ -197,55 +175,41 @@ def camera_motion(
     import cv2
     import numpy as np
 
-    cap = cv2.VideoCapture(str(video))
-    if not cap.isOpened():
-        raise VideoAnalyzerError(f"영상을 열 수 없다: {video}")
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) or CAM_WIDTH
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) or CAM_WIDTH
+    width, height = video_size(video)
+    width, height = width or CAM_WIDTH, height or CAM_WIDTH
     small = (CAM_WIDTH, max(16, round(CAM_WIDTH * height / width)))
     ratio = width / CAM_WIDTH
-    cap.set(cv2.CAP_PROP_POS_MSEC, start * 1000)
     out: list[tuple[float, Camera, bool]] = []
     prev_gray, prev_hist = None, None
     total, step = np.eye(3), np.eye(3)
     blind = 0  # 특징점이 모자라 앞 움직임을 이어 쓴 프레임 수
-    try:
-        while True:
-            ok, img = cap.read()
-            if not ok:
-                break
-            t = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000
-            if end is not None and t > end:
-                break
-            tiny = cv2.resize(img, small)
-            gray = cv2.cvtColor(tiny, cv2.COLOR_BGR2GRAY)
-            hist = cv2.calcHist([cv2.cvtColor(tiny, cv2.COLOR_BGR2HSV)], [0, 1], None,
-                                [16, 8], [0, 180, 0, 256])
-            cv2.normalize(hist, hist)
-            cut = prev_gray is None
-            if prev_gray is not None:
-                move, inliers = _similarity(cv2, np, prev_gray, gray)
-                same = cv2.compareHist(prev_hist, hist, cv2.HISTCMP_CORREL)
-                zoom = (move[0, 0] ** 2 + move[1, 0] ** 2) ** 0.5
-                jump = inliers >= CAM_INLIERS and not 1 / ZOOM_JUMP <= zoom <= ZOOM_JUMP
-                cut = same < CUT_HIST or (inliers < CAM_INLIERS and same < 0.9) or jump
-                if cut:
-                    total, step, blind = np.eye(3), np.eye(3), 0
+    for t, tiny in open_frames(video, start, end, size=small).frames:
+        gray = cv2.cvtColor(tiny, cv2.COLOR_BGR2GRAY)
+        hist = cv2.calcHist([cv2.cvtColor(tiny, cv2.COLOR_BGR2HSV)], [0, 1], None,
+                            [16, 8], [0, 180, 0, 256])
+        cv2.normalize(hist, hist)
+        cut = prev_gray is None
+        if prev_gray is not None:
+            move, inliers = _similarity(cv2, np, prev_gray, gray)
+            same = cv2.compareHist(prev_hist, hist, cv2.HISTCMP_CORREL)
+            zoom = (move[0, 0] ** 2 + move[1, 0] ** 2) ** 0.5
+            jump = inliers >= CAM_INLIERS and not 1 / ZOOM_JUMP <= zoom <= ZOOM_JUMP
+            cut = same < CUT_HIST or (inliers < CAM_INLIERS and same < 0.9) or jump
+            if cut:
+                total, step, blind = np.eye(3), np.eye(3), 0
+            else:
+                if inliers >= CAM_INLIERS:
+                    step, blind = move, 0
+                    step[:2, 2] *= ratio
                 else:
-                    if inliers >= CAM_INLIERS:
-                        step, blind = move, 0
-                        step[:2, 2] *= ratio
-                    else:
-                        blind += 1
-                        if blind > CAM_HOLD:
-                            step = np.eye(3)
-                    total = step @ total
-            a, b, tx, ty = total[0, 0], total[1, 0], total[0, 2], total[1, 2]
-            cam = (round(a, 4), round(b, 4), round(tx, 1), round(ty, 1))
-            out.append((round(t, 3), cam, cut))
-            prev_gray, prev_hist = gray, hist
-    finally:
-        cap.release()
+                    blind += 1
+                    if blind > CAM_HOLD:
+                        step = np.eye(3)
+                total = step @ total
+        a, b, tx, ty = total[0, 0], total[1, 0], total[0, 2], total[1, 2]
+        cam = (round(a, 4), round(b, 4), round(tx, 1), round(ty, 1))
+        out.append((round(t, 3), cam, cut))
+        prev_gray, prev_hist = gray, hist
     return out
 
 
