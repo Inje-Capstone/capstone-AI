@@ -61,10 +61,15 @@ POSE_TAG = "[관절] "
 POSE_TEXT = {"slide_tag": "미끄러져 들어온 주자에게 수비 손이 닿음(태그)",
              "collision": "두 선수가 빠르게 부딪혀 한 명이 넘어짐",
              "swing": "타자가 배트를 휘두름",
+             "dive": "수비가 잔디 위로 몸을 던짐",
              "no_swing": "타자가 공을 그냥 보냄"}
 # 영상 관측이 공식 판정과 갈린 장면 — 판정은 그대로 두고 기록만 한다(오심 검토 후보)
 OBSERVED_TAG_ON_SAFE = "tag_on_safe_runner"
 OBSERVED_SWING_ON_BALL_FOUR = "swing_on_ball_four"
+# 몸 아래 잔디 비율 — 넘으면 수비 다이빙. 실측(2026-11-03): 호수비 모음 다이빙 35건 중
+# 28건이 70% 이상, KBO 정답 클립 주자 슬라이딩 24건은 최대 52%
+DIVE_GRASS = 0.7
+DIVE_RESULT = {"dive_out": "out", "dive_hit": "reach"}  # 다이빙 판정 뒤 타석 결과(일반)
 SWING_GAP = 8.0  # 투구 간격보다 짧다 — 이 안의 스윙은 같은 공(다시보기·이어진 화면)이다
 LAST_PITCH_SEC = 12.0  # 점수판 전이보다 이만큼 앞선 공은 그 플레이의 공으로 보지 않는다
 
@@ -76,6 +81,7 @@ CUE_KINDS = (
     "strikeout", "ball_four", "out_at_base", "runner_scores", "fielder_drops_ball",
     "umpire_signal",
     "swing", "no_swing",  # 관절로 잰 타자 손 움직임(domain/swing.py)
+    "dive",  # 관절로 찾은 슬라이딩 중 몸 아래가 잔디 — 주자가 아니라 수비
     "speech",  # 해설 키워드 — text에 "보크", "도루" 등
 )
 
@@ -283,6 +289,16 @@ def judge_transition(
         # 안 쳤는데 아웃 — 3스트라이크뿐이다. 주자가 움직였으면 다른 플레이가 섞였다(홈스틸 실측)
         if took and (tr.count_reset or tr.half_change) and b == a and not tr.runs:
             return make("result", "strikeout", 0.5, [took], looking=True)
+    dive = _has(near, "dive")
+    if dive and not tr.runs and not b[0]:
+        # 1루가 비어 있어야 아웃이 타자의 것이다 — 1루 주자가 있으면 '주자 포스아웃 + 타자 1루'와
+        # '타자 아웃 + 주자 그대로'가 점수판에서 같은 모양이다
+        batter_out = (b == a and not tr.half_change) or (tr.half_change and not any(b))
+        if tr.outs_made == 1 and batter_out:  # 몸을 던져 타자를 잡았다
+            return make("call", "dive_out", 0.5, [dive])
+        reached = a[0] and tr.runners_after == tr.runners_before + 1
+        if tr.outs_made == 0 and reached and not tr.half_change:  # 몸을 던졌는데 타자가 살았다
+            return make("call", "dive_hit", 0.5, [dive])
     # 나머지 타석 결과는 종류를 모른다 — 상태는 반영하되 카드는 띄우지 않는다
     if tr.count_reset or tr.half_change or tr.outs_made or tr.runs:
         return make("result", "out" if tr.outs_made else "reach", 0.5)
@@ -734,9 +750,15 @@ def _slide_text(s: dict) -> str:
     return f"슬라이딩·다이빙{how}, {s['t0']:.1f}~{s['t1']:.1f}초"
 
 
+def _slide_kind(s: dict) -> str:
+    """잔디 위면 수비 다이빙, 아니면 주자 슬라이딩. 색을 못 쟀으면 지금처럼 슬라이딩."""
+    grass = s.get("grass")
+    return "dive" if grass is not None and grass >= DIVE_GRASS else "slide"
+
+
 def pose_cues(pose: dict) -> list[Cue]:
     """관절 분석(contact.py·swing.py) → 장면 단서. 슬라이딩은 VLM 'slide'와 같은 종류."""
-    cues = [Cue(float(s["t0"]), "slide", POSE_TAG + _slide_text(s))
+    cues = [Cue(float(s["t0"]), _slide_kind(s), POSE_TAG + _slide_text(s))
             for s in pose.get("slides") or []]
     cues += [Cue(float(c["t0"]), c["kind"], POSE_TAG + POSE_TEXT[c["kind"]])
              for c in pose.get("contacts") or [] if c.get("kind") in POSE_TEXT]
@@ -772,6 +794,7 @@ _CODE_TEXT = {
     "missed_base": "누의 공과", "home_collision": "홈 충돌", "slide_rule": "슬라이딩 규정",
     "runner_lane": "3피트 라인", "fan_interference": "관중 방해", "intentional_drop": "고의낙구",
     "passing_runner": "주자 추월", "called_game": "콜드게임·노게임",
+    "dive_out": "몸을 던진 수비로 아웃", "dive_hit": "몸을 던졌지만 안타",
 }
 
 
@@ -876,6 +899,11 @@ def to_relay_events(
             result = "strikeout" if j.detail.get("out") else "dropped_third_strike_safe"
             events.append(RelayEvent(id=f"v{n}", t=int(j.t), kind="result", text=text,
                                      detail={"result": result, **delta}, **base))
+        elif kind == "call" and code in DIVE_RESULT:  # 카드는 call, 타석 끝은 result로
+            events.append(RelayEvent(id=f"v{n}c", t=int(j.t), kind="call", text=text,
+                                     detail={"call": code, **_check_extra(j)}, **base))
+            events.append(RelayEvent(id=f"v{n}", t=int(j.t), kind="result", text=text,
+                                     detail={"result": DIVE_RESULT[code], **delta}, **base))
         elif kind == "call" and code == "infield_fly":
             events.append(RelayEvent(id=f"v{n}c", t=int(j.t), kind="call", text=text,
                                      detail={"call": code, **_check_extra(j)}, **base))

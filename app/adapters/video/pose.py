@@ -32,6 +32,29 @@ CUT_HIST = 0.5  # 앞 프레임과 색 분포 상관 — 이보다 낮으면 화
 ZOOM_JUMP = 1.1
 
 
+def ground_under(img: Any, box: tuple[float, float, float, float]) -> tuple[float, float]:
+    """(잔디 비율, 흙 비율) — 몸 바로 아래 띠. 주자는 흙 위로 미끄러지고 외야 다이빙은 잔디 위다.
+
+    실측: KBO 정답 클립 슬라이딩 24건은 잔디 최대 52%(주자는 흙 위), 호수비 모음의 수비 다이빙
+    35건은 잔디 중앙값 93%(2026-11-03). 흙 위의 내야 다이빙은 이 색만으로는 주자와 구분되지 않는다.
+    """
+    import cv2
+
+    x0, y0, x1, y1 = (int(v) for v in box)
+    if y1 >= img.shape[0] - 2:  # 몸이 화면 아래에 잘렸다 — 바닥이 안 보인다
+        return 0.0, 0.0
+    tall = y1 - y0
+    strip = img[max(y1, 0):min(y1 + tall // 2 + 6, img.shape[0]),
+                max(x0, 0):max(x1, x0 + 1)]
+    if strip.size == 0:
+        return 0.0, 0.0
+    hsv = cv2.cvtColor(strip, cv2.COLOR_BGR2HSV)
+    h, s_, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+    grass = (h >= 30) & (h <= 90) & (s_ >= 50) & (v >= 40)  # field_ratio와 같은 색 기준
+    dirt = (h >= 5) & (h <= 25) & (s_ >= 60) & (v >= 60)
+    return round(float(grass.mean()), 3), round(float(dirt.mean()), 3)
+
+
 def field_ratio(img: Any) -> float:
     """잔디(초록)·흙(주황 갈색) 화소 비율. 점수판 유무와 상관없이 '경기장 화면'을 가른다.
 
