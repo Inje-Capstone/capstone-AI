@@ -1,0 +1,82 @@
+﻿clip,expect,input,right,wrong,codes
+kbo_balk_walkoff_bae,balk,화면 + 해설,True,,balk
+kbo_balk_walkoff_bae,balk,해설만,True,,balk
+kbo_balk_walkoff_bae,balk,화면만,False,,
+kbo_balk_ks2017,balk,화면 + 해설,False,,
+kbo_balk_ks2017,balk,해설만,False,,
+kbo_balk_ks2017,balk,화면만,False,,
+kbo_balk_cuevas,balk,화면 + 해설,True,,balk
+kbo_balk_cuevas,balk,해설만,False,,
+kbo_balk_cuevas,balk,화면만,True,,balk
+kbo_lddp_park,double_play,화면 + 해설,False,,
+kbo_lddp_park,double_play,해설만,False,,
+kbo_lddp_park,double_play,화면만,False,,
+kbo_lddp_austin,double_play,화면 + 해설,False,,
+kbo_lddp_austin,double_play,해설만,False,,
+kbo_lddp_austin,double_play,화면만,False,,
+kbo_lddp_son,double_play,화면 + 해설,False,,
+kbo_lddp_son,double_play,해설만,False,,
+kbo_lddp_son,double_play,화면만,False,,
+kbo_foultip_k_walkoff,strikeout,화면 + 해설,True,,out strikeout
+kbo_foultip_k_walkoff,strikeout,해설만,False,,
+kbo_foultip_k_walkoff,strikeout,화면만,False,dropped_third_strike,out dropped_third_strike
+kbo_dts_walkoff,dropped_third_strike,화면 + 해설,False,,
+kbo_dts_walkoff,dropped_third_strike,해설만,False,,
+kbo_dts_walkoff,dropped_third_strike,화면만,False,,
+kbo_dts_wp_hong,dropped_third_strike,화면 + 해설,False,,
+kbo_dts_wp_hong,dropped_third_strike,해설만,False,,
+kbo_dts_wp_hong,dropped_third_strike,화면만,False,,
+kbo_homesteal_lee,steal,화면 + 해설,True,,out steal
+kbo_homesteal_lee,steal,해설만,False,,
+kbo_homesteal_lee,steal,화면만,True,,out steal
+kbo_homesteal_hwang,steal,화면 + 해설,True,,steal
+kbo_homesteal_hwang,steal,해설만,False,,
+kbo_homesteal_hwang,steal,화면만,True,,steal
+kbo_doublesteal_kt,steal,화면 + 해설,False,sac_fly,out sac_fly
+kbo_doublesteal_kt,steal,해설만,True,,steal
+kbo_doublesteal_kt,steal,화면만,False,,out
+kbo_doublesteal_japan,steal,화면 + 해설,True,,pitcher steal
+kbo_doublesteal_japan,steal,해설만,False,strikeout,strikeout
+kbo_doublesteal_japan,steal,화면만,True,,pitcher steal
+kbo_pickoff_ahn,caught_stealing,화면 + 해설,True,,caught_stealing
+kbo_pickoff_ahn,caught_stealing,해설만,False,,
+kbo_pickoff_ahn,caught_stealing,화면만,True,,caught_stealing
+kbo_tp_kiwoom,triple_play,화면 + 해설,True,,triple_play
+kbo_tp_kiwoom,triple_play,해설만,True,,triple_play
+kbo_tp_kiwoom,triple_play,화면만,False,,out
+kbo_tp_kt,triple_play,화면 + 해설,True,,out triple_play
+kbo_tp_kt,triple_play,해설만,True,,triple_play
+kbo_tp_kt,triple_play,화면만,False,double_play,out double_play
+kbo_tp_lg,triple_play,화면 + 해설,True,,triple_play
+kbo_tp_lg,triple_play,해설만,True,,triple_play
+kbo_tp_lg,triple_play,화면만,False,double_play,double_play
+kbo_tp_lotte,triple_play,화면 + 해설,True,,triple_play
+kbo_tp_lotte,triple_play,해설만,True,,triple_play
+kbo_tp_lotte,triple_play,화면만,False,double_play,double_play
+kbo_hbp_walkoff_ssg,hbp,화면 + 해설,False,,
+kbo_hbp_walkoff_ssg,hbp,해설만,False,,
+kbo_hbp_walkoff_ssg,hbp,화면만,False,,
+kbo_headshot_kim,hbp,화면 + 해설,True,,pitcher hbp
+kbo_headshot_kim,hbp,해설만,True,,hbp
+kbo_headshot_kim,hbp,화면만,False,,pitcher
+kbo_sf_walkoff_nc,sac_fly,화면 + 해설,False,dropped_third_strike,dropped_third_strike
+kbo_sf_walkoff_nc,sac_fly,해설만,True,,sac_fly
+kbo_sf_walkoff_nc,sac_fly,화면만,False,dropped_third_strike,dropped_third_strike
+kbo_sf_walkoff_lg,sac_fly,화면 + 해설,True,,sac_fly
+kbo_sf_walkoff_lg,sac_fly,해설만,False,,
+kbo_sf_walkoff_lg,sac_fly,화면만,False,,
+kbo_hr_kim,homerun,화면 + 해설,True,,out homerun
+kbo_hr_kim,homerun,해설만,False,,
+kbo_hr_kim,homerun,화면만,True,,out homerun
+kbo_hr_slam_hilliard,homerun,화면 + 해설,True,,pitcher homerun
+kbo_hr_slam_hilliard,homerun,해설만,True,,homerun
+kbo_hr_slam_hilliard,homerun,화면만,True,,pitcher homerun
+kbo_squeeze_kia,squeeze,화면 + 해설,False,strikeout,reach strikeout
+kbo_squeeze_kia,squeeze,해설만,False,strikeout,strikeout
+kbo_squeeze_kia,squeeze,화면만,False,,reach
+kbo_checkswing_review,video_review,화면 + 해설,True,check_swing strikeout,video_review check_swing strikeout
+kbo_checkswing_review,video_review,해설만,False,,
+kbo_checkswing_review,video_review,화면만,False,check_swing strikeout,check_swing strikeout
+kbo_abs_ejection,ejection,화면 + 해설,True,,ejection pitcher
+kbo_abs_ejection,ejection,해설만,True,,ejection
+kbo_abs_ejection,ejection,화면만,False,,pitcher

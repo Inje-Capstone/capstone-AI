@@ -240,6 +240,8 @@ data/
 
 해설만 / 화면만 / 둘 다 판정 비교(`eval_clips.py --ablation` → `data/clip_eval/ABLATION.md`): 37% / 26% / 63%.
 
+분석 데이터(엔진이 잰 값 + 사람 정답 + 판정, 발표·보고서용): `data/analysis/` — `scripts/analysis_data.py --clips ../clips_private`로 표를 다시 만들고, 측정할 때마다 `data/analysis/LOG.md`에 남긴다.
+
 - VLM: VSS 풀스택 대신 **VSS 계열 VLM을 NVIDIA 호스팅 API로 직접** 부른다(GPU 불필요, 기술 조사서 권고안).
   기본 `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`(VSS 3.2 Omni, 영상+음성). GPU는 학교 승인이 안 나 쓰지 않는다
   (2026-10-27). OpenAI 호환 서버 주소를 받는 `--base-url`은 남겨 둔다. VSS 서버면 `--backend vss`

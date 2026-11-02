@@ -891,6 +891,29 @@ def test_take_during_a_steal_of_home_is_not_a_called_third_strike():
     assert j.code != "strikeout"
 
 
+def test_official_walk_stays_when_the_batter_seemed_to_swing():
+    """심판이 체크스윙을 안 돌았다고 봤으면 볼넷이다 — 영상 관측은 기록만."""
+    cues = [Cue(5, "swing"), Cue(7, "speech", "볼넷으로 걸어 나갑니다")]
+    j = one(R(0, balls=3), R(10, bases=FIRST), cues)
+    assert (j.code, j.detail["observed"]) == ("walk", "swing_on_ball_four")
+    (event,) = to_relay_events([j])
+    assert event.detail["result"] == "walk"
+    assert event.detail["observed"] == "swing_on_ball_four"
+
+
+def test_tag_seen_on_a_safe_steal_keeps_the_safe_call():
+    cues = [Cue(5, "slide"), Cue(5.5, "slide_tag")]
+    j = one(R(0, bases=FIRST), R(10, bases=SECOND, balls=1), cues)
+    assert (j.code, j.detail["observed"]) == ("steal", "tag_on_safe_runner")
+    assert to_relay_events([j])[0].detail["observed"] == "tag_on_safe_runner"
+
+
+def test_no_observation_note_when_video_agrees():
+    j = one(R(0, bases=FIRST), R(10, bases=SECOND, balls=1), [Cue(5, "slide")])
+    assert "observed" not in j.detail
+    assert "observed" not in to_relay_events([j])[0].detail
+
+
 def test_swing_on_ball_three_means_a_hit_not_a_walk():
     cues = [Cue(5, "swing")]
     assert one(R(0, balls=3), R(10, bases=FIRST), cues).code == "reach"
