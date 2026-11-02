@@ -914,6 +914,74 @@ def test_no_observation_note_when_video_agrees():
     assert "observed" not in to_relay_events([j])[0].detail
 
 
+def test_dive_on_grass_then_an_out_is_a_diving_play():
+    second = (False, True, False)
+    cues = [Cue(5, "dive", "[관절] 수비가 잔디 위로 몸을 던짐")]
+    j = one(R(0, bases=second, balls=1, strikes=2), R(10, outs=1, bases=second), cues)
+    assert (j.kind, j.code) == ("call", "dive_out")
+    call, result = to_relay_events([j])
+    assert (call.kind, call.detail["call"]) == ("call", "dive_out")
+    assert (result.detail["result"], result.detail["outs_made"]) == ("out", 1)
+
+
+def test_diving_card_leaves_the_game_state_as_a_plain_out_would():
+    """카드만 더한다 — 아웃·카운트·이닝은 일반 아웃 판정과 같아야 한다."""
+    from app.domain.game_state import replay
+
+    def state(events):
+        s = replay(events, "A", "B")
+        return s.inning, s.half, s.outs, s.balls, s.strikes, s.bases, s.game_over
+
+    for before, after in ((R(0, outs=1, balls=1, strikes=2), R(10, outs=2)),
+                          (R(0, outs=2, balls=1, strikes=2), R(10, inning=3, half="bot")),
+                          (R(0, balls=2, strikes=2), R(10, bases=FIRST))):
+        (tr,) = transitions(stabilize(twice(before, after)))
+        dive = judge_transition(tr, [Cue(5, "dive")])
+        plain = judge_transition(tr, [])
+        assert dive.code in ("dive_out", "dive_hit")
+        assert state(to_relay_events([dive])) == state(to_relay_events([plain]))
+
+
+def test_dive_then_the_batter_on_base_is_a_missed_dive():
+    j = one(R(0, balls=2, strikes=2), R(10, bases=FIRST), [Cue(5, "dive")])
+    assert j.code == "dive_hit"
+    call, result = to_relay_events([j])
+    assert result.detail["result"] == "reach"
+
+
+def test_runner_on_first_makes_a_dive_out_ambiguous():
+    """1루 주자 포스아웃 + 타자 1루와 타자 아웃 + 주자 그대로는 점수판 모양이 같다."""
+    j = one(R(0, bases=FIRST), R(10, outs=1, bases=FIRST), [Cue(5, "dive")])
+    assert j.code not in ("dive_out", "dive_hit")
+
+
+def test_runners_moving_without_a_new_runner_is_not_a_missed_dive():
+    both = (True, True, False)
+    corners = (True, False, True)
+    j = one(R(0, bases=both), R(10, bases=corners), [Cue(5, "dive")])
+    assert j.code not in ("dive_out", "dive_hit")
+
+
+def test_third_out_with_runners_on_is_not_called_a_diving_catch():
+    second = (False, True, False)
+    (tr,) = transitions(stabilize(twice(R(0, outs=2, bases=second), R(10, inning=3, half="bot"))))
+    assert judge_transition(tr, [Cue(5, "dive")]).code != "dive_out"
+
+
+def test_dive_with_a_run_scoring_says_nothing_specific():
+    third = (False, False, True)
+    j = one(R(0, bases=third), R(10, outs=1, away=1), [Cue(5, "dive")])
+    assert j.code not in ("dive_out", "dive_hit")
+
+
+def test_runner_slide_on_dirt_stays_a_slide_and_grass_becomes_a_dive():
+    pose = {"slides": [{"t0": 1.0, "t1": 2.0, "distance": 2.0, "grass": 0.02},
+                       {"t0": 5.0, "t1": 6.0, "distance": 2.4, "grass": 0.96},
+                       {"t0": 7.0, "t1": 8.0, "distance": 1.0, "grass": 0.52},  # 주자 최대
+                       {"t0": 9.0, "t1": 9.5, "distance": 1.0}]}
+    assert [c.kind for c in pose_cues(pose)] == ["slide", "dive", "slide", "slide"]
+
+
 def test_swing_on_ball_three_means_a_hit_not_a_walk():
     cues = [Cue(5, "swing")]
     assert one(R(0, balls=3), R(10, bases=FIRST), cues).code == "reach"

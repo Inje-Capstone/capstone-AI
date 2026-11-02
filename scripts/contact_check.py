@@ -22,6 +22,7 @@ from typing import Any, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from app.adapters.video.base import VideoAnalyzerError  # noqa: E402
 from app.adapters.video.pose import (  # noqa: E402
     PeoplePoseExtractor,
     attach_camera,
@@ -104,15 +105,37 @@ def summarize(video: Path, args: argparse.Namespace, start: float = 0.0,
               end: Optional[float] = None) -> dict[str, Any]:
     """판정 단서로 쓸 것만 — 슬라이딩·다이빙, 미끄러져 들어와 닿음, 충돌. (eval_clips --pose)"""
     frames, height = load_frames(video, args, start, end)
-    _sc, found, slid = analyze(frames, min_scale=args.min_scale * height)
+    sc, found, slid = analyze(frames, min_scale=args.min_scale * height)
     return {
-        "slides": [{"t0": s.t0, "t1": s.t1, "distance": s.distance, "thrown": s.thrown}
+        "slides": [{"t0": s.t0, "t1": s.t1, "distance": s.distance, "thrown": s.thrown,
+                    "grass": slide_grass(video, sc, s)}
                    for s in slid],
         "contacts": [
             {"t0": c.t0, "t1": c.t1, "kind": c.kind, "why": c.why}
             for c in found if c.kind != "contact"
         ],
     }
+
+
+def slide_grass(video: Path, sc: Scene, s: Any) -> Optional[float]:
+    """미끄러진 한가운데 몸 아래 잔디 비율 — 영상을 못 읽으면 None."""
+    from app.adapters.video.frames import open_frames
+    from app.adapters.video.pose import ground_under
+
+    t = (s.t0 + s.t1) / 2
+    boxes = _boxes_at(sc, t, s.members or (s.who,))
+    if not boxes:
+        return None
+    try:
+        source = open_frames(video, t, t + 0.3)
+        first = next(source.frames, None)
+        source.frames.close()
+    except VideoAnalyzerError:
+        return None
+    if first is None:
+        return None
+    b = next(iter(boxes.values()))
+    return ground_under(first[1], (b.x0, b.y0, b.x1, b.y1))[0]
 
 
 def summarize_long(video: Path, args: argparse.Namespace, start: float, end: float,
