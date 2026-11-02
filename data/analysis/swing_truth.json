@@ -1,0 +1,1679 @@
+{
+ "_note": "타자 스윙 정답 — 사람이 프레임을 보고 매겼다. label: S 스윙, T 안 침, B 번트, ? 봐도 모름, N 투구 장면 아님. set: tune = 기준값을 정할 때 본 장면, test = 기준을 고정한 뒤 처음 본 장면. first_label: 하이라이트 3편을 처음 매긴 값 — 손목이 빠른데 '안 침'으로 매긴 장면을 손목 최대 순간으로 다시 보니 대부분 스윙이어서 고쳤다(2026-11-01). folder: clips_private/ 아래 영상 폴더. t0·t1: 투구 화면 구간(초). test 장면은 엔진이 찾은 화면 시작(t0)만 적었다.",
+ "shots": [
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 41.04,
+   "t1": 43.04,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 52.55,
+   "t1": 55.31,
+   "label": "S",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 103.85,
+   "t1": 108.36,
+   "label": "?",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 115.62,
+   "t1": 123.12,
+   "label": "N",
+   "first_label": "N",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 129.13,
+   "t1": 132.88,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 136.14,
+   "t1": 140.64,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 146.4,
+   "t1": 149.9,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 158.16,
+   "t1": 160.91,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 183.43,
+   "t1": 185.44,
+   "label": "S",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 197.2,
+   "t1": 199.7,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 229.23,
+   "t1": 231.23,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 271.52,
+   "t1": 275.53,
+   "label": "S",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 323.57,
+   "t1": 325.58,
+   "label": "?",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 337.34,
+   "t1": 341.59,
+   "label": "T",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 343.09,
+   "t1": 346.85,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 356.86,
+   "t1": 359.61,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 365.11,
+   "t1": 367.12,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 382.88,
+   "t1": 386.14,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 393.89,
+   "t1": 397.65,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 406.66,
+   "t1": 408.91,
+   "label": "?",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 413.66,
+   "t1": 415.16,
+   "label": "S",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 426.93,
+   "t1": 428.43,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 443.19,
+   "t1": 446.2,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 477.48,
+   "t1": 481.98,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 486.74,
+   "t1": 489.24,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 504.5,
+   "t1": 506.76,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 522.02,
+   "t1": 525.27,
+   "label": "S",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 531.78,
+   "t1": 535.03,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 543.29,
+   "t1": 546.55,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 551.8,
+   "t1": 553.8,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 564.31,
+   "t1": 568.32,
+   "label": "T",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 576.33,
+   "t1": 579.33,
+   "label": "T",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 595.09,
+   "t1": 598.6,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 620.12,
+   "t1": 624.12,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 658.66,
+   "t1": 660.91,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 692.94,
+   "t1": 695.19,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 714.21,
+   "t1": 716.22,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 724.22,
+   "t1": 725.98,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 733.48,
+   "t1": 735.48,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 753.25,
+   "t1": 756.51,
+   "label": "S",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 775.77,
+   "t1": 777.78,
+   "label": "N",
+   "first_label": "N",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 824.57,
+   "t1": 828.83,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 833.08,
+   "t1": 836.59,
+   "label": "?",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 844.34,
+   "t1": 848.35,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 856.61,
+   "t1": 858.61,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "3QYUP4AgNpI",
+   "folder": "games",
+   "t0": 878.38,
+   "t1": 881.88,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 46.55,
+   "t1": 48.05,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 62.31,
+   "t1": 64.06,
+   "label": "S",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 91.59,
+   "t1": 93.59,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 109.36,
+   "t1": 115.37,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 149.65,
+   "t1": 153.9,
+   "label": "N",
+   "first_label": "N",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 192.94,
+   "t1": 194.44,
+   "label": "?",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 206.96,
+   "t1": 213.71,
+   "label": "N",
+   "first_label": "N",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 243.49,
+   "t1": 249.0,
+   "label": "N",
+   "first_label": "N",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 252.0,
+   "t1": 254.75,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 456.46,
+   "t1": 460.71,
+   "label": "N",
+   "first_label": "N",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 728.48,
+   "t1": 730.48,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 737.99,
+   "t1": 742.49,
+   "label": "T",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 751.5,
+   "t1": 756.01,
+   "label": "N",
+   "first_label": "N",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 781.78,
+   "t1": 783.28,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 797.05,
+   "t1": 799.3,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 811.31,
+   "t1": 813.31,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 829.58,
+   "t1": 834.83,
+   "label": "N",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 840.34,
+   "t1": 843.34,
+   "label": "T",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 849.6,
+   "t1": 853.6,
+   "label": "N",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 861.11,
+   "t1": 866.62,
+   "label": "N",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 877.13,
+   "t1": 881.63,
+   "label": "?",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 926.68,
+   "t1": 928.43,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 956.46,
+   "t1": 959.46,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 991.24,
+   "t1": 993.24,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 1000.0,
+   "t1": 1002.25,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "T93FGIYBM8E",
+   "folder": "games",
+   "t0": 1011.51,
+   "t1": 1017.77,
+   "label": "N",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 109.61,
+   "t1": 115.62,
+   "label": "N",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 127.88,
+   "t1": 132.13,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 146.4,
+   "t1": 148.9,
+   "label": "?",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 154.9,
+   "t1": 158.91,
+   "label": "?",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 161.16,
+   "t1": 163.16,
+   "label": "B",
+   "first_label": "B",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 174.92,
+   "t1": 178.43,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 222.97,
+   "t1": 225.48,
+   "label": "?",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 255.76,
+   "t1": 258.26,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 270.02,
+   "t1": 273.52,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 298.05,
+   "t1": 301.3,
+   "label": "N",
+   "first_label": "N",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 311.06,
+   "t1": 325.07,
+   "label": "?",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 330.08,
+   "t1": 333.33,
+   "label": "?",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 340.84,
+   "t1": 344.84,
+   "label": "N",
+   "first_label": "N",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 359.36,
+   "t1": 361.61,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 374.87,
+   "t1": 378.13,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 440.44,
+   "t1": 444.19,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 498.0,
+   "t1": 501.25,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 514.01,
+   "t1": 516.52,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 539.04,
+   "t1": 544.04,
+   "label": "T",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 554.05,
+   "t1": 557.56,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 587.34,
+   "t1": 590.59,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 598.6,
+   "t1": 600.35,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 624.37,
+   "t1": 632.13,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 674.42,
+   "t1": 676.68,
+   "label": "?",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 692.19,
+   "t1": 695.95,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 731.98,
+   "t1": 742.99,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 765.26,
+   "t1": 772.02,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 792.79,
+   "t1": 797.3,
+   "label": "N",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 804.8,
+   "t1": 808.06,
+   "label": "?",
+   "first_label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 814.56,
+   "t1": 829.58,
+   "label": "N",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 847.35,
+   "t1": 849.6,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 870.12,
+   "t1": 876.38,
+   "label": "N",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 888.39,
+   "t1": 890.14,
+   "label": "?",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 917.67,
+   "t1": 924.67,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 949.7,
+   "t1": 956.21,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 990.49,
+   "t1": 994.99,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 1029.03,
+   "t1": 1032.53,
+   "label": "S",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 1036.79,
+   "t1": 1039.79,
+   "label": "N",
+   "first_label": "N",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 1049.55,
+   "t1": 1055.55,
+   "label": "?",
+   "first_label": "?",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 1062.31,
+   "t1": 1067.07,
+   "label": "S",
+   "first_label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 1079.58,
+   "t1": 1081.58,
+   "label": "N",
+   "first_label": "N",
+   "set": "tune"
+  },
+  {
+   "video": "wyC8BnovUUA",
+   "folder": "games",
+   "t0": 1087.59,
+   "t1": 1093.59,
+   "label": "N",
+   "first_label": "N",
+   "set": "tune"
+  },
+  {
+   "video": "89gNJQjBRrQ",
+   "folder": "takes",
+   "t0": 20.25,
+   "t1": 25.25,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "89gNJQjBRrQ",
+   "folder": "takes",
+   "t0": 63.0,
+   "t1": 70.0,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "89gNJQjBRrQ",
+   "folder": "takes",
+   "t0": 83.25,
+   "t1": 89.5,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "89gNJQjBRrQ",
+   "folder": "takes",
+   "t0": 131.0,
+   "t1": 134.5,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "NVOfYTDrqlU",
+   "folder": "takes",
+   "t0": 158.5,
+   "t1": 166.75,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "NVOfYTDrqlU",
+   "folder": "takes",
+   "t0": 204.5,
+   "t1": 210.25,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "p55O9v1xKRI",
+   "folder": "takes",
+   "t0": 33.0,
+   "t1": 36.5,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "p55O9v1xKRI",
+   "folder": "takes",
+   "t0": 68.25,
+   "t1": 72.0,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "p55O9v1xKRI",
+   "folder": "takes",
+   "t0": 98.25,
+   "t1": 102.25,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "p55O9v1xKRI",
+   "folder": "takes",
+   "t0": 177.5,
+   "t1": 180.25,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "p55O9v1xKRI",
+   "folder": "takes",
+   "t0": 199.5,
+   "t1": 202.75,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "zRqpvJdTybA",
+   "folder": "takes",
+   "t0": 19.75,
+   "t1": 33.5,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "zRqpvJdTybA",
+   "folder": "takes",
+   "t0": 42.25,
+   "t1": 47.25,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "zRqpvJdTybA",
+   "folder": "takes",
+   "t0": 57.5,
+   "t1": 61.0,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "zRqpvJdTybA",
+   "folder": "takes",
+   "t0": 87.5,
+   "t1": 94.25,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "zRqpvJdTybA",
+   "folder": "takes",
+   "t0": 115.75,
+   "t1": 122.25,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "zRqpvJdTybA",
+   "folder": "takes",
+   "t0": 174.75,
+   "t1": 177.5,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "zRqpvJdTybA",
+   "folder": "takes",
+   "t0": 196.25,
+   "t1": 197.5,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "zRqpvJdTybA",
+   "folder": "takes",
+   "t0": 261.75,
+   "t1": 267.0,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "zRqpvJdTybA",
+   "folder": "takes",
+   "t0": 309.25,
+   "t1": 314.75,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "zRqpvJdTybA",
+   "folder": "takes",
+   "t0": 346.0,
+   "t1": 351.25,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "zRqpvJdTybA",
+   "folder": "takes",
+   "t0": 402.0,
+   "t1": 413.25,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "zRqpvJdTybA",
+   "folder": "takes",
+   "t0": 501.5,
+   "t1": 514.5,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "7TYZzeweCjk",
+   "folder": "takes2",
+   "t0": 26.75,
+   "t1": 31.75,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "7TYZzeweCjk",
+   "folder": "takes2",
+   "t0": 38.0,
+   "t1": 43.0,
+   "label": "S",
+   "set": "tune"
+  },
+  {
+   "video": "7TYZzeweCjk",
+   "folder": "takes2",
+   "t0": 118.75,
+   "t1": 124.0,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "7TYZzeweCjk",
+   "folder": "takes2",
+   "t0": 146.5,
+   "t1": 153.25,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "7TYZzeweCjk",
+   "folder": "takes2",
+   "t0": 206.5,
+   "t1": 209.25,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "aHIWz5VByMM",
+   "folder": "takes2",
+   "t0": 14.0,
+   "t1": 19.75,
+   "label": "T",
+   "set": "tune"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 26.13,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 44.34,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 63.03,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 98.3,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 113.48,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 136.6,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 155.52,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 189.39,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 201.3,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 222.09,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 279.31,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 289.12,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 308.27,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 336.3,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 348.45,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 381.62,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 396.33,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 434.63,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 493.49,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 518.02,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 545.35,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 566.37,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 590.66,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 631.3,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 663.3,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 687.82,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 705.11,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 747.15,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 760.93,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 781.01,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 798.06,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 823.05,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 878.88,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 1039.81,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 1068.07,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 1126.22,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 1144.44,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 1162.66,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 1186.48,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 1211.48,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 1238.57,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 1287.85,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "OvmkANKCcks",
+   "folder": "takes2",
+   "t0": 1301.87,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "xtXEisvgTR0",
+   "folder": "takes2",
+   "t0": 26.98,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "xtXEisvgTR0",
+   "folder": "takes2",
+   "t0": 72.98,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "xtXEisvgTR0",
+   "folder": "takes2",
+   "t0": 99.73,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "xtXEisvgTR0",
+   "folder": "takes2",
+   "t0": 117.73,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "xtXEisvgTR0",
+   "folder": "takes2",
+   "t0": 150.23,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "xtXEisvgTR0",
+   "folder": "takes2",
+   "t0": 193.48,
+   "t1": null,
+   "label": "T",
+   "set": "test"
+  },
+  {
+   "video": "xtXEisvgTR0",
+   "folder": "takes2",
+   "t0": 237.48,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "xtXEisvgTR0",
+   "folder": "takes2",
+   "t0": 276.48,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  },
+  {
+   "video": "xtXEisvgTR0",
+   "folder": "takes2",
+   "t0": 300.73,
+   "t1": null,
+   "label": "S",
+   "set": "test"
+  }
+ ]
+}

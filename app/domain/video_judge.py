@@ -10,6 +10,9 @@ RelayEvent 형식이라 GameSim·detectors·카드가 그대로 받는다.
 
 순서는 영상 먼저, 해설은 검사다(`judge_checked`): 해설 없이 판정한 뒤 해설과 맞는지 본다.
 
+공식 결과는 심판 판정이다(점수판이 뼈대). 영상에서 본 동작이 그 판정과 갈려도 판정을 뒤집지 않고
+`detail["observed"]`에 남긴다 — 관절 신호에도 오차가 있고 중계 각도로는 접촉 순간을 다 못 본다.
+
 판정 규칙표는 docs/exec-plans의 07-video-judge 계획과 1:1이다.
 """
 
@@ -59,6 +62,9 @@ POSE_TEXT = {"slide_tag": "미끄러져 들어온 주자에게 수비 손이 닿
              "collision": "두 선수가 빠르게 부딪혀 한 명이 넘어짐",
              "swing": "타자가 배트를 휘두름",
              "no_swing": "타자가 공을 그냥 보냄"}
+# 영상 관측이 공식 판정과 갈린 장면 — 판정은 그대로 두고 기록만 한다(오심 검토 후보)
+OBSERVED_TAG_ON_SAFE = "tag_on_safe_runner"
+OBSERVED_SWING_ON_BALL_FOUR = "swing_on_ball_four"
 SWING_GAP = 8.0  # 투구 간격보다 짧다 — 이 안의 스윙은 같은 공(다시보기·이어진 화면)이다
 LAST_PITCH_SEC = 12.0  # 점수판 전이보다 이만큼 앞선 공은 그 플레이의 공으로 보지 않는다
 
@@ -199,8 +205,10 @@ def judge_transition(
             return make("call", "balk", 0.5, [balk_cue, _speech(near, "보크")])
         steal_cue = _has(near, "slide") or _speech(near, "도루")
         if single_runner_advance(b, a) and steal_cue and not _speech(near, "폭투", "포일"):
+            # 세이프인데 태그가 닿아 보였다 — 베이스가 먼저였을 수도 있다. 관측만 남긴다
+            seen = {"observed": OBSERVED_TAG_ON_SAFE} if _has(near, "slide_tag") else {}
             return make("steal", "steal", 0.5, [steal_cue, _speech(near, "도루")],
-                        base=single_runner_advance(b, a))
+                        base=single_runner_advance(b, a), **seen)
         double = advanced_all_one_base(b, a) and not same_count and sum(b) >= 2
         if double and steal_cue and not _speech(near, "폭투", "포일"):  # 더블스틸 — 투구가 있었다
             return make("steal", "steal", 0.5, [steal_cue, _speech(near, "도루")], double=True)
@@ -254,11 +262,16 @@ def judge_transition(
             return make("call", "dropped_third_strike", prior,
                         [dts, _speech(near, "낫아웃", "낫 아웃")])
         walk_speech = _speech(near, *WALK_WORDS) or _has(near, "ball_four")
-        batted = _has(near, "contact") or _swung_last_pitch(near, tr.t)
+        swung = _swung_last_pitch(near, tr.t)
+        batted = _has(near, "contact") or swung
         if tr.before.balls == 3 and not batted:
             return make("result", "walk", 0.6, [walk_speech, _took_last_pitch(near, tr.t)])
+        # 3볼에서 휘둘렀는데 1루 — 안타거나, 심판이 체크스윙을 '안 돌았다'로 본 볼넷이다
+        seen = {"observed": OBSERVED_SWING_ON_BALL_FOUR} if tr.before.balls == 3 and swung else {}
         if walk_speech:
-            return make("result", "walk", 0.5, [walk_speech])
+            return make("result", "walk", 0.5, [walk_speech], **seen)
+        if seen:
+            return make("result", "reach", 0.5, [swung], **seen)
     if tr.outs_made == 1 and tr.before.strikes == 2:
         dts = _strike_three_miss(near) or _speech(near, "낫아웃", "낫 아웃")
         if dts and dts_possible(tr.before):  # 낫아웃 상황이었지만 1루에서 아웃
@@ -767,6 +780,11 @@ def _call_extra(j: Judgment) -> dict:
     return {"balk_kind": j.detail["balk_kind"]} if "balk_kind" in j.detail else {}
 
 
+def _observed_extra(j: Judgment) -> dict:
+    """영상 관측이 공식 판정과 갈렸다는 기록 — 판정·카드는 바꾸지 않는다."""
+    return {"observed": j.detail["observed"]} if "observed" in j.detail else {}
+
+
 def _check_extra(j: Judgment) -> dict:
     """영상↔해설 대조 결과 — judge_checked를 거친 판정에만 있다."""
     return {"check": j.detail["check"]} if "check" in j.detail else {}
@@ -847,7 +865,7 @@ def to_relay_events(
             "outs_made": tr.outs_made, "runs": tr.runs,
             "bases_after": _bases_list(tr.after.bases),
             "evidence": j.evidence, "confidence": round(j.confidence, 2), "source": "video",
-            **_check_extra(j),
+            **_check_extra(j), **_observed_extra(j),
         }
         base = dict(inning=tr.before.inning, half=tr.before.half)
         label = _CODE_TEXT.get(code, code)
