@@ -1,0 +1,77 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+zRqpvJdTybA,8.2,none,True,,,,조용함,
+zRqpvJdTybA,19.7,none,True,,,,조용함,
+zRqpvJdTybA,42.2,none,True,,,,조용함,
+zRqpvJdTybA,57.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (64s); [점수판] 삼진 표시(K) (62s),맞음,삼진(1K 표시)
+zRqpvJdTybA,87.5,none,True,,,,조용함,
+zRqpvJdTybA,102.2,none,True,,,,조용함,
+zRqpvJdTybA,115.7,none,True,,,,조용함,
+zRqpvJdTybA,131.0,none,True,,,,조용함,
+zRqpvJdTybA,174.7,none,True,,,,조용함,파울
+zRqpvJdTybA,196.2,none,True,,,,조용함,파울
+zRqpvJdTybA,220.5,none,True,,,,조용함,
+zRqpvJdTybA,261.7,none,True,,,,조용함,
+zRqpvJdTybA,280.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→100; [관절] 타자가 공을 그냥 보냄 (313s),맞음,삼진(2K) — 3아웃
+zRqpvJdTybA,309.2,none,True,,,,조용함,
+zRqpvJdTybA,326.2,none,True,,,,조용함,
+zRqpvJdTybA,346.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,외야 뜬공 — 주자 1루 그대로
+zRqpvJdTybA,361.0,none,True,,,,조용함,
+zRqpvJdTybA,402.0,none,True,,,,조용함,
+zRqpvJdTybA,424.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 100→000; [점수판] 삼진 표시(K) (429s),맞음,삼진(3K) — 3아웃
+zRqpvJdTybA,434.0,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (439s); [점수판] 삼진 표시(K) (438s),맞음,삼진(4K)
+zRqpvJdTybA,472.0,strikeout,True,strikeout reach reach,video_only video_only video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 타자가 공을 그냥 보냄 (473s); [점수판] 삼진 표시(K) (476s) | 점수판 아웃+0 득점+1 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→010,맞음,삼진(5K)
+zRqpvJdTybA,501.5,strikeout,False,,,,놓침,삼진(6K) — 영상 끝 2초 전. 앞 타석 득점·2루 주자는 장면 없이 같은 칸에서 바뀜
+OvmkANKCcks,26.1,none,True,,,,조용함,
+OvmkANKCcks,44.3,none,True,,,,조용함,
+OvmkANKCcks,63.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼로 보임 — 1아웃
+OvmkANKCcks,98.3,none,True,,,,조용함,
+OvmkANKCcks,113.5,none,True,,,,조용함,
+OvmkANKCcks,136.6,none,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,헛판정,
+OvmkANKCcks,155.5,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,"삼진으로 보임 — 2아웃, 다음 장면은 3회"
+OvmkANKCcks,189.4,none,True,,,,조용함,
+OvmkANKCcks,201.3,none,True,,,,조용함,
+OvmkANKCcks,222.1,none,True,,,,조용함,
+OvmkANKCcks,251.3,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (257s),맞음,삼진으로 보임
+OvmkANKCcks,275.6,none,True,,,,조용함,
+OvmkANKCcks,279.3,none,True,,,,조용함,
+OvmkANKCcks,289.1,none,True,,,,조용함,
+OvmkANKCcks,308.3,none,True,,,,조용함,
+OvmkANKCcks,336.3,none,True,,,,조용함,
+OvmkANKCcks,348.4,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (356s),맞음,삼진으로 보임 — 2아웃
+OvmkANKCcks,381.6,none,True,,,,조용함,
+OvmkANKCcks,396.3,none,True,,,,조용함,
+OvmkANKCcks,419.5,none,True,,,,조용함,
+OvmkANKCcks,434.6,none,True,,,,조용함,
+OvmkANKCcks,459.2,out_any,True,out out,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+3 득점+0 주자 000→100,맞음,삼진으로 보임 — 3아웃
+OvmkANKCcks,493.5,none,True,,,,조용함,
+OvmkANKCcks,518.0,none,True,,,,조용함,
+OvmkANKCcks,545.3,none,True,,,,조용함,
+OvmkANKCcks,566.4,none,True,,,,조용함,
+OvmkANKCcks,590.7,none,True,,,,조용함,
+OvmkANKCcks,610.0,none,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,헛판정,
+OvmkANKCcks,631.3,double_play,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,틀림,풀카운트 삼진 + 2루 도루 저지 — 3아웃
+OvmkANKCcks,663.3,none,True,,,,조용함,
+OvmkANKCcks,687.8,none,True,,,,조용함,
+OvmkANKCcks,705.1,out_any,False,out out,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,삼진으로 보임 — 다음 투구 전에 아웃 하나가 장면 없이 더 올라감
+OvmkANKCcks,747.1,none,True,,,,조용함,
+OvmkANKCcks,760.9,none,True,,,,조용함,
+OvmkANKCcks,781.0,none,True,,,,조용함,
+OvmkANKCcks,798.1,none,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,헛판정,
+OvmkANKCcks,823.1,out_any,True,out,video_only,점수판 아웃+3 득점+1 주자 000→100,맞음,삼진으로 보임 — 3아웃
+OvmkANKCcks,838.0,out,True,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 100→000 | 점수판 아웃+0 득점+0 주자 000→010,맞음,희생번트 — 주자 2루로
+OvmkANKCcks,878.9,none,True,,,,조용함,
+OvmkANKCcks,904.8,steal,True,balk,video_only,점수판 아웃+0 득점+0 주자 010→001,틀림,3루 도루(비디오 판독 뒤 세이프)
+OvmkANKCcks,1039.8,none,True,,,,조용함,
+OvmkANKCcks,1058.3,none,True,,,,조용함,
+OvmkANKCcks,1068.1,none,True,,,,조용함,
+OvmkANKCcks,1098.0,none,True,,,,조용함,
+OvmkANKCcks,1105.4,none,True,,,,조용함,
+OvmkANKCcks,1126.2,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 001→001; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1135s),맞음,삼진으로 보임 — 2아웃
+OvmkANKCcks,1144.4,none,False,,,,조용함,삼진 다시보기
+OvmkANKCcks,1162.7,none,True,,,,조용함,
+OvmkANKCcks,1186.5,none,True,,,,조용함,
+OvmkANKCcks,1211.5,none,True,,,,조용함,
+OvmkANKCcks,1238.6,none,True,,,,조용함,
+OvmkANKCcks,1266.8,none,True,,,,조용함,
+OvmkANKCcks,1287.9,none,True,,,,조용함,
+OvmkANKCcks,1301.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 001→000,맞음,땅볼 3아웃 — 영상 끝
