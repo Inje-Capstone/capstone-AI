@@ -325,7 +325,9 @@ def judge_transition(
     if dive and not tr.runs and not b[0]:
         # 1루가 비어 있어야 아웃이 타자의 것이다 — 1루 주자가 있으면 '주자 포스아웃 + 타자 1루'와
         # '타자 아웃 + 주자 그대로'가 점수판에서 같은 모양이다
-        batter_out = (b == a and not tr.half_change) or (tr.half_change and not any(b))
+        # 이닝이 바뀌었는데 새 이닝에 주자가 있으면 새 이닝 플레이까지 합쳐진 전이다(하이라이트)
+        batter_out = (b == a and not tr.half_change) or (
+            tr.half_change and not any(b) and not any(a))
         if tr.outs_made == 1 and batter_out:  # 몸을 던져 타자를 잡았다
             return make("call", "dive_out", 0.5, [dive])
         reached = a[0] and tr.runners_after == tr.runners_before + 1

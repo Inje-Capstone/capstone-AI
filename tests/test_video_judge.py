@@ -1136,3 +1136,10 @@ def test_a_new_runner_means_the_at_bat_ended_even_if_the_count_did_not_drop():
                   R(10, balls=1, strikes=1, bases=(False, True, False)))
     (tr,) = transitions(stabilize(steal))
     assert not tr.count_reset
+
+
+def test_a_dive_does_not_explain_a_half_change_merged_with_the_next_half():
+    """3아웃 뒤 새 이닝 첫 타자 안타까지 한 전이로 합쳐지면 다이빙 아웃이라 말하지 않는다."""
+    (tr,) = transitions(stabilize(twice(R(0, outs=2, half="bot"),
+                                        R(10, inning=4, bases=(True, False, False)))))
+    assert judge_transition(tr, [Cue(5, "dive")]).code != "dive_out"
