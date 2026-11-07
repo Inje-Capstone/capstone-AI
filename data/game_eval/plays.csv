@@ -43,7 +43,7 @@
 3QYUP4AgNpI,833.1,walk,True,walk,refined,"점수판 아웃+0 득점+0 주자 100→110; 해설 '- 골을 맞아서 볼넷을 2개 내주고 있는 김백산, 박정현 선수가 대타로. 높은 쪽에 볼입니다.' (840s)",맞음,정은원 볼넷
 3QYUP4AgNpI,844.3,walk,True,walk,confirmed,점수판 아웃+0 득점+0 주자 110→111; 해설 '베이스가 가득 채워졌습니다. 볼넷 3개째. 오늘 4타수 1안타를 기록하고 있는 1번 타자 최인호. 잘 맞췄습니다.' (850s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (848s),맞음,박정현 볼넷 — 만루
 3QYUP4AgNpI,856.6,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 111→101,맞음,최인호 2타점 안타
-3QYUP4AgNpI,878.4,out,True,,,,놓침,장규현 땅볼 — 경기 끝
+3QYUP4AgNpI,878.4,out,True,out,video_only,점수판 아웃+1 득점+0 주자 101→000,맞음,장규현 땅볼 — 경기 끝
 T93FGIYBM8E,36.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,1회말 첫 타자 안타
 T93FGIYBM8E,46.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→101,맞음,안타 — 1·2루
 T93FGIYBM8E,62.3,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 101→110,맞음,적시타 0-1
@@ -103,7 +103,7 @@ T93FGIYBM8E,956.7,homerun,True,homerun,refined,점수판 아웃+2 득점+1 주�
 T93FGIYBM8E,972.7,none,False,,,,조용함,홈런 다시보기
 T93FGIYBM8E,991.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
 T93FGIYBM8E,1000.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
-T93FGIYBM8E,1011.5,out_any,True,,,,놓침,경기 끝
+T93FGIYBM8E,1011.5,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,경기 끝
 wyC8BnovUUA,109.6,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,삼진으로 보임
 wyC8BnovUUA,127.9,out_any,True,strikeout,refined,점수판 아웃+1 득점+0 주자 000→000; 해설 '3번 타자와는 다른 볼 배합으로 지금 삼진을 잡아내고 있습니다. 3번 타자 김도영과의 승부가 이어집니다. 그렇다. 스피치. 원바운드 볼. 볼이 완전히 엉덩이.' (140s),맞음,
 wyC8BnovUUA,146.4,walk,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,틀림,볼넷으로 보임(3-2)
@@ -145,4 +145,4 @@ wyC8BnovUUA,1036.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 01
 wyC8BnovUUA,1049.5,walk,False,walk,video_only,점수판 아웃+0 득점+0 주자 001→101; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1056s),맞음,볼넷으로 보임(3-0)
 wyC8BnovUUA,1062.3,out,True,out out,video_only video_only,점수판 아웃+1 득점+0 주자 101→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,3아웃
 wyC8BnovUUA,1079.6,out,True,,,,놓침,땅볼
-wyC8BnovUUA,1087.6,out,True,,,,놓침,경기 끝
+wyC8BnovUUA,1087.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,경기 끝

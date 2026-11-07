@@ -356,6 +356,35 @@ def judge_transition(
     return None
 
 
+GAME_END_SEC = 120.0  # 마지막 점수판 뒤 이 안의 투구만 마지막 타석으로 본다
+
+
+def _game_end(stable: Sequence[Reading], cues: Sequence[Cue]) -> list[Transition]:
+    """경기 끝 — 마지막 아웃 뒤엔 점수판이 다시 안 보여 전이가 없다. 9회 이후 2아웃에 앞선 팀이
+    수비 중이면 경기는 세 번째 아웃으로만 끝난다. 마지막 점수판 뒤에 투구 화면이 있으면 그 공이
+    마지막 아웃이다(하이라이트 3편 실측: 마지막 아웃 3개를 모두 놓쳤다).
+    """
+    if not stable:
+        return []
+    last = stable[-1]
+    ends = last.outs == 2 and last.inning >= 9 and (
+        (last.half == "top" and last.home > last.away)
+        or (last.half == "bot" and last.away > last.home))
+    pitches = [c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+               and last.t < c.t <= last.t + GAME_END_SEC]
+    if not ends or not pitches:
+        return []
+    # 9회말 끝내기 홈런 뒤 영상이 끝나면 점수판이 안 바뀐 채 끝난다 — 그 말이 있으면 아웃이 아니다
+    after_last = [c for c in cues if c.kind == "speech" and c.t > last.t]
+    if _speech(after_last, "끝내기", *HR_WORDS):
+        return []
+    t = max(c.t for c in pitches) + 1.0
+    after = Reading(t, last.inning, last.half, 0, 0, 3, (False, False, False),
+                    last.away, last.home)
+    return [Transition(t=t, before=last, after=after, outs_made=1, runs=0, half_change=True,
+                       count_reset=True)]
+
+
 def _mentions(c: Cue, code: str) -> int:
     """해설 한 조각이 그 판정을 몇 번 말했나 — 판정 낱말(별칭 포함)이 나온 횟수, 최소 1."""
     words = next((w for k, _kind, w in _CUE_ONLY if k == code), ())
@@ -478,8 +507,12 @@ def judge(
     cues: Sequence[Cue],
     min_repeat: int = 2,
     window: tuple[float, float] = (CUE_BEFORE, CUE_AFTER),
+    finished: bool = False,
 ) -> list[Judgment]:
     """점수판 판독 열 + 단서 → 판정 목록 (시간순). 투수 교체는 단서만으로 판정한다.
+
+    `finished`: 다 본 녹화본이면 마지막 점수판 뒤 투구로 경기 끝 아웃을 판정한다(_game_end).
+    실시간은 꺼 둔다 — 9회 2아웃에 공 하나 던진 뒤 다음 점수판을 읽기 전에 경기 끝이 뜬다.
 
     `min_repeat`: 같은 점수판이 몇 번 연속 보여야 믿나. 경기 전체는 2(오독 거르기),
     점수판이 몇 번밖에 안 나오는 하이라이트 클립은 1로 쓴다.
@@ -489,7 +522,7 @@ def judge(
     stable = stabilize(readings, min_repeat=min_repeat)
     out = []
     spent: Counter = Counter()
-    for tr in transitions(stable):
+    for tr in transitions(stable) + (_game_end(stable, cues) if finished else []):
         j = _judge_spending_words(tr, cues, window, spent)
         if j is not None:
             out.append(j)
@@ -580,6 +613,7 @@ def judge_checked(
     min_repeat: int = 2,
     window: tuple[float, float] = (CUE_BEFORE, CUE_AFTER),
     check_window: tuple[float, float] = CHECK_WINDOW,
+    finished: bool = False,
 ) -> list[Judgment]:
     """영상 판정 → 해설 대조. 판정마다 `detail["check"]`에 대조 결과를 단다.
 
@@ -588,9 +622,9 @@ def judge_checked(
     영상이 일반 결과까지만 냈을 때 종류를 대는 데 쓴다.
     """
     seen, heard = split_cues(cues)
-    video = judge(readings, seen, min_repeat, window)
+    video = judge(readings, seen, min_repeat, window, finished)
     out = []
-    for j in judge(readings, cues, min_repeat, window):
+    for j in judge(readings, cues, min_repeat, window, finished):
         v = _same_play(j, video)
         if v is None:
             j.detail["check"] = CHECK_SPEECH_ONLY

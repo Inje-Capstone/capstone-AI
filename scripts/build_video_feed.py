@@ -62,7 +62,7 @@ def build(
 ) -> dict[str, Any]:
     # 점수판 전용 판독·Whisper 해설이 있으면 그걸로 — 클립 평가(eval_clips)와 같은 입력
     readings, cues, min_repeat = observe(snap)
-    judgments = judge_checked(readings, cues, min_repeat=min_repeat)
+    judgments = judge_checked(readings, cues, min_repeat=min_repeat, finished=True)  # 녹화본
     events = to_relay_events(judgments, min_confidence)
     stable = stabilize(readings, min_repeat)
     enriched = data is not None and offset is not None
