@@ -138,10 +138,26 @@ class ScorebugSegments:
             r["t"] = round(clip.start + mid, 2)
         speech = []
         if self.transcriber is not None:  # 조각 소리 받아쓰기 — 홈런·삼진 말로 판정을 확인·보완
-            for s in self.transcriber.transcribe(clip.path, clip.duration, 0.0):
-                if s.get("text"):
-                    speech.append({"t": round(clip.start + float(s["t"]), 2), "text": s["text"]})
+            speech = self._speech(clip)
         return SimpleNamespace(scoreboard=[r] if r else [], speech=speech, events=[])
+
+    def _speech(self, clip: VideoClip) -> list[dict[str, Any]]:
+        """홀수 번째 조각에서 앞 조각과 소리를 이어 10초 창으로 받아 적는다. 5초 조각만으로는
+        문맥이 짧아 '투런 홈런'을 '트롯 후보'로 적었다(2026-11-07 실측). 요청도 절반이다."""
+        k = seg_index(clip.path)
+        prev = clip.path.with_name(f"seg_{k - 1:05d}{clip.path.suffix}")
+        if k % 2 == 0 or not prev.exists():
+            return []
+        with tempfile.TemporaryDirectory() as tmp:
+            joined = Path(tmp) / "pair.m4a"
+            subprocess.run([self.transcriber.ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
+                            "-i", str(prev), "-i", str(clip.path), "-filter_complex",
+                            "[0:a][1:a]concat=n=2:v=0:a=1[a]", "-map", "[a]", str(joined)],
+                           check=True)
+            start = clip.start - clip.duration
+            pieces = self.transcriber.transcribe(joined, clip.duration * 2, 0.0)
+        return [{"t": round(start + float(s["t"]), 2), "text": s["text"]}
+                for s in pieces if s.get("text")]
 
 
 def analyze_segment(analyzer: Any, path: Path, start: float, length: float) -> dict[str, Any]:
@@ -237,7 +253,7 @@ def main() -> int:
             from analyze_video import build_transcriber
 
             transcriber = build_transcriber(argparse.Namespace(**{**vars(args),
-                                                                 "asr_piece": args.seg_sec}))
+                                                                 "asr_piece": args.seg_sec * 2}))
         analyzer: Any = ScorebugSegments(build_reader(reader_args), transcriber)
     else:
         analyzer = build_analyzer(args)
