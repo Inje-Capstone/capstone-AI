@@ -23,6 +23,8 @@ MBC는 주자 칸을 흰색으로 채운다 — `base_fill: "bright"`면 밝고 
 시험 경기(zRqpvJdTybA)에서 가짜 출루 판정이 나왔다. `mark`(칸 x0, y0, x1, y1)에 `mark_hue` 색
 화소가 많으면 그 판독에 `mark: "strikeout"`을 달아 상태 판독에서 빼고 삼진 단서로 쓴다.
 `base_hue`가 있으면 그 색상 범위(도)의 칸만 주자로 본다 — 노란 주자 칸과 빨간 K 글자를 가른다.
+다른 중계(캐스터 이름 띠가 위에 붙은 상자형, YiiGl9UUV2E)는 검은 'nK'가 볼카운트·아웃 칸을 덮는다 —
+`mark_fill: "dark"`면 표시 칸의 어두운 화소를 센다(평소 그 칸은 흰 바탕에 빨강·회색 점뿐).
 """
 
 import colorsys
@@ -55,6 +57,7 @@ class Layout:
     base_hue: Optional[tuple[float, float]] = None  # 주자 칸 색상 범위(도, lo>hi면 0도를 넘는다)
     mark: Optional[tuple[float, float, float, float]] = None  # 삼진 표시가 덮는 칸(비율)
     mark_hue: tuple[float, float] = (340.0, 20.0)  # 삼진 표시 글자 색상 범위(도) — 기본 빨강
+    mark_fill: str = "color"  # 삼진 표시 글자: color(mark_hue 색) | dark(검은 글자)
 
     @classmethod
     def load(cls, path: Path) -> "Layout":
@@ -64,6 +67,8 @@ class Layout:
                 raise ValueError(f"{path}: {key}는 숫자 4개(x0, y0, x1, y1 또는 x, y, w, h)다")
         if raw.get("half_by", "shape") not in ("shape", "position"):
             raise ValueError(f"{path}: half_by는 shape 또는 position이다")
+        if raw.get("mark_fill", "color") not in ("color", "dark"):
+            raise ValueError(f"{path}: mark_fill은 color 또는 dark다")
         crop = raw.get("crop")
         half = raw.get("half")
         return cls(
@@ -79,6 +84,7 @@ class Layout:
             base_hue=_pair(raw.get("base_hue")),
             mark=tuple(float(v) for v in raw["mark"]) if raw.get("mark") else None,  # type: ignore[arg-type]
             mark_hue=_pair(raw.get("mark_hue")) or (340.0, 20.0),
+            mark_fill=str(raw.get("mark_fill", "color")),
         )
 
 
@@ -145,6 +151,7 @@ def decode_half(layout: Layout, pixels: bytes, width: int, height: int) -> Optio
 
 
 MARK_MIN_PIXELS = 40  # 삼진 표시로 볼 최소 화소 수(1280×720) — 'nK' 글자는 수백 화소
+DARK_VAL = 0.3  # mark_fill "dark": 이보다 어두우면 검은 글자
 
 
 def decode_mark(layout: Layout, pixels: bytes, width: int, height: int) -> Optional[str]:
@@ -157,7 +164,8 @@ def decode_mark(layout: Layout, pixels: bytes, width: int, height: int) -> Optio
         for x in range(max(0, x0), min(width, x1 + 1)):
             i = (y * width + x) * 3
             rgb = (pixels[i] / 255, pixels[i + 1] / 255, pixels[i + 2] / 255)
-            if is_filled(rgb) and hue_in(rgb, layout.mark_hue):
+            if (max(rgb) < DARK_VAL if layout.mark_fill == "dark"
+                    else is_filled(rgb) and hue_in(rgb, layout.mark_hue)):
                 found += 1
                 if found >= MARK_MIN_PIXELS:
                     return "strikeout"
