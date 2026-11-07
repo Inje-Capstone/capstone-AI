@@ -154,6 +154,25 @@ def summarize_long(video: Path, args: argparse.Namespace, start: float, end: flo
     return out
 
 
+def views_after(video: Path, args: argparse.Namespace, times: Sequence[float], start: float,
+                end: float, window: float = WINDOW) -> list[Optional[str]]:
+    """투구 화면이 끝난 시각마다 공이 맞아 나갔나(play_view) — summarize_long과 같은 창 캐시."""
+    from app.domain.play_view import play_view
+
+    found: dict[float, Optional[str]] = {}
+    t = start
+    while t < end:
+        stop = min(t + window, end)
+        mine = [x for x in times if t <= x < stop]
+        if mine:
+            frames, _height = load_frames(video, args, t, stop)
+            fps = getattr(args, "fps", FPS)
+            for x in mine:
+                found[x] = play_view(frames, x, fps)
+        t += window
+    return [found.get(x) for x in times]
+
+
 def save_shot(video: Path, t: float, boxes: dict[int, Body], dest: Path, label: str) -> None:
     import cv2
 

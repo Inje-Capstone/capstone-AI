@@ -16,12 +16,14 @@ RelayEvent 형식이라 GameSim·detectors·카드가 그대로 받는다.
 판정 규칙표는 docs/exec-plans의 07-video-judge 계획과 1:1이다.
 """
 
+from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Optional
 
 from app.domain.balk_judge import BALK_WORDS, TYPE_LABELS, speech_type
 from app.domain.models import KIND_STATE, RelayEvent
+from app.domain.play_view import IN_PLAY, NO_PLAY, VIEW_UNKNOWN
 from app.domain.scorebug import (
     Reading,
     Transition,
@@ -62,7 +64,10 @@ POSE_TEXT = {"slide_tag": "미끄러져 들어온 주자에게 수비 손이 닿
              "collision": "두 선수가 빠르게 부딪혀 한 명이 넘어짐",
              "swing": "타자가 배트를 휘두름",
              "dive": "수비가 잔디 위로 몸을 던짐",
-             "no_swing": "타자가 공을 그냥 보냄"}
+             "no_swing": "타자가 공을 그냥 보냄",
+             IN_PLAY: "투구 뒤 넓은 경기장 화면 — 공이 맞아 나감",
+             NO_PLAY: "투구 뒤 선수 클로즈업 — 공이 안 맞음",
+             VIEW_UNKNOWN: "투구 뒤 화면으로 공이 맞았는지 못 가름"}
 # 영상 관측이 공식 판정과 갈린 장면 — 판정은 그대로 두고 기록만 한다(오심 검토 후보)
 OBSERVED_TAG_ON_SAFE = "tag_on_safe_runner"
 OBSERVED_SWING_ON_BALL_FOUR = "swing_on_ball_four"
@@ -131,6 +136,11 @@ _EN_WORDS = {
 }
 
 
+# 받아쓰기(Whisper)가 숫자로 적는 말 — '삼진'을 '3진'으로(2026-11-07 하이라이트 실측: "4타자 연속
+# 3진"). '3진루' 같은 말은 해설에 없다
+_ASR_WORDS = {"삼진": ("3진",)}
+
+
 # 같은 글자의 다른 말 — '사구(死球)'는 몸에 맞는 공인데 '고의사구(四球)'는 고의4구다.
 # 낱말을 품은 다른 말(복합어)을 지우고 찾는다
 _HOMONYMS = {
@@ -139,16 +149,21 @@ _HOMONYMS = {
 }
 
 
-def _says(text: str, word: str) -> bool:
+def _without_homonyms(text: str, word: str) -> str:
     for other in _HOMONYMS.get(word, ()):
         text = text.replace(other, "")
-    return word in text
+    return text
+
+
+def _says(text: str, word: str) -> bool:
+    return word in _without_homonyms(text, word)
 
 
 def _speech(cues: Sequence[Cue], *words: str) -> Optional[Cue]:
     wanted = [w.lower() for w in words]
     for w in words:
         wanted += [e for k, en in _EN_WORDS.items() if k in w for e in en]
+        wanted += [e for k, alt in _ASR_WORDS.items() if k in w for e in alt]
     for c in cues:
         if c.kind == "speech" and any(_says(c.text.lower(), w) for w in wanted):
             return c
@@ -246,7 +261,12 @@ def judge_transition(
         tp = _speech(near, *TRIPLE_WORDS)
         if tp:
             return make("result", "triple_play", 0.6, [tp])
-    hr = _has(near, "ball_over_fence") or _speech(near, "홈런")
+    view = _pitch_view(cues, tr)
+    in_play = view if view is not None and view.kind == IN_PLAY else None
+    no_play = view if view is not None and view.kind == NO_PLAY else None
+    # 공이 맞아 나가 주자 전원과 타자가 들어왔고 아웃이 없다 — 홈런(그라운드 홈런 포함)
+    hr = _has(near, "ball_over_fence") or _speech(near, "홈런") or (
+        in_play if tr.outs_made == 0 and tr.count_reset else None)
     if tr.runs >= 1 and tr.runs == tr.runners_before + 1 and not any(a) and hr:
         return make("result", "homerun", 0.5, [hr, _speech(near, "홈런")])
     if tr.outs_made == 1 and tr.runs >= 1 and tr.before.outs <= 1:  # 9.08(d) 2아웃 전
@@ -267,33 +287,47 @@ def judge_transition(
             prior = 0.5 if tr.before.strikes == 2 else 0.3
             return make("call", "dropped_third_strike", prior,
                         [dts, _speech(near, "낫아웃", "낫 아웃")])
-        walk_speech = _speech(near, *WALK_WORDS) or _has(near, "ball_four")
+        # 공이 맞아 나갔으면(넓은 경기장 화면) 볼넷이 아니다 — 해설의 '볼넷'은 다른 타석 말이다
+        walk_speech = None if in_play else (_speech(near, *WALK_WORDS) or _has(near, "ball_four"))
         swung = _swung_last_pitch(near, tr.t)
-        batted = _has(near, "contact") or swung
+        batted = _has(near, "contact") or swung or in_play
         if tr.before.balls == 3 and not batted:
-            return make("result", "walk", 0.6, [walk_speech, _took_last_pitch(near, tr.t)])
+            return make("result", "walk", 0.6,
+                        [walk_speech, _took_last_pitch(near, tr.t), no_play])
         # 3볼에서 휘둘렀는데 1루 — 안타거나, 심판이 체크스윙을 '안 돌았다'로 본 볼넷이다
         seen = {"observed": OBSERVED_SWING_ON_BALL_FOUR} if tr.before.balls == 3 and swung else {}
         if walk_speech:
             return make("result", "walk", 0.5, [walk_speech], **seen)
         if seen:
             return make("result", "reach", 0.5, [swung], **seen)
+        # 볼 셋 전·스트라이크 둘 전에 공이 안 맞았는데 1루 — 몸에 맞는 공이다(낫아웃은 2스트라이크)
+        if no_play and tr.before.balls < 3 and tr.before.strikes < 2:
+            return make("result", "hbp", 0.5, [no_play])
     if tr.outs_made == 1 and tr.before.strikes == 2:
         dts = _strike_three_miss(near) or _speech(near, "낫아웃", "낫 아웃")
         if dts and dts_possible(tr.before):  # 낫아웃 상황이었지만 1루에서 아웃
             return make("call", "dropped_third_strike", 0.5, [dts], out=True)
-        k = _has(near, "swing_miss") or _has(near, "strikeout") or _speech(near, "삼진")
+        # 공이 맞아 나갔으면 삼진이 아니다 — 해설의 '삼진'은 앞 타자 말일 수 있다
+        k = None if in_play else (
+            _has(near, "swing_miss") or _has(near, "strikeout") or _speech(near, "삼진"))
         if k:
             return make("result", "strikeout", 0.5, [k])
         took = _took_last_pitch(near, tr.t)
         # 안 쳤는데 아웃 — 3스트라이크뿐이다. 주자가 움직였으면 다른 플레이가 섞였다(홈스틸 실측)
-        if took and (tr.count_reset or tr.half_change) and b == a and not tr.runs:
+        # 3아웃이면 점수판이 주자를 지운다 — 이닝이 바뀌었으면 주자 모양은 보지 않는다
+        same_bases = b == a or tr.half_change
+        if took and (tr.count_reset or tr.half_change) and same_bases and not tr.runs:
             return make("result", "strikeout", 0.5, [took], looking=True)
+        # 2스트라이크에서 공이 안 맞았는데 아웃 — 삼진이다(휘둘렀는지는 모른다)
+        if no_play and (tr.count_reset or tr.half_change) and same_bases and not tr.runs:
+            return make("result", "strikeout", 0.5, [no_play])
     dive = _has(near, "dive")
     if dive and not tr.runs and not b[0]:
         # 1루가 비어 있어야 아웃이 타자의 것이다 — 1루 주자가 있으면 '주자 포스아웃 + 타자 1루'와
         # '타자 아웃 + 주자 그대로'가 점수판에서 같은 모양이다
-        batter_out = (b == a and not tr.half_change) or (tr.half_change and not any(b))
+        # 이닝이 바뀌었는데 새 이닝에 주자가 있으면 새 이닝 플레이까지 합쳐진 전이다(하이라이트)
+        batter_out = (b == a and not tr.half_change) or (
+            tr.half_change and not any(b) and not any(a))
         if tr.outs_made == 1 and batter_out:  # 몸을 던져 타자를 잡았다
             return make("call", "dive_out", 0.5, [dive])
         reached = a[0] and tr.runners_after == tr.runners_before + 1
@@ -303,6 +337,50 @@ def judge_transition(
     if tr.count_reset or tr.half_change or tr.outs_made or tr.runs:
         return make("result", "out" if tr.outs_made else "reach", 0.5)
     return None
+
+
+def _mentions(c: Cue, code: str) -> int:
+    """해설 한 조각이 그 판정을 몇 번 말했나 — 판정 낱말(별칭 포함)이 나온 횟수, 최소 1."""
+    words = next((w for k, _kind, w in _CUE_ONLY if k == code), ())
+    alts = [*words]
+    for w in words:
+        alts += [e for k, en in _EN_WORDS.items() if k in w for e in en]
+        alts += [e for k, alt in _ASR_WORDS.items() if k in w for e in alt]
+    text = c.text.lower()
+    return max(1, sum(_without_homonyms(text, w.lower()).count(w.lower()) for w in alts))
+
+
+def _judge_spending_words(
+    tr: Transition, cues: Sequence[Cue], window: tuple[float, float], spent: Counter
+) -> Optional[Judgment]:
+    """해설 한 조각의 '삼진' 한 마디는 삼진 하나만 설명한다.
+
+    받아쓰기는 30초 조각이라 한 조각 안에 앞 타자 삼진과 다음 타자 땅볼이 같이 든다. 앞 전이가
+    그 말로 삼진을 냈으면 다음 전이는 같은 말로 다시 삼진을 낼 수 없다(2026-11-07 하이라이트
+    실측: 땅볼 아웃 두 개가 앞 타자의 '삼진'으로 삼진 카드가 됐다). 다른 종류(홈런 등)에는 쓴다.
+    """
+    pool = list(cues)
+    while True:
+        j = judge_transition(tr, pool, window)
+        if j is None:
+            return None
+        said = [c for c in pool if c.kind == "speech" and _ev(c) in j.evidence]
+        over = [c for c in said if spent[(c, j.code)] >= _mentions(c, j.code)]
+        if not over:
+            for c in said:
+                spent[(c, j.code)] += 1
+            return j
+        pool = [c for c in pool if c not in over]
+
+
+def _pitch_view(cues: Sequence[Cue], tr: Transition) -> Optional[Cue]:
+    """그 타석 마지막 공 뒤 화면 — 직전 상태가 처음 보인 때부터 새 상태가 보인 때 사이의 마지막
+    투구. 하이라이트는 다시보기가 길어 새 점수판이 투구 뒤 수십 초에야 보인다(스윙 단서의
+    LAST_PITCH_SEC보다 넓게 본다)."""
+    views = [c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+             and tr.before.t < c.t <= tr.t]
+    last = max(views, key=lambda c: c.t) if views else None
+    return last if last is not None and last.kind != VIEW_UNKNOWN else None
 
 
 def _last_pitch(cues: Sequence[Cue], t: float) -> list[Cue]:
@@ -393,8 +471,9 @@ def judge(
     """
     stable = stabilize(readings, min_repeat=min_repeat)
     out = []
+    spent: Counter = Counter()
     for tr in transitions(stable):
-        j = judge_transition(tr, cues, window)
+        j = _judge_spending_words(tr, cues, window, spent)
         if j is not None:
             out.append(j)
     seen_change: list[float] = []
@@ -735,7 +814,10 @@ def observe(snap: dict) -> tuple[list[Reading], list[Cue], int]:
     crop = (snap.get("scorebug") or {}).get("scoreboard") or []
     if crop:
         readings, _ = from_snapshot({"scoreboard": crop})
-        return readings, cues, 2 if snap["scorebug"].get("every") else 1
+        # 하이라이트를 일정 간격으로 읽으면 한 상태가 한 번만 읽히는 일이 많다 — 분석할 때
+        # 정한 기준(analyze_video --min-repeat)이 있으면 그것을 쓴다
+        fixed = snap["scorebug"].get("min_repeat")
+        return readings, cues, int(fixed) if fixed else (2 if snap["scorebug"].get("every") else 1)
     return readings, cues, 2
 
 
@@ -766,6 +848,9 @@ def pose_cues(pose: dict) -> list[Cue]:
         if s.get("clear", True):  # 경계에 걸친 값은 어느 쪽 단서로도 쓰지 않는다
             kind = "swing" if s["swing"] else "no_swing"
             cues.append(Cue(float(s["t"]), kind, POSE_TAG + POSE_TEXT[kind]))
+        if "t1" in s:  # 투구 화면이 끝난 때 — 못 가른 투구도 남겨 앞 공 화면을 대신 쓰지 않는다
+            view = s.get("view") if s.get("view") in (IN_PLAY, NO_PLAY) else VIEW_UNKNOWN
+            cues.append(Cue(float(s["t1"]), view, POSE_TAG + POSE_TEXT[view]))
     return cues
 
 

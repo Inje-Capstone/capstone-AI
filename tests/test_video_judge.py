@@ -69,6 +69,18 @@ def test_stabilize_rejects_score_going_down_and_inning_going_back():
     assert [(r.away, r.inning) for r in stabilize(readings)] == [(2, 3), (3, 3)]
 
 
+def test_a_misread_later_inning_does_not_lock_out_the_real_ones():
+    """타순 4를 회차로 읽은 판독 몇 장이 진짜 2회 판독 수십 장을 버리게 하면 안 된다."""
+    reads = [R(0, inning=2), R(5, inning=4), R(6, inning=4), R(10, inning=2, outs=1),
+             R(15, inning=2, outs=2), R(18, inning=2, outs=2, balls=1),
+             R(20, inning=3, half="bot"), R(25, inning=3, half="bot", outs=1)]
+    stable = stabilize(reads, min_repeat=1)
+    assert [(r.inning, r.half, r.outs) for r in stable] == [
+        (2, "top", 0), (2, "top", 1), (2, "top", 2), (2, "top", 2), (3, "bot", 0), (3, "bot", 1)]
+    # 반복을 요구하는 경기 영상 방식도 같다 — 오독 덩어리가 짧으면 진 사슬이다
+    assert [r.inning for r in stabilize(twice(*reads), min_repeat=2)] == [2, 2, 2, 2, 3, 3]
+
+
 def test_stabilize_never_lets_outs_go_down_within_a_half():
     """같은 반 이닝에서 아웃이 줄면 오독 — 받아들이면 다음 판독에서 아웃을 또 센다."""
     readings = twice(R(0, outs=1), R(10, outs=0, balls=1), R(20, outs=2))
@@ -439,6 +451,9 @@ def test_full_game_feed_prefers_crop_scoreboard_and_whisper_like_clip_eval():
     # 경기 영상 방식(N초마다)은 같은 상태를 여러 번 읽었다 → 반복으로 거른다
     periodic = {**snap, "scorebug": {**snap["scorebug"], "every": 8}}
     assert observe(periodic)[2] == 2
+    # 하이라이트를 N초마다 읽으면 한 상태가 한 번만 읽힌다 — 분석 때 정한 기준을 따른다
+    highlight = {**snap, "scorebug": {**snap["scorebug"], "every": 8, "min_repeat": 1}}
+    assert observe(highlight)[2] == 1
     speech = [c.text for c in cues if c.kind == "speech"]
     assert speech == ["뛰었습니다 도루!", "[자막] 도루 성공"]
 
@@ -1003,3 +1018,128 @@ def test_call_only_heard_in_commentary_is_marked_for_moving_to_video():
     cues = [Cue(5, "umpire_signal"), Cue(6, "speech", "비디오 판독 들어갑니다")]
     (j,) = judge_checked(twice(R(0), R(10)), cues)
     assert (j.code, j.detail["check"]) == ("video_review", "speech_only")
+
+
+def test_whisper_writing_strikeout_with_a_digit_still_counts():
+    """받아쓰기가 '삼진'을 '3진'으로 적어도 삼진이다(하이라이트 실측 '4타자 연속 3진')."""
+    before = R(0, outs=2, balls=3, strikes=2, bases=(True, True, False))
+    after = R(10, inning=4)
+    (tr,) = transitions(stabilize(twice(before, after)))
+    j = judge_transition(tr, [Cue(8, "speech", "3진. 4타자 연속 삼진 잡아내고")])
+    assert j.code == "strikeout"
+    j = judge_transition(tr, [Cue(8, "speech", "- 3진.- 4타자 연속")])
+    assert j.code == "strikeout"
+
+
+def test_one_spoken_strikeout_explains_one_strikeout():
+    """30초 받아쓰기 조각 하나에 앞 타자 삼진과 다음 타자 땅볼이 같이 든다."""
+    reads = twice(R(0, balls=1, strikes=2), R(10, outs=1, balls=1, strikes=2), R(20, outs=2))
+    heard = [Cue(5, "speech", "투 앤 투에서 헛스윙 삼진! 다음 타자 땅볼 1루에서 아웃")]
+    assert [j.code for j in judge(reads, heard)] == ["strikeout", "out"]
+    twice_said = [Cue(5, "speech", "삼진! 또 삼진입니다")]
+    assert [j.code for j in judge(reads, twice_said)] == ["strikeout", "strikeout"]
+
+
+def test_count_dropping_alone_is_a_misread_not_a_new_batter():
+    """카운트만 줄고 아웃·주자·득점이 그대로면 판정하지 않는다(독립 리뷰 재현)."""
+    reads = twice(R(0, balls=1, strikes=2, outs=1), R(10, balls=0, strikes=1, outs=1))
+    assert judge(reads, []) == []
+    hit = twice(R(0, balls=2, strikes=2, outs=2, bases=(False, True, False)),
+                R(10, balls=0, strikes=1, outs=2, bases=(True, False, True)))
+    assert [j.code for j in judge(hit, [])] == ["reach"]
+
+
+def test_a_compound_word_does_not_count_as_a_second_mention():
+    reads = twice(R(0), R(10, away=1), R(20, away=2))
+    heard = [Cue(5, "speech", "홈런스타 이벤트, 홈런!")]
+    assert [j.code for j in judge(reads, heard)] == ["homerun", "reach"]
+
+
+def _view(t, kind):
+    return Cue(t, kind, "[관절] 투구 뒤 화면")
+
+
+def test_ball_not_put_in_play_with_two_strikes_then_out_is_a_strikeout():
+    """해설 없이 — 투구 뒤 선수 클로즈업(공이 안 맞음) + 2스트라이크 + 아웃 = 삼진."""
+    (tr,) = transitions(stabilize(twice(R(0, balls=1, strikes=2), R(10, outs=1, balls=0,
+                                                                     strikes=1))))
+    assert judge_transition(tr, [_view(4, "no_play")]).code == "strikeout"
+    # 3아웃이면 점수판이 주자를 지워도 삼진이다
+    (tr,) = transitions(stabilize(twice(R(0, outs=2, strikes=2, bases=(True, False, False)),
+                                        R(10, inning=4))))
+    assert judge_transition(tr, [_view(4, "no_play")]).code == "strikeout"
+
+
+def test_ball_put_in_play_overrides_spoken_strikeout_and_walk():
+    """공이 맞아 나갔으면 해설의 '삼진'·'볼넷'은 다른 타석 말이다."""
+    (tr,) = transitions(stabilize(twice(R(0, balls=1, strikes=2), R(10, outs=1))))
+    said = Cue(6, "speech", "앞 타자 헛스윙 삼진")
+    assert judge_transition(tr, [said, _view(4, "in_play")]).code == "out"
+    (tr,) = transitions(stabilize(twice(R(0, balls=3, strikes=1), R(10, bases=(True, False,
+                                                                              False)))))
+    walk_said = Cue(6, "speech", "볼넷으로 걸어 나갑니다")
+    assert judge_transition(tr, [walk_said, _view(4, "in_play")]).code == "reach"
+    assert judge_transition(tr, [_view(4, "no_play")]).code == "walk"
+
+
+def test_not_put_in_play_early_in_the_count_then_first_base_is_a_hit_by_pitch():
+    (tr,) = transitions(stabilize(twice(R(0, balls=1), R(10, bases=(True, False, False)))))
+    assert judge_transition(tr, [_view(4, "no_play")]).code == "hbp"
+    # 2스트라이크면 낫아웃일 수도 있어 말하지 않는다
+    (tr,) = transitions(stabilize(twice(R(0, balls=1, strikes=2),
+                                        R(10, bases=(True, False, False)))))
+    assert judge_transition(tr, [_view(4, "no_play")]).code != "hbp"
+
+
+def test_ball_in_play_and_everyone_scores_is_a_home_run_without_the_word():
+    (tr,) = transitions(stabilize(twice(R(0, balls=1, bases=(True, False, False)),
+                                        R(10, away=2))))
+    assert judge_transition(tr, [_view(4, "in_play")]).code == "homerun"
+    assert judge_transition(tr, []).code != "homerun"
+
+
+def test_the_view_must_belong_to_this_at_bat():
+    """직전 상태가 보이기 전의 투구 화면은 이 타석 것이 아니다."""
+    (tr,) = transitions(stabilize(twice(R(20, balls=1, strikes=2), R(30, outs=1))))
+    assert judge_transition(tr, [_view(5, "no_play")]).code == "out"
+
+
+def test_an_unclear_last_pitch_does_not_borrow_the_previous_pitch_view():
+    """마지막 공 화면을 못 가르면 같은 타석 앞 공의 '안 맞음'을 쓰지 않는다(독립 리뷰 재현)."""
+    (tr,) = transitions(stabilize(twice(R(100, strikes=2), R(130, outs=1))))
+    earlier, last = _view(101, "no_play"), _view(120, "view_unknown")
+    assert judge_transition(tr, [earlier, last]).code == "out"
+    (tr,) = transitions(stabilize(twice(R(100, balls=1, strikes=1),
+                                        R(130, bases=(True, False, False)))))
+    assert judge_transition(tr, [earlier, last]).code == "reach"
+    # 직전 상태가 보이기 전(앞 타석 끝)의 화면도 쓰지 않는다
+    assert judge_transition(tr, [_view(99.5, "no_play")]).code == "reach"
+
+
+def test_swings_without_a_view_become_unknown_view_cues():
+    pose = {"swings": [{"t": 5.0, "t0": 3.0, "t1": 6.0, "swing": True, "clear": True},
+                       {"t": 25.0, "t0": 23.0, "t1": 26.0, "swing": False, "clear": True,
+                        "view": "no_play"}]}
+    kinds = [(c.t, c.kind) for c in pose_cues(pose) if "view" in c.kind or "play" in c.kind]
+    assert kinds == [(6.0, "view_unknown"), (26.0, "no_play")]
+
+
+def test_a_new_runner_means_the_at_bat_ended_even_if_the_count_did_not_drop():
+    """1·2루에서 2점이 나고 2루에 주자가 남았다 — 타자가 나갔다(다음 타자 첫 판독이 이미 2-1)."""
+    reads = twice(R(0, balls=2, strikes=1, outs=2, bases=(True, True, False)),
+                  R(10, balls=2, strikes=1, outs=2, bases=(False, True, False), home=2))
+    (tr,) = transitions(stabilize(reads))
+    assert tr.count_reset
+    assert judge_transition(tr, []).code == "reach"
+    # 도루는 주자 수가 그대로다 — 새 타자로 보지 않는다
+    steal = twice(R(0, balls=1, bases=(True, False, False)),
+                  R(10, balls=1, strikes=1, bases=(False, True, False)))
+    (tr,) = transitions(stabilize(steal))
+    assert not tr.count_reset
+
+
+def test_a_dive_does_not_explain_a_half_change_merged_with_the_next_half():
+    """3아웃 뒤 새 이닝 첫 타자 안타까지 한 전이로 합쳐지면 다이빙 아웃이라 말하지 않는다."""
+    (tr,) = transitions(stabilize(twice(R(0, outs=2, half="bot"),
+                                        R(10, inning=4, bases=(True, False, False)))))
+    assert judge_transition(tr, [Cue(5, "dive")]).code != "dive_out"

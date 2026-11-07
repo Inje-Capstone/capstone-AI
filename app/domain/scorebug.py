@@ -92,6 +92,11 @@ def stabilize(readings: Sequence[Reading], min_repeat: int = 2) -> list[Reading]
     같은 반 이닝에서 아웃도 줄 수 없다 — 받아들이면 다음 판독에서 아웃을 또 세어 경기 상태가
     3아웃을 넘는다(시뮬레이션 실측).
 
+    이 세 규칙은 앞에서부터 하나씩 적용하지 않는다 — 회차 오독 한 장('4.강백호'의 타순 4를
+    4회로 읽음)을 먼저 받으면 그 뒤 진짜 2·3회 판독이 전부 '되돌아감'으로 버려졌다(2026-11-07
+    하이라이트 실측: 36칸 중 31칸 놓침). 서로 모순 없는 판독 덩어리 중 판독이 가장 많은 사슬을
+    고른다(_consistent_chain).
+
     `min_repeat` 1(점수판 전용 판독 — 상태마다 한 장)은 반복으로 거를 수 없어, 앞뒤 판독과
     수지가 안 맞는 한 장을 버린다: 앞→뒤는 가능한데 앞→이것 또는 이것→뒤가 불가능할 때.
     """
@@ -105,21 +110,38 @@ def stabilize(readings: Sequence[Reading], min_repeat: int = 2) -> list[Reading]
     if min_repeat <= 1:
         runs = _drop_spikes(runs)
     stable: list[Reading] = []
-    for candidate, run in runs:
-        accepted = run >= min_repeat
-        if accepted and stable:
-            prev = stable[-1]
-            if candidate.key() == prev.key():
-                accepted = False
-            elif candidate.away < prev.away or candidate.home < prev.home:
-                accepted = False
-            elif _half_order(candidate) < _half_order(prev):  # 이닝은 되돌아가지 않는다
-                accepted = False
-            elif _half_order(candidate) == _half_order(prev) and candidate.outs < prev.outs:
-                accepted = False
-        if accepted:
+    for candidate, _run in _consistent_chain([rn for rn in runs if rn[1] >= min_repeat]):
+        if not stable or candidate.key() != stable[-1].key():
             stable.append(candidate)
     return stable
+
+
+def _can_follow(a: Reading, b: Reading) -> bool:
+    """a 다음에 b가 올 수 있나 — 점수는 줄지 않고, 이닝은 되돌아가지 않고, 같은 반 이닝에서
+    아웃도 줄지 않는다."""
+    if b.away < a.away or b.home < a.home:
+        return False
+    if _half_order(b) < _half_order(a):
+        return False
+    return not (_half_order(b) == _half_order(a) and b.outs < a.outs)
+
+
+def _consistent_chain(runs: list[tuple[Reading, int]]) -> list[tuple[Reading, int]]:
+    """시간순 판독 덩어리 중 서로 모순 없는 사슬 가운데 판독 수가 가장 많은 것."""
+    best = [n for _r, n in runs]
+    back = [-1] * len(runs)
+    for j, (rj, nj) in enumerate(runs):
+        for i in range(j):
+            if best[i] + nj > best[j] and _can_follow(runs[i][0], rj):
+                best[j], back[j] = best[i] + nj, i
+    if not runs:
+        return []
+    j = max(range(len(runs)), key=lambda k: (best[k], k))
+    chain = []
+    while j >= 0:
+        chain.append(runs[j])
+        j = back[j]
+    return chain[::-1]
 
 
 def _drop_spikes(runs: list[tuple[Reading, int]]) -> list[tuple[Reading, int]]:
@@ -151,6 +173,15 @@ def transitions(stable: Sequence[Reading]) -> list[Transition]:
             (before.balls, before.strikes) != (0, 0) or half_change or outs_made
             or runs or after.bases != before.bases
         )
+        # 한 타석 안에서 볼·스트라이크는 줄지 않는다 — 줄었고 아웃·주자·득점도 바뀌었으면 새 타자다.
+        # 하이라이트는 새 타자의 초구 뒤에야 점수판이 다시 보여 0-0이 안 읽힌다(2026-11-07 실측:
+        # 안타가 '주자 진루'로). 카운트만 줄었으면 오독일 수 있어 새 타자로 보지 않는다
+        dropped = after.balls < before.balls or after.strikes < before.strikes
+        moved = half_change or outs_made or runs or after.bases != before.bases
+        # 주자 수 + 득점이 늘었으면 타자가 나갔다 — 한 타석 안의 진루(도루·폭투·보크)로는 늘 수
+        # 없다. 다음 타자의 첫 판독이 이미 2-1이면 카운트로는 새 타자를 모른다(2타점 2루타 실측)
+        new_runner = sum(after.bases) + max(0, runs) > sum(before.bases)
+        count_reset = count_reset or bool(dropped and moved) or (new_runner and not half_change)
         out.append(Transition(
             t=after.t, before=before, after=after, outs_made=outs_made, runs=max(0, runs),
             half_change=half_change, count_reset=count_reset,

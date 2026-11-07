@@ -67,3 +67,85 @@ def test_reader_takes_bases_and_outs_from_pixels_when_layout_given(tmp_path):
     (r,) = reader.read("g.mp4", 2.0)["scoreboard"]
     assert (r["bases"], r["outs"]) == ([1], 1)  # 화소: 1루만 빨강, 아웃 점 하나
     assert (r["balls"], r["strikes"], r["home"]) == (1, 2, 4)  # 숫자는 VLM 그대로
+
+
+def test_bright_mode_counts_white_squares_not_red_or_dark():
+    """MBC 아래 띠는 주자 칸을 흰색으로 채운다(실측 밝기 0.92~1.00, 빈 칸 0.11~0.14)."""
+    assert is_filled(WHITE, "bright")
+    assert not is_filled(RED, "bright")
+    assert not is_filled((0.12, 0.12, 0.13), "bright")
+
+
+def test_bar_layout_reads_white_bases_but_red_out_dots():
+    layout = Layout.load(ROOT / "data" / "scorebug_layouts" / "mbc_sports_plus.json")
+    assert layout.crop is not None and layout.scale == 1.5 and layout.base_fill == "bright"
+    b1, b2, b3 = layout.bases[1], layout.bases[2], layout.bases[3]
+    o1, o2 = layout.outs
+    colors = {b1: WHITE, b2: (0.12, 0.12, 0.13), b3: WHITE, o1: RED, o2: WHITE}
+    assert decode(layout, lambda p: colors[p]) == ([1, 3], 1)
+
+
+def test_reader_with_a_crop_layout_skips_corner_picking(tmp_path):
+    """띠 점수판은 위치 파일의 영역을 그대로 자른다 — 모서리 고르기 요청을 쓰지 않는다."""
+    from app.adapters.video import scorebug_reader as sr
+
+    path = tmp_path / "bar.json"
+    path.write_text(json.dumps({"name": "bar", "crop": [0.2, 0.9, 0.3, 0.06], "scale": 1.5,
+                                "bases": {"1": [0.3, 0.95], "2": [0.29, 0.94],
+                                          "3": [0.28, 0.95]},
+                                "outs": [[0.4, 0.95], [0.41, 0.95]]}), encoding="utf-8")
+    reader = sr.ScorebugReader("K", "http://x", "m", layout=Layout.load(path))
+
+    def no_pick(*_args):
+        raise AssertionError("모서리를 고르면 안 된다")
+
+    reader.pick_corner = no_pick
+    filters = []
+    thumb = bytes([50] * sr.THUMB_W * sr.THUMB_H)
+    reader._thumbs = lambda video, corner, start, duration: [thumb] * 2
+    reader._frame = lambda video, t, vf: filters.append(vf) or b"jpg"
+    reader._rgb = lambda video, t: bytes([20, 20, 20] * sr.RGB_W * sr.RGB_H)
+    reader._ask = lambda images, text, max_tokens: {
+        "visible": True, "inning": 1, "half": "top", "balls": 0, "strikes": 0,
+        "outs": 2, "bases": [1], "away": 0, "home": 0}
+    out = reader.read("g.mp4", 2.0)
+    assert out["corner"] == "layout" and len(out["scoreboard"]) == 1
+    assert all(f.startswith("crop=iw*0.3:ih*0.06:iw*0.2:ih*0.9,scale=iw*1.5") for f in filters)
+    r = out["scoreboard"][0]
+    assert (r["bases"], r["outs"]) == ([], 0)  # 화소(검정)가 VLM 답을 이긴다
+
+
+def _triangle(up: bool, color=(220, 20, 60), bg=(245, 245, 245)) -> bytes:
+    """1280×720 화면 (600, 300) 둘레에 ▲(up) 또는 ▼."""
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    px = bytearray(bytes(bg) * (RGB_W * RGB_H))
+    for row in range(10):
+        half = row if up else 9 - row  # ▲는 아래로 갈수록 넓다
+        for x in range(600 - half, 601 + half):
+            i = ((300 + row) * RGB_W + x) * 3
+            px[i:i + 3] = bytes(color)
+    return bytes(px)
+
+
+def test_arrow_pixels_decide_top_or_bottom_of_the_inning():
+    from app.adapters.video.scorebug_layout import decode_half
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    box = (590 / RGB_W, 295 / RGB_H, 612 / RGB_W, 315 / RGB_H)
+    layout = Layout("t", {}, (), half=box)
+    assert decode_half(layout, _triangle(up=True), RGB_W, RGB_H) == "top"
+    assert decode_half(layout, _triangle(up=False), RGB_W, RGB_H) == "bot"
+    blank = bytes((245, 245, 245) * (RGB_W * RGB_H))
+    assert decode_half(layout, blank, RGB_W, RGB_H) is None  # 화살표가 없으면 VLM 답을 둔다
+    white = Layout("t", {}, (), half=box, half_fill="bright")
+    dark_up = _triangle(up=True, color=(250, 250, 250), bg=(15, 15, 15))
+    assert decode_half(white, dark_up, RGB_W, RGB_H) == "top"
+    assert decode_half(Layout("t", {}, ()), dark_up, RGB_W, RGB_H) is None  # 칸이 없는 위치 파일
+
+
+def test_shipped_layouts_have_arrow_boxes():
+    for name in ("sbs_sports_2026", "mbc_sports_plus", "tving_postseason"):
+        layout = Layout.load(ROOT / "data" / "scorebug_layouts" / f"{name}.json")
+        x0, y0, x1, y1 = layout.half
+        assert 0 < x0 < x1 < 1 and 0 < y0 < y1 < 1
