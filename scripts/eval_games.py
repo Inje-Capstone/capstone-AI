@@ -189,6 +189,8 @@ def main() -> None:
                         help="점수판 판독만 이 폴더의 스냅샷에서 가져온다(읽기 방식 비교)")
     parser.add_argument("--asr-from", type=Path, default=None,
                         help="해설 받아쓰기만 이 폴더의 스냅샷에서 가져온다(조각 길이 비교)")
+    parser.add_argument("--out", type=Path, default=OUT,
+                        help="REPORT.md·plays.csv를 쓸 폴더(시험용 경기는 따로 둔다)")
     args = parser.parse_args()
     labels = json.loads(LABELS.read_text(encoding="utf-8"))["games"]
     rows, titles = [], {}
@@ -209,14 +211,15 @@ def main() -> None:
         snaps[stem] = snap
     if not rows:
         raise SystemExit("채점할 영상이 없다 — 스냅샷 폴더를 확인한다")
-    with (OUT / "plays.csv").open("w", encoding="utf-8-sig", newline="") as f:
+    args.out.mkdir(parents=True, exist_ok=True)
+    with (args.out / "plays.csv").open("w", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
     text = report(rows, titles)
     if args.ablation:
         text += "\n" + ablation(labels, snaps)
-    (OUT / "REPORT.md").write_text(text, encoding="utf-8")
+    (args.out / "REPORT.md").write_text(text, encoding="utf-8")
     print(text)
 
 

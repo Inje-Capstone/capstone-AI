@@ -178,7 +178,7 @@ def _speech(cues: Sequence[Cue], *words: str) -> Optional[Cue]:
 def _ev(c: Cue) -> str:
     if c.kind == "speech":
         return f"해설 '{c.text}' ({c.t:.0f}s)"
-    if c.text.startswith(POSE_TAG):  # 관절로 잰 동작 — 무엇을 봤는지 그대로
+    if c.text.startswith((POSE_TAG, "[점수판]")):  # 관절로 잰 동작·점수판 표시 — 본 것 그대로
         return f"{c.text} ({c.t:.0f}s)"
     return f"장면 {c.kind} ({c.t:.0f}s)"
 
@@ -559,6 +559,41 @@ def _walk_off_kind(near: Sequence[Cue]) -> Optional[tuple[str, Cue]]:
     return None
 
 
+K_MARK = "k_mark"  # 점수판이 주자·아웃 칸을 'nK'로 덮은 판독(scorebug_layout.decode_mark)
+K_MARK_TEXT = "[점수판] 삼진 표시(K)"
+K_MARK_SEC = 8.0  # 표시가 뜬 뒤 아웃이 올라간 판독까지(처음 본 시험 경기 실측 2~5초)
+
+
+def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence[Reading]) -> None:
+    """삼진 표시 뒤 첫 아웃 판정을 삼진으로. 표시 하나는 판정 하나에만 쓴다.
+
+    표시는 2~3초 떠 있어 연달아 두 번 읽히기도 한다 — 표시 뒤 첫 아웃 판정이 이미 쓰였으면
+    더 뒤의 아웃으로 넘어가지 않는다(같은 삼진의 표시다). 표시 직전 판독이 2스트라이크가
+    아니면(아웃이 이미 올라갔다 등) 쓰지 않는다 — 뒤따르는 다른 타자의 아웃을 삼진으로 바꾼다.
+    아웃 하나짜리, 여러 플레이가 합쳐지지 않은 판정만 바꾼다(독립 리뷰).
+    """
+    used: set[int] = set()
+    for m in sorted((c for c in cues if c.kind == K_MARK), key=lambda c: c.t):
+        prev = [r for r in stable if r.t <= m.t]
+        if not prev or prev[-1].strikes != 2:
+            continue
+        after = [i for i, j in enumerate(judged) if j.transition is not None
+                 and j.transition.outs_made >= 1 and m.t <= j.t <= m.t + K_MARK_SEC]
+        if not after:
+            continue
+        i = min(after, key=lambda i: judged[i].t)
+        if i in used:
+            continue
+        used.add(i)
+        j = judged[i]
+        tr = j.transition
+        if j.code == "out" and tr is not None and tr.outs_made == 1 and not j.detail.get("merged"):
+            judged[i] = Judgment(j.t, "result", "strikeout", max(j.confidence, 0.6),
+                                 j.evidence + [_ev(m)], j.transition, dict(j.detail))
+        elif j.code == "strikeout":
+            j.evidence.append(_ev(m))
+
+
 def judge(
     readings: Sequence[Reading],
     cues: Sequence[Cue],
@@ -584,6 +619,7 @@ def judge(
         j = _judge_spending_words(tr, cues, window, spent)
         if j is not None:
             out.append(j)
+    _apply_k_marks(out, cues, stable)
     seen_change: list[float] = []
     for c in sorted(cues, key=lambda c: c.t):
         is_change = c.kind == "pitching_change" or (
@@ -895,8 +931,11 @@ def judge_from_cues(cues: Sequence[Cue]) -> Optional[Judgment]:
 # ── 분석 스냅샷(analyze_video.py) → 판독·단서 ───────────────────────────
 def from_snapshot(snap: dict) -> tuple[list[Reading], list[Cue]]:
     """`data/video/{id}.json` → (점수판 판독, 장면·해설 단서)."""
-    readings = []
+    readings, marks = [], []
     for r in snap.get("scoreboard") or []:
+        if r.get("mark") == "strikeout":  # 주자·아웃 칸이 삼진 표시로 덮인 판독 — 상태는 엉터리다
+            marks.append(Cue(float(r["t"]), K_MARK, K_MARK_TEXT))
+            continue
         bases = tuple(n in (r.get("bases") or []) for n in (1, 2, 3))
         readings.append(Reading(float(r["t"]), int(r["inning"]), r["half"], int(r["balls"]),
                                 int(r["strikes"]), int(r["outs"]), bases,  # type: ignore[arg-type]
@@ -905,7 +944,7 @@ def from_snapshot(snap: dict) -> tuple[list[Reading], list[Cue]]:
             for e in snap.get("events") or [] if e.get("event_type") in CUE_KINDS]
     cues += [Cue(float(s["t"]), "speech", s["text"]) for s in snap.get("speech") or []
              if not is_echoed_keyword(s.get("text", ""))]
-    return readings, sorted(cues + pose_cues(snap.get("pose") or {}), key=lambda c: c.t)
+    return readings, sorted(cues + marks + pose_cues(snap.get("pose") or {}), key=lambda c: c.t)
 
 
 def observe(snap: dict) -> tuple[list[Reading], list[Cue], int]:
@@ -926,7 +965,8 @@ def observe(snap: dict) -> tuple[list[Reading], list[Cue], int]:
         )
     crop = (snap.get("scorebug") or {}).get("scoreboard") or []
     if crop:
-        readings, _ = from_snapshot({"scoreboard": crop})
+        readings, marks = from_snapshot({"scoreboard": crop})
+        cues = sorted(cues + marks, key=lambda c: c.t)
         # 하이라이트를 일정 간격으로 읽으면 한 상태가 한 번만 읽히는 일이 많다 — 분석할 때
         # 정한 기준(analyze_video --min-repeat)이 있으면 그것을 쓴다
         fixed = snap["scorebug"].get("min_repeat")

@@ -21,7 +21,7 @@ from typing import Any, Optional, Union
 
 from app.adapters.video.base import VideoAnalyzerError, _json_payload
 from app.adapters.video.http import completion_text, post_json
-from app.adapters.video.scorebug_layout import Layout, decode, decode_half, rgb_sampler
+from app.adapters.video.scorebug_layout import Layout, decode, decode_half, decode_mark, rgb_sampler
 
 # 모서리 후보 (x, y, w, h — 화면 비율)
 CORNERS = {
@@ -390,6 +390,9 @@ class ScorebugReader:
                 half = decode_half(self.layout, px, RGB_W, RGB_H)
                 if half:
                     r["half"] = half
+                mark = decode_mark(self.layout, px, RGB_W, RGB_H)
+                if mark:  # 주자·아웃 칸이 덮였다 — 상태 판독에서 빠지고 단서가 된다
+                    r["mark"] = mark
             return r
         except (subprocess.CalledProcessError, OSError) as exc:  # 출력 파일이 안 생김 등
             raise VideoAnalyzerError(f"점수판 판독 실패: {exc}") from exc
@@ -450,6 +453,9 @@ class ScorebugReader:
                     half = decode_half(self.layout, px, RGB_W, RGB_H)
                     if half:  # 초·말도 화살표 화소가 VLM보다 믿을 만하다
                         r["half"] = half
+                    mark = decode_mark(self.layout, px, RGB_W, RGB_H)
+                    if mark:  # 주자·아웃 칸이 삼진 표시로 덮였다 — 상태 판독에서 빠진다
+                        r["mark"] = mark
                 if r:
                     readings.append(r)
         except (subprocess.CalledProcessError, VideoAnalyzerError) as exc:

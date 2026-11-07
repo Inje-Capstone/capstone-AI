@@ -35,4 +35,12 @@ def test_unclear_or_missing_views_say_nothing():
     assert play_view([], 10.0) is None  # 경기장이 아닌 화면 — 관절이 건너뜀
     assert play_view(frames(10.5, 5, tall=0.08), 10.0) is None  # 넓은 화면 0.5초뿐
     assert play_view(frames(10.5, 20, tall=0.4), 10.0) is None  # 중간 크기
-    assert play_view(frames(20.0, 20, tall=0.08), 10.0) is None  # 투구 뒤 3.5초 밖
+    # 투구 뒤 3.5초 밖의 넓은 화면은 세지 않는다 — 그 사이가 경기장 밖 화면이면 안 맞은 것
+    assert play_view(frames(20.0, 20, tall=0.08), 10.0) == NO_PLAY
+
+
+def test_pitch_followed_only_by_off_field_frames_is_no_play():
+    """투구 뒤 경기장 화면이 한 장도 없다(실내 클로즈업 건너뜀) — 안 맞았다. 영상 끝은 모른다."""
+    later = [PeopleFrame(5.0, (), height=1080)]  # 분석이 구간 뒤까지 이어졌다
+    assert play_view(later, 0.0) == NO_PLAY
+    assert play_view([], 0.0) is None  # 영상·조각이 끝났다
