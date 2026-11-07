@@ -4,7 +4,7 @@
 
 ## 1. 지금 상태
 
-- **실제 경기 정확도(2026-11-07, PR #52~#54)**: 1080p 경기 하이라이트 3편(SBS·MBC 스포츠+·포스트시즌 TVING) 119칸 중 **95(80%)**, 확실한 정답만 79/97. 설정을 정한 뒤 한 번만 잰 시험용 PO 1차전은 27/36(75%). 해설을 빼도(점수판+관절) 95 — `data/game_eval/REPORT.md`, 측정 기록 `data/analysis/LOG.md`. 정답은 사람이 투구 화면마다 매겼다(`data/game_eval/labels.json`) — 네이버 문자중계가 이 PC에서 응답하지 않았다
+- **실제 경기 정확도(2026-11-07, PR #52~#58)**: 1080p 경기 하이라이트 3편(SBS·MBC 스포츠+·포스트시즌 TVING) 118칸 중 **97(82%)**, 확실한 정답만 81/100. 설정을 정한 뒤 처음 잰 시험용 PO 1차전은 27/36(75%). 해설을 빼도(점수판+관절) 96. 중간발표 시연 클립은 같은 판정(도루 카드) 그대로 — `data/game_eval/REPORT.md`, 측정 기록 `data/analysis/LOG.md`. 정답은 사람이 투구 화면마다 매겼다(`data/game_eval/labels.json`) — 네이버 문자중계가 이 PC에서 응답하지 않았다
 - main: PR #1~#28 머지, CI(test 3.9·3.12 + docker) 통과, pytest 229 · ruff clean
 - **판단 신호 — 관절 슬라이딩·태그·충돌(2026-10-27)**: `app/domain/contact.py` — 화면 속 모든 사람 관절(rtmlib, `PeoplePoseExtractor`)로 슬라이딩·다이빙(상체가 눕혀진 채 몸길이 0.4배 넘게 이동), 미끄러져 들어와 닿음(태그), 충돌(빠르게 다가와 닿고 넘어짐). 중계 카메라 패닝·줌은 배경 광류 + RANSAC 닮음 변환(`camera_motion`)으로 되돌린다. 스냅샷 `pose` → 장면 단서 `slide`(VLM과 같은 종류)·`slide_tag`·`collision`, 카드 근거 '[관절] …'. 충돌·태그는 홈 충돌·슬라이딩 규정·주루/수비방해 선언의 확인 장면
   - 정답 표 `data/clip_eval/contact_truth.json` 28클립(기준 6·검증 12·최종 10 — 최종은 2차 기준 고정 뒤 검출을 가리고 분류)
@@ -77,6 +77,7 @@ L=data/scorebug_layouts/sbs_sports_2026.json   # 중계사별: mbc_sports_plus.j
 - 점수판 판독은 한 번에 하나만 돌린다(동시에 보내면 NVIDIA 분당 한도 429로 절반 넘게 실패). `--read-gap` 기본 1.6초
 - 새 중계사는 `scripts/scorebug_layout.py`로 주자·아웃 위치를 잰다. 아래 띠 점수판은 `crop`, 흰 주자 칸은 `base_fill: bright`, 초·말 화살표 칸은 `half`(위치 파일 3개 참고)
 - 관절은 CPU로 영상 1초당 약 3.5~4초(15분 하이라이트 60~80분)
+- 실시간(VLM 영상 입력 없이): `live_video.py LIVE1 game.mp4 --away KIA --home 삼성 --scorebug-layout <위치 파일> --asr --height 1080 --workers 1` — 5초 조각마다 점수판 한 장. 상태 추적은 되지만 홈런 카드는 받아쓰기 품질에 달려 있다(LOG.md)
 
 **리플레이 (경기 끝난 영상)**
 ```bash
