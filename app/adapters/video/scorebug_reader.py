@@ -259,17 +259,14 @@ class ScorebugReader:
             "temperature": 0.0,
             "chat_template_kwargs": {"enable_thinking": False},
         }
-        with self._pace:
+        with self._pace:  # 보내기까지 잠금 안에서 — 잠금을 푼 뒤 밀리면 두 요청이 붙어 나간다
             wait = self._last + self.min_gap - time.monotonic()
             if wait > 0:
                 time.sleep(wait)
             self._last = time.monotonic()
             self.requests += 1
-        return _json_payload(
-            completion_text(
-                post_json(f"{self.base_url}/chat/completions", body, token=self.api_key)
-            )
-        )
+            response = post_json(f"{self.base_url}/chat/completions", body, token=self.api_key)
+        return _json_payload(completion_text(response))
 
     def _frame(self, video: Path, t: float, vf: str) -> bytes:
         with tempfile.TemporaryDirectory() as d:

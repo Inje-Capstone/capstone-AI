@@ -1223,3 +1223,19 @@ def test_an_out_and_a_late_run_from_third_are_one_sacrifice_fly():
     wild = twice(R(0, balls=2, strikes=2, bases=loaded), R(10, outs=1, bases=loaded),
                  R(21, outs=1, balls=1, bases=(False, True, True), away=1))
     assert len(judge(wild, [])) == 2
+
+
+def test_outs_raised_one_by_one_within_seconds_are_one_double_play():
+    """점수판이 병살 아웃을 4초 간격으로 하나씩 올렸다 — 투구 없이 이어지면 한 플레이다."""
+    reads = twice(R(0, outs=1, balls=0, strikes=1, bases=(True, False, False)),
+                  R(10, outs=2, bases=(True, False, False)), R(14, inning=4, half="bot"))
+    said = Cue(12, "speech", "더블 플레이로 이닝을 끝내버리는")
+    assert [j.code for j in judge(reads, [said])] == ["double_play"]
+    # 사이에 투구가 있었으면 따로 일어난 아웃이다
+    assert len(judge(reads, [said, _view(12, "no_play")])) == 2
+
+
+def test_talk_about_hoping_for_a_double_play_before_the_play_is_not_a_double_play():
+    (tr,) = transitions(stabilize(twice(R(0, outs=1, bases=(True, False, False)),
+                                        R(40, inning=4, half="bot"))))
+    assert judge_transition(tr, [Cue(5, "speech", "여기서 병살 노려야죠")]).code == "out"

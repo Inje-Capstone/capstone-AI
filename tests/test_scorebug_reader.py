@@ -151,7 +151,7 @@ def test_request_gap_holds_across_threads(monkeypatch):
     for th in threads:
         th.join()
     gaps = [b - a for a, b in zip(sorted(sent), sorted(sent)[1:])]
-    assert len(sent) == 3 and min(gaps) >= 0.19
+    assert len(sent) == 3 and min(gaps) >= 0.17  # 윈도우 시계 해상도(약 15ms)만큼 여유
 
 
 def test_single_frame_past_the_end_of_a_short_segment_is_a_read_error(tmp_path):

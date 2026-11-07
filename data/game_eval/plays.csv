@@ -59,7 +59,7 @@ T93FGIYBM8E,206.9,none,True,out,video_only,점수판 아웃+1 득점+0 주자 00
 T93FGIYBM8E,216.4,?,False,,,,제외,점수판 없음 — 아웃 하나·출루 하나 순서 모름
 T93FGIYBM8E,233.2,?,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,제외,
 T93FGIYBM8E,243.5,?,False,,,,제외,
-T93FGIYBM8E,252.0,double_play,True,out out,video_only video_only,점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+1 득점+0 주자 100→000,틀림,병살 3아웃
+T93FGIYBM8E,252.0,double_play,True,double_play,refined,점수판 아웃+2 득점+0 주자 100→000; 해설 '- 꿈틀거리는 삼성 타선을 더블 플레이로 이닝을 끝내버리고 있는 LG였습니다.' (260s),맞음,병살 3아웃
 T93FGIYBM8E,270.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,
 T93FGIYBM8E,287.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,
 T93FGIYBM8E,304.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,3아웃
@@ -98,7 +98,7 @@ T93FGIYBM8E,840.3,?,False,runner,video_only,점수판 아웃+0 득점+0 주자 1
 T93FGIYBM8E,849.6,?,False,walk,confirmed,점수판 아웃+0 득점+0 주자 011→111; 해설 '자 밀어내기 볼넷으로 결국 삼성에게 또' (860s),제외,
 T93FGIYBM8E,861.1,walk,True,hbp,conflict,점수판 아웃+0 득점+1 주자 111→111; 해설 '그리고 몸에 맞는 볼까지 자 일단 몸 상태를 거의 옆구리 쪽으로 보였는데요 아 팔인가요? 자 일단 위저블록' (880s); 영상은 볼넷 — 해설과 달라 보류,틀림,밀어내기 볼넷 8-4
 T93FGIYBM8E,877.1,hbp,False,hbp,confirmed,점수판 아웃+0 득점+1 주자 111→111; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (882s),맞음,초구 몸에 맞는 공 9-4
-T93FGIYBM8E,926.7,double_play,False,out out out,video_only video_only video_only,점수판 아웃+1 득점+0 주자 111→111 | 점수판 아웃+1 득점+0 주자 111→000 | 점수판 아웃+3 득점+0 주자 000→000,틀림,병살로 보임 — 이닝 끝
+T93FGIYBM8E,926.7,double_play,False,out out,video_only video_only,점수판 아웃+2 득점+0 주자 111→000 | 점수판 아웃+3 득점+0 주자 000→000,틀림,병살로 보임 — 이닝 끝
 T93FGIYBM8E,956.7,homerun,True,homerun,refined,점수판 아웃+2 득점+1 주자 000→000; 해설 '김용훈의 솔로포.- 가을에. 그러니까 박찌말 감독이 바라는 건 바로 이런 거예요. 그러니까 이런 기회에 김용훈 선수가 해야 될 이 장타를.' (970s); [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (959s),맞음,솔로 홈런 10-4
 T93FGIYBM8E,972.7,none,False,,,,조용함,홈런 다시보기
 T93FGIYBM8E,991.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
