@@ -100,7 +100,7 @@ def verdict(code: str, got: list[dict[str, Any]]) -> Optional[str]:
 def engine_judgments(snap: dict[str, Any]) -> list[dict[str, Any]]:
     readings, cues, repeat = observe(snap)
     out = []
-    for j in judge_checked(readings, cues, min_repeat=repeat):
+    for j in judge_checked(readings, cues, min_repeat=repeat, finished=True):
         if j.kind == "sub":
             continue
         out.append({"t": round(j.t, 1), "code": j.code, "kind": j.kind,

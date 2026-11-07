@@ -1180,3 +1180,24 @@ def test_home_run_with_outs_in_the_same_transition_is_marked_merged():
     (tr,) = transitions(stabilize(twice(R(0, outs=1), R(10, inning=4, away=1))))
     j = judge_transition(tr, [Cue(6, "speech", "솔로포!")])
     assert (j.code, j.detail.get("merged")) == ("homerun", True)
+
+
+def test_the_last_out_of_the_game_comes_from_the_last_pitch_after_the_last_scoreboard():
+    """9회말 2아웃, 원정이 앞섬 — 마지막 점수판 뒤 투구가 있으면 그 공이 마지막 아웃이다."""
+    reads = twice(R(0, inning=9, half="bot", outs=2, balls=1, strikes=2, away=5, home=1))
+    js = judge(reads, [_view(20, "no_play")], finished=True)
+    assert [(j.code, j.t) for j in js] == [("strikeout", 21.0)]
+    assert judge(reads, [_view(20, "no_play")]) == []  # 실시간(다 안 봄)에는 말하지 않는다
+    (event,) = [e for e in to_relay_events(js) if e.kind == "result"]
+    assert event.detail["outs_made"] == 1  # 상태도 세 번째 아웃으로 넘어간다
+    # 동점이면 연장 — 마지막 아웃으로 끝난다고 말하지 않는다
+    tied = twice(R(0, inning=9, half="bot", outs=2, away=1, home=1))
+    assert judge(tied, [_view(20, "in_play")], finished=True) == []
+    # 투구 화면이 없으면(점수판 뒤 바로 영상 끝) 말하지 않는다
+    assert judge(reads, [], finished=True) == []
+
+
+def test_a_walk_off_word_after_the_last_scoreboard_stops_the_game_end_out():
+    reads = twice(R(0, inning=9, half="bot", outs=2, bases=(True, False, False), away=5, home=4))
+    said = Cue(25, "speech", "끝내기 투런 홈런!")
+    assert judge(reads, [_view(20, "in_play"), said], finished=True) == []
