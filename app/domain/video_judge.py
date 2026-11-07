@@ -279,7 +279,8 @@ def judge_transition(
         if tr.before.strikes == 2 and k and not _speech(near, "병살"):
             # 삼진 + 도루 실패(스트라이크 아웃 스로 아웃) — 병살타 카드를 띄우면 틀린 설명이 된다
             return make("result", "strikeout", 0.5, [k])
-        dp = _speech(near, "병살")
+        # 판정 시각 근처 말만 — 플레이 전의 '병살 노려야죠'를 병살로 받지 않는다(독립 리뷰)
+        dp = _speech(near, *DP_WORDS)
         if tr.half_change and not dp:
             # 이닝이 바뀐 전이의 아웃 둘은 하이라이트에선 대개 여러 플레이가 합쳐진 것이다
             return make("result", "out", 0.5, merged=True)
@@ -360,6 +361,8 @@ def judge_transition(
 
 GAME_END_SEC = 120.0  # 마지막 점수판 뒤 이 안의 투구만 마지막 타석으로 본다
 SPLIT_SEC = 25.0  # 점수판이 아웃과 득점을 나눠 반영하는 간격(하이라이트 실측 11·21초)
+OUTS_SPLIT_SEC = 8.0  # 병살 아웃을 하나씩 올리는 간격(실측 4초) — 다음 투구까지는 15초 넘게 걸린다
+DP_WORDS = ("병살", "더블플레이", "더블 플레이")
 
 
 def _merge_split(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transition]:
@@ -393,6 +396,21 @@ def _merge_split(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transit
         if split and prev is not None:
             out[-1] = Transition(t=prev.t, before=prev.before, after=tr.after, outs_made=1,
                                  runs=tr.runs, half_change=False, count_reset=prev.count_reset)
+            continue
+        # 병살: 점수판이 아웃을 하나씩 두 번 올렸다(2아웃 → 4초 뒤 3아웃). 사이에 투구가 없어야 한다
+        pitched = any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                      and prev is not None and prev.t < c.t <= tr.t for c in cues)
+        outs_split = (
+            prev is not None and tr.t - prev.t <= OUTS_SPLIT_SEC and not pitched
+            and prev.outs_made == 1 and prev.runs == 0 and not prev.half_change
+            and tr.outs_made >= 1 and tr.runs == 0
+            and (tr.half_change or (tr.before.balls, tr.before.strikes)
+                 == (tr.after.balls, tr.after.strikes))
+        )
+        if outs_split and prev is not None:
+            out[-1] = Transition(t=prev.t, before=prev.before, after=tr.after,
+                                 outs_made=prev.outs_made + tr.outs_made, runs=0,
+                                 half_change=tr.half_change, count_reset=True)
             continue
         out.append(tr)
     return out
@@ -779,7 +797,7 @@ _CUE_ONLY = (
     ("sac_fly", "result", ("희생플라이", "희생 플라이")),
     ("hbp", "result", HBP_WORDS),
     ("steal", "steal", ("홈스틸", "더블스틸", "더블 스틸", "도루")),
-    ("double_play", "result", ("병살", "더블플레이", "더블 플레이")),
+    ("double_play", "result", DP_WORDS),
     ("homerun", "result", HR_WORDS),
     ("walk", "result", WALK_WORDS),
     ("strikeout", "result", ("삼진",)),
