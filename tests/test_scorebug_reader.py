@@ -85,3 +85,18 @@ def test_periodic_plan_reads_every_n_seconds_and_on_reappearance():
     plan = plan_periodic(frames, ref=0, every=8)
     assert [s for s, _ in plan] == [0, 8, 16, 23, 31, 39]
     assert len(plan_periodic(frames, ref=0, every=8, max_reads=3)) == 3
+
+
+def test_pick_corner_skips_a_corner_that_does_not_read_as_a_score_bug():
+    """영상 첫 장면(팀 소개 그래픽)에서 고른 모서리가 점수판이 아니면 다음 시각에서 다시 고른다."""
+    from app.adapters.video.scorebug_reader import ScorebugReader
+
+    reader = ScorebugReader("K", "http://x", "m")
+    reader._frame = lambda video, t, vf: f"{t:.0f}".encode()
+    answers = iter([{"image": 3}, {"visible": False},  # 1초: 왼쪽 아래를 골랐지만 안 읽힘
+                    {"image": 1}, {"visible": True, "inning": 1, "half": "top", "balls": 0,
+                                   "strikes": 0, "outs": 0, "bases": [], "away": 0,
+                                   "home": 0}])
+    reader._ask = lambda images, text, max_tokens: next(answers)
+    corner, t = reader.pick_corner("g.mp4", 100.0)
+    assert corner == "top_left" and t == 30.0

@@ -267,6 +267,9 @@ def main() -> int:
     parser.add_argument("--no-think", dest="no_think", action="store_true",
                         help=argparse.SUPPRESS)  # 예전 명령 호환
     parser.add_argument("--no-audio", action="store_true", help="청크에서 음성(해설)을 뺀다")
+    parser.add_argument("--no-vlm", action="store_true",
+                        help="영상 조각을 VLM에 보내지 않는다 — 점수판·해설·관절만 쓴다"
+                             "(호스팅 VLM이 영상 입력을 거절할 때, 2026-11-01~)")
     parser.add_argument("--model", default=None)
     parser.add_argument("--base-url", default=None, help="cosmos: 로컬 NIM이면 http://host:8000/v1")
     parser.add_argument("--vss-url", default=None)
@@ -286,10 +289,14 @@ def main() -> int:
                         help="점수판 판독 요청 상한 (무료 크레딧 보호)")
     parser.add_argument("--asr", action="store_true",
                         help="해설을 Whisper로 받아 적는다([asr] 설치) — 30초마다 요청 1회")
+    parser.add_argument("--audio", type=Path, default=None,
+                        help="소리를 따로 받은 파일(화면·소리가 나뉜 다운로드) — 해설 받아쓰기용")
     args = parser.parse_args()
 
     if not args.video.exists():
         raise SystemExit(f"영상이 없다: {args.video}")
+    if args.audio is not None and not args.audio.exists():
+        raise SystemExit(f"소리 파일이 없다: {args.audio}")
     settings = get_settings()
 
     ffmpeg = find_tool("ffmpeg", args.ffmpeg)
@@ -306,9 +313,11 @@ def main() -> int:
             check=True)
 
     out_path = (args.out_dir or settings.video_dir) / f"{args.game_id}.json"
-    snap = run(args.game_id, args.video, analyzer, clips, cut, out_path)
+    sent = [] if args.no_vlm else clips
+    snap = run(args.game_id, args.video, analyzer, sent, cut, out_path)
 
-    span = (clips[0][0], clips[-1][0] + clips[-1][1]) if clips else None  # VLM이 본 구간만
+    # 점수판·해설·관절을 볼 구간 = VLM이 볼 구간(--no-vlm이면 보내지 않았을 뿐 같은 구간)
+    span = (clips[0][0], clips[-1][0] + clips[-1][1]) if clips else None
     if args.scorebug and span:
         from app.adapters.video.scorebug_reader import VERSION as SCOREBUG_VERSION
 
@@ -330,7 +339,7 @@ def main() -> int:
             print(f"해설 받아쓰기 건너뜀: {exc}", file=sys.stderr)
         else:
             if dedicated_pass(snap, "asr", ASR_VERSION, span, lambda s, n: {
-                    "segments": transcriber.transcribe(args.video, n, s)}):
+                    "segments": transcriber.transcribe(args.audio or args.video, n, s)}):
                 save(out_path, snap)
     if args.pose and span:  # 판정 신호: 해설·VLM 말 없이 동작을 직접 잰다(contact.py)
         from contact_check import MIN_SCALE, summarize_long

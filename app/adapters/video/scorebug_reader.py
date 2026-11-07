@@ -15,7 +15,7 @@ import subprocess
 import tempfile
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from app.adapters.video.base import VideoAnalyzerError, _json_payload
 from app.adapters.video.http import completion_text, post_json
@@ -33,6 +33,9 @@ THUMB_W, THUMB_H = 96, 48
 RGB_W, RGB_H = 1280, 720  # 주자·아웃 화소 읽기용 프레임 크기 (scorebug_layout)
 PIXEL_TOL = 30  # 같은 화소로 볼 밝기 차
 MASK_MIN = 0.3  # 기준과 같은 값으로 이 비율 이상 나온 화소 = 점수판 그래픽
+# 위치 파일 영역: 점수판이 보이는 때(기준 화면)를 찾아볼 곳 — 구간 비율
+REF_TRIES = (0.05, 0.2, 0.35, 0.5, 0.65, 0.8)
+PICK_TRIES = (0.3, 0.6, 0.45, 0.75)  # 모서리 고르기를 해 볼 곳(1초 다음) — 구간 비율
 MAYBE_VISIBLE = 0.55  # 기준 화면과 이만큼 닮으면 점수판이 보일 수 있다 (배경이 바뀌어도)
 SHOT_CHANGE = 0.05  # 이웃 프레임이 이만큼 달라지면 다른 장면(또는 점수판 변화)
 
@@ -71,8 +74,16 @@ READ_PROMPT_V2 = (
 
 
 # ── 순수 함수 (테스트 대상) ───────────────────────────────────────────────
-def crop_filter(corner: str, scale: float = 3.0) -> str:
-    x, y, w, h = CORNERS[corner]
+Region = tuple[float, float, float, float]
+
+
+def region_of(corner: Union[str, Region]) -> Region:
+    """모서리 이름 또는 위치 파일의 crop(x, y, w, h 비율)."""
+    return CORNERS[corner] if isinstance(corner, str) else corner
+
+
+def crop_filter(corner: Union[str, Region], scale: float = 3.0) -> str:
+    x, y, w, h = region_of(corner)
     return f"crop=iw*{w}:ih*{h}:iw*{x}:ih*{y},scale=iw*{scale}:-2:flags=lanczos"
 
 
@@ -278,9 +289,11 @@ class ScorebugReader:
             check=True,
         ).stdout
 
-    def _thumbs(self, video: Path, corner: str, start: float, duration: float) -> list[bytes]:
+    def _thumbs(
+        self, video: Path, corner: Union[str, Region], start: float, duration: float
+    ) -> list[bytes]:
         """[start, start+duration) 구간을 1초마다 — i번째 썸네일은 영상 start+i초."""
-        x, y, w, h = CORNERS[corner]
+        x, y, w, h = region_of(corner)
         vf = f"fps=1,crop=iw*{w}:ih*{h}:iw*{x}:ih*{y},scale={THUMB_W}:{THUMB_H},format=gray"
         raw = subprocess.run(
             [
@@ -311,7 +324,7 @@ class ScorebugReader:
     def pick_corner(
         self, video: Path, duration: float, start: float = 0.0
     ) -> tuple[Optional[str], float]:
-        for t in (1.0, duration * 0.3, duration * 0.6):
+        for t in (1.0, *(duration * part for part in PICK_TRIES)):
             t = start + min(max(0.0, t), max(0.0, duration - 0.5))
             images = [self._frame(video, t, crop_filter(c, 2.0)) for c in CORNERS]
             answer = self._ask(images, PICK_PROMPT, 64) or {}
@@ -320,7 +333,24 @@ class ScorebugReader:
             except (TypeError, ValueError):
                 k = 0
             if 1 <= k <= len(CORNERS):
-                return list(CORNERS)[k - 1], t
+                # 고른 자리에서 실제로 읽히는지 본다 — 영상 첫 장면의 팀 소개 그래픽을 점수판으로
+                # 고르면 그 뒤 판독이 전부 빈 곳을 읽는다(2026-11-07 하이라이트 실측: 109회 0건)
+                corner = list(CORNERS)[k - 1]
+                seen = self._ask([self._frame(video, t, crop_filter(corner))], READ_PROMPT, 256)
+                if normalize_reading(seen, t):
+                    return corner, t
+        return None, 0.0
+
+    def find_in_layout(
+        self, video: Path, duration: float, start: float = 0.0
+    ) -> tuple[Optional[Region], float]:
+        """위치 파일에 점수판 영역이 있으면 고를 필요 없이, 보이는 때(기준 화면)만 찾는다."""
+        assert self.layout is not None and self.layout.crop is not None
+        for part in REF_TRIES:
+            t = start + min(max(0.0, duration * part), max(0.0, duration - 0.5))
+            frame = self._frame(video, t, crop_filter(self.layout.crop, self.layout.scale))
+            if normalize_reading(self._ask([frame], READ_PROMPT, 256), t):
+                return self.layout.crop, t
         return None, 0.0
 
     def read(self, video: Path, duration: float, start: float = 0.0) -> dict[str, Any]:
@@ -329,12 +359,19 @@ class ScorebugReader:
         시각은 영상 시작 기준 초. 경기 영상은 VLM이 본 구간(--start·--end·--limit)만 읽는다.
         """
         try:
-            corner, t_ref = self.pick_corner(video, duration, start)
+            fixed = self.layout is not None and self.layout.crop is not None
+            corner: Union[str, Region, None]
+            if fixed:
+                corner, t_ref = self.find_in_layout(video, duration, start)
+            else:
+                corner, t_ref = self.pick_corner(video, duration, start)
+            scale = self.layout.scale if fixed and self.layout else 3.0
             if corner is None:
                 return {"corner": None, "scoreboard": [], "requests": self.requests}
             thumbs = self._thumbs(video, corner, start, duration)
             if not thumbs:
-                return {"corner": corner, "scoreboard": [], "requests": self.requests}
+                return {"corner": "layout" if fixed else corner, "scoreboard": [],
+                        "requests": self.requests}
             ref = min(int(t_ref - start), len(thumbs) - 1)
             readings, failed = [], 0
             plan = (
@@ -345,7 +382,7 @@ class ScorebugReader:
             for first, at in plan:
                 try:  # 한 장 실패(503 등)로 클립 전체를 버리지 않는다
                     answer = self._ask(
-                        [self._frame(video, start + at + 0.5, crop_filter(corner))],
+                        [self._frame(video, start + at + 0.5, crop_filter(corner, scale))],
                         READ_PROMPT,
                         256,
                     )
@@ -361,7 +398,7 @@ class ScorebugReader:
         except (subprocess.CalledProcessError, VideoAnalyzerError) as exc:
             raise VideoAnalyzerError(f"점수판 판독 실패: {exc}") from exc
         return {
-            "corner": corner,
+            "corner": "layout" if fixed else corner,
             "scoreboard": readings,
             "requests": self.requests,
             "failed_reads": failed,
