@@ -13,6 +13,7 @@
 import base64
 import subprocess
 import tempfile
+import threading
 import time
 from collections.abc import Sequence
 from pathlib import Path
@@ -238,6 +239,7 @@ class ScorebugReader:
         # 요청 사이 최소 간격(초) — 호스팅 API는 분당 한도를 넘으면 429로 막는다. 한 줄로 이어
         # 보내도 장당 1.3초라 한도를 넘었다(2026-11-07). 다시 보내지 않고 미리 천천히 보낸다
         self.min_gap, self._last = min_gap, -1e9
+        self._pace = threading.Lock()  # 실시간은 조각을 여러 줄로 읽는다 — 간격 확인을 한 줄로
         self.changes = changes  # every와 함께: 일정 간격 + 점수판 그림이 바뀔 때도 읽는다
         self.requests = 0
 
@@ -257,11 +259,12 @@ class ScorebugReader:
             "temperature": 0.0,
             "chat_template_kwargs": {"enable_thinking": False},
         }
-        wait = self._last + self.min_gap - time.monotonic()
-        if wait > 0:
-            time.sleep(wait)
-        self._last = time.monotonic()
-        self.requests += 1
+        with self._pace:
+            wait = self._last + self.min_gap - time.monotonic()
+            if wait > 0:
+                time.sleep(wait)
+            self._last = time.monotonic()
+            self.requests += 1
         return _json_payload(
             completion_text(
                 post_json(f"{self.base_url}/chat/completions", body, token=self.api_key)
@@ -371,6 +374,28 @@ class ScorebugReader:
                 if normalize_reading(seen, t):
                     return corner, t
         return None, 0.0
+
+    def read_frame(self, video: Path, t: float) -> Optional[dict[str, Any]]:
+        """한 장만 읽는다(실시간 조각) — 위치 파일의 영역(crop)으로 자르고, 주자·아웃·초말은 화소로.
+
+        점수판이 안 보이면 None. 실시간은 조각마다 한 장(5초 조각이면 분당 12회 — 요청 한도 안).
+        """
+        if self.layout is None or self.layout.crop is None:
+            raise VideoAnalyzerError("한 장 판독은 점수판 영역(crop)이 있는 위치 파일이 필요하다")
+        try:
+            frame = self._frame(video, t, crop_filter(self.layout.crop, self.layout.scale))
+            r = normalize_reading(self._ask([frame], self.prompt, 256), t)
+            if r:
+                px = self._rgb(video, t)
+                if len(px) < RGB_W * RGB_H * 3:  # 조각 끝을 넘긴 시각(짧은 마지막 조각)
+                    raise VideoAnalyzerError(f"프레임을 못 읽음: {video} {t:.1f}s")
+                r["bases"], r["outs"] = decode(self.layout, rgb_sampler(px, RGB_W, RGB_H))
+                half = decode_half(self.layout, px, RGB_W, RGB_H)
+                if half:
+                    r["half"] = half
+            return r
+        except (subprocess.CalledProcessError, OSError) as exc:  # 출력 파일이 안 생김 등
+            raise VideoAnalyzerError(f"점수판 판독 실패: {exc}") from exc
 
     def find_in_layout(
         self, video: Path, duration: float, start: float = 0.0

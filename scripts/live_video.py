@@ -119,6 +119,47 @@ class DataPoller(threading.Thread):
             self.stop.wait(self.every)
 
 
+class ScorebugSegments:
+    """VLM 영상 입력 없이 — 조각 가운데 한 장의 점수판만 읽는다(VLM이 영상을 422로 거절할 때).
+
+    결과 모양은 VLM 분석기와 같다(scoreboard·speech·events). 서버는 점수판 판독만으로 판정한다
+    (영상 우선 판정). 판독 시각은 경기 영상 기준(조각 시작 + 조각 안 시각).
+    """
+
+    def __init__(self, reader: Any, transcriber: Any = None) -> None:
+        self.reader, self.transcriber = reader, transcriber
+
+    def analyze(self, clip: VideoClip) -> Any:
+        from types import SimpleNamespace
+
+        mid = clip.duration / 2
+        r = self.reader.read_frame(clip.path, mid)
+        if r:
+            r["t"] = round(clip.start + mid, 2)
+        speech = []
+        if self.transcriber is not None:  # 조각 소리 받아쓰기 — 홈런·삼진 말로 판정을 확인·보완
+            speech = self._speech(clip)
+        return SimpleNamespace(scoreboard=[r] if r else [], speech=speech, events=[])
+
+    def _speech(self, clip: VideoClip) -> list[dict[str, Any]]:
+        """홀수 번째 조각에서 앞 조각과 소리를 이어 10초 창으로 받아 적는다. 5초 조각만으로는
+        문맥이 짧아 '투런 홈런'을 '트롯 후보'로 적었다(2026-11-07 실측). 요청도 절반이다."""
+        k = seg_index(clip.path)
+        prev = clip.path.with_name(f"seg_{k - 1:05d}{clip.path.suffix}")
+        if k % 2 == 0 or not prev.exists():
+            return []
+        with tempfile.TemporaryDirectory() as tmp:
+            joined = Path(tmp) / "pair.m4a"
+            subprocess.run([self.transcriber.ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
+                            "-i", str(prev), "-i", str(clip.path), "-filter_complex",
+                            "[0:a][1:a]concat=n=2:v=0:a=1[a]", "-map", "[a]", str(joined)],
+                           check=True)
+            start = clip.start - clip.duration
+            pieces = self.transcriber.transcribe(joined, clip.duration * 2, 0.0)
+        return [{"t": round(start + float(s["t"]), 2), "text": s["text"]}
+                for s in pieces if s.get("text")]
+
+
 def analyze_segment(analyzer: Any, path: Path, start: float, length: float) -> dict[str, Any]:
     result = analyzer.analyze(VideoClip(path, start, length))
     return {"scoreboard": result.scoreboard, "speech": result.speech,
@@ -186,6 +227,11 @@ def main() -> int:
     parser.add_argument("--vss-url", default=None)
     parser.add_argument("--clip-base-url", default=None)
     parser.add_argument("--ffmpeg", default=None)
+    parser.add_argument("--scorebug-layout", type=Path, default=None,
+                        help="VLM 영상 대신 조각마다 점수판 한 장만 읽는다(crop 있는 위치 파일). "
+                             "--height 720 이상 권장")
+    parser.add_argument("--asr", action="store_true",
+                        help="--scorebug-layout과 함께: 조각마다 해설을 Whisper로 받아 적는다")
     args = parser.parse_args()
 
     token = os.getenv("ROOKIE_LIVE_TOKEN", "").strip()
@@ -194,8 +240,23 @@ def main() -> int:
     server = Server(args.server, token)
     server.post(f"/api/live/{args.game_id}", {"away_team": args.away, "home_team": args.home,
                                                "date": args.date, "stadium": args.stadium})
-    analyzer = build_analyzer(args)
     ffmpeg = find_tool("ffmpeg", args.ffmpeg)
+    if args.scorebug_layout:
+        from analyze_video import build_reader
+
+        reader_args = argparse.Namespace(**{**vars(args), "layout": args.scorebug_layout,
+                                            "read_every": None, "max_reads": 10,
+                                            "read_prompt": "v2", "read_gap": 1.6,
+                                            "read_changes": False})
+        transcriber = None
+        if args.asr:
+            from analyze_video import build_transcriber
+
+            transcriber = build_transcriber(argparse.Namespace(**{**vars(args),
+                                                                 "asr_piece": args.seg_sec * 2}))
+        analyzer: Any = ScorebugSegments(build_reader(reader_args), transcriber)
+    else:
+        analyzer = build_analyzer(args)
     with tempfile.TemporaryDirectory() as tmp:
         out_dir = Path(tmp)
         producer = subprocess.Popen(segment_cmd(

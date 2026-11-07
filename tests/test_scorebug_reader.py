@@ -133,3 +133,47 @@ def test_requests_keep_a_minimum_gap(monkeypatch):
     clock[0] += 0.5
     reader._ask([b"a"], "p", 8)
     assert slept == [pytest.approx(1.1)] and reader.requests == 2
+
+
+def test_request_gap_holds_across_threads(monkeypatch):
+    """실시간은 조각을 여러 줄로 읽는다 — 동시에 들어와도 간격을 지킨다(독립 리뷰 재현)."""
+    import threading
+
+    from app.adapters.video import scorebug_reader as sr
+
+    sent = []
+    monkeypatch.setattr(sr, "post_json", lambda *a, **k: sent.append(sr.time.monotonic()) or {
+        "choices": [{"message": {"content": "{}"}}]})
+    reader = sr.ScorebugReader("K", "http://x", "m", min_gap=0.2)
+    threads = [threading.Thread(target=reader._ask, args=([b"a"], "p", 8)) for _ in range(3)]
+    for th in threads:
+        th.start()
+    for th in threads:
+        th.join()
+    gaps = [b - a for a, b in zip(sorted(sent), sorted(sent)[1:])]
+    assert len(sent) == 3 and min(gaps) >= 0.19
+
+
+def test_single_frame_past_the_end_of_a_short_segment_is_a_read_error(tmp_path):
+    from app.adapters.video import scorebug_reader as sr
+    from app.adapters.video.base import VideoAnalyzerError
+    from app.adapters.video.scorebug_layout import Layout
+
+    path = tmp_path / "bar.json"
+    path.write_text('{"name": "b", "crop": [0.2, 0.9, 0.3, 0.06], "bases": {"1": [0.5, 0.5]},'
+                    ' "outs": []}', encoding="utf-8")
+    reader = sr.ScorebugReader("K", "http://x", "m", layout=Layout.load(path))
+
+    def missing(*_args):
+        raise FileNotFoundError("f.jpg")
+
+    reader._frame = missing
+    with pytest.raises(VideoAnalyzerError):
+        reader.read_frame("seg.mp4", 2.5)
+    reader._frame = lambda video, t, vf: b"jpg"
+    reader._ask = lambda images, text, max_tokens: {
+        "visible": True, "inning": 1, "half": "top", "balls": 0, "strikes": 0, "outs": 0,
+        "bases": [], "away": 0, "home": 0}
+    reader._rgb = lambda video, t: b""
+    with pytest.raises(VideoAnalyzerError):
+        reader.read_frame("seg.mp4", 2.5)

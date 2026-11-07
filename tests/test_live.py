@@ -2,6 +2,7 @@
 
 import importlib.util
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -274,3 +275,73 @@ def test_data_payload_uses_converter():
 
     body = live.data_payload("G", fetch=fetch, preview=lambda gid: None)
     assert [e["kind"] for e in body["events"]] == ["atbat"] and body["context"] == {}
+
+
+def test_scorebug_segments_read_one_frame_per_segment_in_game_time():
+    """VLM 영상 입력 없이 — 조각 가운데 한 장, 시각은 경기 영상 기준."""
+    live = _load("live_video")
+    from app.adapters.video.base import VideoClip
+
+    asked = []
+
+    class Reader:
+        def read_frame(self, video, t):
+            asked.append((video, t))
+            return {"t": t, "inning": 3, "half": "bot", "balls": 1, "strikes": 0, "outs": 1,
+                    "bases": [2], "away": 0, "home": 2}
+
+    out = live.ScorebugSegments(Reader()).analyze(VideoClip(Path("seg_007.ts"), 35.0, 5.0))
+    assert asked == [(Path("seg_007.ts"), 2.5)]
+    assert [r["t"] for r in out.scoreboard] == [37.5] and out.events == [] and out.speech == []
+    body = live.analyze_segment(live.ScorebugSegments(Reader()), Path("s.ts"), 10.0, 5.0)
+    assert body["scoreboard"][0]["t"] == 12.5 and body["events"] == []
+
+
+def test_scorebug_segments_add_commentary_in_game_time():
+    live = _load("live_video")
+    from app.adapters.video.base import VideoClip
+
+    class Reader:
+        def read_frame(self, video, t):
+            return None  # 다시보기 — 점수판 없음
+
+    class Whisper:
+        def transcribe(self, video, duration, start):
+            return [{"t": 0.0, "text": "넘어갑니다 투런 홈런!"},
+                    {"t": 0.0, "text": "", "error": "x"}]
+
+    seg = live.ScorebugSegments(Reader(), Whisper())
+    seg._speech = lambda clip: [{"t": clip.start - 5.0, "text": "넘어갑니다 투런 홈런!"}]
+    out = seg.analyze(VideoClip(Path("seg_00009.mp4"), 45.0, 5.0))
+    assert out.scoreboard == [] and out.speech == [{"t": 40.0, "text": "넘어갑니다 투런 홈런!"}]
+
+
+def test_commentary_is_taken_in_ten_second_windows_on_odd_segments(tmp_path):
+    """짝수 조각은 건너뛰고, 홀수 조각에서 앞 조각과 이어 10초로 받아 적는다."""
+    import shutil
+
+    live = _load("live_video")
+    from app.adapters.video.base import VideoClip
+
+    ffmpeg = shutil.which("ffmpeg")
+    if ffmpeg is None:
+        pytest.skip("ffmpeg 없음")
+    calls = []
+
+    class Whisper:
+        def __init__(self):
+            self.ffmpeg = ffmpeg
+
+        def transcribe(self, video, duration, start):
+            calls.append((Path(video).suffix, duration))
+            return [{"t": 0.0, "text": "앞 조각 말"}, {"t": 5.0, "text": "뒤 조각 말"}]
+
+    for k in (0, 1):  # 소리만 있는 짧은 조각 둘
+        subprocess.run([ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi",
+                        "-i", "sine=frequency=440:duration=5", "-c:a", "aac",
+                        str(tmp_path / f"seg_{k:05d}.mp4")], check=True)
+    seg = live.ScorebugSegments(None, Whisper())
+    assert seg._speech(VideoClip(tmp_path / "seg_00000.mp4", 0.0, 5.0)) == []
+    got = seg._speech(VideoClip(tmp_path / "seg_00001.mp4", 5.0, 5.0))
+    assert got == [{"t": 0.0, "text": "앞 조각 말"}, {"t": 5.0, "text": "뒤 조각 말"}]
+    assert calls == [(".m4a", 10.0)]
