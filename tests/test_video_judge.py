@@ -1143,3 +1143,40 @@ def test_a_dive_does_not_explain_a_half_change_merged_with_the_next_half():
     (tr,) = transitions(stabilize(twice(R(0, outs=2, half="bot"),
                                         R(10, inning=4, bases=(True, False, False)))))
     assert judge_transition(tr, [Cue(5, "dive")]).code != "dive_out"
+
+
+def test_batter_scoring_is_a_home_run_even_when_later_outs_are_merged():
+    """3점 홈런 뒤 2아웃까지 한 전이로 합쳐져도 홈런 — 타자가 홈을 밟는 병살은 없다."""
+    reads = twice(R(0, outs=0, bases=(True, True, False)), R(10, outs=2, away=3))
+    (tr,) = transitions(stabilize(reads))
+    assert judge_transition(tr, [_view(4, "in_play")]).code == "homerun"
+    assert judge_transition(tr, [Cue(6, "speech", "강민호의 스리런!")]).code == "homerun"
+    assert judge_transition(tr, []).code == "out"  # 단서가 없으면 예전대로(합쳐진 전이)
+    # 이닝이 바뀌면 새 이닝은 늘 빈 베이스 — 해설 말이 있어야 한다
+    half = twice(R(0, outs=1, bases=(True, False, False)), R(10, inning=4, away=2))
+    (tr,) = transitions(stabilize(half))
+    assert judge_transition(tr, [_view(4, "in_play")]).code != "homerun"
+    assert judge_transition(tr, [Cue(6, "speech", "투런 홈런")]).code == "homerun"
+
+
+def test_home_run_words_said_long_before_the_new_scoreboard_still_count():
+    """다시보기가 길어 새 점수판이 30초 넘게 뒤에 보여도, 그 사이 '솔로포'는 이 전이의 말이다."""
+    (tr,) = transitions(stabilize(twice(R(0, outs=1), R(40, inning=4, away=1))))
+    assert judge_transition(tr, [Cue(12, "speech", "김용훈의 솔로포")]).code == "homerun"
+
+
+def test_two_outs_across_a_half_change_need_the_word_double_play():
+    """1아웃에서 이닝이 바뀐 전이(아웃 둘) — 하이라이트에선 대개 여러 플레이가 합쳐진 것이다."""
+    (tr,) = transitions(stabilize(twice(R(0, outs=1, bases=(True, False, False)),
+                                        R(10, inning=4))))
+    assert judge_transition(tr, []).code == "out"
+    assert judge_transition(tr, [Cue(6, "speech", "6-4-3 병살!")]).code == "double_play"
+    # 같은 이닝 안의 아웃 둘은 예전대로 병살
+    (tr,) = transitions(stabilize(twice(R(0, outs=0, bases=(True, False, False)), R(10, outs=2))))
+    assert judge_transition(tr, []).code == "double_play"
+
+
+def test_home_run_with_outs_in_the_same_transition_is_marked_merged():
+    (tr,) = transitions(stabilize(twice(R(0, outs=1), R(10, inning=4, away=1))))
+    j = judge_transition(tr, [Cue(6, "speech", "솔로포!")])
+    assert (j.code, j.detail.get("merged")) == ("homerun", True)

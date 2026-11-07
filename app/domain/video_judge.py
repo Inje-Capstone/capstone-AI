@@ -50,6 +50,9 @@ SPEECH_KEYWORDS = (
 )
 
 # 볼넷(5.05(b)(1)) — '고의사구'는 고의4구(四球), 그냥 '사구'는 몸에 맞는 공(死球)
+# 홈런을 부르는 말 — 해설은 '홈런' 대신 솔로포·투런·스리런·만루포로 많이 말한다(하이라이트 실측)
+HR_WORDS = ("홈런", "솔로포", "투런", "투 런", "스리런", "쓰리런", "스리 런", "만루포",
+            "그랜드슬램", "담장을 넘", "담장 넘")
 WALK_WORDS = (
     "볼넷", "포볼", "밀어내기", "고의사구", "고의 사구", "고의4구", "고의 4구", "자동 고의",
 )
@@ -209,6 +212,24 @@ def judge_transition(
             kind = "result" if code in ("homerun", "walk", "hbp", "sac_fly") else "call"
             return make(kind, code, 0.5, [cue], walk_off=True)
 
+    # 타자가 홈을 밟았다 — 득점이 직전 주자 + 1이고 베이스가 비었다. 타자가 홈을 밟는 병살은 없다.
+    # 하이라이트는 홈런 뒤 아웃까지 한 전이로 합쳐진다(실측: 3점 홈런 + 2아웃이 병살로) → 아웃·병살·
+    # '한 플레이' 검사보다 먼저 본다. 이닝이 바뀌면 새 이닝은 늘 빈 베이스라 모양이 근거가 못 된다 —
+    # 그때는 해설·장면 단서가 있을 때만
+    view = _pitch_view(cues, tr)
+    in_play = view if view is not None and view.kind == IN_PLAY else None
+    no_play = view if view is not None and view.kind == NO_PLAY else None
+    # 직전 상태가 보인 때부터 새 상태가 보인 때까지 한 말도 본다 — 하이라이트는 홈런 뒤 다시보기가
+    # 길어 새 점수판이 30초 넘게 뒤에 보인다(실측: '솔로포'가 판정 시각 20초 창 밖)
+    between = [c for c in cues if tr.before.t <= c.t <= tr.t + CUE_AFTER]
+    hr_word = (_has(near, "ball_over_fence") or _speech(near, *HR_WORDS)
+               or _speech(between, *HR_WORDS))
+    batter_home = tr.runs >= 1 and tr.runs == tr.runners_before + 1 and not any(a)
+    if batter_home and (hr_word or (not tr.half_change and in_play)):
+        # 홈런은 아웃을 만들지 않는다 — 아웃이 섞였으면 다른 플레이가 합쳐진 전이다
+        merged = tr.outs_made > 0 or not one_play(tr)
+        return make("result", "homerun", 0.5, [hr_word, in_play], merged=merged)
+
     # 한 플레이로 설명이 안 되면(여러 플레이가 한 전이로 합쳐짐) 종류를 말하지 않는다
     if not one_play(tr):
         return make("result", "out" if tr.outs_made else "reach", 0.5, merged=True)
@@ -256,19 +277,15 @@ def judge_transition(
         if tr.before.strikes == 2 and k and not _speech(near, "병살"):
             # 삼진 + 도루 실패(스트라이크 아웃 스로 아웃) — 병살타 카드를 띄우면 틀린 설명이 된다
             return make("result", "strikeout", 0.5, [k])
-        return make("result", "double_play", 0.8, [_speech(near, "병살")])
+        dp = _speech(near, "병살")
+        if tr.half_change and not dp:
+            # 이닝이 바뀐 전이의 아웃 둘은 하이라이트에선 대개 여러 플레이가 합쳐진 것이다
+            return make("result", "out", 0.5, merged=True)
+        return make("result", "double_play", 0.8, [dp])
     if tr.outs_made == 3:  # 판독 누락으로도 생긴다 — 해설이 있을 때만 삼중살
         tp = _speech(near, *TRIPLE_WORDS)
         if tp:
             return make("result", "triple_play", 0.6, [tp])
-    view = _pitch_view(cues, tr)
-    in_play = view if view is not None and view.kind == IN_PLAY else None
-    no_play = view if view is not None and view.kind == NO_PLAY else None
-    # 공이 맞아 나가 주자 전원과 타자가 들어왔고 아웃이 없다 — 홈런(그라운드 홈런 포함)
-    hr = _has(near, "ball_over_fence") or _speech(near, "홈런") or (
-        in_play if tr.outs_made == 0 and tr.count_reset else None)
-    if tr.runs >= 1 and tr.runs == tr.runners_before + 1 and not any(a) and hr:
-        return make("result", "homerun", 0.5, [hr, _speech(near, "홈런")])
     if tr.outs_made == 1 and tr.runs >= 1 and tr.before.outs <= 1:  # 9.08(d) 2아웃 전
         sf = _has(near, "deep_fly") or _speech(near, "희생플라이", "희생 플라이")
         if sf:
@@ -524,9 +541,13 @@ def _same_play(j: Judgment, video: Sequence[Judgment]) -> Optional[Judgment]:
                  and abs(v.t - j.t) <= CALL_GAP), None)
 
 
-def _commentary_says(t: float, heard: Sequence[Cue], window: tuple[float, float]) -> set[str]:
-    """그 장면 앞뒤로 해설이 말한 판정 코드."""
-    near = _near(heard, t, *window)
+def _commentary_says(t: float, heard: Sequence[Cue], window: tuple[float, float],
+                     tr: Optional[Transition] = None) -> set[str]:
+    """그 장면 앞뒤로 해설이 말한 판정 코드. 점수판 전이면 직전 상태가 보인 때부터 새 상태가 보인
+    때까지 한 말도 본다 — 하이라이트는 다시보기가 길어 새 점수판이 30초 넘게 뒤에 보인다."""
+    near = list(_near(heard, t, *window))
+    if tr is not None:
+        near += [c for c in heard if tr.before.t <= c.t <= tr.t + window[1] and c not in near]
     return {code for code, _, words in _CUE_ONLY if _speech(near, *words)}
 
 
@@ -574,7 +595,7 @@ def judge_checked(
         if v is None:
             j.detail["check"] = CHECK_SPEECH_ONLY
         elif j.transition is not None:
-            j = _check_play(j, v, _commentary_says(j.t, heard, check_window))
+            j = _check_play(j, v, _commentary_says(j.t, heard, check_window, j.transition))
         else:  # 교체·심판 선언 — 함께 일어날 수 있어 서로 어긋난다고 보지 않는다
             backed = set(j.evidence) - set(v.evidence)
             j.detail["check"] = CHECK_CONFIRMED if backed else CHECK_VIDEO_ONLY
@@ -685,7 +706,7 @@ _CUE_ONLY = (
     ("hbp", "result", HBP_WORDS),
     ("steal", "steal", ("홈스틸", "더블스틸", "더블 스틸", "도루")),
     ("double_play", "result", ("병살", "더블플레이", "더블 플레이")),
-    ("homerun", "result", ("홈런",)),
+    ("homerun", "result", HR_WORDS),
     ("walk", "result", WALK_WORDS),
     ("strikeout", "result", ("삼진",)),
 )

@@ -45,3 +45,18 @@ def test_shipped_labels_use_known_codes_and_increasing_times():
         assert all(p["code"] in known for p in plays)
         assert all(a["t"] < b["t"] for a, b in zip(plays, plays[1:]))
         assert all(p["t"] <= p["pitch_end"] <= p["end"] for p in plays)
+
+
+def test_a_judgment_in_a_replay_cell_belongs_to_the_play_before_it():
+    plays = [{"t": 10.0, "pitch_end": 13.0, "end": 30.0, "code": "homerun", "sure": True},
+             {"t": 30.0, "pitch_end": 33.0, "end": 60.0, "code": "none", "sure": False},
+             {"t": 60.0, "pitch_end": 62.0, "end": 70.0, "code": "out", "sure": True}]
+    cells = eval_games.assign(plays, [{"t": 50.0, "code": "homerun"}])
+    assert [[j["code"] for j in c] for c in cells] == [["homerun"], [], []]
+
+
+def test_only_play_cells_take_judgments_from_idle_cells():
+    plays = [{"t": 0.0, "pitch_end": 2.0, "end": 10.0, "code": "none", "sure": True},
+             {"t": 10.0, "pitch_end": 12.0, "end": 20.0, "code": "?", "sure": False}]
+    cells = eval_games.assign(plays, [{"t": 15.0, "code": "out"}])
+    assert [[j["code"] for j in c] for c in cells] == [[], ["out"]]
