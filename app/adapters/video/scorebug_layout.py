@@ -10,6 +10,10 @@
 점수판이 화면 아래 띠인 중계(MBC 스포츠+, 포스트시즌 TVING)는 모서리 자르기(가로 45%)로는
 주자·아웃 칸이 잘린다 — 위치 파일의 `crop`(x, y, 너비, 높이 비율)으로 띠를 통째 자른다.
 MBC는 주자 칸을 흰색으로 채운다 — `base_fill: "bright"`면 밝고 색 없는 칸을 채운 것으로 본다.
+
+초·말(▲/▼)도 VLM이 자주 뒤집어 읽었다(2026-11-07 MBC 하이라이트: 1회말을 1회초로) — 위치 파일에
+`half`(화살표 칸 x0, y0, x1, y1 비율)가 있으면 칸 안 화살표 화소의 무게중심으로 가른다. ▼는 넓은
+쪽이 위라 무게중심이 위로, ▲는 아래로 쏠린다.
 """
 
 import colorsys
@@ -36,11 +40,14 @@ class Layout:
     crop: Optional[tuple[float, float, float, float]] = None  # 점수판 영역(x, y, w, h 비율)
     scale: float = 3.0  # VLM에 보낼 때 crop을 키우는 배율 — 넓은 띠는 1.5면 된다
     base_fill: str = "color"  # 주자 칸을 채우는 방식: color(색) | bright(흰색)
+    half: Optional[tuple[float, float, float, float]] = None  # ▲/▼ 칸(x0, y0, x1, y1 비율)
+    half_fill: str = "color"  # 화살표 색: color | bright
 
     @classmethod
     def load(cls, path: Path) -> "Layout":
         raw = json.loads(Path(path).read_text(encoding="utf-8"))
         crop = raw.get("crop")
+        half = raw.get("half")
         return cls(
             name=str(raw["name"]),
             bases={int(k): (float(v[0]), float(v[1])) for k, v in raw["bases"].items()},
@@ -48,6 +55,8 @@ class Layout:
             crop=tuple(float(v) for v in crop) if crop else None,  # type: ignore[arg-type]
             scale=float(raw.get("scale", 3.0)),
             base_fill=str(raw.get("base_fill", "color")),
+            half=tuple(float(v) for v in half) if half else None,  # type: ignore[arg-type]
+            half_fill=str(raw.get("half_fill", "color")),
         )
 
 
@@ -64,6 +73,33 @@ def decode(layout: Layout, sample: Callable[[Point], Rgb]) -> tuple[list[int], i
                    if is_filled(sample(p), layout.base_fill))
     outs = sum(1 for p in layout.outs if is_filled(sample(p)))
     return bases, outs
+
+
+HALF_MIN_PIXELS = 8  # 화살표로 볼 최소 화소 수(1280×720 프레임)
+HALF_TILT = 0.08  # 무게중심이 세로 범위 가운데에서 이만큼(범위 비율) 넘게 쏠려야 가른다
+
+
+def decode_half(layout: Layout, pixels: bytes, width: int, height: int) -> Optional[str]:
+    """▲(top) / ▼(bot) / 모름(None) — 화살표 칸 안 채워진 화소의 세로 무게중심으로."""
+    if layout.half is None:
+        return None
+    x0, y0, x1, y1 = (round(v * n) for v, n in zip(layout.half, (width, height, width, height)))
+    ys = []
+    for y in range(max(0, y0), min(height, y1 + 1)):
+        for x in range(max(0, x0), min(width, x1 + 1)):
+            i = (y * width + x) * 3
+            rgb = (pixels[i] / 255, pixels[i + 1] / 255, pixels[i + 2] / 255)
+            if is_filled(rgb, layout.half_fill):
+                ys.append(y)
+    if len(ys) < HALF_MIN_PIXELS:
+        return None
+    top, bottom = min(ys), max(ys)
+    mid, center = (top + bottom) / 2, sum(ys) / len(ys)
+    if center < mid - HALF_TILT * (bottom - top):
+        return "bot"
+    if center > mid + HALF_TILT * (bottom - top):
+        return "top"
+    return None
 
 
 def rgb_sampler(pixels: bytes, width: int, height: int) -> Callable[[Point], Rgb]:

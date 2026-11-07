@@ -113,3 +113,39 @@ def test_reader_with_a_crop_layout_skips_corner_picking(tmp_path):
     assert all(f.startswith("crop=iw*0.3:ih*0.06:iw*0.2:ih*0.9,scale=iw*1.5") for f in filters)
     r = out["scoreboard"][0]
     assert (r["bases"], r["outs"]) == ([], 0)  # 화소(검정)가 VLM 답을 이긴다
+
+
+def _triangle(up: bool, color=(220, 20, 60), bg=(245, 245, 245)) -> bytes:
+    """1280×720 화면 (600, 300) 둘레에 ▲(up) 또는 ▼."""
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    px = bytearray(bytes(bg) * (RGB_W * RGB_H))
+    for row in range(10):
+        half = row if up else 9 - row  # ▲는 아래로 갈수록 넓다
+        for x in range(600 - half, 601 + half):
+            i = ((300 + row) * RGB_W + x) * 3
+            px[i:i + 3] = bytes(color)
+    return bytes(px)
+
+
+def test_arrow_pixels_decide_top_or_bottom_of_the_inning():
+    from app.adapters.video.scorebug_layout import decode_half
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    box = (590 / RGB_W, 295 / RGB_H, 612 / RGB_W, 315 / RGB_H)
+    layout = Layout("t", {}, (), half=box)
+    assert decode_half(layout, _triangle(up=True), RGB_W, RGB_H) == "top"
+    assert decode_half(layout, _triangle(up=False), RGB_W, RGB_H) == "bot"
+    blank = bytes((245, 245, 245) * (RGB_W * RGB_H))
+    assert decode_half(layout, blank, RGB_W, RGB_H) is None  # 화살표가 없으면 VLM 답을 둔다
+    white = Layout("t", {}, (), half=box, half_fill="bright")
+    dark_up = _triangle(up=True, color=(250, 250, 250), bg=(15, 15, 15))
+    assert decode_half(white, dark_up, RGB_W, RGB_H) == "top"
+    assert decode_half(Layout("t", {}, ()), dark_up, RGB_W, RGB_H) is None  # 칸이 없는 위치 파일
+
+
+def test_shipped_layouts_have_arrow_boxes():
+    for name in ("sbs_sports_2026", "mbc_sports_plus", "tving_postseason"):
+        layout = Layout.load(ROOT / "data" / "scorebug_layouts" / f"{name}.json")
+        x0, y0, x1, y1 = layout.half
+        assert 0 < x0 < x1 < 1 and 0 < y0 < y1 < 1

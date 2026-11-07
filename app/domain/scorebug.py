@@ -178,7 +178,10 @@ def transitions(stable: Sequence[Reading]) -> list[Transition]:
         # 안타가 '주자 진루'로). 카운트만 줄었으면 오독일 수 있어 새 타자로 보지 않는다
         dropped = after.balls < before.balls or after.strikes < before.strikes
         moved = half_change or outs_made or runs or after.bases != before.bases
-        count_reset = count_reset or bool(dropped and moved)
+        # 주자 수 + 득점이 늘었으면 타자가 나갔다 — 한 타석 안의 진루(도루·폭투·보크)로는 늘 수
+        # 없다. 다음 타자의 첫 판독이 이미 2-1이면 카운트로는 새 타자를 모른다(2타점 2루타 실측)
+        new_runner = sum(after.bases) + max(0, runs) > sum(before.bases)
+        count_reset = count_reset or bool(dropped and moved) or (new_runner and not half_change)
         out.append(Transition(
             t=after.t, before=before, after=after, outs_made=outs_made, runs=max(0, runs),
             half_change=half_change, count_reset=count_reset,

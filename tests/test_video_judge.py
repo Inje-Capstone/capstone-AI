@@ -1122,3 +1122,17 @@ def test_swings_without_a_view_become_unknown_view_cues():
                         "view": "no_play"}]}
     kinds = [(c.t, c.kind) for c in pose_cues(pose) if "view" in c.kind or "play" in c.kind]
     assert kinds == [(6.0, "view_unknown"), (26.0, "no_play")]
+
+
+def test_a_new_runner_means_the_at_bat_ended_even_if_the_count_did_not_drop():
+    """1·2루에서 2점이 나고 2루에 주자가 남았다 — 타자가 나갔다(다음 타자 첫 판독이 이미 2-1)."""
+    reads = twice(R(0, balls=2, strikes=1, outs=2, bases=(True, True, False)),
+                  R(10, balls=2, strikes=1, outs=2, bases=(False, True, False), home=2))
+    (tr,) = transitions(stabilize(reads))
+    assert tr.count_reset
+    assert judge_transition(tr, []).code == "reach"
+    # 도루는 주자 수가 그대로다 — 새 타자로 보지 않는다
+    steal = twice(R(0, balls=1, bases=(True, False, False)),
+                  R(10, balls=1, strikes=1, bases=(False, True, False)))
+    (tr,) = transitions(stabilize(steal))
+    assert not tr.count_reset
