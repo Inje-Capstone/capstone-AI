@@ -1272,3 +1272,22 @@ def test_strikeout_mark_needs_two_strikes_before_it_and_a_single_out():
              _board(5, 0, 0, 2)]
     readings, cues, _ = observe({"scorebug": {"scoreboard": board}})
     assert [j.code for j in judge(readings, cues, min_repeat=1)] == ["out"]
+
+
+def test_strikeout_mark_names_a_merged_highlight_jump_but_keeps_it_merged():
+    """하이라이트가 건너뛰어 아웃 둘이 한 전이(이닝 끝) — 보이는 플레이는 삼진, merged는 남긴다."""
+    board = [_board(0, 1, 2, 1), _board(3, 0, 0, 0, mark="strikeout"),
+             _board(6, 0, 0, 0, inning=1, half="bot")]
+    readings, cues, _ = observe({"scorebug": {"scoreboard": board}})
+    [j] = judge(readings, cues, min_repeat=1)
+    assert j.code == "strikeout" and j.detail.get("merged")
+
+
+def test_strikeout_mark_reaches_a_late_jump_only_without_a_pitch_between():
+    """표시 뒤 20초에 건너뛴 점수판 — 사이에 투구 화면이 없으면 그 아웃이 삼진, 있으면 아니다."""
+    board = [_board(0, 1, 2, 1), _board(3, 0, 0, 0, mark="strikeout"),
+             _board(23, 0, 0, 0, inning=1, half="bot")]
+    readings, cues, _ = observe({"scorebug": {"scoreboard": board}})
+    assert [j.code for j in judge(readings, cues, min_repeat=1)] == ["strikeout"]
+    pitched = sorted(cues + [_view(15, "in_play")], key=lambda c: c.t)
+    assert [j.code for j in judge(readings, pitched, min_repeat=1)] == ["out"]

@@ -244,3 +244,19 @@ def test_dark_strikeout_mark_counts_black_text():
     assert decode_mark(red_text, black, RGB_W, RGB_H) is None
     caster = Layout.load(ROOT / "data" / "scorebug_layouts" / "kbo_caster_box.json")
     assert caster.mark_fill == "dark" and caster.half is None
+
+
+def test_white_out_dots_mean_the_strikeout_mark_covers_them():
+    """표시가 나타나는 중엔 글자가 모자라도 아웃 점 자리가 흰 바탕이다 — cover_val로 잡는다."""
+    from app.adapters.video.scorebug_layout import decode_mark
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    outs = ((100 / RGB_W, 100 / RGB_H), (120 / RGB_W, 100 / RGB_H))
+    box = (0.9, 0.9, 0.95, 0.95)  # 글자 칸은 비었다
+    layout = Layout("t", {}, outs, mark=box, cover_val=0.85)
+    white = bytes((250, 250, 250)) * (RGB_W * RGB_H)
+    gray = bytes((185, 185, 185)) * (RGB_W * RGB_H)  # 꺼진 아웃 점(밝기 0.73)
+    assert decode_mark(layout, white, RGB_W, RGB_H) == "strikeout"
+    assert decode_mark(layout, gray, RGB_W, RGB_H) is None
+    plain = Layout("t", {}, outs, mark=box)  # 옵션이 없으면 아웃 점은 안 본다
+    assert decode_mark(plain, white, RGB_W, RGB_H) is None

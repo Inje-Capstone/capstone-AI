@@ -75,3 +75,34 @@ OvmkANKCcks,1238.6,none,True,,,,조용함,
 OvmkANKCcks,1266.8,none,True,,,,조용함,
 OvmkANKCcks,1287.9,none,True,,,,조용함,
 OvmkANKCcks,1301.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 001→000,맞음,땅볼 3아웃 — 영상 끝
+7TYZzeweCjk,26.7,none,True,,,,조용함,
+7TYZzeweCjk,38.0,strikeout,True,strikeout out,video_only video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (43s); [점수판] 삼진 표시(K) (43s) | 점수판 아웃+2 득점+1 주자 000→000,맞음,삼진(1K)
+7TYZzeweCjk,68.2,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (75s),맞음,삼진(2K)
+7TYZzeweCjk,102.7,strikeout,True,strikeout,video_only,점수판 아웃+2 득점+0 주자 000→100; [점수판] 삼진 표시(K) (108s),맞음,삼진(3K)
+7TYZzeweCjk,117.0,?,False,,,,제외,다시보기 — 1루 주자는 장면 없이 생김
+7TYZzeweCjk,118.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 100→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (124s); [점수판] 삼진 표시(K) (123s),맞음,삼진(4K)
+7TYZzeweCjk,146.5,strikeout,True,strikeout,video_only,점수판 아웃+2 득점+0 주자 100→100; [점수판] 삼진 표시(K) (154s),맞음,삼진(5K)
+7TYZzeweCjk,177.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 100→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (189s); [점수판] 삼진 표시(K) (189s),맞음,삼진(6K)
+7TYZzeweCjk,206.7,none,False,out,video_only,점수판 아웃+2 득점+2 주자 100→000,헛판정,6K 타자 다시보기로 보임
+7TYZzeweCjk,222.0,?,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (229s); [점수판] 삼진 표시(K) (232s),제외,5회말 3-2 투구 뒤 7회말로 건너뜀 — 결과 모름
+7TYZzeweCjk,254.5,strikeout,True,out,video_only,점수판 아웃+2 득점+2 주자 000→000,틀림,"삼진(8K) — 3아웃, 영상 끝 20초 전"
+YiiGl9UUV2E,13.2,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (17s); [점수판] 삼진 표시(K) (17s),맞음,삼진(1K)
+YiiGl9UUV2E,30.2,?,False,,,,제외,아웃 하나·출루 하나가 장면 없이 — 순서 모름
+YiiGl9UUV2E,34.7,out_any,False,out,video_only,점수판 아웃+2 득점+2 주자 000→000,맞음,3아웃 — 2K인지 표시를 못 봄
+YiiGl9UUV2E,62.5,strikeout,True,strikeout out,video_only video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (65s) | 점수판 아웃+1 득점+0 주자 000→000,맞음,삼진(3K) — 다음 아웃은 장면 없이
+YiiGl9UUV2E,84.0,strikeout,True,out,video_only,점수판 아웃+1 득점+1 주자 000→100,틀림,삼진(4K) — 3아웃
+YiiGl9UUV2E,100.5,strikeout,True,strikeout out,video_only video_only,점수판 아웃+1 득점+0 주자 100→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (104s); [점수판] 삼진 표시(K) (104s) | 점수판 아웃+1 득점+1 주자 100→100,맞음,삼진(5K)
+YiiGl9UUV2E,117.5,out_any,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 100→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (121s),맞음,3아웃 — 6K로 보이나 표시를 못 봄
+YiiGl9UUV2E,131.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [점수판] 삼진 표시(K) (138s),맞음,삼진(7K)
+YiiGl9UUV2E,149.2,none,True,,,,조용함,
+YiiGl9UUV2E,155.0,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 타자가 공을 그냥 보냄 (156s); [점수판] 삼진 표시(K) (159s),맞음,삼진(8K)
+YiiGl9UUV2E,172.5,none,True,,,,조용함,
+YiiGl9UUV2E,183.2,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (188s),맞음,삼진(9K) — 3아웃
+YiiGl9UUV2E,201.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (206s); [점수판] 삼진 표시(K) (206s),맞음,삼진(10K)
+YiiGl9UUV2E,220.0,none,False,,,,조용함,다시보기·투구 궤적 그래픽
+YiiGl9UUV2E,223.7,none,False,,,,조용함,다시보기
+YiiGl9UUV2E,237.5,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (244s); [점수판] 삼진 표시(K) (244s),맞음,삼진(11K)
+YiiGl9UUV2E,254.5,?,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→110,제외,투수 교체 — 주자 둘은 장면 없이
+YiiGl9UUV2E,278.0,none,True,,,,조용함,
+YiiGl9UUV2E,292.7,none,True,,,,조용함,
+YiiGl9UUV2E,328.7,?,False,,,,제외,영상 끝 — 결과 모름

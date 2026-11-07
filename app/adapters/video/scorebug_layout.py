@@ -25,6 +25,10 @@ MBC는 주자 칸을 흰색으로 채운다 — `base_fill: "bright"`면 밝고 
 `base_hue`가 있으면 그 색상 범위(도)의 칸만 주자로 본다 — 노란 주자 칸과 빨간 K 글자를 가른다.
 다른 중계(캐스터 이름 띠가 위에 붙은 상자형, YiiGl9UUV2E)는 검은 'nK'가 볼카운트·아웃 칸을 덮는다 —
 `mark_fill: "dark"`면 표시 칸의 어두운 화소를 센다(평소 그 칸은 흰 바탕에 빨강·회색 점뿐).
+표시가 나타나는 중이면 글자 화소가 모자라 놓친다(처음 본 경기 4장 중 3장) — 대신 두 중계 모두 표시가
+아웃 점 자리를 흰 바탕으로 덮었다(채도 0.02 이하, 밝기 0.9 이상;
+평소 꺼진 점은 회색 밝기 0.68~0.74).
+`cover_val`이 있으면 아웃 점이 모두 그보다 밝고 색이 없을 때도 덮인 것(삼진 표시)으로 본다.
 """
 
 import colorsys
@@ -58,6 +62,7 @@ class Layout:
     mark: Optional[tuple[float, float, float, float]] = None  # 삼진 표시가 덮는 칸(비율)
     mark_hue: tuple[float, float] = (340.0, 20.0)  # 삼진 표시 글자 색상 범위(도) — 기본 빨강
     mark_fill: str = "color"  # 삼진 표시 글자: color(mark_hue 색) | dark(검은 글자)
+    cover_val: Optional[float] = None  # 아웃 점이 모두 이보다 밝은 무채색이면 표시가 덮은 것
 
     @classmethod
     def load(cls, path: Path) -> "Layout":
@@ -85,6 +90,7 @@ class Layout:
             mark=tuple(float(v) for v in raw["mark"]) if raw.get("mark") else None,  # type: ignore[arg-type]
             mark_hue=_pair(raw.get("mark_hue")) or (340.0, 20.0),
             mark_fill=str(raw.get("mark_fill", "color")),
+            cover_val=float(raw["cover_val"]) if raw.get("cover_val") is not None else None,
         )
 
 
@@ -152,12 +158,18 @@ def decode_half(layout: Layout, pixels: bytes, width: int, height: int) -> Optio
 
 MARK_MIN_PIXELS = 40  # 삼진 표시로 볼 최소 화소 수(1280×720) — 'nK' 글자는 수백 화소
 DARK_VAL = 0.3  # mark_fill "dark": 이보다 어두우면 검은 글자
+COVER_SAT = 0.1  # cover_val: 아웃 점 자리가 이보다 색이 없어야 흰 바탕
 
 
 def decode_mark(layout: Layout, pixels: bytes, width: int, height: int) -> Optional[str]:
     """점수판이 주자·아웃 칸을 삼진 표시(K)로 덮었으면 "strikeout", 아니면 None."""
     if layout.mark is None:
         return None
+    if layout.cover_val is not None and layout.outs:
+        sample = rgb_sampler(pixels, width, height)
+        hsv = [colorsys.rgb_to_hsv(*sample(p)) for p in layout.outs]
+        if all(s < COVER_SAT and v >= layout.cover_val for _, s, v in hsv):
+            return "strikeout"
     x0, y0, x1, y1 = (round(v * n) for v, n in zip(layout.mark, (width, height, width, height)))
     found = 0
     for y in range(max(0, y0), min(height, y1 + 1)):
