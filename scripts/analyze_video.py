@@ -218,7 +218,8 @@ def build_transcriber(args: argparse.Namespace) -> Any:
     from app.adapters.video.speech_asr import WhisperTranscriber
 
     return WhisperTranscriber(
-        os.getenv("NVIDIA_API_KEY", "").strip(), ffmpeg=find_tool("ffmpeg", args.ffmpeg)
+        os.getenv("NVIDIA_API_KEY", "").strip(), ffmpeg=find_tool("ffmpeg", args.ffmpeg),
+        piece_sec=getattr(args, "asr_piece", 30.0),
     )
 
 
@@ -301,6 +302,8 @@ def main() -> int:
                         help="점수판 판독 요청 상한 (무료 크레딧 보호)")
     parser.add_argument("--asr", action="store_true",
                         help="해설을 Whisper로 받아 적는다([asr] 설치) — 30초마다 요청 1회")
+    parser.add_argument("--asr-piece", type=float, default=30.0,
+                        help="받아쓰기 조각 길이(초) — 해설 시각이 조각 시작으로 붙는다")
     parser.add_argument("--audio", type=Path, default=None,
                         help="소리를 따로 받은 파일(화면·소리가 나뉜 다운로드) — 해설 받아쓰기용")
     args = parser.parse_args()
@@ -347,7 +350,10 @@ def main() -> int:
             print(f"점수판 판독이 상한({args.max_reads})에 걸렸다 — 빠진 구간이 있다. "
                   "--max-reads를 올려 다시 돌린다", file=sys.stderr)
     if args.asr and span:
-        from app.adapters.video.speech_asr import VERSION as ASR_VERSION
+        from app.adapters.video.speech_asr import VERSION
+
+        ASR_VERSION = VERSION if args.asr_piece == 30 else VERSION.replace(
+            "30s", f"{args.asr_piece:g}s")
 
         try:
             transcriber = build_transcriber(args)

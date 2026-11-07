@@ -171,6 +171,8 @@ def main() -> None:
                         help="입력을 하나씩 빼고도 채점한다(해설 없이·관절 없이·점수판만)")
     parser.add_argument("--scorebug-from", type=Path, default=None,
                         help="점수판 판독만 이 폴더의 스냅샷에서 가져온다(읽기 방식 비교)")
+    parser.add_argument("--asr-from", type=Path, default=None,
+                        help="해설 받아쓰기만 이 폴더의 스냅샷에서 가져온다(조각 길이 비교)")
     args = parser.parse_args()
     labels = json.loads(LABELS.read_text(encoding="utf-8"))["games"]
     rows, titles = [], {}
@@ -183,6 +185,9 @@ def main() -> None:
         if args.scorebug_from is not None:
             other = json.loads((args.scorebug_from / f"{stem}.json").read_text(encoding="utf-8"))
             snap["scorebug"] = other["scorebug"]
+        if args.asr_from is not None:
+            other = json.loads((args.asr_from / f"{stem}.json").read_text(encoding="utf-8"))
+            snap["asr"] = other["asr"]
         rows += grade(stem, game, snap)
         titles[stem] = game["title"]
         snaps[stem] = snap
