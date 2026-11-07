@@ -1201,3 +1201,25 @@ def test_a_walk_off_word_after_the_last_scoreboard_stops_the_game_end_out():
     reads = twice(R(0, inning=9, half="bot", outs=2, bases=(True, False, False), away=5, home=4))
     said = Cue(25, "speech", "끝내기 투런 홈런!")
     assert judge(reads, [_view(20, "in_play"), said], finished=True) == []
+
+
+def test_an_out_and_a_late_run_from_third_are_one_sacrifice_fly():
+    """점수판이 아웃을 먼저, 11초 뒤 득점을 따로 반영했다 — 한 플레이다."""
+    loaded = (True, True, True)
+    reads = twice(R(0, balls=2, strikes=2, bases=loaded), R(10, outs=1, bases=loaded),
+                  R(21, outs=1, bases=(True, True, False), away=1))
+    said = Cue(5, "speech", "가볍게 걷어 올렸습니다 센터쪽 중견수")
+    hit = _view(5, "in_play")
+    assert [j.code for j in judge(reads, [said, hit])] == ["sac_fly"]
+    assert [j.code for j in judge(reads, [hit])] == ["out"]  # 말이 없으면 한 번의 아웃
+    # 공이 맞았다는 영상이 없으면 합치지 않는다 — 삼진 뒤 폭투 득점일 수 있다
+    assert len(judge(reads, [said])) == 2
+    assert len(judge(reads, [hit, Cue(18, "speech", "폭투! 3루 주자 홈인")])) == 2
+    # 다음 타자 초구 카운트와 함께 보여도 같다
+    pitched = twice(R(0, balls=2, strikes=2, bases=loaded), R(10, outs=1, bases=loaded),
+                    R(21, outs=1, balls=1, bases=(True, True, False), away=1))
+    assert [j.code for j in judge(pitched, [said, hit])] == ["sac_fly"]
+    # 다른 주자도 움직였으면(폭투) 따로 일어난 일이다
+    wild = twice(R(0, balls=2, strikes=2, bases=loaded), R(10, outs=1, bases=loaded),
+                 R(21, outs=1, balls=1, bases=(False, True, True), away=1))
+    assert len(judge(wild, [])) == 2

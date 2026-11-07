@@ -37,7 +37,7 @@
 3QYUP4AgNpI,714.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,김성윤 안타
 3QYUP4AgNpI,724.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,구자욱 안타
 3QYUP4AgNpI,733.5,walk,False,reach,video_only,점수판 아웃+0 득점+0 주자 110→111,틀림,디아즈 볼넷으로 보임(3-1)
-3QYUP4AgNpI,753.5,sac_fly,True,out runner,video_only video_only,점수판 아웃+1 득점+0 주자 111→111 | 점수판 아웃+0 득점+1 주자 111→110,틀림,최형우 희생플라이
+3QYUP4AgNpI,753.5,sac_fly,True,sac_fly,refined,점수판 아웃+1 득점+1 주자 111→110; 해설 '7:4의 평균자 직점을 무사 발로 상황 타석의 최형우 다시 투앤투 가볍게 걷어 올렸습니다 센터쪽 중견수 내려오면' (750s),맞음,최형우 희생플라이
 3QYUP4AgNpI,775.8,homerun,True,out,video_only,점수판 아웃+2 득점+3 주자 110→000,틀림,강민호 3점 홈런
 3QYUP4AgNpI,824.6,walk,False,walk out,confirmed video_only,점수판 아웃+0 득점+0 주자 000→100; 해설 '시즌 5경기에서 1승 1패를 기록하고 있는 김백산 선수고요. 변화구가 반대로 꺾이면서 볼넷입니다.' (820s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (829s) | 점수판 아웃+2 득점+0 주자 100→100,맞음,노시환 볼넷으로 보임(3-2)
 3QYUP4AgNpI,833.1,walk,True,walk,refined,"점수판 아웃+0 득점+0 주자 100→110; 해설 '- 골을 맞아서 볼넷을 2개 내주고 있는 김백산, 박정현 선수가 대타로. 높은 쪽에 볼입니다.' (840s)",맞음,정은원 볼넷
@@ -50,9 +50,9 @@ T93FGIYBM8E,62.3,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 
 T93FGIYBM8E,84.8,none,False,,,,조용함,넓은 화면(투구 아님)
 T93FGIYBM8E,91.6,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 110→111 | 점수판 아웃+1 득점+0 주자 111→111,맞음,안타 — 만루
 T93FGIYBM8E,109.3,out_any,True,,,,놓침,삼진으로 보임
-T93FGIYBM8E,125.9,sac_fly,True,out,video_only,점수판 아웃+1 득점+0 주자 111→111,틀림,희생플라이 0-2
+T93FGIYBM8E,125.9,sac_fly,True,out,video_only,점수판 아웃+1 득점+1 주자 111→110,틀림,희생플라이 0-2
 T93FGIYBM8E,141.9,none,False,,,,조용함,희생플라이 다시보기
-T93FGIYBM8E,149.1,none,False,steal,video_only,"점수판 아웃+0 득점+1 주자 111→110; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 1.1배 미끄러짐, 151.2~153.8초 (151s)",헛판정,다시보기
+T93FGIYBM8E,149.1,none,False,,,,조용함,다시보기
 T93FGIYBM8E,157.4,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 110→010,맞음,2타점 2루타 0-4
 T93FGIYBM8E,192.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,땅볼 3아웃
 T93FGIYBM8E,206.9,none,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,헛판정,
