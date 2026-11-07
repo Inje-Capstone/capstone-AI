@@ -53,6 +53,8 @@ SPEECH_KEYWORDS = (
 # 홈런을 부르는 말 — 해설은 '홈런' 대신 솔로포·투런·스리런·만루포로 많이 말한다(하이라이트 실측)
 HR_WORDS = ("홈런", "솔로포", "투런", "투 런", "스리런", "쓰리런", "스리 런", "만루포",
             "그랜드슬램", "담장을 넘", "담장 넘")
+# 희생플라이 — 해설은 '희생플라이'보다 뜬공 모양으로 말한다("가볍게 걷어 올렸습니다, 중견수")
+SF_WORDS = ("희생플라이", "희생 플라이", "뜬공", "걷어 올", "띄워", "띄웠")
 WALK_WORDS = (
     "볼넷", "포볼", "밀어내기", "고의사구", "고의 사구", "고의4구", "고의 4구", "자동 고의",
 )
@@ -287,7 +289,7 @@ def judge_transition(
         if tp:
             return make("result", "triple_play", 0.6, [tp])
     if tr.outs_made == 1 and tr.runs >= 1 and tr.before.outs <= 1:  # 9.08(d) 2아웃 전
-        sf = _has(near, "deep_fly") or _speech(near, "희생플라이", "희생 플라이")
+        sf = _has(near, "deep_fly") or _speech(near, *SF_WORDS) or _speech(between, *SF_WORDS)
         if sf:
             return make("result", "sac_fly", 0.5, [sf])
     if tr.outs_made == 1 and b == a and not tr.half_change:
@@ -357,6 +359,43 @@ def judge_transition(
 
 
 GAME_END_SEC = 120.0  # 마지막 점수판 뒤 이 안의 투구만 마지막 타석으로 본다
+SPLIT_SEC = 25.0  # 점수판이 아웃과 득점을 나눠 반영하는 간격(하이라이트 실측 11·21초)
+
+
+def _merge_split(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transition]:
+    """점수판이 아웃을 먼저, 득점을 몇 초 뒤 따로 반영한 것을 한 전이로 합친다(희생플라이 실측).
+
+    앞 전이: 아웃 하나·득점 없음·주자 그대로·3루 주자 있음. 뒤 전이(SPLIT_SEC 안): 새 타자로 안
+    바뀜, 아웃 없이 3루 주자 하나만 들어오고 다른 주자는 그대로 — 득점만 늦게 반영됐다(다음 타자
+    초구 카운트와 함께 보이기도 한다). 폭투·보크는 다른 주자도 함께 움직인다.
+    아웃의 마지막 공이 맞아 나갔을 때만(삼진 뒤 다음 타자 초구 폭투 득점과 가른다), 득점 쪽 해설에
+    폭투·포일·보크·도루가 없을 때만 합친다(독립 리뷰 재현).
+    """
+    out: list[Transition] = []
+    for tr in trs:
+        prev = out[-1] if out else None
+        split = (
+            prev is not None and tr.t - prev.t <= SPLIT_SEC
+            and prev.outs_made == 1 and prev.runs == 0 and not prev.half_change
+            and prev.before.bases == prev.after.bases and prev.before.bases[2]
+            and tr.outs_made == 0 and tr.runs >= 1 and not tr.half_change
+            and tr.runs == 1
+            # 카운트가 그대로(0-0 그대로도 '리셋'으로 잡힌다)거나 새 타자로 안 바뀜
+            and ((tr.before.balls, tr.before.strikes) == (tr.after.balls, tr.after.strikes)
+                 or not tr.count_reset)
+            and tr.after.bases == (tr.before.bases[0], tr.before.bases[1], False)
+            and tr.before.bases[2]
+        )
+        if split and prev is not None:
+            view = _pitch_view(cues, prev)
+            other = _speech(_near(cues, tr.t), "폭투", "포일", "보크", "도루", "홈스틸")
+            split = view is not None and view.kind == IN_PLAY and other is None
+        if split and prev is not None:
+            out[-1] = Transition(t=prev.t, before=prev.before, after=tr.after, outs_made=1,
+                                 runs=tr.runs, half_change=False, count_reset=prev.count_reset)
+            continue
+        out.append(tr)
+    return out
 
 
 def _game_end(stable: Sequence[Reading], cues: Sequence[Cue]) -> list[Transition]:
@@ -522,7 +561,8 @@ def judge(
     stable = stabilize(readings, min_repeat=min_repeat)
     out = []
     spent: Counter = Counter()
-    for tr in transitions(stable) + (_game_end(stable, cues) if finished else []):
+    trs = _merge_split(transitions(stable), cues)
+    for tr in trs + (_game_end(stable, cues) if finished else []):
         j = _judge_spending_words(tr, cues, window, spent)
         if j is not None:
             out.append(j)
