@@ -36,7 +36,7 @@
 3QYUP4AgNpI,692.9,none,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,헛판정,
 3QYUP4AgNpI,714.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,김성윤 안타
 3QYUP4AgNpI,724.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,구자욱 안타
-3QYUP4AgNpI,733.5,walk,False,reach,video_only,점수판 아웃+0 득점+0 주자 110→111,틀림,디아즈 볼넷으로 보임(3-1)
+3QYUP4AgNpI,733.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 110→111,맞음,디아즈 안타(전광판 HIT) — 다시 보고 고침
 3QYUP4AgNpI,753.5,sac_fly,True,sac_fly,refined,점수판 아웃+1 득점+1 주자 111→110; 해설 '7:4의 평균자 직점을 무사 발로 상황 타석의 최형우 다시 투앤투 가볍게 걷어 올렸습니다 센터쪽 중견수 내려오면' (750s),맞음,최형우 희생플라이
 3QYUP4AgNpI,775.8,homerun,True,out,video_only,점수판 아웃+2 득점+3 주자 110→000,틀림,강민호 3점 홈런
 3QYUP4AgNpI,824.6,walk,False,walk out,confirmed video_only,점수판 아웃+0 득점+0 주자 000→100; 해설 '시즌 5경기에서 1승 1패를 기록하고 있는 김백산 선수고요. 변화구가 반대로 꺾이면서 볼넷입니다.' (820s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (829s) | 점수판 아웃+2 득점+0 주자 100→100,맞음,노시환 볼넷으로 보임(3-2)
@@ -73,7 +73,7 @@ T93FGIYBM8E,401.9,reach,True,out,video_only,점수판 아웃+2 득점+2 주자 0
 T93FGIYBM8E,429.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
 T93FGIYBM8E,436.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
 T93FGIYBM8E,456.2,out_any,False,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 배트를 휘두름 (459s),맞음,3아웃
-T93FGIYBM8E,468.0,walk,False,,,,놓침,볼넷으로 보임(3-1)
+T93FGIYBM8E,468.0,walk,True,,,,놓침,볼넷(배트 놓고 1루로 걸어감 — 다시 보고 확인)
 T93FGIYBM8E,482.0,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 100→001 | 점수판 아웃+0 득점+0 주자 001→011,맞음,2루타 — 주자 3루
 T93FGIYBM8E,513.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 011→011,맞음,
 T93FGIYBM8E,531.3,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 011→100,맞음,2타점 안타 4-4
@@ -89,7 +89,7 @@ T93FGIYBM8E,696.7,none,False,runner,video_only,점수판 아웃+0 득점+0 주�
 T93FGIYBM8E,708.4,reach,True,,,,놓침,2타점 안타 7-4
 T93FGIYBM8E,728.5,out,True,out,video_only,점수판 아웃+1 득점+2 주자 011→000,맞음,땅볼
 T93FGIYBM8E,738.0,out_any,False,strikeout reach reach,video_only video_only video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (743s) | 점수판 아웃+0 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,
-T93FGIYBM8E,751.5,walk_or_hbp,False,,,,놓침,몸에 맞는 공 또는 볼넷
+T93FGIYBM8E,751.5,hbp,True,,,,놓침,몸에 맞는 공(타석에서 몸을 숙임 — 다시 보고 고침)
 T93FGIYBM8E,781.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,3아웃
 T93FGIYBM8E,797.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
 T93FGIYBM8E,811.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→001,맞음,땅볼 — 주자 3루로
@@ -106,7 +106,7 @@ T93FGIYBM8E,1000.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 00
 T93FGIYBM8E,1011.5,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,경기 끝
 wyC8BnovUUA,109.6,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,삼진으로 보임
 wyC8BnovUUA,127.9,out_any,True,strikeout,refined,점수판 아웃+1 득점+0 주자 000→000; 해설 '3번 타자와는 다른 볼 배합으로 지금 삼진을 잡아내고 있습니다. 3번 타자 김도영과의 승부가 이어집니다. 그렇다. 스피치. 원바운드 볼. 볼이 완전히 엉덩이.' (140s),맞음,
-wyC8BnovUUA,146.4,walk,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,틀림,볼넷으로 보임(3-2)
+wyC8BnovUUA,146.4,?,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,제외,볼넷인지 안타인지 못 가림(다시 봄)
 wyC8BnovUUA,154.9,none,True,,,,조용함,
 wyC8BnovUUA,161.1,steal,True,steal,video_only,"점수판 아웃+0 득점+0 주자 100→010; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 0.9배 미끄러짐, 170.4~170.8초 (170s)",맞음,2루 도루
 wyC8BnovUUA,174.9,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→001,맞음,적시타 1-0

@@ -304,9 +304,9 @@
      "t": 733.5,
      "pitch_end": 735.5,
      "end": 753.5,
-     "code": "walk",
-     "sure": false,
-     "note": "디아즈 볼넷으로 보임(3-1)"
+     "code": "reach",
+     "sure": true,
+     "note": "디아즈 안타(전광판 HIT) — 다시 보고 고침"
     },
     {
      "t": 753.5,
@@ -607,8 +607,8 @@
      "pitch_end": 471.5,
      "end": 482.0,
      "code": "walk",
-     "sure": false,
-     "note": "볼넷으로 보임(3-1)"
+     "sure": true,
+     "note": "볼넷(배트 놓고 1루로 걸어감 — 다시 보고 확인)"
     },
     {
      "t": 482.0,
@@ -734,9 +734,9 @@
      "t": 751.5,
      "pitch_end": 758.2,
      "end": 781.8,
-     "code": "walk_or_hbp",
-     "sure": false,
-     "note": "몸에 맞는 공 또는 볼넷"
+     "code": "hbp",
+     "sure": true,
+     "note": "몸에 맞는 공(타석에서 몸을 숙임 — 다시 보고 고침)"
     },
     {
      "t": 781.8,
@@ -876,9 +876,9 @@
      "t": 146.4,
      "pitch_end": 148.9,
      "end": 154.9,
-     "code": "walk",
+     "code": "?",
      "sure": false,
-     "note": "볼넷으로 보임(3-2)"
+     "note": "볼넷인지 안타인지 못 가림(다시 봄)"
     },
     {
      "t": 154.9,
