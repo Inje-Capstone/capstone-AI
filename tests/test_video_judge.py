@@ -1239,3 +1239,36 @@ def test_talk_about_hoping_for_a_double_play_before_the_play_is_not_a_double_pla
     (tr,) = transitions(stabilize(twice(R(0, outs=1, bases=(True, False, False)),
                                         R(40, inning=4, half="bot"))))
     assert judge_transition(tr, [Cue(5, "speech", "여기서 병살 노려야죠")]).code == "out"
+
+
+def _board(t, balls, strikes, outs, bases=(), inning=1, half="top", mark=None):
+    r = {"t": t, "inning": inning, "half": half, "balls": balls, "strikes": strikes,
+         "outs": outs, "bases": list(bases), "away": 0, "home": 0}
+    if mark:
+        r["mark"] = mark
+    return r
+
+
+def test_strikeout_mark_reading_is_dropped_and_names_the_next_out():
+    """점수판이 주자·아웃 칸을 'nK'로 덮은 판독 — 상태에서 빼고, 뒤이은 아웃을 삼진으로."""
+    board = [_board(0, 2, 2, 1), _board(3, 0, 0, 0, [3], mark="strikeout"),
+             _board(4, 0, 0, 0, [3], mark="strikeout"),  # 같은 표시를 한 번 더 읽음
+             _board(5, 0, 0, 2), _board(8, 1, 1, 2),
+             _board(12, 0, 0, 0, inning=1, half="bot")]  # 다음 아웃(이닝 끝)은 다른 타자다
+    readings, cues, _ = observe({"scorebug": {"scoreboard": board}})
+    assert len(readings) == 4 and [c.t for c in cues if c.kind == "k_mark"] == [3.0, 4.0]
+    js = judge(readings, cues, min_repeat=1)
+    assert [j.code for j in js] == ["strikeout", "out"]
+    assert any("삼진 표시(K)" in e for e in js[0].evidence)
+    # 표시가 없으면(같은 판독에서 덮인 두 장을 뺀 것) 공이 맞았는지 모르니 그냥 아웃이다
+    plain = [r for r in board if "mark" not in r]
+    readings, cues, _ = observe({"scorebug": {"scoreboard": plain}})
+    assert [j.code for j in judge(readings, cues, min_repeat=1)] == ["out", "out"]
+
+
+def test_strikeout_mark_needs_two_strikes_before_it_and_a_single_out():
+    """표시 직전 판독이 2스트라이크가 아니면 뒤 아웃을 삼진으로 바꾸지 않는다(리뷰 시나리오)."""
+    board = [_board(0, 1, 1, 1), _board(3, 0, 0, 0, [3], mark="strikeout"),
+             _board(5, 0, 0, 2)]
+    readings, cues, _ = observe({"scorebug": {"scoreboard": board}})
+    assert [j.code for j in judge(readings, cues, min_repeat=1)] == ["out"]

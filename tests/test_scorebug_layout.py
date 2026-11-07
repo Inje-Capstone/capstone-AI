@@ -145,7 +145,7 @@ def test_arrow_pixels_decide_top_or_bottom_of_the_inning():
 
 
 def test_shipped_layouts_have_arrow_boxes():
-    for name in ("sbs_sports_2026", "mbc_sports_plus", "tving_postseason"):
+    for name in ("sbs_sports_2026", "mbc_sports_plus", "tving_postseason", "kbo_topleft_box"):
         layout = Layout.load(ROOT / "data" / "scorebug_layouts" / f"{name}.json")
         x0, y0, x1, y1 = layout.half
         assert 0 < x0 < x1 < 1 and 0 < y0 < y1 < 1
@@ -171,3 +171,60 @@ def test_single_frame_read_for_live_segments_uses_pixels_for_bases_outs_and_half
     assert (r["t"], r["half"], r["bases"], r["outs"], r["balls"]) == (2.5, "bot", [], 0, 1)
     reader._ask = lambda images, text, max_tokens: {"visible": False}
     assert reader.read_frame("seg.ts", 2.5) is None
+
+
+def test_lit_arrow_position_decides_half_when_both_arrows_are_drawn():
+    """▲·▼가 늘 그려지고 켜진 쪽만 색칠 — 색칠된 화소가 칸 위쪽이면 초, 아래쪽이면 말."""
+    from app.adapters.video.scorebug_layout import decode_half
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    box = (590 / RGB_W, 290 / RGB_H, 612 / RGB_W, 340 / RGB_H)  # 칸 가운데 y=315
+    layout = Layout("t", {}, (), half=box, half_by="position")
+    upper = _triangle(up=True)  # y 300~309 — 위쪽
+    assert decode_half(layout, upper, RGB_W, RGB_H) == "top"
+    lower = bytearray(bytes((245, 245, 245)) * (RGB_W * RGB_H))
+    for y in range(325, 333):  # 아래쪽에 작은 빨간 덩어리(모양은 따지지 않는다)
+        for x in range(598, 604):
+            i = (y * RGB_W + x) * 3
+            lower[i:i + 3] = bytes((220, 20, 60))
+    assert decode_half(layout, bytes(lower), RGB_W, RGB_H) == "bot"
+    boxed = Layout.load(ROOT / "data" / "scorebug_layouts" / "kbo_topleft_box.json")
+    assert boxed.half_by == "position"
+    assert boxed.mark is not None and boxed.base_hue == (20.0, 60.0)
+
+
+def test_strikeout_mark_over_the_bases_is_found_and_red_text_is_not_a_runner():
+    """삼진 표시('nK' 빨간 글자)가 주자 칸을 덮으면 표시로 읽고, 노란 주자 칸으로 읽지 않는다."""
+    from app.adapters.video.scorebug_layout import decode_mark, hue_in
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    box = (590 / RGB_W, 295 / RGB_H, 612 / RGB_W, 315 / RGB_H)
+    layout = Layout("t", {3: (600 / RGB_W, 305 / RGB_H)}, (), base_hue=(20.0, 60.0), mark=box)
+    red = _triangle(up=True)  # 빨간 화소 100개
+    assert decode_mark(layout, red, RGB_W, RGB_H) == "strikeout"
+    assert decode(layout, rgb_sampler(red, RGB_W, RGB_H))[0] == []
+    yellow = _triangle(up=True, color=(240, 190, 30))  # 노란 주자 칸
+    assert decode_mark(layout, yellow, RGB_W, RGB_H) is None
+    assert decode(layout, rgb_sampler(yellow, RGB_W, RGB_H))[0] == [3]
+    assert decode_mark(Layout("t", {}, ()), red, RGB_W, RGB_H) is None  # 칸이 없는 위치 파일
+    assert hue_in((1.0, 0.0, 0.05), (340.0, 20.0)) and not hue_in((0.94, 0.75, 0.12), (340.0, 20.0))
+
+
+def test_position_half_needs_a_clear_side_and_layout_boxes_are_checked(tmp_path):
+    """켜진 화소가 칸 가운데면(둘 다 켜짐) 모른다. 칸은 숫자 4개, half_by는 둘 중 하나."""
+    import pytest
+
+    from app.adapters.video.scorebug_layout import decode_half
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    box = (590 / RGB_W, 280 / RGB_H, 612 / RGB_W, 330 / RGB_H)  # 칸 가운데 y=305 = ▲ 가운데
+    assert decode_half(Layout("t", {}, (), half=box, half_by="position"),
+                       _triangle(up=True), RGB_W, RGB_H) is None
+    bad = tmp_path / "bad.json"
+    bad.write_text('{"name": "x", "bases": {}, "outs": [], "mark": [0.1, 0.1, 0.2]}',
+                   encoding="utf-8")
+    with pytest.raises(ValueError):
+        Layout.load(bad)
+    bad.write_text('{"name": "x", "bases": {}, "outs": [], "half_by": "postion"}', encoding="utf-8")
+    with pytest.raises(ValueError):
+        Layout.load(bad)

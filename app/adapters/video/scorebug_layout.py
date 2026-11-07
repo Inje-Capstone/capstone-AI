@@ -14,6 +14,15 @@ MBC는 주자 칸을 흰색으로 채운다 — `base_fill: "bright"`면 밝고 
 초·말(▲/▼)도 VLM이 자주 뒤집어 읽었다(2026-11-07 MBC 하이라이트: 1회말을 1회초로) — 위치 파일에
 `half`(화살표 칸 x0, y0, x1, y1 비율)가 있으면 칸 안 화살표 화소의 무게중심으로 가른다. ▼는 넓은
 쪽이 위라 무게중심이 위로, ▲는 아래로 쏠린다.
+▲·▼를 둘 다 그려 두고 켜진 쪽만 색칠하는 점수판(왼쪽 위 상자형)은 화살표가 720p에서 8줄뿐이라
+모양으로는 5장 중 2장만 갈렸다 — `half_by: "position"`이면 색칠된 화소가 칸 위쪽이면 초,
+아래쪽이면 말.
+
+같은 점수판은 삼진이 나오면 주자·아웃 칸 자리에 빨간 'nK'(그 투수의 n번째 삼진)를 2~3초 덮는다.
+그 판독은 주자·아웃이 엉터리다(K 글자가 3루 칸에 걸려 '3루 주자', 흰 바탕이라 '0아웃') — 처음 본
+시험 경기(zRqpvJdTybA)에서 가짜 출루 판정이 나왔다. `mark`(칸 x0, y0, x1, y1)에 `mark_hue` 색
+화소가 많으면 그 판독에 `mark: "strikeout"`을 달아 상태 판독에서 빼고 삼진 단서로 쓴다.
+`base_hue`가 있으면 그 색상 범위(도)의 칸만 주자로 본다 — 노란 주자 칸과 빨간 K 글자를 가른다.
 """
 
 import colorsys
@@ -42,10 +51,19 @@ class Layout:
     base_fill: str = "color"  # 주자 칸을 채우는 방식: color(색) | bright(흰색)
     half: Optional[tuple[float, float, float, float]] = None  # ▲/▼ 칸(x0, y0, x1, y1 비율)
     half_fill: str = "color"  # 화살표 색: color | bright
+    half_by: str = "shape"  # shape(화살표 하나의 모양) | position(▲·▼ 중 켜진 쪽 위치)
+    base_hue: Optional[tuple[float, float]] = None  # 주자 칸 색상 범위(도, lo>hi면 0도를 넘는다)
+    mark: Optional[tuple[float, float, float, float]] = None  # 삼진 표시가 덮는 칸(비율)
+    mark_hue: tuple[float, float] = (340.0, 20.0)  # 삼진 표시 글자 색상 범위(도) — 기본 빨강
 
     @classmethod
     def load(cls, path: Path) -> "Layout":
         raw = json.loads(Path(path).read_text(encoding="utf-8"))
+        for key in ("crop", "half", "mark"):
+            if raw.get(key) is not None and len(raw[key]) != 4:
+                raise ValueError(f"{path}: {key}는 숫자 4개(x0, y0, x1, y1 또는 x, y, w, h)다")
+        if raw.get("half_by", "shape") not in ("shape", "position"):
+            raise ValueError(f"{path}: half_by는 shape 또는 position이다")
         crop = raw.get("crop")
         half = raw.get("half")
         return cls(
@@ -57,7 +75,24 @@ class Layout:
             base_fill=str(raw.get("base_fill", "color")),
             half=tuple(float(v) for v in half) if half else None,  # type: ignore[arg-type]
             half_fill=str(raw.get("half_fill", "color")),
+            half_by=str(raw.get("half_by", "shape")),
+            base_hue=_pair(raw.get("base_hue")),
+            mark=tuple(float(v) for v in raw["mark"]) if raw.get("mark") else None,  # type: ignore[arg-type]
+            mark_hue=_pair(raw.get("mark_hue")) or (340.0, 20.0),
         )
+
+
+def _pair(raw) -> Optional[tuple[float, float]]:
+    return (float(raw[0]), float(raw[1])) if raw else None
+
+
+def hue_in(rgb: Rgb, hues: Optional[tuple[float, float]]) -> bool:
+    """색상(도)이 범위 안인가. 범위가 없으면 늘 참. lo > hi면 0도를 넘는 범위(빨강 340~20)."""
+    if hues is None:
+        return True
+    h = colorsys.rgb_to_hsv(*rgb)[0] * 360
+    lo, hi = hues[0] % 360, hues[1] % 360  # [-20, 20]도 [340, 20]으로
+    return lo <= h <= hi if lo <= hi else (h >= lo or h <= hi)
 
 
 def is_filled(rgb: Rgb, mode: str = "color") -> bool:
@@ -70,7 +105,8 @@ def is_filled(rgb: Rgb, mode: str = "color") -> bool:
 def decode(layout: Layout, sample: Callable[[Point], Rgb]) -> tuple[list[int], int]:
     """(주자 베이스 목록, 아웃 수). `sample(점)`이 그 위치 둘레 평균 색(0~1)을 준다."""
     bases = sorted(n for n, p in layout.bases.items()
-                   if is_filled(sample(p), layout.base_fill))
+                   if is_filled(sample(p), layout.base_fill)
+                   and (layout.base_fill == "bright" or hue_in(sample(p), layout.base_hue)))
     outs = sum(1 for p in layout.outs if is_filled(sample(p)))
     return bases, outs
 
@@ -93,12 +129,38 @@ def decode_half(layout: Layout, pixels: bytes, width: int, height: int) -> Optio
                 ys.append(y)
     if len(ys) < HALF_MIN_PIXELS:
         return None
+    center = sum(ys) / len(ys)
+    if layout.half_by == "position":  # 켜진 화살표가 칸의 위쪽 반이면 ▲(초)
+        mid = (y0 + y1) / 2
+        if abs(center - mid) < HALF_TILT * (y1 - y0):  # 둘 다 켜졌거나 가운데 — 모른다
+            return None
+        return "top" if center < mid else "bot"
     top, bottom = min(ys), max(ys)
-    mid, center = (top + bottom) / 2, sum(ys) / len(ys)
+    mid = (top + bottom) / 2
     if center < mid - HALF_TILT * (bottom - top):
         return "bot"
     if center > mid + HALF_TILT * (bottom - top):
         return "top"
+    return None
+
+
+MARK_MIN_PIXELS = 40  # 삼진 표시로 볼 최소 화소 수(1280×720) — 'nK' 글자는 수백 화소
+
+
+def decode_mark(layout: Layout, pixels: bytes, width: int, height: int) -> Optional[str]:
+    """점수판이 주자·아웃 칸을 삼진 표시(K)로 덮었으면 "strikeout", 아니면 None."""
+    if layout.mark is None:
+        return None
+    x0, y0, x1, y1 = (round(v * n) for v, n in zip(layout.mark, (width, height, width, height)))
+    found = 0
+    for y in range(max(0, y0), min(height, y1 + 1)):
+        for x in range(max(0, x0), min(width, x1 + 1)):
+            i = (y * width + x) * 3
+            rgb = (pixels[i] / 255, pixels[i + 1] / 255, pixels[i + 2] / 255)
+            if is_filled(rgb) and hue_in(rgb, layout.mark_hue):
+                found += 1
+                if found >= MARK_MIN_PIXELS:
+                    return "strikeout"
     return None
 
 
