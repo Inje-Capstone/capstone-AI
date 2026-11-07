@@ -66,6 +66,7 @@ def assign(plays: list[dict[str, Any]], judged: list[dict[str, Any]]) -> list[li
 
     빈 칸 바로 다음 칸에 판정이 둘 이상이고 그 첫 판정이 칸 시작 LATE초 안이면 앞 칸 몫으로
     옮긴다 — 다시보기 뒤 새 점수판이 다음 투구 화면이 끝난 몇 초 뒤에야 보이는 일이 있다.
+    다음 칸이 플레이가 아닌 칸(다시보기 투구 화면·볼 하나·못 봄)이면 하나라도 옮긴다.
     """
     spans = windows(plays)
     cells: list[list[dict[str, Any]]] = [[] for _ in plays]
@@ -76,7 +77,11 @@ def assign(plays: list[dict[str, Any]], judged: list[dict[str, Any]]) -> list[li
                 break
     for k in range(len(cells) - 1):
         nxt = cells[k + 1]
-        if not cells[k] and len(nxt) >= 2 and nxt[0]["t"] < spans[k + 1][0] + LATE:
+        if cells[k] or not nxt or plays[k]["code"] in SKIP | {NONE}:  # 받는 쪽은 플레이 칸이어야
+            continue
+        # 다음 칸이 플레이가 아니면(다시보기·볼 하나·못 봄) 거기 든 판정은 앞 플레이가 늦게 보인 것
+        idle = plays[k + 1]["code"] in SKIP | {NONE}
+        if idle or (len(nxt) >= 2 and nxt[0]["t"] < spans[k + 1][0] + LATE):
             cells[k].append(nxt.pop(0))
     return cells
 
@@ -138,6 +143,17 @@ def report(rows: list[dict[str, Any]], titles: dict[str, str]) -> str:
         c = Counter(r["verdict"] for r in sure)
         lines += [f"확실한 정답만: {len(sure)}칸 중 맞음 {c['맞음']}, 틀림 {c['틀림']}, "
                   f"놓침 {c['놓침']}.", ""]
+    names = {"reach": "안타·출루", "out": "아웃(인플레이)", "out_any": "아웃(종류 모름)",
+             "strikeout": "삼진", "walk": "볼넷", "hbp": "몸에 맞는 공", "walk_or_hbp": "볼넷·사구",
+             "homerun": "홈런", "sac_fly": "희생플라이", "double_play": "병살", "steal": "도루"}
+    by_code = []
+    for code in names:
+        part = [r for r in rows if r["truth"] == code and r["verdict"] in ("맞음", "틀림", "놓침")]
+        if part:
+            c = Counter(r["verdict"] for r in part)
+            by_code.append([names[code], len(part), c["맞음"], c["틀림"], c["놓침"]])
+    lines += ["## 정답 종류별", "", "| 정답 | 칸 | 맞음 | 틀림 | 놓침 |", "|---|---|---|---|---|",
+              *["| " + " | ".join(str(x) for x in row) + " |" for row in by_code], ""]
     pairs = Counter((r["truth"], r["engine"] or "(없음)") for r in rows
                     if r["verdict"] in ("맞음", "틀림", "놓침"))
     lines += ["## 정답 × 엔진", "", "| 정답 | 엔진 | 칸 |", "|---|---|---|",
