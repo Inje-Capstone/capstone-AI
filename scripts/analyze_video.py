@@ -283,6 +283,9 @@ def main() -> int:
                         help="점수판만 잘라 읽는다(클립 평가와 같은 방식) — 바뀔 때마다 요청 1회")
     parser.add_argument("--read-every", type=float, default=8.0,
                         help="점수판이 보이는 동안 몇 초마다 읽나 (투구 간격 15~25초)")
+    parser.add_argument("--min-repeat", type=int, default=None,
+                        help="같은 점수판이 몇 번 읽혀야 믿나 — 하이라이트는 1(한 상태가 한 번만 "
+                             "보인다). 없으면 --read-every가 있을 때 2")
     parser.add_argument("--layout", type=Path, default=None,
                         help="중계사 점수판 위치(data/scorebug_layouts/) — 주자·아웃을 화소로")
     parser.add_argument("--max-reads", type=int, default=600,
@@ -326,6 +329,8 @@ def main() -> int:
             f"-{args.layout.stem}" if args.layout else "")
         if dedicated_pass(snap, "scorebug", version, span,
                           lambda s, n: reader.read(args.video, n, s)):
+            if args.min_repeat:
+                snap["scorebug"]["min_repeat"] = args.min_repeat
             save(out_path, snap)
         if reader.requests >= args.max_reads:
             print(f"점수판 판독이 상한({args.max_reads})에 걸렸다 — 빠진 구간이 있다. "

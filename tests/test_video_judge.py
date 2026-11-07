@@ -69,6 +69,18 @@ def test_stabilize_rejects_score_going_down_and_inning_going_back():
     assert [(r.away, r.inning) for r in stabilize(readings)] == [(2, 3), (3, 3)]
 
 
+def test_a_misread_later_inning_does_not_lock_out_the_real_ones():
+    """타순 4를 회차로 읽은 판독 몇 장이 진짜 2회 판독 수십 장을 버리게 하면 안 된다."""
+    reads = [R(0, inning=2), R(5, inning=4), R(6, inning=4), R(10, inning=2, outs=1),
+             R(15, inning=2, outs=2), R(18, inning=2, outs=2, balls=1),
+             R(20, inning=3, half="bot"), R(25, inning=3, half="bot", outs=1)]
+    stable = stabilize(reads, min_repeat=1)
+    assert [(r.inning, r.half, r.outs) for r in stable] == [
+        (2, "top", 0), (2, "top", 1), (2, "top", 2), (2, "top", 2), (3, "bot", 0), (3, "bot", 1)]
+    # 반복을 요구하는 경기 영상 방식도 같다 — 오독 덩어리가 짧으면 진 사슬이다
+    assert [r.inning for r in stabilize(twice(*reads), min_repeat=2)] == [2, 2, 2, 2, 3, 3]
+
+
 def test_stabilize_never_lets_outs_go_down_within_a_half():
     """같은 반 이닝에서 아웃이 줄면 오독 — 받아들이면 다음 판독에서 아웃을 또 센다."""
     readings = twice(R(0, outs=1), R(10, outs=0, balls=1), R(20, outs=2))
@@ -439,6 +451,9 @@ def test_full_game_feed_prefers_crop_scoreboard_and_whisper_like_clip_eval():
     # 경기 영상 방식(N초마다)은 같은 상태를 여러 번 읽었다 → 반복으로 거른다
     periodic = {**snap, "scorebug": {**snap["scorebug"], "every": 8}}
     assert observe(periodic)[2] == 2
+    # 하이라이트를 N초마다 읽으면 한 상태가 한 번만 읽힌다 — 분석 때 정한 기준을 따른다
+    highlight = {**snap, "scorebug": {**snap["scorebug"], "every": 8, "min_repeat": 1}}
+    assert observe(highlight)[2] == 1
     speech = [c.text for c in cues if c.kind == "speech"]
     assert speech == ["뛰었습니다 도루!", "[자막] 도루 성공"]
 
@@ -1003,3 +1018,38 @@ def test_call_only_heard_in_commentary_is_marked_for_moving_to_video():
     cues = [Cue(5, "umpire_signal"), Cue(6, "speech", "비디오 판독 들어갑니다")]
     (j,) = judge_checked(twice(R(0), R(10)), cues)
     assert (j.code, j.detail["check"]) == ("video_review", "speech_only")
+
+
+def test_whisper_writing_strikeout_with_a_digit_still_counts():
+    """받아쓰기가 '삼진'을 '3진'으로 적어도 삼진이다(하이라이트 실측 '4타자 연속 3진')."""
+    before = R(0, outs=2, balls=3, strikes=2, bases=(True, True, False))
+    after = R(10, inning=4)
+    (tr,) = transitions(stabilize(twice(before, after)))
+    j = judge_transition(tr, [Cue(8, "speech", "3진. 4타자 연속 삼진 잡아내고")])
+    assert j.code == "strikeout"
+    j = judge_transition(tr, [Cue(8, "speech", "- 3진.- 4타자 연속")])
+    assert j.code == "strikeout"
+
+
+def test_one_spoken_strikeout_explains_one_strikeout():
+    """30초 받아쓰기 조각 하나에 앞 타자 삼진과 다음 타자 땅볼이 같이 든다."""
+    reads = twice(R(0, balls=1, strikes=2), R(10, outs=1, balls=1, strikes=2), R(20, outs=2))
+    heard = [Cue(5, "speech", "투 앤 투에서 헛스윙 삼진! 다음 타자 땅볼 1루에서 아웃")]
+    assert [j.code for j in judge(reads, heard)] == ["strikeout", "out"]
+    twice_said = [Cue(5, "speech", "삼진! 또 삼진입니다")]
+    assert [j.code for j in judge(reads, twice_said)] == ["strikeout", "strikeout"]
+
+
+def test_count_dropping_alone_is_a_misread_not_a_new_batter():
+    """카운트만 줄고 아웃·주자·득점이 그대로면 판정하지 않는다(독립 리뷰 재현)."""
+    reads = twice(R(0, balls=1, strikes=2, outs=1), R(10, balls=0, strikes=1, outs=1))
+    assert judge(reads, []) == []
+    hit = twice(R(0, balls=2, strikes=2, outs=2, bases=(False, True, False)),
+                R(10, balls=0, strikes=1, outs=2, bases=(True, False, True)))
+    assert [j.code for j in judge(hit, [])] == ["reach"]
+
+
+def test_a_compound_word_does_not_count_as_a_second_mention():
+    reads = twice(R(0), R(10, away=1), R(20, away=2))
+    heard = [Cue(5, "speech", "홈런스타 이벤트, 홈런!")]
+    assert [j.code for j in judge(reads, heard)] == ["homerun", "reach"]

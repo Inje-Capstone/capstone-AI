@@ -16,6 +16,7 @@ RelayEvent 형식이라 GameSim·detectors·카드가 그대로 받는다.
 판정 규칙표는 docs/exec-plans의 07-video-judge 계획과 1:1이다.
 """
 
+from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Optional
@@ -131,6 +132,11 @@ _EN_WORDS = {
 }
 
 
+# 받아쓰기(Whisper)가 숫자로 적는 말 — '삼진'을 '3진'으로(2026-11-07 하이라이트 실측: "4타자 연속
+# 3진"). '3진루' 같은 말은 해설에 없다
+_ASR_WORDS = {"삼진": ("3진",)}
+
+
 # 같은 글자의 다른 말 — '사구(死球)'는 몸에 맞는 공인데 '고의사구(四球)'는 고의4구다.
 # 낱말을 품은 다른 말(복합어)을 지우고 찾는다
 _HOMONYMS = {
@@ -139,16 +145,21 @@ _HOMONYMS = {
 }
 
 
-def _says(text: str, word: str) -> bool:
+def _without_homonyms(text: str, word: str) -> str:
     for other in _HOMONYMS.get(word, ()):
         text = text.replace(other, "")
-    return word in text
+    return text
+
+
+def _says(text: str, word: str) -> bool:
+    return word in _without_homonyms(text, word)
 
 
 def _speech(cues: Sequence[Cue], *words: str) -> Optional[Cue]:
     wanted = [w.lower() for w in words]
     for w in words:
         wanted += [e for k, en in _EN_WORDS.items() if k in w for e in en]
+        wanted += [e for k, alt in _ASR_WORDS.items() if k in w for e in alt]
     for c in cues:
         if c.kind == "speech" and any(_says(c.text.lower(), w) for w in wanted):
             return c
@@ -305,6 +316,40 @@ def judge_transition(
     return None
 
 
+def _mentions(c: Cue, code: str) -> int:
+    """해설 한 조각이 그 판정을 몇 번 말했나 — 판정 낱말(별칭 포함)이 나온 횟수, 최소 1."""
+    words = next((w for k, _kind, w in _CUE_ONLY if k == code), ())
+    alts = [*words]
+    for w in words:
+        alts += [e for k, en in _EN_WORDS.items() if k in w for e in en]
+        alts += [e for k, alt in _ASR_WORDS.items() if k in w for e in alt]
+    text = c.text.lower()
+    return max(1, sum(_without_homonyms(text, w.lower()).count(w.lower()) for w in alts))
+
+
+def _judge_spending_words(
+    tr: Transition, cues: Sequence[Cue], window: tuple[float, float], spent: Counter
+) -> Optional[Judgment]:
+    """해설 한 조각의 '삼진' 한 마디는 삼진 하나만 설명한다.
+
+    받아쓰기는 30초 조각이라 한 조각 안에 앞 타자 삼진과 다음 타자 땅볼이 같이 든다. 앞 전이가
+    그 말로 삼진을 냈으면 다음 전이는 같은 말로 다시 삼진을 낼 수 없다(2026-11-07 하이라이트
+    실측: 땅볼 아웃 두 개가 앞 타자의 '삼진'으로 삼진 카드가 됐다). 다른 종류(홈런 등)에는 쓴다.
+    """
+    pool = list(cues)
+    while True:
+        j = judge_transition(tr, pool, window)
+        if j is None:
+            return None
+        said = [c for c in pool if c.kind == "speech" and _ev(c) in j.evidence]
+        over = [c for c in said if spent[(c, j.code)] >= _mentions(c, j.code)]
+        if not over:
+            for c in said:
+                spent[(c, j.code)] += 1
+            return j
+        pool = [c for c in pool if c not in over]
+
+
 def _last_pitch(cues: Sequence[Cue], t: float) -> list[Cue]:
     """전이 시각 `t` 직전의 공에 속한 스윙 단서들. 전이 뒤의 것은 다시보기다."""
     seen = [c for c in cues if c.kind in ("swing", "no_swing")
@@ -393,8 +438,9 @@ def judge(
     """
     stable = stabilize(readings, min_repeat=min_repeat)
     out = []
+    spent: Counter = Counter()
     for tr in transitions(stable):
-        j = judge_transition(tr, cues, window)
+        j = _judge_spending_words(tr, cues, window, spent)
         if j is not None:
             out.append(j)
     seen_change: list[float] = []
@@ -735,7 +781,10 @@ def observe(snap: dict) -> tuple[list[Reading], list[Cue], int]:
     crop = (snap.get("scorebug") or {}).get("scoreboard") or []
     if crop:
         readings, _ = from_snapshot({"scoreboard": crop})
-        return readings, cues, 2 if snap["scorebug"].get("every") else 1
+        # 하이라이트를 일정 간격으로 읽으면 한 상태가 한 번만 읽히는 일이 많다 — 분석할 때
+        # 정한 기준(analyze_video --min-repeat)이 있으면 그것을 쓴다
+        fixed = snap["scorebug"].get("min_repeat")
+        return readings, cues, int(fixed) if fixed else (2 if snap["scorebug"].get("every") else 1)
     return readings, cues, 2
 
 
