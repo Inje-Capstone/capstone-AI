@@ -7,6 +7,12 @@
 실측(2026-11-07, 1080p 하이라이트 한화-삼성 투구 45개, 기준값을 정한 재료): 투구 화면이 끝난 뒤
 0.3~3.5초에 사람이 모두 작은(키 0.15 미만) 화면이 공이 맞아 나간 투구는 15~31장, 안 맞은
 투구는 0장이었고 안 맞은 투구의 가장 큰 사람 키는 0.69~1.1이었다(10장/초).
+
+실내 구장(고척돔, 처음 본 시험 경기)은 투구 뒤 클로즈업 배경이 어두운 벽·광고라 잔디·흙 색이
+없어 관절 분석이 '경기장 화면 아님'으로 건너뛰었다 — 투구 21개 중 11개가 볼 프레임 0장으로
+'모름'. 공이 맞아 나가면 카메라가 경기장을 따라가므로, 투구 뒤 3초 넘게 경기장 화면이 한 장도
+없으면 안 맞은 것으로 본다. 조정용 3경기 투구 139개 중 이런 투구 6개는 정답이 삼진으로 보이는
+아웃 5·볼넷 1이었고 공이 맞은 투구는 없었다.
 """
 
 from collections.abc import Sequence
@@ -39,10 +45,13 @@ def tallest(frame: PeopleFrame) -> Optional[float]:
 def play_view(frames: Sequence[PeopleFrame], t: float, fps: float = 10.0) -> Optional[str]:
     """투구 화면이 끝난 시각 `t` 뒤 — IN_PLAY · NO_PLAY · 모름(None).
 
-    경기장이 아닌 화면(관중·그래픽)은 관절 분석이 건너뛰어 프레임이 없다 — 보인 것만 센다.
+    경기장이 아닌 화면(관중·그래픽·실내 클로즈업)은 관절 분석이 건너뛰어 프레임이 없다.
+    구간 전체가 그랬고 분석이 구간 뒤까지 이어졌으면(영상·조각 끝이 아니면) 안 맞은 것으로 본다.
     """
-    seen = [m for f in frames if t + AFTER[0] <= f.t <= t + AFTER[1]
-            for m in [tallest(f)] if m is not None]
+    inside = [f for f in frames if t + AFTER[0] <= f.t <= t + AFTER[1]]
+    if not inside and any(f.t > t + AFTER[1] for f in frames):
+        return NO_PLAY
+    seen = [m for f in inside for m in [tallest(f)] if m is not None]
     wide = sum(1 for m in seen if m < WIDE_TALL)
     if wide >= WIDE_SEC * fps:
         return IN_PLAY
