@@ -149,3 +149,25 @@ def test_shipped_layouts_have_arrow_boxes():
         layout = Layout.load(ROOT / "data" / "scorebug_layouts" / f"{name}.json")
         x0, y0, x1, y1 = layout.half
         assert 0 < x0 < x1 < 1 and 0 < y0 < y1 < 1
+
+
+def test_single_frame_read_for_live_segments_uses_pixels_for_bases_outs_and_half(tmp_path):
+    """실시간 조각은 한 장만 읽는다 — 숫자는 VLM, 주자·아웃·초말은 화소."""
+    from app.adapters.video import scorebug_reader as sr
+
+    path = tmp_path / "bar.json"
+    path.write_text(json.dumps({"name": "bar", "crop": [0.2, 0.9, 0.3, 0.06],
+                                "bases": {"1": [0.9, 0.9], "2": [0.91, 0.9], "3": [0.92, 0.9]},
+                                "outs": [[0.93, 0.9], [0.94, 0.9]],
+                                "half": [590 / sr.RGB_W, 295 / sr.RGB_H, 612 / sr.RGB_W,
+                                         315 / sr.RGB_H]}), encoding="utf-8")
+    reader = sr.ScorebugReader("K", "http://x", "m", layout=Layout.load(path))
+    reader._frame = lambda video, t, vf: b"jpg"
+    reader._rgb = lambda video, t: _triangle(up=False)  # ▼ = 말, 주자·아웃 칸은 흰 배경
+    reader._ask = lambda images, text, max_tokens: {
+        "visible": True, "inning": 7, "half": "top", "balls": 1, "strikes": 2,
+        "outs": 2, "bases": [1, 2], "away": 3, "home": 4}
+    r = reader.read_frame("seg.ts", 2.5)
+    assert (r["t"], r["half"], r["bases"], r["outs"], r["balls"]) == (2.5, "bot", [], 0, 1)
+    reader._ask = lambda images, text, max_tokens: {"visible": False}
+    assert reader.read_frame("seg.ts", 2.5) is None

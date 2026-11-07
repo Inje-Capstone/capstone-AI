@@ -274,3 +274,40 @@ def test_data_payload_uses_converter():
 
     body = live.data_payload("G", fetch=fetch, preview=lambda gid: None)
     assert [e["kind"] for e in body["events"]] == ["atbat"] and body["context"] == {}
+
+
+def test_scorebug_segments_read_one_frame_per_segment_in_game_time():
+    """VLM 영상 입력 없이 — 조각 가운데 한 장, 시각은 경기 영상 기준."""
+    live = _load("live_video")
+    from app.adapters.video.base import VideoClip
+
+    asked = []
+
+    class Reader:
+        def read_frame(self, video, t):
+            asked.append((video, t))
+            return {"t": t, "inning": 3, "half": "bot", "balls": 1, "strikes": 0, "outs": 1,
+                    "bases": [2], "away": 0, "home": 2}
+
+    out = live.ScorebugSegments(Reader()).analyze(VideoClip(Path("seg_007.ts"), 35.0, 5.0))
+    assert asked == [(Path("seg_007.ts"), 2.5)]
+    assert [r["t"] for r in out.scoreboard] == [37.5] and out.events == [] and out.speech == []
+    body = live.analyze_segment(live.ScorebugSegments(Reader()), Path("s.ts"), 10.0, 5.0)
+    assert body["scoreboard"][0]["t"] == 12.5 and body["events"] == []
+
+
+def test_scorebug_segments_add_commentary_in_game_time():
+    live = _load("live_video")
+    from app.adapters.video.base import VideoClip
+
+    class Reader:
+        def read_frame(self, video, t):
+            return None  # 다시보기 — 점수판 없음
+
+    class Whisper:
+        def transcribe(self, video, duration, start):
+            return [{"t": 0.0, "text": "넘어갑니다 투런 홈런!"},
+                    {"t": 0.0, "text": "", "error": "x"}]
+
+    out = live.ScorebugSegments(Reader(), Whisper()).analyze(VideoClip(Path("s.ts"), 40.0, 5.0))
+    assert out.scoreboard == [] and out.speech == [{"t": 40.0, "text": "넘어갑니다 투런 홈런!"}]
