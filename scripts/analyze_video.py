@@ -364,7 +364,13 @@ def main() -> int:
         snap["pose"] = summarize_long(args.video, pose_args, *span)
         from app.adapters.video.pitch_view import SwingExtractor
 
-        snap["pose"]["swings"] = SwingExtractor().extract(args.video, *span)
+        swings = SwingExtractor().extract(args.video, *span)
+        from contact_check import views_after  # 투구 뒤 화면: 공이 맞아 나갔나
+
+        for s, view in zip(swings, views_after(args.video, pose_args, [s["t1"] for s in swings],
+                                               *span)):
+            s["view"] = view
+        snap["pose"]["swings"] = swings
         save(out_path, snap)
     crop = (snap.get("scorebug") or {}).get("scoreboard") or []
     whisper = [s for s in (snap.get("asr") or {}).get("segments") or [] if s.get("text")]

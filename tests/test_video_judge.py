@@ -1053,3 +1053,72 @@ def test_a_compound_word_does_not_count_as_a_second_mention():
     reads = twice(R(0), R(10, away=1), R(20, away=2))
     heard = [Cue(5, "speech", "홈런스타 이벤트, 홈런!")]
     assert [j.code for j in judge(reads, heard)] == ["homerun", "reach"]
+
+
+def _view(t, kind):
+    return Cue(t, kind, "[관절] 투구 뒤 화면")
+
+
+def test_ball_not_put_in_play_with_two_strikes_then_out_is_a_strikeout():
+    """해설 없이 — 투구 뒤 선수 클로즈업(공이 안 맞음) + 2스트라이크 + 아웃 = 삼진."""
+    (tr,) = transitions(stabilize(twice(R(0, balls=1, strikes=2), R(10, outs=1, balls=0,
+                                                                     strikes=1))))
+    assert judge_transition(tr, [_view(4, "no_play")]).code == "strikeout"
+    # 3아웃이면 점수판이 주자를 지워도 삼진이다
+    (tr,) = transitions(stabilize(twice(R(0, outs=2, strikes=2, bases=(True, False, False)),
+                                        R(10, inning=4))))
+    assert judge_transition(tr, [_view(4, "no_play")]).code == "strikeout"
+
+
+def test_ball_put_in_play_overrides_spoken_strikeout_and_walk():
+    """공이 맞아 나갔으면 해설의 '삼진'·'볼넷'은 다른 타석 말이다."""
+    (tr,) = transitions(stabilize(twice(R(0, balls=1, strikes=2), R(10, outs=1))))
+    said = Cue(6, "speech", "앞 타자 헛스윙 삼진")
+    assert judge_transition(tr, [said, _view(4, "in_play")]).code == "out"
+    (tr,) = transitions(stabilize(twice(R(0, balls=3, strikes=1), R(10, bases=(True, False,
+                                                                              False)))))
+    walk_said = Cue(6, "speech", "볼넷으로 걸어 나갑니다")
+    assert judge_transition(tr, [walk_said, _view(4, "in_play")]).code == "reach"
+    assert judge_transition(tr, [_view(4, "no_play")]).code == "walk"
+
+
+def test_not_put_in_play_early_in_the_count_then_first_base_is_a_hit_by_pitch():
+    (tr,) = transitions(stabilize(twice(R(0, balls=1), R(10, bases=(True, False, False)))))
+    assert judge_transition(tr, [_view(4, "no_play")]).code == "hbp"
+    # 2스트라이크면 낫아웃일 수도 있어 말하지 않는다
+    (tr,) = transitions(stabilize(twice(R(0, balls=1, strikes=2),
+                                        R(10, bases=(True, False, False)))))
+    assert judge_transition(tr, [_view(4, "no_play")]).code != "hbp"
+
+
+def test_ball_in_play_and_everyone_scores_is_a_home_run_without_the_word():
+    (tr,) = transitions(stabilize(twice(R(0, balls=1, bases=(True, False, False)),
+                                        R(10, away=2))))
+    assert judge_transition(tr, [_view(4, "in_play")]).code == "homerun"
+    assert judge_transition(tr, []).code != "homerun"
+
+
+def test_the_view_must_belong_to_this_at_bat():
+    """직전 상태가 보이기 전의 투구 화면은 이 타석 것이 아니다."""
+    (tr,) = transitions(stabilize(twice(R(20, balls=1, strikes=2), R(30, outs=1))))
+    assert judge_transition(tr, [_view(5, "no_play")]).code == "out"
+
+
+def test_an_unclear_last_pitch_does_not_borrow_the_previous_pitch_view():
+    """마지막 공 화면을 못 가르면 같은 타석 앞 공의 '안 맞음'을 쓰지 않는다(독립 리뷰 재현)."""
+    (tr,) = transitions(stabilize(twice(R(100, strikes=2), R(130, outs=1))))
+    earlier, last = _view(101, "no_play"), _view(120, "view_unknown")
+    assert judge_transition(tr, [earlier, last]).code == "out"
+    (tr,) = transitions(stabilize(twice(R(100, balls=1, strikes=1),
+                                        R(130, bases=(True, False, False)))))
+    assert judge_transition(tr, [earlier, last]).code == "reach"
+    # 직전 상태가 보이기 전(앞 타석 끝)의 화면도 쓰지 않는다
+    assert judge_transition(tr, [_view(99.5, "no_play")]).code == "reach"
+
+
+def test_swings_without_a_view_become_unknown_view_cues():
+    pose = {"swings": [{"t": 5.0, "t0": 3.0, "t1": 6.0, "swing": True, "clear": True},
+                       {"t": 25.0, "t0": 23.0, "t1": 26.0, "swing": False, "clear": True,
+                        "view": "no_play"}]}
+    kinds = [(c.t, c.kind) for c in pose_cues(pose) if "view" in c.kind or "play" in c.kind]
+    assert kinds == [(6.0, "view_unknown"), (26.0, "no_play")]

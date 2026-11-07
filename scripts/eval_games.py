@@ -145,15 +145,36 @@ def report(rows: list[dict[str, Any]], titles: dict[str, str]) -> str:
     return "\n".join(lines)
 
 
+ABLATIONS = (
+    ("점수판+관절+해설", lambda s: s),
+    ("점수판+관절(해설 없이)", lambda s: {**s, "asr": {}, "speech": []}),
+    ("점수판+해설(관절 없이)", lambda s: {**s, "pose": {}}),
+    ("점수판만", lambda s: {**s, "asr": {}, "speech": [], "pose": {}}),
+)
+
+
+def ablation(labels: dict[str, Any], snaps: dict[str, dict[str, Any]]) -> str:
+    lines = ["## 입력별", "", "| 입력 | 맞음 | 틀림 | 놓침 | 헛판정 |", "|---|---|---|---|---|"]
+    for name, cut in ABLATIONS:
+        c: Counter = Counter()
+        for stem, snap in snaps.items():
+            c.update(r["verdict"] for r in grade(stem, labels[stem], cut(snap)))
+        lines.append(f"| {name} | {c['맞음']} | {c['틀림']} | {c['놓침']} | {c['헛판정']} |")
+    return "\n".join(lines) + "\n"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--snapshots", type=Path, required=True, help="analyze_video 결과 폴더")
     parser.add_argument("--only", nargs="*", default=None, help="이 영상만")
+    parser.add_argument("--ablation", action="store_true",
+                        help="입력을 하나씩 빼고도 채점한다(해설 없이·관절 없이·점수판만)")
     parser.add_argument("--scorebug-from", type=Path, default=None,
                         help="점수판 판독만 이 폴더의 스냅샷에서 가져온다(읽기 방식 비교)")
     args = parser.parse_args()
     labels = json.loads(LABELS.read_text(encoding="utf-8"))["games"]
     rows, titles = [], {}
+    snaps: dict[str, dict[str, Any]] = {}
     for stem, game in labels.items():
         snap_path = args.snapshots / f"{stem}.json"
         if (args.only and stem not in args.only) or not snap_path.exists():
@@ -164,6 +185,7 @@ def main() -> None:
             snap["scorebug"] = other["scorebug"]
         rows += grade(stem, game, snap)
         titles[stem] = game["title"]
+        snaps[stem] = snap
     if not rows:
         raise SystemExit("채점할 영상이 없다 — 스냅샷 폴더를 확인한다")
     with (OUT / "plays.csv").open("w", encoding="utf-8-sig", newline="") as f:
@@ -171,6 +193,8 @@ def main() -> None:
         writer.writeheader()
         writer.writerows(rows)
     text = report(rows, titles)
+    if args.ablation:
+        text += "\n" + ablation(labels, snaps)
     (OUT / "REPORT.md").write_text(text, encoding="utf-8")
     print(text)
 
