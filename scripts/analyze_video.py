@@ -198,7 +198,7 @@ def build_analyzer(args: argparse.Namespace) -> VideoAnalyzer:
 def build_reader(args: argparse.Namespace) -> Any:
     from app.adapters.video.cosmos import DEFAULT_BASE_URL, DEFAULT_MODEL
     from app.adapters.video.scorebug_layout import Layout
-    from app.adapters.video.scorebug_reader import ScorebugReader
+    from app.adapters.video.scorebug_reader import READ_PROMPT, READ_PROMPT_V2, ScorebugReader
 
     return ScorebugReader(
         os.getenv("NVIDIA_API_KEY", "").strip(),
@@ -208,6 +208,9 @@ def build_reader(args: argparse.Namespace) -> Any:
         ffmpeg=find_tool("ffmpeg", args.ffmpeg),
         every=getattr(args, "read_every", None),  # 클립 평가는 없음(바뀔 때마다)
         layout=Layout.load(args.layout) if getattr(args, "layout", None) else None,
+        prompt=READ_PROMPT_V2 if getattr(args, "read_prompt", "v1") == "v2" else READ_PROMPT,
+        min_gap=getattr(args, "read_gap", 0.0),
+        changes=getattr(args, "read_changes", False),
     )
 
 
@@ -283,6 +286,12 @@ def main() -> int:
                         help="점수판만 잘라 읽는다(클립 평가와 같은 방식) — 바뀔 때마다 요청 1회")
     parser.add_argument("--read-every", type=float, default=8.0,
                         help="점수판이 보이는 동안 몇 초마다 읽나 (투구 간격 15~25초)")
+    parser.add_argument("--read-gap", type=float, default=1.6,
+                        help="점수판 판독 요청 사이 최소 간격(초) — 분당 한도(429)를 넘지 않게")
+    parser.add_argument("--read-changes", action="store_true",
+                        help="--read-every와 함께: 점수판 그림이 바뀔 때도 읽는다(하이라이트)")
+    parser.add_argument("--read-prompt", choices=("v1", "v2"), default="v1",
+                        help="점수판 판독 지시문 — v2는 회차를 ▲/▼ 옆 숫자로만 읽게 한다")
     parser.add_argument("--min-repeat", type=int, default=None,
                         help="같은 점수판이 몇 번 읽혀야 믿나 — 하이라이트는 1(한 상태가 한 번만 "
                              "보인다). 없으면 --read-every가 있을 때 2")
@@ -326,7 +335,9 @@ def main() -> int:
 
         reader = build_reader(args)
         version = f"{SCOREBUG_VERSION}-every{args.read_every:g}" + (
-            f"-{args.layout.stem}" if args.layout else "")
+            f"-{args.layout.stem}" if args.layout else "") + (
+            "-v2" if args.read_prompt == "v2" else "") + (
+            "-changes" if args.read_changes else "")
         if dedicated_pass(snap, "scorebug", version, span,
                           lambda s, n: reader.read(args.video, n, s)):
             if args.min_repeat:

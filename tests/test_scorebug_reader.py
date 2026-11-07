@@ -1,4 +1,5 @@
 """점수판 전용 판독 — 읽을 순간 고르기(로컬)와 응답 정리. API·영상 없이."""
+import pytest
 
 from app.adapters.video.scorebug_reader import (
     THUMB_H,
@@ -100,3 +101,35 @@ def test_pick_corner_skips_a_corner_that_does_not_read_as_a_score_bug():
     reader._ask = lambda images, text, max_tokens: next(answers)
     corner, t = reader.pick_corner("g.mp4", 100.0)
     assert corner == "top_left" and t == 30.0
+
+
+def test_combined_plan_keeps_both_periodic_and_change_reads():
+    from app.adapters.video.scorebug_reader import plan_both, plan_periodic
+
+    # 점수판이 1초만 가렸다 다시 보임 — 간격 읽기는 2초 넘게 가려져야 다시 읽는다
+    frames = [_thumb(50, 120)] * 5 + [_thumb(200, 30)] + [_thumb(50, 120, digit=1)] * 4
+    periodic = plan_periodic(frames, ref=0, every=8)
+    both = plan_both(frames, ref=0, every=8)
+    assert set(periodic) <= set(both) and len(both) > len(periodic)
+    assert [at for _s, at in both] == sorted(at for _s, at in both)
+
+
+def test_requests_keep_a_minimum_gap(monkeypatch):
+    """분당 한도(429)를 넘지 않게 미리 천천히 보낸다 — 다시 보내지 않는다."""
+    from app.adapters.video import scorebug_reader as sr
+
+    clock = [100.0]
+    slept = []
+    monkeypatch.setattr(sr.time, "monotonic", lambda: clock[0])
+    def sleep(sec):
+        slept.append(sec)
+        clock[0] += sec
+
+    monkeypatch.setattr(sr.time, "sleep", sleep)
+    monkeypatch.setattr(sr, "post_json",
+                        lambda *a, **k: {"choices": [{"message": {"content": "{}"}}]})
+    reader = sr.ScorebugReader("K", "http://x", "m", min_gap=1.6)
+    reader._ask([b"a"], "p", 8)
+    clock[0] += 0.5
+    reader._ask([b"a"], "p", 8)
+    assert slept == [pytest.approx(1.1)] and reader.requests == 2

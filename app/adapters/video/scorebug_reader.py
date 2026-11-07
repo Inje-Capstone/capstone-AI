@@ -13,6 +13,7 @@
 import base64
 import subprocess
 import tempfile
+import time
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -166,6 +167,24 @@ def plan_periodic(
     return picks
 
 
+def plan_both(
+    thumbs: Sequence[bytes], ref: int, every: float, max_reads: int = 600
+) -> list[tuple[int, int]]:
+    """하이라이트 — 일정 간격(plan_periodic) + 점수판 그림이 바뀔 때(plan_reads)를 합친다.
+
+    실측(2026-11-07, 1080p 하이라이트 3편): 바뀔 때만 읽으면 아래 띠 점수판은 숫자 변화가
+    작은 썸네일에 묻혀 놓치고(36칸 중 10), 8초마다만 읽으면 짧게 비친 상태를 놓쳤다(36칸 중 21).
+    """
+    picks = {at: (start, at) for start, at in plan_periodic(thumbs, ref, every, max_reads)}
+    for start, at in plan_reads(thumbs, ref, max_reads):
+        picks.setdefault(at, (start, at))
+    out = sorted(picks.values(), key=lambda p: p[1])
+    if len(out) > max_reads:
+        step = len(out) / max_reads
+        out = [out[int(k * step)] for k in range(max_reads)]
+    return out
+
+
 def normalize_reading(raw: Any, t: float) -> Optional[dict[str, Any]]:
     if not isinstance(raw, dict) or not raw.get("visible", True):
         return None
@@ -205,6 +224,9 @@ class ScorebugReader:
         ffmpeg: str = "ffmpeg",
         every: Optional[float] = None,
         layout: Optional[Layout] = None,
+        prompt: str = READ_PROMPT,
+        min_gap: float = 0.0,
+        changes: bool = False,
     ) -> None:
         """`every`: 경기 영상이면 그 간격(초)마다 읽는다(plan_periodic). 없으면 하이라이트 방식.
         `layout`: 중계사 점수판 위치 — 있으면 주자·아웃은 화소 색으로 읽는다(VLM이 못 읽었다).
@@ -212,6 +234,11 @@ class ScorebugReader:
         self.api_key, self.model, self.max_reads, self.ffmpeg = api_key, model, max_reads, ffmpeg
         self.base_url = base_url.rstrip("/")
         self.every, self.layout = every, layout
+        self.prompt = prompt  # READ_PROMPT_V2: 회차는 ▲/▼ 옆 숫자만(타순·투구 수를 회차로 읽음)
+        # 요청 사이 최소 간격(초) — 호스팅 API는 분당 한도를 넘으면 429로 막는다. 한 줄로 이어
+        # 보내도 장당 1.3초라 한도를 넘었다(2026-11-07). 다시 보내지 않고 미리 천천히 보낸다
+        self.min_gap, self._last = min_gap, -1e9
+        self.changes = changes  # every와 함께: 일정 간격 + 점수판 그림이 바뀔 때도 읽는다
         self.requests = 0
 
     def _ask(self, images: Sequence[bytes], text: str, max_tokens: int) -> Any:
@@ -230,6 +257,10 @@ class ScorebugReader:
             "temperature": 0.0,
             "chat_template_kwargs": {"enable_thinking": False},
         }
+        wait = self._last + self.min_gap - time.monotonic()
+        if wait > 0:
+            time.sleep(wait)
+        self._last = time.monotonic()
         self.requests += 1
         return _json_payload(
             completion_text(
@@ -336,7 +367,7 @@ class ScorebugReader:
                 # 고른 자리에서 실제로 읽히는지 본다 — 영상 첫 장면의 팀 소개 그래픽을 점수판으로
                 # 고르면 그 뒤 판독이 전부 빈 곳을 읽는다(2026-11-07 하이라이트 실측: 109회 0건)
                 corner = list(CORNERS)[k - 1]
-                seen = self._ask([self._frame(video, t, crop_filter(corner))], READ_PROMPT, 256)
+                seen = self._ask([self._frame(video, t, crop_filter(corner))], self.prompt, 256)
                 if normalize_reading(seen, t):
                     return corner, t
         return None, 0.0
@@ -349,7 +380,7 @@ class ScorebugReader:
         for part in REF_TRIES:
             t = start + min(max(0.0, duration * part), max(0.0, duration - 0.5))
             frame = self._frame(video, t, crop_filter(self.layout.crop, self.layout.scale))
-            if normalize_reading(self._ask([frame], READ_PROMPT, 256), t):
+            if normalize_reading(self._ask([frame], self.prompt, 256), t):
                 return self.layout.crop, t
         return None, 0.0
 
@@ -374,16 +405,17 @@ class ScorebugReader:
                         "requests": self.requests}
             ref = min(int(t_ref - start), len(thumbs) - 1)
             readings, failed = [], 0
-            plan = (
-                plan_periodic(thumbs, ref, self.every, self.max_reads)
-                if self.every
-                else plan_reads(thumbs, ref, self.max_reads)
-            )
+            if self.every and self.changes:
+                plan = plan_both(thumbs, ref, self.every, self.max_reads)
+            elif self.every:
+                plan = plan_periodic(thumbs, ref, self.every, self.max_reads)
+            else:
+                plan = plan_reads(thumbs, ref, self.max_reads)
             for first, at in plan:
                 try:  # 한 장 실패(503 등)로 클립 전체를 버리지 않는다
                     answer = self._ask(
                         [self._frame(video, start + at + 0.5, crop_filter(corner, scale))],
-                        READ_PROMPT,
+                        self.prompt,
                         256,
                     )
                 except VideoAnalyzerError:
