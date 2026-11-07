@@ -4,6 +4,7 @@
 
 ## 1. 지금 상태
 
+- **실제 경기 정확도(2026-11-07, PR #52~#54)**: 1080p 경기 하이라이트 3편(SBS·MBC 스포츠+·포스트시즌 TVING) 119칸 중 **95(80%)**, 확실한 정답만 79/97. 설정을 정한 뒤 한 번만 잰 시험용 PO 1차전은 27/36(75%). 해설을 빼도(점수판+관절) 95 — `data/game_eval/REPORT.md`, 측정 기록 `data/analysis/LOG.md`. 정답은 사람이 투구 화면마다 매겼다(`data/game_eval/labels.json`) — 네이버 문자중계가 이 PC에서 응답하지 않았다
 - main: PR #1~#28 머지, CI(test 3.9·3.12 + docker) 통과, pytest 229 · ruff clean
 - **판단 신호 — 관절 슬라이딩·태그·충돌(2026-10-27)**: `app/domain/contact.py` — 화면 속 모든 사람 관절(rtmlib, `PeoplePoseExtractor`)로 슬라이딩·다이빙(상체가 눕혀진 채 몸길이 0.4배 넘게 이동), 미끄러져 들어와 닿음(태그), 충돌(빠르게 다가와 닿고 넘어짐). 중계 카메라 패닝·줌은 배경 광류 + RANSAC 닮음 변환(`camera_motion`)으로 되돌린다. 스냅샷 `pose` → 장면 단서 `slide`(VLM과 같은 종류)·`slide_tag`·`collision`, 카드 근거 '[관절] …'. 충돌·태그는 홈 충돌·슬라이딩 규정·주루/수비방해 선언의 확인 장면
   - 정답 표 `data/clip_eval/contact_truth.json` 28클립(기준 6·검증 12·최종 10 — 최종은 2차 기준 고정 뒤 검출을 가리고 분류)
@@ -64,6 +65,18 @@ cp .env.example .env                      # 키는 git에 없다 — 직접 채�
 - `ROOKIE_LIVE_TOKEN` — 실시간 모드에서만 (임의 문자열, 서버·분석기 같은 값)
 
 ## 4. 파이프라인 (명령)
+
+**경기 하이라이트 (2026-11-07 설정 — 호스팅 VLM이 영상 입력을 422로 거절해 --no-vlm)**
+```bash
+L=data/scorebug_layouts/sbs_sports_2026.json   # 중계사별: mbc_sports_plus.json, tving_postseason.json
+.venv/bin/python scripts/analyze_video.py <영상ID> game.mp4 --no-vlm --scorebug --read-every 8 --read-changes \
+  --min-repeat 1 --read-prompt v2 --layout $L --asr --asr-piece 10 --audio game.audio.m4a --pose
+.venv/bin/python scripts/build_video_feed.py <영상ID> --snapshot data/video/<영상ID>.json --away 한화 --home 삼성 --no-data
+.venv/bin/python scripts/eval_games.py --snapshots data/video --ablation   # 정답이 있는 영상만 채점(data/game_eval/)
+```
+- 점수판 판독은 한 번에 하나만 돌린다(동시에 보내면 NVIDIA 분당 한도 429로 절반 넘게 실패). `--read-gap` 기본 1.6초
+- 새 중계사는 `scripts/scorebug_layout.py`로 주자·아웃 위치를 잰다. 아래 띠 점수판은 `crop`, 흰 주자 칸은 `base_fill: bright`, 초·말 화살표 칸은 `half`(위치 파일 3개 참고)
+- 관절은 CPU로 영상 1초당 약 3.5~4초(15분 하이라이트 60~80분)
 
 **리플레이 (경기 끝난 영상)**
 ```bash
@@ -164,6 +177,8 @@ L=data/scorebug_layouts/sbs_sports.json
 
 ## 8. 함정 (실측으로 알게 된 것)
 
+- **하이라이트 점수판(2026-11-07)**: VLM은 타순 '4.강백호'를 4회로, ▼를 ▲로 읽는다 → 지시문 v2 + 초·말 화살표 화소. 한 상태가 한 번만 보이고 새 타자 초구 뒤에야 점수판이 보인다 → 안정화는 '모순 없는 가장 긴 사슬', 새 타자는 카운트 감소·주자 수+득점 증가로. 다시보기가 길어 새 점수판이 30초 넘게 늦는다 → 직전 상태~새 상태 사이 해설도 본다
+- **투구 뒤 화면**: 공이 맞아 나가면 중계는 넓은 경기장, 안 맞으면 클로즈업 — 관절로 잰 사람 키로 가른다(`app/domain/play_view.py`). 해설 없이 삼진·볼넷·몸에 맞는 공·홈런을 가른다
 - **영상 모델의 언어 (실측 2026-10-26)**: Nemotron Omni는 한국어 해설을 못 알아듣고 지어낸 문장·영어 문장을 적는다 → 해설은 Whisper로 받는다. 지시문에 키워드 목록을 주면 듣지 않은 단어를 그대로 적어(가짜 단서) v3에서 뺐다
 - **영상 통째 판독은 점수판에 약하다**: 같은 프레임도 점수판만 잘라 키워 한 장으로 주면 정확히 읽는다. 여러 장을 한 요청에 묶으면 다시 틀린다
 - **하이라이트의 한계**: 점수판이 몇 초만 비치고, 직캠은 점수판·해설이 없다 — 판정 상한이 낮다. 실제 경기 영상(중계 전체)이 MVP 평가의 기준
