@@ -74,6 +74,9 @@ class Layout:
             raise ValueError(f"{path}: half_by는 shape 또는 position이다")
         if raw.get("mark_fill", "color") not in ("color", "dark"):
             raise ValueError(f"{path}: mark_fill은 color 또는 dark다")
+        cover = raw.get("cover_val")
+        if cover is not None and (not raw.get("mark") or not 0 < float(cover) <= 1):
+            raise ValueError(f"{path}: cover_val은 mark와 함께, 0~1 사이 밝기다")
         crop = raw.get("crop")
         half = raw.get("half")
         return cls(

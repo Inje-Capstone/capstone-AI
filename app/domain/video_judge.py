@@ -577,13 +577,15 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
     (다른 타자의 아웃이면 투구가 있었어야 한다).
     """
     used: set[int] = set()
+    # 투구 화면 단서(관절)가 아예 없으면 '사이에 투구가 없었다'를 알 수 없다 — 연장하지 않는다
+    viewed = any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) for c in cues)
     for m in sorted((c for c in cues if c.kind == K_MARK), key=lambda c: c.t):
         prev = [r for r in stable if r.t <= m.t]
         if not prev or prev[-1].strikes != 2:
             continue
         after = [i for i, j in enumerate(judged) if j.transition is not None
                  and j.transition.outs_made >= 1 and m.t <= j.t <= m.t + K_MARK_JUMP_SEC
-                 and (j.t <= m.t + K_MARK_SEC or not any(
+                 and (j.t <= m.t + K_MARK_SEC or viewed and not any(
                      c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) and m.t < c.t <= j.t
                      for c in cues))]
         if not after:
@@ -594,7 +596,11 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
         used.add(i)
         j = judged[i]
         tr = j.transition
-        if j.code == "out" and tr is not None and (tr.outs_made == 1 or j.detail.get("merged")):
+        # 같은 이닝에 점수가 났으면 삼진이 아니다(희생플라이·땅볼 타점) — 이닝이 바뀐 전이의 점수는
+        # 다른 공격 차례에서 났을 수 있다
+        scored = tr is not None and tr.runs and not tr.half_change
+        if (j.code == "out" and tr is not None and not scored
+                and (tr.outs_made == 1 or j.detail.get("merged"))):
             judged[i] = Judgment(j.t, "result", "strikeout", max(j.confidence, 0.6),
                                  j.evidence + [_ev(m)], j.transition, dict(j.detail))
         elif j.code == "strikeout":

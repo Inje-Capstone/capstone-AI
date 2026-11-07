@@ -1288,6 +1288,20 @@ def test_strikeout_mark_reaches_a_late_jump_only_without_a_pitch_between():
     board = [_board(0, 1, 2, 1), _board(3, 0, 0, 0, mark="strikeout"),
              _board(23, 0, 0, 0, inning=1, half="bot")]
     readings, cues, _ = observe({"scorebug": {"scoreboard": board}})
+    cues = sorted(cues + [_view(1, "view_unknown")], key=lambda c: c.t)  # 삼진 투구 자체(표시 전)
     assert [j.code for j in judge(readings, cues, min_repeat=1)] == ["strikeout"]
     pitched = sorted(cues + [_view(15, "in_play")], key=lambda c: c.t)
     assert [j.code for j in judge(readings, pitched, min_repeat=1)] == ["out"]
+
+
+def test_strikeout_mark_does_not_name_an_out_that_scored_or_a_jump_without_views():
+    """같은 이닝에 점수가 난 아웃(희생플라이)은 삼진이 아니다. 투구 화면 단서가 없으면 8초까지만."""
+    board = [_board(0, 1, 2, 1, [3]), _board(3, 0, 0, 0, mark="strikeout"), _board(6, 0, 0, 2)]
+    board[-1]["away"] = 1
+    readings, cues, _ = observe({"scorebug": {"scoreboard": board}})
+    assert [j.code for j in judge(readings, cues, min_repeat=1)] != ["strikeout"]
+    jump = [_board(0, 1, 2, 1), _board(3, 0, 0, 0, mark="strikeout"),
+            _board(23, 0, 0, 0, inning=1, half="bot")]
+    readings, cues, _ = observe({"scorebug": {"scoreboard": jump}})
+    no_views = [c for c in cues if not c.text.startswith("[관절]")]
+    assert [j.code for j in judge(readings, no_views, min_repeat=1)] == ["out"]
