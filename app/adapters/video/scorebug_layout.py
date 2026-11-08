@@ -29,6 +29,10 @@ MBC는 주자 칸을 흰색으로 채운다 — `base_fill: "bright"`면 밝고 
 아웃 점 자리를 흰 바탕으로 덮었다(채도 0.02 이하, 밝기 0.9 이상;
 평소 꺼진 점은 회색 밝기 0.68~0.74).
 `cover_val`이 있으면 아웃 점이 모두 그보다 밝고 색이 없을 때도 덮인 것(삼진 표시)으로 본다.
+
+볼·스트라이크를 숫자 대신 점으로 그리는 점수판(SPOTV2 'B●●● S●● O●●')은 VLM이 점을 못 세
+카운트를 거의 늘 0-0으로 읽었다(처음 본 시험 경기 판독 38장 중 2스트라이크 0장) — `balls`·
+`strikes` 점 위치가 있으면 아웃처럼 켜진 점 수를 센다.
 """
 
 import colorsys
@@ -64,6 +68,8 @@ class Layout:
     mark_hue: tuple[float, float] = (340.0, 20.0)  # 삼진 표시 글자 색상 범위(도) — 기본 빨강
     mark_fill: str = "color"  # 삼진 표시 글자: color(mark_hue 색) | dark(검은 글자)
     cover_val: Optional[float] = None  # 아웃 점이 모두 이보다 밝은 무채색이면 표시가 덮은 것
+    balls: tuple[Point, ...] = ()  # 볼 점 중심들(점으로 그리는 점수판만)
+    strikes: tuple[Point, ...] = ()  # 스트라이크 점 중심들
 
     @classmethod
     def load(cls, path: Path) -> "Layout":
@@ -95,6 +101,8 @@ class Layout:
             mark_hue=_pair(raw.get("mark_hue")) or (340.0, 20.0),
             mark_fill=str(raw.get("mark_fill", "color")),
             cover_val=float(raw["cover_val"]) if raw.get("cover_val") is not None else None,
+            balls=tuple((float(x), float(y)) for x, y in raw.get("balls", [])),
+            strikes=tuple((float(x), float(y)) for x, y in raw.get("strikes", [])),
         )
 
 
@@ -127,6 +135,14 @@ def decode(layout: Layout, sample: Callable[[Point], Rgb]) -> tuple[list[int], i
                    and (layout.base_fill == "bright" or hue_in(sample(p), layout.base_hue)))
     outs = sum(1 for p in layout.outs if is_filled(sample(p)))
     return bases, outs
+
+
+def decode_count(layout: Layout, sample: Callable[[Point], Rgb]) -> Optional[tuple[int, int]]:
+    """(볼, 스트라이크) — 위치 파일에 점 위치가 있을 때만. 없으면 None(VLM 답을 쓴다)."""
+    if not layout.balls or not layout.strikes:
+        return None
+    lit = [sum(1 for p in pts if is_filled(sample(p))) for pts in (layout.balls, layout.strikes)]
+    return lit[0], lit[1]
 
 
 HALF_MIN_PIXELS = 8  # 화살표로 볼 최소 화소 수(1280×720 프레임)

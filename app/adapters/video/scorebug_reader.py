@@ -21,7 +21,14 @@ from typing import Any, Optional, Union
 
 from app.adapters.video.base import VideoAnalyzerError, _json_payload
 from app.adapters.video.http import completion_text, post_json
-from app.adapters.video.scorebug_layout import Layout, decode, decode_half, decode_mark, rgb_sampler
+from app.adapters.video.scorebug_layout import (
+    Layout,
+    decode,
+    decode_count,
+    decode_half,
+    decode_mark,
+    rgb_sampler,
+)
 
 # 모서리 후보 (x, y, w, h — 화면 비율)
 CORNERS = {
@@ -387,6 +394,9 @@ class ScorebugReader:
                 if len(px) < RGB_W * RGB_H * 3:  # 조각 끝을 넘긴 시각(짧은 마지막 조각)
                     raise VideoAnalyzerError(f"프레임을 못 읽음: {video} {t:.1f}s")
                 r["bases"], r["outs"] = decode(self.layout, rgb_sampler(px, RGB_W, RGB_H))
+                count = decode_count(self.layout, rgb_sampler(px, RGB_W, RGB_H))
+                if count:  # 점으로 그린 볼·스트라이크
+                    r["balls"], r["strikes"] = count
                 half = decode_half(self.layout, px, RGB_W, RGB_H)
                 if half:
                     r["half"] = half
@@ -450,6 +460,9 @@ class ScorebugReader:
                 if r and self.layout is not None:
                     px = self._rgb(video, start + at + 0.5)
                     r["bases"], r["outs"] = decode(self.layout, rgb_sampler(px, RGB_W, RGB_H))
+                    count = decode_count(self.layout, rgb_sampler(px, RGB_W, RGB_H))
+                    if count:  # 점으로 그린 볼·스트라이크도 화소가 VLM보다 낫다
+                        r["balls"], r["strikes"] = count
                     half = decode_half(self.layout, px, RGB_W, RGB_H)
                     if half:  # 초·말도 화살표 화소가 VLM보다 믿을 만하다
                         r["half"] = half
