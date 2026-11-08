@@ -5,17 +5,17 @@
 3QYUP4AgNpI,115.6,none,True,,,,조용함,
 3QYUP4AgNpI,129.1,out_any,False,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '-너픈봉의 헛스윙 삼진.-투아웃.' (130s),맞음,노시환 아웃 — 4·5번 화면 중 어디인지 모름
 3QYUP4AgNpI,136.1,none,False,,,,조용함,
-3QYUP4AgNpI,146.4,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (150s),맞음,허인서 3아웃
+3QYUP4AgNpI,146.4,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (150s); [점수판] 삼진 표시(K) (151s),맞음,허인서 3아웃
 3QYUP4AgNpI,158.1,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,강민호 출루
 3QYUP4AgNpI,183.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,김영웅 안타
 3QYUP4AgNpI,197.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 110→111,맞음,류지혁 안타 — 만루
 3QYUP4AgNpI,229.2,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+2 주자 111→011 | 점수판 아웃+1 득점+0 주자 011→011,맞음,이재현 3타점 안타
 3QYUP4AgNpI,271.5,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+1 주자 011→010 | 점수판 아웃+0 득점+1 주자 010→010,맞음,김성윤 타점 2루타
 3QYUP4AgNpI,323.6,out,False,out walk,video_only confirmed,점수판 아웃+1 득점+0 주자 010→010 | 점수판 아웃+0 득점+0 주자 010→110; 해설 '벗어났습니다. 볼넷. 스윙. 삼진으로 물러나는 최영호.' (340s),맞음,구자욱 땅볼로 보임
-3QYUP4AgNpI,343.1,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 110→000; 해설 '벗어났습니다. 볼넷. 스윙. 삼진으로 물러나는 최영호.' (340s),맞음,최형우 삼진(K 표시)
+3QYUP4AgNpI,343.1,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 110→000; 해설 '벗어났습니다. 볼넷. 스윙. 삼진으로 물러나는 최영호.' (340s); [점수판] 삼진 표시(K) (348s),맞음,최형우 삼진(K 표시)
 3QYUP4AgNpI,356.8,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '삼진. 4타자 연속 삼진 잡아내고 있는 페델. 툭 밀어냈습니다. 유격수 이재혁.' (360s),맞음,3회초 김태연 아웃
 3QYUP4AgNpI,365.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,이도윤 땅볼
-3QYUP4AgNpI,382.9,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (386s),맞음,심우준 3아웃
+3QYUP4AgNpI,382.9,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (386s); [점수판] 삼진 표시(K) (388s),맞음,심우준 3아웃
 3QYUP4AgNpI,393.9,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+1 득점+0 주자 100→100,맞음,이원석 안타
 3QYUP4AgNpI,406.6,?,False,runner,video_only,점수판 아웃+0 득점+0 주자 100→010,제외,주자 1→2루(점수판 화소) — 도루·폭투인지 못 봄
 3QYUP4AgNpI,413.6,reach,False,reach,video_only,점수판 아웃+0 득점+0 주자 010→101,맞음,강백호 안타로 보임
