@@ -188,6 +188,22 @@ def _confidence(base: float, supports: Sequence[Optional[Cue]]) -> tuple[float, 
     return min(1.0, base + 0.25 * len(found)), [_ev(c) for c in found]
 
 
+def _late_board_slide(tr: Transition, cues: Sequence[Cue]) -> Optional[Cue]:
+    """점수판이 늦게 고쳐진 진루(비디오 판독) — 앞 판독 직후의 슬라이딩.
+
+    처음 본 시험 경기(문동주, 2026-11-08): 3루 도루를 처음엔 '아웃'으로 띄웠다가 비디오 판독 뒤
+    2분이 지나서야 '1사 3루'로 고쳤다. 안정화가 판독 전 '아웃' 장면을 버려 전이가 915→1035초가
+    됐고, 915초 슬라이딩이 판정 범위(전이 앞 20초) 밖으로 밀려 보크 모양이 됐다. 전이가 길고 그
+    사이에 투구 화면이 없으면 진루는 앞 판독 무렵에 일어났다 — 그때의 슬라이딩을 본다.
+    """
+    if tr.t - tr.before.t <= CUE_BEFORE:
+        return None
+    if any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) and tr.before.t < c.t <= tr.t for c in cues):
+        return None
+    return next((c for c in cues if c.kind == "slide"
+                 and tr.before.t - CUE_AFTER <= c.t <= tr.before.t + CUE_BEFORE), None)
+
+
 def judge_transition(
     tr: Transition, cues: Sequence[Cue], window: tuple[float, float] = (CUE_BEFORE, CUE_AFTER)
 ) -> Optional[Judgment]:
@@ -247,7 +263,7 @@ def judge_transition(
         balk_cue = _speech(near, "보크") or _has(near, "pitcher_stops")
         if advanced_all_one_base(b, a) and balk_cue and (same_count or _speech(near, "보크")):
             return make("call", "balk", 0.5, [balk_cue, _speech(near, "보크")])
-        steal_cue = _has(near, "slide") or _speech(near, "도루")
+        steal_cue = _has(near, "slide") or _speech(near, "도루") or _late_board_slide(tr, cues)
         if single_runner_advance(b, a) and steal_cue and not _speech(near, "폭투", "포일"):
             # 세이프인데 태그가 닿아 보였다 — 베이스가 먼저였을 수도 있다. 관측만 남긴다
             seen = {"observed": OBSERVED_TAG_ON_SAFE} if _has(near, "slide_tag") else {}

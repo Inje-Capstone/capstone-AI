@@ -1305,3 +1305,14 @@ def test_strikeout_mark_does_not_name_an_out_that_scored_or_a_jump_without_views
     readings, cues, _ = observe({"scorebug": {"scoreboard": jump}})
     no_views = [c for c in cues if not c.text.startswith("[관절]")]
     assert [j.code for j in judge(readings, no_views, min_repeat=1)] == ["out"]
+
+
+def test_late_board_after_review_still_finds_the_steal_slide():
+    """비디오 판독 뒤 2분 늦게 고친 점수판(2루→3루, 카운트 그대로) — 투구가 없었으면 앞 판독 무렵의
+    슬라이딩이 도루 단서다. 사이에 투구가 있었으면 다른 플레이일 수 있어 쓰지 않는다."""
+    reads = twice(R(0, outs=1, balls=1, strikes=1, bases=(False, True, False)),
+                  R(120, outs=1, balls=1, strikes=1, bases=(False, False, True)))
+    slide = Cue(1.0, "slide", "[관절] 슬라이딩·다이빙 1.0~1.5초")
+    assert [j.code for j in judge(reads, [slide])] == ["steal"]
+    pitched = [slide, _view(60, "no_play")]
+    assert [j.code for j in judge(reads, pitched)] != ["steal"]
