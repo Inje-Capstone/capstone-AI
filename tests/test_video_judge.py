@@ -772,6 +772,27 @@ def test_sac_fly_needs_less_than_two_outs_before():
     assert two_outs is None or two_outs.code != "sac_fly"
 
 
+def test_sac_fly_from_shape_when_the_forced_runner_on_first_held():
+    """만루·1사에서 아웃 하나·3루 주자만 득점·1·2루 그대로 — 땅볼이면 1루 주자는 포스로 뛴다.
+
+    해설에 뜬공 말이 없어도(삼성-LG 희생플라이 0-2, 2026-11-08) 공이 맞아 나간 화면이면 희생플라이.
+    """
+    loaded, after = (True, True, True), (True, True, False)
+    sf = one(R(0, outs=1, bases=loaded, strikes=1), R(10, outs=2, bases=after, away=1),
+             [_view(4, "in_play")])
+    assert (sf.code, sf.detail.get("shape")) == ("sac_fly", True)
+    # 공이 안 맞았으면(폭투로 득점 + 삼진 같은 것) 아니다
+    no_view = one(R(0, outs=1, bases=loaded, strikes=1), R(10, outs=2, bases=after, away=1))
+    assert no_view.code != "sac_fly"
+    # 만루가 아니면 가르지 않는다 — 2·3루는 땅볼 아웃 사이 득점, 1·3루는 2루 포스아웃 + 타자 1루
+    # + 득점(야수선택)과 모양이 같다
+    second_third = one(R(0, outs=1, bases=(False, True, True)),
+                       R(10, outs=2, bases=(False, True, False), away=1), [_view(4, "in_play")])
+    first_third = one(R(0, outs=1, bases=(True, False, True)),
+                      R(10, outs=2, bases=(True, False, False), away=1), [_view(4, "in_play")])
+    assert second_third.code != "sac_fly" and first_third.code != "sac_fly"
+
+
 def test_pose_slide_supports_steal_and_shows_what_was_seen():
     """관절로 잰 슬라이딩은 VLM 'slide'와 같은 단서 — 카드 근거에 무엇을 봤는지 남긴다."""
     snap = {
@@ -1255,7 +1276,9 @@ def test_an_out_and_a_late_run_from_third_are_one_sacrifice_fly():
     said = Cue(5, "speech", "가볍게 걷어 올렸습니다 센터쪽 중견수")
     hit = _view(5, "in_play")
     assert [j.code for j in judge(reads, [said, hit])] == ["sac_fly"]
-    assert [j.code for j in judge(reads, [hit])] == ["out"]  # 말이 없으면 한 번의 아웃
+    # 말이 없어도 한 플레이 — 만루에서 1루 주자가 그대로라 모양만으로 희생플라이(확신 낮춤)
+    [shape] = judge(reads, [hit])
+    assert (shape.code, shape.confidence) == ("sac_fly", 0.65)
     # 공이 맞았다는 영상이 없으면 합치지 않는다 — 삼진 뒤 폭투 득점일 수 있다
     assert len(judge(reads, [said])) == 2
     assert len(judge(reads, [hit, Cue(18, "speech", "폭투! 3루 주자 홈인")])) == 2

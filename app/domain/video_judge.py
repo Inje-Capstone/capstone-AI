@@ -317,6 +317,12 @@ def judge_transition(
         sf = _has(near, "deep_fly") or _speech(near, *SF_WORDS) or _speech(between, *SF_WORDS)
         if sf:
             return make("result", "sac_fly", 0.5, [sf])
+        # 만루에서 3루 주자만 들어오고 1·2루 주자가 그대로 — 땅볼이면 주자 모두 포스로 뛴다(타자가
+        # 1루에서 아웃이면 '주자 셋 진루' 011, 2루 포스아웃이면 101). 공이 잡혔고 3루 주자가
+        # 태그업했다. 1·3루는 '2루 포스아웃 + 타자 1루 + 득점'(야수선택)과 모양이 같아 안 본다
+        held = b == (True, True, True) and a == (True, True, False) and tr.runs == 1
+        if held and in_play and not tr.half_change and one_play(tr):
+            return make("result", "sac_fly", 0.4, [in_play], shape=True)
     if tr.outs_made == 1 and b == a and not tr.half_change:
         iff = _speech(near, "인필드플라이", "인필드 플라이") or _has(near, "infield_popup")
         if iff and b[0] and b[1] and tr.before.outs <= 1:  # 5.09(a)(5) 무사·1사 1·2루/만루
