@@ -339,11 +339,11 @@ def judge_transition(
                         [dts, _speech(near, "낫아웃", "낫 아웃")])
         # 공이 맞아 나갔으면(넓은 경기장 화면) 볼넷이 아니다 — 해설의 '볼넷'은 다른 타석 말이다
         walk_speech = None if in_play else (_speech(near, *WALK_WORDS) or _has(near, "ball_four"))
-        swung = _swung_last_pitch(near, tr.t)
+        swung = _swung_last_pitch(near, tr.t, tr.before.t)
         batted = _has(near, "contact") or swung or in_play
         if tr.before.balls == 3 and not batted:
             return make("result", "walk", 0.6,
-                        [walk_speech, _took_last_pitch(near, tr.t), no_play])
+                        [walk_speech, _took_last_pitch(near, tr.t, tr.before.t), no_play])
         # 3볼에서 휘둘렀는데 1루 — 안타거나, 심판이 체크스윙을 '안 돌았다'로 본 볼넷이다
         seen = {"observed": OBSERVED_SWING_ON_BALL_FOUR} if tr.before.balls == 3 and swung else {}
         if walk_speech:
@@ -362,7 +362,7 @@ def judge_transition(
             _has(near, "swing_miss") or _has(near, "strikeout") or _speech(near, "삼진"))
         if k:
             return make("result", "strikeout", 0.5, [k])
-        took = _took_last_pitch(near, tr.t)
+        took = _took_last_pitch(near, tr.t, tr.before.t)
         # 안 쳤는데 아웃 — 3스트라이크뿐이다. 주자가 움직였으면 다른 플레이가 섞였다(홈스틸 실측)
         # 3아웃이면 점수판이 주자를 지운다 — 이닝이 바뀌었으면 주자 모양은 보지 않는다
         same_bases = b == a or tr.half_change
@@ -516,27 +516,31 @@ def _pitch_view(cues: Sequence[Cue], tr: Transition) -> Optional[Cue]:
     return last if last is not None and last.kind != VIEW_UNKNOWN else None
 
 
-def _last_pitch(cues: Sequence[Cue], t: float) -> list[Cue]:
-    """전이 시각 `t` 직전의 공에 속한 스윙 단서들. 전이 뒤의 것은 다시보기다."""
+def _last_pitch(cues: Sequence[Cue], t: float, since: float = float("-inf")) -> list[Cue]:
+    """전이 시각 `t` 직전의 공에 속한 스윙 단서들. 전이 뒤의 것은 다시보기다.
+
+    `since`(직전 상태가 처음 보인 때) 전의 스윙은 앞 타석 공이다 — 그 상태(예: 3-1)가 보인 뒤에
+    결정구를 던졌다(삼성-LG 볼넷이 9초 앞 3아웃 스윙 때문에 '출루'로, 2026-11-08).
+    """
     seen = [c for c in cues if c.kind in ("swing", "no_swing")
-            and t - LAST_PITCH_SEC <= c.t <= t]
+            and t - LAST_PITCH_SEC <= c.t <= t and c.t > since]
     if not seen:
         return []
     last = max(c.t for c in seen)
     return [c for c in seen if last - c.t <= SWING_GAP]
 
 
-def _took_last_pitch(cues: Sequence[Cue], t: float) -> Optional[Cue]:
+def _took_last_pitch(cues: Sequence[Cue], t: float, since: float = float("-inf")) -> Optional[Cue]:
     """마지막 공을 그냥 보냈나. 같은 공에 스윙이 하나라도 보이면 아니다 — 느린 다시보기는 손이
     느려 '안 침'으로 재진다."""
-    pitch = _last_pitch(cues, t)
+    pitch = _last_pitch(cues, t, since)
     if not pitch or any(c.kind == "swing" for c in pitch):
         return None
     return pitch[-1]
 
 
-def _swung_last_pitch(cues: Sequence[Cue], t: float) -> Optional[Cue]:
-    return next((c for c in _last_pitch(cues, t) if c.kind == "swing"), None)
+def _swung_last_pitch(cues: Sequence[Cue], t: float, since: float = float("-inf")) -> Optional[Cue]:
+    return next((c for c in _last_pitch(cues, t, since) if c.kind == "swing"), None)
 
 
 def _strike_three_miss(cues: Sequence[Cue]) -> Optional[Cue]:
