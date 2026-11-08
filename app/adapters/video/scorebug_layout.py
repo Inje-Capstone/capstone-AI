@@ -81,6 +81,8 @@ class Layout:
             raise ValueError(f"{path}: half_by는 shape 또는 position이다")
         if raw.get("mark_fill", "color") not in ("color", "dark"):
             raise ValueError(f"{path}: mark_fill은 color 또는 dark다")
+        if bool(raw.get("balls")) != bool(raw.get("strikes")):
+            raise ValueError(f"{path}: balls·strikes 점 위치는 둘 다 적는다")
         cover = raw.get("cover_val")
         if cover is not None and (not raw.get("mark") or not 0 < float(cover) <= 1):
             raise ValueError(f"{path}: cover_val은 mark와 함께, 0~1 사이 밝기다")
@@ -101,8 +103,8 @@ class Layout:
             mark_hue=_pair(raw.get("mark_hue")) or (340.0, 20.0),
             mark_fill=str(raw.get("mark_fill", "color")),
             cover_val=float(raw["cover_val"]) if raw.get("cover_val") is not None else None,
-            balls=tuple((float(x), float(y)) for x, y in raw.get("balls", [])),
-            strikes=tuple((float(x), float(y)) for x, y in raw.get("strikes", [])),
+            balls=tuple((float(x), float(y)) for x, y in raw.get("balls") or []),
+            strikes=tuple((float(x), float(y)) for x, y in raw.get("strikes") or []),
         )
 
 

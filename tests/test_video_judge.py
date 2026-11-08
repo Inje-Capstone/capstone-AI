@@ -1313,9 +1313,16 @@ def test_late_board_after_review_still_finds_the_steal_slide():
     reads = twice(R(0, outs=1, balls=1, strikes=1, bases=(False, True, False)),
                   R(120, outs=1, balls=1, strikes=1, bases=(False, False, True)))
     slide = Cue(1.0, "slide", "[관절] 슬라이딩·다이빙 1.0~1.5초")
-    assert [j.code for j in judge(reads, [slide])] == ["steal"]
-    pitched = [slide, _view(60, "no_play")]
+    earlier = _view(-3, "in_play")  # 앞 투구 화면(관절 화면 단서가 있는 영상)
+    assert [j.code for j in judge(reads, [earlier, slide])] == ["steal"]
+    pitched = [earlier, slide, _view(60, "no_play")]
     assert [j.code for j in judge(reads, pitched)] != ["steal"]
+    # 앞 판독 전의 슬라이딩(앞 플레이 몫), 관절 화면 단서가 없는 영상, '폭투' 해설은 도루가 아니다
+    before = Cue(-1.0, "slide", "[관절] 슬라이딩·다이빙 -1.0~-0.5초")
+    assert [j.code for j in judge(reads, [earlier, before])] != ["steal"]
+    assert [j.code for j in judge(reads, [slide])] != ["steal"]
+    wp = Cue(2.0, "speech", "아 폭투가 나오면서")
+    assert [j.code for j in judge(reads, [earlier, slide, wp])] != ["steal"]
 
 
 def test_strikeout_pitch_view_ending_just_after_the_mark_does_not_block_the_jump():

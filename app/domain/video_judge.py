@@ -198,10 +198,15 @@ def _late_board_slide(tr: Transition, cues: Sequence[Cue]) -> Optional[Cue]:
     """
     if tr.t - tr.before.t <= CUE_BEFORE:
         return None
-    if any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) and tr.before.t < c.t <= tr.t for c in cues):
+    views = [c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)]
+    # 투구 화면 단서가 아예 없으면 '사이에 투구가 없었다'를 알 수 없다(독립 리뷰)
+    if not views or any(tr.before.t < c.t <= tr.t for c in views):
         return None
-    return next((c for c in cues if c.kind == "slide"
-                 and tr.before.t - CUE_AFTER <= c.t <= tr.before.t + CUE_BEFORE), None)
+    late = [c for c in cues if tr.before.t < c.t <= tr.before.t + CUE_BEFORE]
+    # 앞 판독 전의 슬라이딩은 앞 판독이 이미 담은 플레이다. 그 무렵 '폭투·포일'이면 도루가 아니다
+    if _speech(late, "폭투", "포일"):
+        return None
+    return next((c for c in late if c.kind == "slide"), None)
 
 
 def judge_transition(
