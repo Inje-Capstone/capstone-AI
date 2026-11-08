@@ -55,6 +55,8 @@ HR_WORDS = ("홈런", "솔로포", "투런", "투 런", "스리런", "쓰리런"
             "그랜드슬램", "담장을 넘", "담장 넘")
 # 희생플라이 — 해설은 '희생플라이'보다 뜬공 모양으로 말한다("가볍게 걷어 올렸습니다, 중견수")
 SF_WORDS = ("희생플라이", "희생 플라이", "뜬공", "걷어 올", "띄워", "띄웠")
+# 희생플라이를 직접 말하는 낱말 — 득점이 늦게 반영된 합친 전이는 새 상태가 보일 때까지 이 말만
+SF_STRONG = ("희생플라이", "희생 플라이", "태그업")
 WALK_WORDS = (
     "볼넷", "포볼", "밀어내기", "고의사구", "고의 사구", "고의4구", "고의 4구", "자동 고의",
 )
@@ -248,6 +250,11 @@ def judge_transition(
     hr_word = (_has(near, "ball_over_fence") or _speech(near, *HR_WORDS)
                or _speech(between, *HR_WORDS))
     batter_home = tr.runs >= 1 and tr.runs == tr.runners_before + 1 and not any(a)
+    if batter_home and not hr_word and not in_play:
+        # 홈런은 새 점수판 뒤 다시보기 동안에도 말한다(PO 2차전 '최고령 홈런' — 새 점수판 9~19초
+        # 뒤). 다른 증거가 없을 때만 — 있으면 다음 홈런의 말을 가져간다(독립 리뷰)
+        replay = [c for c in cues if tr.t < c.t <= max(tr.t, tr.after.t) + HR_TALK_SEC]
+        hr_word = _speech(replay, *HR_WORDS)
     # 투구 화면 단서(관절)가 아예 없는 실시간 — 아웃 없이 타자까지 홈을 밟은 모양이면 홈런으로 본다
     blind = not any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) for c in cues)
     shape_only = blind and not tr.half_change and not tr.outs_made and one_play(tr)
@@ -314,7 +321,11 @@ def judge_transition(
         if tp:
             return make("result", "triple_play", 0.6, [tp])
     if tr.outs_made == 1 and tr.runs >= 1 and tr.before.outs <= 1:  # 9.08(d) 2아웃 전
-        sf = _has(near, "deep_fly") or _speech(near, *SF_WORDS) or _speech(between, *SF_WORDS)
+        # 직전 상태가 보인 뒤 ~ 새 상태가 보인 뒤 6초의 강한 말(희생플라이·태그업) — 늦게 반영된
+        # 득점을 합친 전이는 새 상태가 아웃보다 뒤에 보였다(PO 2차전). 앞 플레이 '태그업'은 안 본다
+        told = [c for c in cues if tr.before.t < c.t <= max(tr.t, tr.after.t) + CUE_AFTER]
+        sf = (_has(near, "deep_fly") or _speech(near, *SF_WORDS) or _speech(between, *SF_WORDS)
+              or _speech(told, *SF_STRONG))
         if sf:
             return make("result", "sac_fly", 0.5, [sf])
         # 만루에서 3루 주자만 들어오고 1·2루 주자가 그대로 — 땅볼이면 주자 모두 포스로 뛴다(타자가
@@ -393,6 +404,7 @@ def judge_transition(
 
 GAME_END_SEC = 120.0  # 마지막 점수판 뒤 이 안의 투구만 마지막 타석으로 본다
 SPLIT_SEC = 25.0  # 점수판이 아웃과 득점을 나눠 반영하는 간격(하이라이트 실측 11·21초)
+HR_TALK_SEC = 20.0  # 홈런 말을 새 점수판 뒤 이만큼까지 듣는다(다시보기)
 NEW_HALF_LEAD = 3.0  # 새 반 이닝 첫 투구의 스윙이 그 투구 화면 단서보다 앞서는 시간(실측 약 1초)
 OUTS_SPLIT_SEC = 8.0  # 병살 아웃을 하나씩 올리는 간격(실측 4초) — 다음 투구까지는 15초 넘게 걸린다
 DP_WORDS = ("병살", "더블플레이", "더블 플레이")
@@ -428,6 +440,22 @@ def _split_half(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transiti
     return out
 
 
+def _tagged_up(before: tuple, after: tuple) -> bool:
+    """3루 주자가 들어오고 1·2루 주자는 그대로이거나 한 베이스씩 간 모양(새 주자 없음)."""
+    first, second, third = before
+    if not third:
+        return False
+    moves = [(False, False)] if not first else [(True, False), (False, True)]  # 1루 주자: 1루·2루
+    out = set()
+    for one in moves:
+        for two in ([(False, False)] if not second else [(True, False), (False, True)]):
+            # one = (1루에 있음, 2루로 감), two = (2루에 있음, 3루로 감)
+            bases = (one[0], one[1] or two[0], two[1])
+            if not (one[1] and two[0]):  # 같은 베이스에 둘은 없다
+                out.add(bases)
+    return after in out
+
+
 def _merge_split(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transition]:
     """점수판이 아웃을 먼저, 득점을 몇 초 뒤 따로 반영한 것을 한 전이로 합친다(희생플라이 실측).
 
@@ -449,9 +477,19 @@ def _merge_split(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transit
             # 카운트가 그대로(0-0 그대로도 '리셋'으로 잡힌다)거나 새 타자로 안 바뀜
             and ((tr.before.balls, tr.before.strikes) == (tr.after.balls, tr.after.strikes)
                  or not tr.count_reset)
-            and tr.after.bases == (tr.before.bases[0], tr.before.bases[1], False)
             and tr.before.bases[2]
         )
+        if split and prev is not None:
+            held = tr.after.bases == (tr.before.bases[0], tr.before.bases[1], False)
+            # 다른 주자도 태그업해 한 베이스 갔으면(2루 → 3루) — 폭투·보크와 같은 모양이라 카운트가
+            # 그대로이고 사이에 투구가 없을 때만(PO 2차전 희생플라이, 2026-11-08)
+            pitched = any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) and prev.t < c.t <= tr.t
+                          for c in cues)
+            same = (tr.before.balls, tr.before.strikes) == (tr.after.balls, tr.after.strikes)
+            # 투수 정지(보크)·슬라이딩(도루)이 보였으면 태그업이 아니다(독립 리뷰)
+            moved = any(c.kind in ("pitcher_stops", "slide") and prev.t < c.t <= tr.t for c in cues)
+            split = held or (same and not pitched and not moved
+                             and _tagged_up(tr.before.bases, tr.after.bases))
         if split and prev is not None:
             view = _pitch_view(cues, prev)
             other = _speech(_near(cues, tr.t), "폭투", "포일", "보크", "도루", "홈스틸")
@@ -663,6 +701,13 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
                  and (j.t <= m.t + K_MARK_SEC or viewed and not any(
                      c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
                      and m.t + K_MARK_OWN_VIEW < c.t <= j.t for c in cues))]
+        if not after:
+            # 아웃 전이가 표시를 품고 있고 사이에 다른 투구가 없으면 그 전이의 삼진이다 — 표시만으로
+            # 또 내면 삼진이 둘이 된다(PO 2차전 3K, 아웃 판독이 34초 뒤)
+            after = [i for i, j in enumerate(judged) if j.transition is not None
+                     and j.transition.outs_made >= 1 and j.transition.before.t < m.t <= j.t
+                     and viewed and not any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                                            and m.t + K_MARK_OWN_VIEW < c.t <= j.t for c in cues)]
         if not after:
             outs_near = any(j.transition is not None and j.transition.outs_made >= 1
                             and m.t - 3.0 <= j.t <= m.t + K_MARK_JUMP_SEC for j in judged)

@@ -1342,6 +1342,71 @@ def test_an_out_and_a_late_run_from_third_are_one_sacrifice_fly():
     assert len(judge(wild, [])) == 2
 
 
+def test_a_runner_tagging_up_to_third_keeps_the_sacrifice_fly_one_play():
+    """PO 2차전: 1사 2·3루 희생플라이 — 점수판이 아웃을 먼저, 11초 뒤 득점과 2루 주자 3루를 함께.
+    카운트가 그대로이고 사이에 투구가 없으면 태그업이다. 투구가 있었으면 폭투일 수 있다."""
+    corners = (False, True, True)
+    reads = twice(R(0, outs=1, balls=3, strikes=2, bases=corners),
+                  R(13, outs=2, bases=corners), R(24, outs=2, bases=(False, False, True), away=1))
+    said = Cue(20, "speech", "희생플라이 타점으로 또 한 점을 더했습니다")
+    hit = _view(5, "in_play")
+    assert [j.code for j in judge(reads, [said, hit])] == ["sac_fly"]
+    assert len(judge(reads, [said, hit, _view(18, "no_play")])) == 2
+
+
+def test_tag_up_words_after_the_late_run_count_for_the_sacrifice_fly():
+    """PO 2차전: 1사 1·3루 희생플라이 — '노바운드 캐치… 태그업'이 득점이 늦게 반영된 뒤(합친
+    전이의 아웃 시각 + 6초 밖)에 나왔다. 새 상태가 보인 때까지 듣고 '태그업'도 희생플라이 말."""
+    corners = (True, False, True)
+    reads = twice(R(0, outs=1, balls=1, bases=corners), R(8, outs=2, bases=corners),
+                  R(16, outs=2, bases=FIRST, away=1))
+    said = Cue(15, "speech", "노바운드 캐치를 잘 해줬고 태그업 주자")
+    assert [j.code for j in judge(reads, [said, _view(3, "in_play")])] == ["sac_fly"]
+
+
+def test_home_run_words_during_the_replay_after_the_new_board():
+    """PO 2차전 최형우 솔로 — '홈런입니다'가 새 점수판 9~19초 뒤 다시보기 동안 나왔다."""
+    reads = twice(R(0, outs=1, half="bot", home=7), R(12, outs=1, half="bot", home=8))
+    late = [_view(-30, "no_play"), Cue(21, "speech", "역대 플레이오프 최고령 홈런입니다")]
+    assert [j.code for j in judge(reads, late)] == ["homerun"]
+    too_late = [_view(-30, "no_play"), Cue(40, "speech", "역대 플레이오프 최고령 홈런입니다")]
+    assert [j.code for j in judge(reads, too_late)] != ["homerun"]
+
+
+def test_review_cases_for_tag_up_and_late_words():
+    """독립 리뷰 재현 넷 — 태그업 합치기가 보크·도루를 삼키고, 늘린 창에 다음 타석 '뜬공'이 섞이고,
+    앞 플레이 '태그업'이 땅볼 타점을, 앞 홈런이 다음 홈런의 다시보기 말을 가져갔다."""
+    corners = (False, True, True)
+    reads = twice(R(0, outs=1, bases=corners), R(13, outs=2, bases=corners),
+                  R(24, outs=2, bases=(False, False, True), away=1))
+    hit = _view(5, "in_play")
+    balk = judge(reads, [hit, Cue(22, "pitcher_stops")])
+    assert [j.code for j in balk] == ["out", "balk"]
+    steal = judge(reads, [hit, Cue(22, "slide")])
+    assert len(steal) == 2
+    next_fly = judge(reads, [hit, Cue(22, "pitcher_stops"),
+                             Cue(28, "speech", "다음 타자 뜬공 잡았습니다")])
+    assert "sac_fly" not in [j.code for j in next_fly]
+    grounder = twice(R(0, outs=1, balls=1, strikes=1, bases=(False, False, True)),
+                     R(10, outs=2, away=1))
+    said = [_view(4, "in_play"), Cue(-5, "speech", "앞서 태그업으로 3루까지 갔죠")]
+    assert judge(grounder, said)[0].code != "sac_fly"
+    two = twice(R(0, outs=1), R(12, outs=1, away=1), R(34, outs=1, away=2))
+    back = [_view(5, "in_play"), _view(-30, "no_play"), Cue(31, "speech", "백투백 홈런")]
+    assert [j.code for j in judge(two, back)] == ["homerun", "homerun"]
+
+
+def test_a_strikeout_mark_inside_the_out_transition_is_not_a_second_strikeout():
+    """PO 2차전 3K — 표시 뒤 아웃 판독이 34초 늦게 와 표시만으로 낸 삼진과 둘이 됐다. 그 아웃 전이가
+    표시를 품고 사이에 다른 투구가 없으면 같은 삼진이다. 다른 투구가 있었으면 따로다(정우주 3K)."""
+    reads = twice(R(0, outs=1, strikes=2), R(40, outs=2))
+    mark = Cue(5, "k_mark", "[점수판] 삼진 표시(K)")
+    one_k = judge(reads, [_view(4.5, "no_play"), mark], finished=True)
+    assert [j.code for j in one_k] == ["strikeout"]
+    two = judge(reads, [_view(4.5, "no_play"), mark, _view(20, "no_play")], finished=True)
+    assert [j.code for j in two].count("strikeout") >= 1 and len(two) == 2
+
+
 def test_outs_raised_one_by_one_within_seconds_are_one_double_play():
     """점수판이 병살 아웃을 4초 간격으로 하나씩 올렸다 — 투구 없이 이어지면 한 플레이다."""
     reads = twice(R(0, outs=1, balls=0, strikes=1, bases=(True, False, False)),
