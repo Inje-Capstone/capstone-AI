@@ -1332,3 +1332,14 @@ def test_strikeout_pitch_view_ending_just_after_the_mark_does_not_block_the_jump
     readings, cues, _ = observe({"scorebug": {"scoreboard": board}})
     cues = sorted(cues + [_view(3.5, "no_play")], key=lambda c: c.t)
     assert "strikeout" in [j.code for j in judge(readings, cues, min_repeat=1)]
+
+
+def test_strikeout_mark_alone_at_the_end_of_a_finished_video():
+    """다 본 영상 끝 2초 전 삼진 — 뒤에 아웃 판독이 없다. 표시만으로 삼진(선언),
+    그 투구 화면 끝 시각. 실시간(finished=False)은 아웃 판독이 뒤에 올 수 있어 내지 않는다."""
+    board = [_board(0, 1, 2, 2), _board(3, 0, 0, 0, mark="strikeout")]
+    readings, cues, _ = observe({"scorebug": {"scoreboard": board}})
+    cues = sorted(cues + [_view(-20, "in_play"), _view(3.5, "no_play")], key=lambda c: c.t)
+    [j] = judge(readings, cues, min_repeat=1, finished=True)
+    assert (j.code, j.kind, j.t, j.transition) == ("strikeout", "call", 3.5, None)
+    assert judge(readings, cues, min_repeat=1) == []

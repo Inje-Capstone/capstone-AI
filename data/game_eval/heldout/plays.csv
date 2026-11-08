@@ -20,7 +20,7 @@ zRqpvJdTybA,402.0,none,True,,,,조용함,
 zRqpvJdTybA,424.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 100→000; [점수판] 삼진 표시(K) (429s),맞음,삼진(3K) — 3아웃
 zRqpvJdTybA,434.0,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (439s); [점수판] 삼진 표시(K) (438s),맞음,삼진(4K)
 zRqpvJdTybA,472.0,strikeout,True,strikeout reach reach,video_only video_only video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 타자가 공을 그냥 보냄 (473s); [점수판] 삼진 표시(K) (476s) | 점수판 아웃+0 득점+1 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→010,맞음,삼진(5K)
-zRqpvJdTybA,501.5,strikeout,False,,,,놓침,삼진(6K) — 영상 끝 2초 전. 앞 타석 득점·2루 주자는 장면 없이 같은 칸에서 바뀜
+zRqpvJdTybA,501.5,strikeout,False,strikeout,video_only,[점수판] 삼진 표시(K) (514s),맞음,삼진(6K) — 영상 끝 2초 전. 앞 타석 득점·2루 주자는 장면 없이 같은 칸에서 바뀜
 OvmkANKCcks,26.1,none,True,,,,조용함,
 OvmkANKCcks,44.3,none,True,,,,조용함,
 OvmkANKCcks,63.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼로 보임 — 1아웃
@@ -134,7 +134,7 @@ xtXEisvgTR0,300.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+
 89gNJQjBRrQ,99.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [점수판] 삼진 표시(K) (106s),맞음,삼진(2K) — 공이 빠져 1루로 뛰었으나 아웃으로 보임
 89gNJQjBRrQ,113.7,none,True,,,,조용함,
 89gNJQjBRrQ,131.0,?,False,,,,제외,0-2 2사 뒤 점수판 없음
-89gNJQjBRrQ,151.7,?,False,,,,제외,점수판 없음
+89gNJQjBRrQ,151.7,?,False,strikeout,video_only,[점수판] 삼진 표시(K) (157s),제외,점수판 없음
 89gNJQjBRrQ,173.0,?,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (180s),제외,점수판 없음
 89gNJQjBRrQ,196.5,?,False,,,,제외,점수판 없음
 NVOfYTDrqlU,30.5,none,True,,,,조용함,
@@ -148,7 +148,7 @@ NVOfYTDrqlU,182.5,none,True,,,,조용함,
 NVOfYTDrqlU,204.5,none,False,,,,조용함,뒤 점수판 없음 — 스트라이크로 보임
 NVOfYTDrqlU,223.5,none,False,,,,조용함,중계 화면 전환
 NVOfYTDrqlU,230.7,none,False,,,,조용함,투수 클로즈업 — 카운트 그대로
-NVOfYTDrqlU,245.7,strikeout,True,,,,놓침,삼진(3K) — 3아웃
+NVOfYTDrqlU,245.7,strikeout,True,strikeout,video_only,[점수판] 삼진 표시(K) (249s),맞음,삼진(3K) — 3아웃
 NVOfYTDrqlU,253.5,?,False,,,,제외,점수판 없음 — 결과 모름
 NVOfYTDrqlU,260.5,?,False,,,,제외,점수판 없음 — 결과 모름
 NVOfYTDrqlU,278.0,?,False,,,,제외,점수판 없음 — 결과 모름
