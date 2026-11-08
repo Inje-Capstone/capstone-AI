@@ -579,6 +579,7 @@ K_MARK = "k_mark"  # 점수판이 주자·아웃 칸을 'nK'로 덮은 판독(sc
 K_MARK_TEXT = "[점수판] 삼진 표시(K)"
 K_MARK_SEC = 8.0  # 표시가 뜬 뒤 아웃이 올라간 판독까지(처음 본 시험 경기 실측 2~5초)
 K_MARK_JUMP_SEC = 30.0  # 사이에 투구 화면이 없으면(하이라이트가 다음 장면으로 건너뜀) 여기까지
+K_MARK_OWN_VIEW = 2.0  # 표시 뒤 이 안에 끝난 투구 화면은 그 삼진 투구 자신(표시가 0.5초 먼저 뜸)
 
 
 def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence[Reading]) -> None:
@@ -602,8 +603,8 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
         after = [i for i, j in enumerate(judged) if j.transition is not None
                  and j.transition.outs_made >= 1 and m.t <= j.t <= m.t + K_MARK_JUMP_SEC
                  and (j.t <= m.t + K_MARK_SEC or viewed and not any(
-                     c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) and m.t < c.t <= j.t
-                     for c in cues))]
+                     c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                     and m.t + K_MARK_OWN_VIEW < c.t <= j.t for c in cues))]
         if not after:
             continue
         i = min(after, key=lambda i: judged[i].t)

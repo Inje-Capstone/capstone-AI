@@ -1316,3 +1316,12 @@ def test_late_board_after_review_still_finds_the_steal_slide():
     assert [j.code for j in judge(reads, [slide])] == ["steal"]
     pitched = [slide, _view(60, "no_play")]
     assert [j.code for j in judge(reads, pitched)] != ["steal"]
+
+
+def test_strikeout_pitch_view_ending_just_after_the_mark_does_not_block_the_jump():
+    """표시가 그 삼진 투구 화면보다 0.5초 먼저 떴다 — 그 화면은 '사이의 투구'가 아니다."""
+    board = [_board(0, 0, 2, 2), _board(3, 0, 0, 0, mark="strikeout"),
+             _board(15, 2, 2, 1, [1], inning=2, half="top")]
+    readings, cues, _ = observe({"scorebug": {"scoreboard": board}})
+    cues = sorted(cues + [_view(3.5, "no_play")], key=lambda c: c.t)
+    assert "strikeout" in [j.code for j in judge(readings, cues, min_repeat=1)]
