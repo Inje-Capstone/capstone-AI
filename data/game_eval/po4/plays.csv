@@ -1,0 +1,101 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+ejMdL3m6Dpc,34.0,none,True,,,,조용함,경기 전 소개
+ejMdL3m6Dpc,49.5,none,True,,,,조용함,경기 전 소개
+ejMdL3m6Dpc,56.8,none,True,,,,조용함,경기 전 소개
+ejMdL3m6Dpc,62.8,none,True,,,,조용함,경기 전 소개
+ejMdL3m6Dpc,68.3,none,True,,,,조용함,경기 전 소개
+ejMdL3m6Dpc,72.3,none,True,,,,조용함,경기 전 소개
+ejMdL3m6Dpc,83.6,none,True,out,video_only,점수판 아웃+3 득점+0 주자 000→000,헛판정,경기 전 소개
+ejMdL3m6Dpc,104.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,내야 땅볼(다이빙 수비) — 1사
+ejMdL3m6Dpc,137.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
+ejMdL3m6Dpc,139.6,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,146.1,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
+ejMdL3m6Dpc,170.7,reach,True,,,,놓침,적시타 1-0
+ejMdL3m6Dpc,173.4,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,181.4,out_any,True,out,video_only,점수판 아웃+1 득점+1 주자 110→110,맞음,아웃 — 2사(삼진으로 보임)
+ejMdL3m6Dpc,197.2,none,True,,,,조용함,다시보기
+ejMdL3m6Dpc,202.2,none,True,,,,조용함,볼
+ejMdL3m6Dpc,205.7,none,True,balk,video_only,점수판 아웃+0 득점+0 주자 110→011,헛판정,포수 클로즈업
+ejMdL3m6Dpc,211.2,none,True,reach,video_only,점수판 아웃+0 득점+0 주자 011→011,헛판정,카운트만
+ejMdL3m6Dpc,228.2,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 011→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (235s),맞음,3아웃 — 삼진으로 보임
+ejMdL3m6Dpc,240.0,none,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,헛판정,
+ejMdL3m6Dpc,244.2,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,아웃 — 다음 판독은 2사(아웃 하나는 못 봄)
+ejMdL3m6Dpc,261.5,none,True,,,,조용함,카운트만
+ejMdL3m6Dpc,278.8,out_any,True,,,,놓침,3아웃
+ejMdL3m6Dpc,290.0,reach,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,틀림,안타
+ejMdL3m6Dpc,295.3,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,299.3,none,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,헛판정,카운트만
+ejMdL3m6Dpc,301.3,none,True,,,,조용함,파울
+ejMdL3m6Dpc,325.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→101,맞음,안타 — 1·2루
+ejMdL3m6Dpc,328.1,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,336.1,none,True,out,video_only,점수판 아웃+1 득점+0 주자 101→101,헛판정,카운트만
+ejMdL3m6Dpc,353.8,double_play,False,out,video_only,점수판 아웃+1 득점+0 주자 101→000,틀림,병살로 보임 — 이닝 끝
+ejMdL3m6Dpc,400.1,none,True,,,,조용함,
+ejMdL3m6Dpc,404.1,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
+ejMdL3m6Dpc,423.4,none,True,,,,조용함,다시보기
+ejMdL3m6Dpc,429.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,뜬공
+ejMdL3m6Dpc,433.7,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,444.4,none,True,,,,조용함,카운트만
+ejMdL3m6Dpc,450.4,hbp,True,hbp,video_only,점수판 아웃+0 득점+0 주자 010→110; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (455s),맞음,몸에 맞는 공 — 1·2루
+ejMdL3m6Dpc,455.7,none,True,,,,조용함,
+ejMdL3m6Dpc,458.2,out_any,False,out,video_only,점수판 아웃+1 득점+0 주자 110→110,맞음,아웃 — 장면 못 봄(다음 판독 2사)
+ejMdL3m6Dpc,468.7,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 110→101,맞음,적시타 1-1
+ejMdL3m6Dpc,516.7,none,True,,,,조용함,
+ejMdL3m6Dpc,522.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 101→000,맞음,3아웃(인플레이)
+ejMdL3m6Dpc,525.3,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,535.8,strikeout,False,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '박순규 2번 타자 스윙 3진 아웃' (530s),맞음,삼진으로 보임
+ejMdL3m6Dpc,546.5,none,True,,,,조용함,
+ejMdL3m6Dpc,549.5,strikeout,True,,,,놓침,삼진 — 3아웃(투수 환호)
+ejMdL3m6Dpc,564.8,none,True,,,,조용함,
+ejMdL3m6Dpc,567.6,none,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (559s),헛판정,
+ejMdL3m6Dpc,573.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
+ejMdL3m6Dpc,575.6,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,597.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,내야안타
+ejMdL3m6Dpc,598.8,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,614.8,none,True,,,,조용함,카운트만
+ejMdL3m6Dpc,622.6,reach,True,hbp reach,video_only video_only,점수판 아웃+0 득점+0 주자 100→101; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (628s) | 점수판 아웃+0 득점+0 주자 101→011,맞음,안타 — 1·2루
+ejMdL3m6Dpc,639.6,none,True,,,,조용함,
+ejMdL3m6Dpc,648.6,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 011→000,맞음,3아웃 — 삼진으로 보임
+ejMdL3m6Dpc,650.9,none,True,,,,조용함,
+ejMdL3m6Dpc,656.9,none,True,,,,조용함,
+ejMdL3m6Dpc,658.9,homerun,True,out homerun,video_only refined,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+2 득점+1 주자 000→000; 해설 '-몸 던퍼 이번 플레이오프 두 번째 홈런을 최형우가 중요한 길목에서 쏘아 올렸습니다.-이거는 제가 봤을 때 최형우 선수가 노리고 돌고 있는 것 같아요.' (710s),맞음,솔로 홈런 2-1
+ejMdL3m6Dpc,675.2,same,True,,,,제외,홈런 이어진 화면
+ejMdL3m6Dpc,677.2,same,True,,,,제외,홈런 이어진 화면
+ejMdL3m6Dpc,679.4,same,True,,,,제외,홈런 이어진 화면
+ejMdL3m6Dpc,686.9,same,True,,,,제외,홈런 이어진 화면
+ejMdL3m6Dpc,724.5,reach,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,출루(안타로 보임)
+ejMdL3m6Dpc,750.5,reach,True,reach steal,video_only video_only,"점수판 아웃+0 득점+0 주자 100→101 | 점수판 아웃+0 득점+0 주자 101→011; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 1.1배 미끄러짐, 774.7~779.3초 (775s)",맞음,안타
+ejMdL3m6Dpc,755.7,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,786.3,none,True,,,,조용함,마운드 방문
+ejMdL3m6Dpc,794.8,none,True,,,,조용함,볼
+ejMdL3m6Dpc,811.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 011→011,맞음,인플레이 아웃 — 2사 1·2루
+ejMdL3m6Dpc,832.8,hbp,True,hbp,confirmed,점수판 아웃+0 득점+0 주자 011→111; 해설 '- 삼성의 마운드가 오늘 두 개째 히트 바이 피치를 허락을 하고 있습니다. 김태군이 몸에 맞는 볼.' (840s),맞음,몸에 맞는 공 — 만루
+ejMdL3m6Dpc,845.3,none,True,,,,조용함,
+ejMdL3m6Dpc,847.3,none,True,,,,조용함,
+ejMdL3m6Dpc,859.6,none,True,,,,조용함,
+ejMdL3m6Dpc,862.6,none,True,,,,조용함,볼
+ejMdL3m6Dpc,870.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→000,맞음,외야 뜬공 3아웃
+ejMdL3m6Dpc,882.9,none,True,out,video_only,점수판 아웃+3 득점+0 주자 000→000,헛판정,
+ejMdL3m6Dpc,903.9,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
+ejMdL3m6Dpc,906.1,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,908.6,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,925.2,reach,True,out,video_only,점수판 아웃+1 득점+1 주자 010→100,틀림,적시타 2-2 — 다음 판독은 2사(아웃 하나는 못 봄)
+ejMdL3m6Dpc,927.4,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,954.9,none,True,,,,조용함,
+ejMdL3m6Dpc,960.7,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→101,맞음,안타 — 1·2루
+ejMdL3m6Dpc,962.7,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,967.4,same,True,,,,제외,같은 타구 이어진 화면
+ejMdL3m6Dpc,990.2,none,True,,,,조용함,
+ejMdL3m6Dpc,999.5,none,True,,,,조용함,
+ejMdL3m6Dpc,1002.0,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 101→101,맞음,적시타 3-2
+ejMdL3m6Dpc,1032.3,reach,True,out out,video_only video_only,점수판 아웃+1 득점+1 주자 101→000 | 점수판 아웃+1 득점+0 주자 000→000,틀림,적시타 4-2 — 3아웃은 못 봄
+ejMdL3m6Dpc,1067.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
+ejMdL3m6Dpc,1070.6,none,True,,,,조용함,
+ejMdL3m6Dpc,1078.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,3아웃
+ejMdL3m6Dpc,1081.3,none,True,out out,video_only video_only,점수판 아웃+3 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000,헛판정,
+ejMdL3m6Dpc,1101.1,out_any,True,,,,놓침,아웃 — 삼진으로 보임
+ejMdL3m6Dpc,1112.1,none,True,,,,조용함,
+ejMdL3m6Dpc,1114.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,경기 끝 — 마지막 아웃
+ejMdL3m6Dpc,1117.6,none,True,,,,조용함,
+ejMdL3m6Dpc,1136.9,none,True,,,,조용함,
+ejMdL3m6Dpc,1148.1,none,True,,,,조용함,

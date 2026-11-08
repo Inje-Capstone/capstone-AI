@@ -60,3 +60,17 @@ def test_only_play_cells_take_judgments_from_idle_cells():
              {"t": 10.0, "pitch_end": 12.0, "end": 20.0, "code": "?", "sure": False}]
     cells = eval_games.assign(plays, [{"t": 15.0, "code": "out"}])
     assert [[j["code"] for j in c] for c in cells] == [[], ["out"]]
+
+
+def test_same_play_cells_hand_their_time_to_the_play_before_them():
+    """카메라 전환이 잦은 중계(MBC)는 한 플레이를 투구 화면 여러 칸으로 쪼갠다 — 홈런 뒤 이어진 화면
+    네 칸 다음에야 점수판이 바뀌었다(PO 4차전). 'same' 칸의 시간은 앞 플레이 칸이 받는다."""
+    plays = [{"t": 0.0, "pitch_end": 2.0, "end": 10.0, "code": "homerun", "sure": True},
+             {"t": 10.0, "pitch_end": 12.0, "end": 20.0, "code": "same", "sure": True},
+             {"t": 20.0, "pitch_end": 22.0, "end": 30.0, "code": "same", "sure": True},
+             {"t": 30.0, "pitch_end": 32.0, "end": 40.0, "code": "out", "sure": True}]
+    spans = eval_games.windows(plays)
+    assert spans[0] == (2.0, 32.0) and spans[1][0] == spans[1][1]
+    cells = eval_games.assign(plays, [{"t": 25.0, "code": "homerun"}, {"t": 35.0, "code": "out"}])
+    assert [[j["code"] for j in c] for c in cells] == [["homerun"], [], [], ["out"]]
+    assert eval_games.verdict("same", [{"code": "walk"}]) is None
