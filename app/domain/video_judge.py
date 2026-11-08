@@ -562,6 +562,7 @@ def _walk_off_kind(near: Sequence[Cue]) -> Optional[tuple[str, Cue]]:
 K_MARK = "k_mark"  # 점수판이 주자·아웃 칸을 'nK'로 덮은 판독(scorebug_layout.decode_mark)
 K_MARK_TEXT = "[점수판] 삼진 표시(K)"
 K_MARK_SEC = 8.0  # 표시가 뜬 뒤 아웃이 올라간 판독까지(처음 본 시험 경기 실측 2~5초)
+K_MARK_JUMP_SEC = 30.0  # 사이에 투구 화면이 없으면(하이라이트가 다음 장면으로 건너뜀) 여기까지
 
 
 def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence[Reading]) -> None:
@@ -570,15 +571,23 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
     표시는 2~3초 떠 있어 연달아 두 번 읽히기도 한다 — 표시 뒤 첫 아웃 판정이 이미 쓰였으면
     더 뒤의 아웃으로 넘어가지 않는다(같은 삼진의 표시다). 표시 직전 판독이 2스트라이크가
     아니면(아웃이 이미 올라갔다 등) 쓰지 않는다 — 뒤따르는 다른 타자의 아웃을 삼진으로 바꾼다.
-    아웃 하나짜리, 여러 플레이가 합쳐지지 않은 판정만 바꾼다(독립 리뷰).
+    하이라이트가 건너뛰어 아웃 둘이 한 전이로 합쳐진 판정(merged)도 보이는 플레이는 삼진이다 —
+    처음 본 시험 경기 3칸. merged 표시는 남겨 상태(아웃 둘)와 카드가 어긋나지 않게 한다.
+    건너뛴 뒤의 판독은 표시보다 10~25초 늦다 — 그 사이에 투구 화면이 없을 때만 30초까지 본다
+    (다른 타자의 아웃이면 투구가 있었어야 한다).
     """
     used: set[int] = set()
+    # 투구 화면 단서(관절)가 아예 없으면 '사이에 투구가 없었다'를 알 수 없다 — 연장하지 않는다
+    viewed = any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) for c in cues)
     for m in sorted((c for c in cues if c.kind == K_MARK), key=lambda c: c.t):
         prev = [r for r in stable if r.t <= m.t]
         if not prev or prev[-1].strikes != 2:
             continue
         after = [i for i, j in enumerate(judged) if j.transition is not None
-                 and j.transition.outs_made >= 1 and m.t <= j.t <= m.t + K_MARK_SEC]
+                 and j.transition.outs_made >= 1 and m.t <= j.t <= m.t + K_MARK_JUMP_SEC
+                 and (j.t <= m.t + K_MARK_SEC or viewed and not any(
+                     c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) and m.t < c.t <= j.t
+                     for c in cues))]
         if not after:
             continue
         i = min(after, key=lambda i: judged[i].t)
@@ -587,7 +596,11 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
         used.add(i)
         j = judged[i]
         tr = j.transition
-        if j.code == "out" and tr is not None and tr.outs_made == 1 and not j.detail.get("merged"):
+        # 같은 이닝에 점수가 났으면 삼진이 아니다(희생플라이·땅볼 타점) — 이닝이 바뀐 전이의 점수는
+        # 다른 공격 차례에서 났을 수 있다
+        scored = tr is not None and tr.runs and not tr.half_change
+        if (j.code == "out" and tr is not None and not scored
+                and (tr.outs_made == 1 or j.detail.get("merged"))):
             judged[i] = Judgment(j.t, "result", "strikeout", max(j.confidence, 0.6),
                                  j.evidence + [_ev(m)], j.transition, dict(j.detail))
         elif j.code == "strikeout":

@@ -14,6 +14,7 @@
  "half_fill": "color",
  "half_by": "position",
  "base_hue": [20, 60],
+ "cover_val": 0.85,
  "mark": [0.1797, 0.0602, 0.2214, 0.1157],
  "mark_hue": [340, 20]
 }

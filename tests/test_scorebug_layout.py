@@ -228,3 +228,35 @@ def test_position_half_needs_a_clear_side_and_layout_boxes_are_checked(tmp_path)
     bad.write_text('{"name": "x", "bases": {}, "outs": [], "half_by": "postion"}', encoding="utf-8")
     with pytest.raises(ValueError):
         Layout.load(bad)
+
+
+def test_dark_strikeout_mark_counts_black_text():
+    """검은 'nK'가 볼카운트·아웃 칸을 덮는 중계 — mark_fill dark면 어두운 화소를 센다."""
+    from app.adapters.video.scorebug_layout import decode_mark
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    box = (590 / RGB_W, 295 / RGB_H, 612 / RGB_W, 315 / RGB_H)
+    dark = Layout("t", {}, (), mark=box, mark_fill="dark")
+    black = _triangle(up=True, color=(10, 10, 10))
+    assert decode_mark(dark, black, RGB_W, RGB_H) == "strikeout"
+    assert decode_mark(dark, _triangle(up=True), RGB_W, RGB_H) is None  # 빨간 점은 표시가 아니다
+    red_text = Layout("t", {}, (), mark=box)  # 기본은 빨간 글자
+    assert decode_mark(red_text, black, RGB_W, RGB_H) is None
+    caster = Layout.load(ROOT / "data" / "scorebug_layouts" / "kbo_caster_box.json")
+    assert caster.mark_fill == "dark" and caster.half is None
+
+
+def test_white_out_dots_mean_the_strikeout_mark_covers_them():
+    """표시가 나타나는 중엔 글자가 모자라도 아웃 점 자리가 흰 바탕이다 — cover_val로 잡는다."""
+    from app.adapters.video.scorebug_layout import decode_mark
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    outs = ((100 / RGB_W, 100 / RGB_H), (120 / RGB_W, 100 / RGB_H))
+    box = (0.9, 0.9, 0.95, 0.95)  # 글자 칸은 비었다
+    layout = Layout("t", {}, outs, mark=box, cover_val=0.85)
+    white = bytes((250, 250, 250)) * (RGB_W * RGB_H)
+    gray = bytes((185, 185, 185)) * (RGB_W * RGB_H)  # 꺼진 아웃 점(밝기 0.73)
+    assert decode_mark(layout, white, RGB_W, RGB_H) == "strikeout"
+    assert decode_mark(layout, gray, RGB_W, RGB_H) is None
+    plain = Layout("t", {}, outs, mark=box)  # 옵션이 없으면 아웃 점은 안 본다
+    assert decode_mark(plain, white, RGB_W, RGB_H) is None

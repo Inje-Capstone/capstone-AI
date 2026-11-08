@@ -1813,6 +1813,266 @@
      "note": "땅볼 3아웃 — 영상 끝"
     }
    ]
+  },
+  "7TYZzeweCjk": {
+   "title": "시험용 · KBO 두산-KIA(광주) 최민석 투구 모음 · 왼쪽 위 상자 점수판 (소리 없음)",
+   "layout": "kbo_topleft_box",
+   "plays": [
+    {
+     "t": 26.7,
+     "pitch_end": 31.7,
+     "end": 38.0,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 38.0,
+     "pitch_end": 43.0,
+     "end": 68.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(1K)"
+    },
+    {
+     "t": 68.2,
+     "pitch_end": 75.0,
+     "end": 102.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(2K)"
+    },
+    {
+     "t": 102.7,
+     "pitch_end": 107.2,
+     "end": 117.0,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(3K)"
+    },
+    {
+     "t": 117.0,
+     "pitch_end": 118.5,
+     "end": 118.7,
+     "code": "?",
+     "sure": false,
+     "note": "다시보기 — 1루 주자는 장면 없이 생김"
+    },
+    {
+     "t": 118.7,
+     "pitch_end": 124.0,
+     "end": 146.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(4K)"
+    },
+    {
+     "t": 146.5,
+     "pitch_end": 153.2,
+     "end": 177.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(5K)"
+    },
+    {
+     "t": 177.7,
+     "pitch_end": 189.0,
+     "end": 206.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(6K)"
+    },
+    {
+     "t": 206.7,
+     "pitch_end": 209.2,
+     "end": 222.0,
+     "code": "none",
+     "sure": false,
+     "note": "6K 타자 다시보기로 보임"
+    },
+    {
+     "t": 222.0,
+     "pitch_end": 229.0,
+     "end": 254.5,
+     "code": "?",
+     "sure": false,
+     "note": "5회말 3-2 투구 뒤 7회말로 건너뜀 — 결과 모름"
+    },
+    {
+     "t": 254.5,
+     "pitch_end": 259.5,
+     "end": 274.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(8K) — 3아웃, 영상 끝 20초 전"
+    }
+   ]
+  },
+  "YiiGl9UUV2E": {
+   "title": "시험용 · KBO LG-키움(고척) 안우진 삼진 모음 · 캐스터 띠 상자 점수판 (소리 없음)",
+   "layout": "kbo_caster_box",
+   "plays": [
+    {
+     "t": 13.2,
+     "pitch_end": 17.0,
+     "end": 30.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(1K)"
+    },
+    {
+     "t": 30.2,
+     "pitch_end": 32.0,
+     "end": 34.7,
+     "code": "?",
+     "sure": false,
+     "note": "아웃 하나·출루 하나가 장면 없이 — 순서 모름"
+    },
+    {
+     "t": 34.7,
+     "pitch_end": 41.0,
+     "end": 62.5,
+     "code": "out_any",
+     "sure": false,
+     "note": "3아웃 — 2K인지 표시를 못 봄"
+    },
+    {
+     "t": 62.5,
+     "pitch_end": 65.5,
+     "end": 84.0,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(3K) — 다음 아웃은 장면 없이"
+    },
+    {
+     "t": 84.0,
+     "pitch_end": 89.5,
+     "end": 100.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(4K) — 3아웃"
+    },
+    {
+     "t": 100.5,
+     "pitch_end": 104.2,
+     "end": 117.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(5K)"
+    },
+    {
+     "t": 117.5,
+     "pitch_end": 120.7,
+     "end": 131.7,
+     "code": "out_any",
+     "sure": false,
+     "note": "3아웃 — 6K로 보이나 표시를 못 봄"
+    },
+    {
+     "t": 131.7,
+     "pitch_end": 136.5,
+     "end": 149.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(7K)"
+    },
+    {
+     "t": 149.2,
+     "pitch_end": 154.7,
+     "end": 155.0,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 155.0,
+     "pitch_end": 159.0,
+     "end": 172.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(8K)"
+    },
+    {
+     "t": 172.5,
+     "pitch_end": 174.2,
+     "end": 183.2,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 183.2,
+     "pitch_end": 188.2,
+     "end": 201.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(9K) — 3아웃"
+    },
+    {
+     "t": 201.7,
+     "pitch_end": 206.5,
+     "end": 220.0,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(10K)"
+    },
+    {
+     "t": 220.0,
+     "pitch_end": 223.2,
+     "end": 223.7,
+     "code": "none",
+     "sure": false,
+     "note": "다시보기·투구 궤적 그래픽"
+    },
+    {
+     "t": 223.7,
+     "pitch_end": 230.7,
+     "end": 237.5,
+     "code": "none",
+     "sure": false,
+     "note": "다시보기"
+    },
+    {
+     "t": 237.5,
+     "pitch_end": 243.7,
+     "end": 254.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(11K)"
+    },
+    {
+     "t": 254.5,
+     "pitch_end": 259.0,
+     "end": 278.0,
+     "code": "?",
+     "sure": false,
+     "note": "투수 교체 — 주자 둘은 장면 없이"
+    },
+    {
+     "t": 278.0,
+     "pitch_end": 283.5,
+     "end": 292.7,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 292.7,
+     "pitch_end": 307.2,
+     "end": 328.7,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 328.7,
+     "pitch_end": 339.2,
+     "end": 354.2,
+     "code": "?",
+     "sure": false,
+     "note": "영상 끝 — 결과 모름"
+    }
+   ]
   }
  },
  "_note": "1080p 경기 하이라이트의 정답 — 사람이 투구 화면마다 점수판(전·후)과 그 사이 장면을 보고 매겼다. t·pitch_end·end = 그 투구 화면 시작·끝·다음 투구 화면 시작(초). code: reach(안타·실책 출루), out(인플레이 아웃), strikeout, out_any(삼진인지 인플레이 아웃인지 못 가림), walk, homerun, sac_fly, none(점수판이 그 타석 안에서만 바뀜), ?(결과를 못 봄 — 채점 제외). sure=false는 확실하지 않은 정답."
