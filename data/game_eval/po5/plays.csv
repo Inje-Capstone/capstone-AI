@@ -1,0 +1,41 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+IT2iLKT3a6c,141.9,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
+IT2iLKT3a6c,151.1,out,True,out walk,video_only refined,점수판 아웃+1 득점+0 주자 100→010 | 점수판 아웃+0 득점+0 주자 010→110,맞음,희생번트로 보임 — 1사 2루
+IT2iLKT3a6c,170.9,walk,True,,,,놓침,볼넷 — 1·2루
+IT2iLKT3a6c,180.7,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 110→110,맞음,삼진으로 보임 — 2사
+IT2iLKT3a6c,201.7,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+1 주자 110→110; [관절] 타자가 배트를 휘두름 (204s) | 점수판 아웃+0 득점+0 주자 110→101,맞음,적시타 1-0
+IT2iLKT3a6c,232.7,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 101→000,맞음,3아웃 — 외야 뜬공으로 보임
+IT2iLKT3a6c,270.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,2루타로 보임
+IT2iLKT3a6c,298.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→001,맞음,안타
+IT2iLKT3a6c,319.1,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 001→011 | 점수판 아웃+0 득점+2 주자 011→100,맞음,2타점 적시타 3-0
+IT2iLKT3a6c,355.3,steal,False,steal steal,confirmed video_only,"점수판 아웃+0 득점+0 주자 100→010; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 0.4배 미끄러짐, 357.7~358.2초 (358s) | 점수판 아웃+0 득점+0 주자 100→010; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 0.4배 미끄러짐, 357.7~358.2초 (358s)",맞음,2루 도루로 보임
+IT2iLKT3a6c,370.9,reach,False,out,video_only,점수판 아웃+2 득점+0 주자 100→000,틀림,적시타로 보임 4-0 — 이닝 끝 아웃은 못 봄
+IT2iLKT3a6c,401.6,out_any,False,out,video_only,점수판 아웃+2 득점+0 주자 000→100,맞음,땅볼 아웃으로 보임 — 다음 판독은 2사 1루(하나는 못 봄)
+IT2iLKT3a6c,424.7,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 100→001,맞음,적시 3루타 1-4
+IT2iLKT3a6c,464.4,out,True,out reach,video_only refined,점수판 아웃+1 득점+0 주자 001→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,외야 뜬공 3아웃
+IT2iLKT3a6c,483.7,reach,True,,,,놓침,안타
+IT2iLKT3a6c,496.0,reach,True,reach out,video_only refined,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+1 득점+0 주자 110→110,맞음,안타 — 1·2루
+IT2iLKT3a6c,515.7,out_any,False,,,,놓침,1사 1·2루 — 포스아웃으로 보임
+IT2iLKT3a6c,542.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→011,맞음,희생번트 — 2사 2·3루
+IT2iLKT3a6c,553.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 011→000,맞음,땅볼 3아웃
+IT2iLKT3a6c,583.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
+IT2iLKT3a6c,597.1,out,True,,,,놓침,외야 뜬공 3아웃
+IT2iLKT3a6c,619.4,reach,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,틀림,안타
+IT2iLKT3a6c,628.6,out,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+1 득점+0 주자 100→100,맞음,뜬공
+IT2iLKT3a6c,654.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
+IT2iLKT3a6c,672.7,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 110→110; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (678s),맞음,삼진으로 보임 — 2사
+IT2iLKT3a6c,701.7,strikeout,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 110→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (705s),맞음,삼진으로 보임 — 3아웃
+IT2iLKT3a6c,713.7,none,True,,,,조용함,다시보기
+IT2iLKT3a6c,729.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
+IT2iLKT3a6c,745.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,희생번트 — 1사 2루
+IT2iLKT3a6c,754.7,out,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 000→010 | 점수판 아웃+1 득점+0 주자 010→010,맞음,뜬공 — 2사 2루
+IT2iLKT3a6c,772.0,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→001,맞음,적시 2루타 5-1
+IT2iLKT3a6c,816.8,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 001→100,맞음,적시타 6-1 — 3아웃은 못 봄
+IT2iLKT3a6c,844.3,reach,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,틀림,안타
+IT2iLKT3a6c,857.6,double_play,True,reach double_play,video_only confirmed,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+2 득점+0 주자 100→000; 해설 '-더블 플레이.-확실히 바뀐 야수 쪽으로 타워가 잘 간다 이런 생각을 하고 있는데 사실 더블 플레이가 되리라고는' (870s),맞음,병살
+IT2iLKT3a6c,886.1,out,True,walk,conflict,점수판 아웃+0 득점+0 주자 000→100; 영상은 볼넷 — 해설과 달라 보류,틀림,땅볼 3아웃
+IT2iLKT3a6c,910.1,none,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,헛판정,다시보기
+IT2iLKT3a6c,973.5,walk,False,out,video_only,점수판 아웃+3 득점+0 주자 000→100,틀림,3-2 볼넷으로 보임
+IT2iLKT3a6c,994.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,진루타 땅볼 — 1사 2루
+IT2iLKT3a6c,1005.2,strikeout,False,out,video_only,점수판 아웃+1 득점+0 주자 010→010,틀림,삼진으로 보임
+IT2iLKT3a6c,1020.3,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 010→000; [관절] 타자가 공을 그냥 보냄 (1023s),맞음,경기 끝 — 마지막 아웃
