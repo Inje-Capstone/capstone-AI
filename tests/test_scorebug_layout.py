@@ -260,3 +260,16 @@ def test_white_out_dots_mean_the_strikeout_mark_covers_them():
     assert decode_mark(layout, gray, RGB_W, RGB_H) is None
     plain = Layout("t", {}, outs, mark=box)  # 옵션이 없으면 아웃 점은 안 본다
     assert decode_mark(plain, white, RGB_W, RGB_H) is None
+
+
+def test_dark_lit_arrow_and_new_layouts_load():
+    """SPOTV2는 켜진 화살표를 검게 칠한다(half_fill dark). 새 위치 파일 넷은 모두 읽힌다."""
+    from app.adapters.video.scorebug_layout import decode_half
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    box = (590 / RGB_W, 290 / RGB_H, 612 / RGB_W, 340 / RGB_H)
+    dark = Layout("t", {}, (), half=box, half_fill="dark", half_by="position")
+    assert decode_half(dark, _triangle(up=True, color=(15, 15, 15)), RGB_W, RGB_H) == "top"
+    for name in ("spotv2_box", "kbo_caster_box_up", "kbo_box_bottomright", "bar_two_line"):
+        layout = Layout.load(ROOT / "data" / "scorebug_layouts" / f"{name}.json")
+        assert layout.mark is not None and len(layout.outs) == 2 and len(layout.bases) == 3
