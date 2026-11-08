@@ -11,6 +11,8 @@
 - 놓침: 판정이 없음
 - 헛판정: 정답이 '변화 없음(none)'인 칸에 낸 판정
 정답 '?'(결과를 못 봄) 칸은 채점하지 않는다. 투수 교체는 채점하지 않는다.
+정답 'same'은 앞 칸과 같은 플레이가 이어진 화면이다(카메라 전환이 잦은 중계에서 투구 화면 찾기가
+한 플레이를 여러 칸으로 쪼갬) — 채점하지 않고 그 시간은 앞 칸이 받는다.
 
 사용(analyze_video.py --no-vlm --scorebug --layout … --asr --audio … --pose 결과가 있어야 한다):
     python scripts/eval_games.py --snapshots ../clips_private/game_eval
@@ -45,7 +47,8 @@ ACCEPT = {
     "sac_fly": {"sac_fly"},
     "double_play": {"double_play"},
 }
-SKIP = {"?"}
+SAME = "same"  # 앞 칸과 같은 플레이가 이어진 화면
+SKIP = {"?", SAME}
 LATE = 8.0  # 앞 칸 판정이 다음 칸으로 늦게 넘어올 수 있는 시간(초)
 NONE = "none"
 
@@ -58,6 +61,14 @@ def windows(plays: list[dict[str, Any]]) -> list[tuple[float, float]]:
         nxt = plays[i + 1] if i + 1 < len(plays) else None
         end = nxt.get("pitch_end", nxt["t"]) if nxt else p["end"] + 15.0
         out.append((start, end))
+    # 'same' 칸의 시간은 앞의 플레이 칸이 받는다 — 점수판은 이어진 화면들이 끝난 뒤에 바뀐다
+    for i in range(len(plays)):
+        if plays[i].get("code") == SAME and i > 0:
+            owner = i - 1
+            while owner > 0 and plays[owner].get("code") == SAME:
+                owner -= 1
+            out[owner] = (out[owner][0], out[i][1])
+            out[i] = (out[i][1], out[i][1])
     return out
 
 
