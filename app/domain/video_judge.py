@@ -188,6 +188,27 @@ def _confidence(base: float, supports: Sequence[Optional[Cue]]) -> tuple[float, 
     return min(1.0, base + 0.25 * len(found)), [_ev(c) for c in found]
 
 
+def _late_board_slide(tr: Transition, cues: Sequence[Cue]) -> Optional[Cue]:
+    """점수판이 늦게 고쳐진 진루(비디오 판독) — 앞 판독 직후의 슬라이딩.
+
+    처음 본 시험 경기(문동주, 2026-11-08): 3루 도루를 처음엔 '아웃'으로 띄웠다가 비디오 판독 뒤
+    2분이 지나서야 '1사 3루'로 고쳤다. 안정화가 판독 전 '아웃' 장면을 버려 전이가 915→1035초가
+    됐고, 915초 슬라이딩이 판정 범위(전이 앞 20초) 밖으로 밀려 보크 모양이 됐다. 전이가 길고 그
+    사이에 투구 화면이 없으면 진루는 앞 판독 무렵에 일어났다 — 그때의 슬라이딩을 본다.
+    """
+    if tr.t - tr.before.t <= CUE_BEFORE:
+        return None
+    views = [c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)]
+    # 투구 화면 단서가 아예 없으면 '사이에 투구가 없었다'를 알 수 없다(독립 리뷰)
+    if not views or any(tr.before.t < c.t <= tr.t for c in views):
+        return None
+    late = [c for c in cues if tr.before.t < c.t <= tr.before.t + CUE_BEFORE]
+    # 앞 판독 전의 슬라이딩은 앞 판독이 이미 담은 플레이다. 그 무렵 '폭투·포일'이면 도루가 아니다
+    if _speech(late, "폭투", "포일"):
+        return None
+    return next((c for c in late if c.kind == "slide"), None)
+
+
 def judge_transition(
     tr: Transition, cues: Sequence[Cue], window: tuple[float, float] = (CUE_BEFORE, CUE_AFTER)
 ) -> Optional[Judgment]:
@@ -247,7 +268,7 @@ def judge_transition(
         balk_cue = _speech(near, "보크") or _has(near, "pitcher_stops")
         if advanced_all_one_base(b, a) and balk_cue and (same_count or _speech(near, "보크")):
             return make("call", "balk", 0.5, [balk_cue, _speech(near, "보크")])
-        steal_cue = _has(near, "slide") or _speech(near, "도루")
+        steal_cue = _has(near, "slide") or _speech(near, "도루") or _late_board_slide(tr, cues)
         if single_runner_advance(b, a) and steal_cue and not _speech(near, "폭투", "포일"):
             # 세이프인데 태그가 닿아 보였다 — 베이스가 먼저였을 수도 있다. 관측만 남긴다
             seen = {"observed": OBSERVED_TAG_ON_SAFE} if _has(near, "slide_tag") else {}
@@ -563,9 +584,11 @@ K_MARK = "k_mark"  # 점수판이 주자·아웃 칸을 'nK'로 덮은 판독(sc
 K_MARK_TEXT = "[점수판] 삼진 표시(K)"
 K_MARK_SEC = 8.0  # 표시가 뜬 뒤 아웃이 올라간 판독까지(처음 본 시험 경기 실측 2~5초)
 K_MARK_JUMP_SEC = 30.0  # 사이에 투구 화면이 없으면(하이라이트가 다음 장면으로 건너뜀) 여기까지
+K_MARK_OWN_VIEW = 2.0  # 표시 뒤 이 안에 끝난 투구 화면은 그 삼진 투구 자신(표시가 0.5초 먼저 뜸)
 
 
-def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence[Reading]) -> None:
+def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence[Reading],
+                   finished: bool = False) -> None:
     """삼진 표시 뒤 첫 아웃 판정을 삼진으로. 표시 하나는 판정 하나에만 쓴다.
 
     표시는 2~3초 떠 있어 연달아 두 번 읽히기도 한다 — 표시 뒤 첫 아웃 판정이 이미 쓰였으면
@@ -575,8 +598,13 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
     처음 본 시험 경기 3칸. merged 표시는 남겨 상태(아웃 둘)와 카드가 어긋나지 않게 한다.
     건너뛴 뒤의 판독은 표시보다 10~25초 늦다 — 그 사이에 투구 화면이 없을 때만 30초까지 본다
     (다른 타자의 아웃이면 투구가 있었어야 한다).
+
+    다 본 녹화본(`finished`)에서 표시 뒤 30초 안에 아웃 판정이 아예 없으면(영상 끝·점수판이 사라짐)
+    표시만으로 삼진을 낸다 — 점수판 상태는 바꾸지 않는 선언(call)이다. 처음 본 시험 경기 놓침 3칸이
+    모두 이 경우였다. 실시간은 아웃 판독이 뒤에 오면 카드가 둘이 되어 쓰지 않는다.
     """
     used: set[int] = set()
+    alone: list[Judgment] = []
     # 투구 화면 단서(관절)가 아예 없으면 '사이에 투구가 없었다'를 알 수 없다 — 연장하지 않는다
     viewed = any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) for c in cues)
     for m in sorted((c for c in cues if c.kind == K_MARK), key=lambda c: c.t):
@@ -586,9 +614,19 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
         after = [i for i, j in enumerate(judged) if j.transition is not None
                  and j.transition.outs_made >= 1 and m.t <= j.t <= m.t + K_MARK_JUMP_SEC
                  and (j.t <= m.t + K_MARK_SEC or viewed and not any(
-                     c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) and m.t < c.t <= j.t
-                     for c in cues))]
+                     c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                     and m.t + K_MARK_OWN_VIEW < c.t <= j.t for c in cues))]
         if not after:
+            outs_near = any(j.transition is not None and j.transition.outs_made >= 1
+                            and m.t - 3.0 <= j.t <= m.t + K_MARK_JUMP_SEC for j in judged)
+            if finished and not outs_near and all(abs(a.t - m.t) > K_MARK_JUMP_SEC for a in alone):
+                where = prev[-1]
+                # 표시가 그 삼진 투구 화면보다 먼저 떴으면 판정을 그 투구(화면 끝)에 붙인다
+                own = [c.t for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                       and m.t <= c.t <= m.t + K_MARK_OWN_VIEW]
+                info = {"inning": where.inning, "half": where.half, "mark_only": True}
+                alone.append(Judgment(max(own, default=m.t), "call", "strikeout", 0.5,
+                                      [_ev(m)], None, info))
             continue
         i = min(after, key=lambda i: judged[i].t)
         if i in used:
@@ -605,6 +643,7 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
                                  j.evidence + [_ev(m)], j.transition, dict(j.detail))
         elif j.code == "strikeout":
             j.evidence.append(_ev(m))
+    judged.extend(alone)
 
 
 def judge(
@@ -632,7 +671,7 @@ def judge(
         j = _judge_spending_words(tr, cues, window, spent)
         if j is not None:
             out.append(j)
-    _apply_k_marks(out, cues, stable)
+    _apply_k_marks(out, cues, stable, finished)
     seen_change: list[float] = []
     for c in sorted(cues, key=lambda c: c.t):
         is_change = c.kind == "pitching_change" or (

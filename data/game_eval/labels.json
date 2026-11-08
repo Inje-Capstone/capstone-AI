@@ -2073,6 +2073,678 @@
      "note": "영상 끝 — 결과 모름"
     }
    ]
+  },
+  "xtXEisvgTR0": {
+   "title": "시험용 · KBO 롯데-LG(잠실) 롯데 투수 삼진 모음 · 캐스터 띠 상자 점수판 (소리 없음)",
+   "layout": "kbo_caster_box_up",
+   "plays": [
+    {
+     "t": 0.2,
+     "pitch_end": 11.5,
+     "end": 12.0,
+     "code": "none",
+     "sure": false,
+     "note": "투수 소개 화면"
+    },
+    {
+     "t": 12.0,
+     "pitch_end": 25.5,
+     "end": 27.0,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음 — 높은 타구(조명탑)"
+    },
+    {
+     "t": 27.0,
+     "pitch_end": 34.0,
+     "end": 45.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(1K)"
+    },
+    {
+     "t": 45.2,
+     "pitch_end": 46.7,
+     "end": 58.2,
+     "code": "none",
+     "sure": false,
+     "note": "다시보기"
+    },
+    {
+     "t": 58.2,
+     "pitch_end": 64.2,
+     "end": 73.0,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(2K) — 3아웃"
+    },
+    {
+     "t": 73.0,
+     "pitch_end": 79.0,
+     "end": 99.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(3K)"
+    },
+    {
+     "t": 99.7,
+     "pitch_end": 106.2,
+     "end": 117.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(4K) — 3아웃"
+    },
+    {
+     "t": 117.7,
+     "pitch_end": 123.5,
+     "end": 150.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(5K) — 3아웃"
+    },
+    {
+     "t": 150.2,
+     "pitch_end": 151.7,
+     "end": 152.0,
+     "code": "none",
+     "sure": true,
+     "note": "넓은 화면 — 카운트 그대로"
+    },
+    {
+     "t": 152.0,
+     "pitch_end": 157.0,
+     "end": 165.5,
+     "code": "?",
+     "sure": false,
+     "note": "1사 2루 1-2에서 2사 주자 없음 — 플레이를 못 봄"
+    },
+    {
+     "t": 165.5,
+     "pitch_end": 167.0,
+     "end": 193.5,
+     "code": "none",
+     "sure": false,
+     "note": "투수 교체 장면"
+    },
+    {
+     "t": 193.5,
+     "pitch_end": 194.7,
+     "end": 209.0,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음"
+    },
+    {
+     "t": 209.0,
+     "pitch_end": 217.2,
+     "end": 217.5,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음"
+    },
+    {
+     "t": 217.5,
+     "pitch_end": 225.7,
+     "end": 237.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "교체 투수 삼진(1K) — 3아웃"
+    },
+    {
+     "t": 237.5,
+     "pitch_end": 241.7,
+     "end": 256.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(2K)"
+    },
+    {
+     "t": 256.7,
+     "pitch_end": 272.7,
+     "end": 276.5,
+     "code": "none",
+     "sure": false,
+     "note": "투수 교체 뒤 첫 장면"
+    },
+    {
+     "t": 276.5,
+     "pitch_end": 281.7,
+     "end": 300.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "마무리 삼진(1K) — 다음 아웃은 장면 없이"
+    },
+    {
+     "t": 300.7,
+     "pitch_end": 305.0,
+     "end": 320.0,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(2K) — 경기 끝"
+    }
+   ]
+  },
+  "89gNJQjBRrQ": {
+   "title": "시험용 · KBO LG-키움(고척) 임찬규 투구 · SPOTV2 점수판 (소리 없음)",
+   "layout": "spotv2_box",
+   "plays": [
+    {
+     "t": 6.0,
+     "pitch_end": 11.7,
+     "end": 20.2,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 20.2,
+     "pitch_end": 25.2,
+     "end": 33.0,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 33.0,
+     "pitch_end": 39.0,
+     "end": 49.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(1K)"
+    },
+    {
+     "t": 49.7,
+     "pitch_end": 51.5,
+     "end": 63.0,
+     "code": "none",
+     "sure": false,
+     "note": "다시보기"
+    },
+    {
+     "t": 63.0,
+     "pitch_end": 70.0,
+     "end": 83.2,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 83.2,
+     "pitch_end": 89.5,
+     "end": 89.7,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 89.7,
+     "pitch_end": 99.5,
+     "end": 99.7,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 99.7,
+     "pitch_end": 104.2,
+     "end": 113.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(2K) — 공이 빠져 1루로 뛰었으나 아웃으로 보임"
+    },
+    {
+     "t": 113.7,
+     "pitch_end": 120.5,
+     "end": 131.0,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 131.0,
+     "pitch_end": 134.5,
+     "end": 151.7,
+     "code": "?",
+     "sure": false,
+     "note": "0-2 2사 뒤 점수판 없음"
+    },
+    {
+     "t": 151.7,
+     "pitch_end": 156.7,
+     "end": 173.0,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음"
+    },
+    {
+     "t": 173.0,
+     "pitch_end": 179.7,
+     "end": 196.5,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음"
+    },
+    {
+     "t": 196.5,
+     "pitch_end": 202.7,
+     "end": 217.7,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음"
+    }
+   ]
+  },
+  "NVOfYTDrqlU": {
+   "title": "시험용 · KBO 한화-키움(고척) 정우주 투구 · 오른쪽 아래 상자형 점수판 (소리 없음)",
+   "layout": "kbo_box_bottomright",
+   "plays": [
+    {
+     "t": 30.5,
+     "pitch_end": 36.0,
+     "end": 47.2,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 47.2,
+     "pitch_end": 56.0,
+     "end": 70.7,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 70.7,
+     "pitch_end": 76.0,
+     "end": 101.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(1K)"
+    },
+    {
+     "t": 101.2,
+     "pitch_end": 109.5,
+     "end": 119.0,
+     "code": "none",
+     "sure": false,
+     "note": "다음 타자 첫 공으로 보임"
+    },
+    {
+     "t": 119.0,
+     "pitch_end": 125.2,
+     "end": 139.5,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 139.5,
+     "pitch_end": 146.7,
+     "end": 158.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(2K)"
+    },
+    {
+     "t": 158.5,
+     "pitch_end": 166.7,
+     "end": 182.5,
+     "code": "none",
+     "sure": false,
+     "note": "카운트 그대로"
+    },
+    {
+     "t": 182.5,
+     "pitch_end": 192.7,
+     "end": 204.5,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 204.5,
+     "pitch_end": 210.2,
+     "end": 223.5,
+     "code": "none",
+     "sure": false,
+     "note": "뒤 점수판 없음 — 스트라이크로 보임"
+    },
+    {
+     "t": 223.5,
+     "pitch_end": 227.2,
+     "end": 230.7,
+     "code": "none",
+     "sure": false,
+     "note": "중계 화면 전환"
+    },
+    {
+     "t": 230.7,
+     "pitch_end": 237.2,
+     "end": 245.7,
+     "code": "none",
+     "sure": false,
+     "note": "투수 클로즈업 — 카운트 그대로"
+    },
+    {
+     "t": 245.7,
+     "pitch_end": 248.7,
+     "end": 253.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(3K) — 3아웃"
+    },
+    {
+     "t": 253.5,
+     "pitch_end": 255.0,
+     "end": 260.5,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음 — 결과 모름"
+    },
+    {
+     "t": 260.5,
+     "pitch_end": 264.7,
+     "end": 278.0,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음 — 결과 모름"
+    },
+    {
+     "t": 278.0,
+     "pitch_end": 282.5,
+     "end": 290.0,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음 — 결과 모름"
+    },
+    {
+     "t": 290.0,
+     "pitch_end": 297.2,
+     "end": 297.5,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음 — 결과 모름"
+    },
+    {
+     "t": 297.5,
+     "pitch_end": 303.5,
+     "end": 307.7,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음 — 결과 모름"
+    },
+    {
+     "t": 307.7,
+     "pitch_end": 310.5,
+     "end": 316.0,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음 — 결과 모름"
+    },
+    {
+     "t": 316.0,
+     "pitch_end": 318.7,
+     "end": 323.7,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음 — 결과 모름"
+    },
+    {
+     "t": 323.7,
+     "pitch_end": 326.7,
+     "end": 330.0,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음 — 결과 모름"
+    },
+    {
+     "t": 330.0,
+     "pitch_end": 332.2,
+     "end": 367.2,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음 — 결과 모름"
+    },
+    {
+     "t": 367.2,
+     "pitch_end": 372.0,
+     "end": 387.0,
+     "code": "?",
+     "sure": false,
+     "note": "점수판 없음 — 결과 모름"
+    }
+   ]
+  },
+  "p55O9v1xKRI": {
+   "title": "시험용 · KBO 한화-두산(잠실) 곽빈 삼진 모음 · 두 줄 가로 띠 점수판 (소리 없음)",
+   "layout": "bar_two_line",
+   "plays": [
+    {
+     "t": 0.2,
+     "pitch_end": 8.0,
+     "end": 9.7,
+     "code": "none",
+     "sure": true,
+     "note": ""
+    },
+    {
+     "t": 9.7,
+     "pitch_end": 14.0,
+     "end": 16.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(1K)"
+    },
+    {
+     "t": 16.2,
+     "pitch_end": 17.5,
+     "end": 27.0,
+     "code": "none",
+     "sure": false,
+     "note": ""
+    },
+    {
+     "t": 27.0,
+     "pitch_end": 28.5,
+     "end": 28.7,
+     "code": "none",
+     "sure": false,
+     "note": "다시보기"
+    },
+    {
+     "t": 28.7,
+     "pitch_end": 30.7,
+     "end": 33.0,
+     "code": "?",
+     "sure": false,
+     "note": "장면 없이 1사 2루 — 2루타로 보임"
+    },
+    {
+     "t": 33.0,
+     "pitch_end": 36.5,
+     "end": 46.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(2K)"
+    },
+    {
+     "t": 46.2,
+     "pitch_end": 50.2,
+     "end": 50.5,
+     "code": "none",
+     "sure": false,
+     "note": "다시보기"
+    },
+    {
+     "t": 50.5,
+     "pitch_end": 53.5,
+     "end": 54.5,
+     "code": "none",
+     "sure": false,
+     "note": "다시보기"
+    },
+    {
+     "t": 54.5,
+     "pitch_end": 56.0,
+     "end": 56.2,
+     "code": "none",
+     "sure": false,
+     "note": ""
+    },
+    {
+     "t": 56.2,
+     "pitch_end": 59.7,
+     "end": 60.0,
+     "code": "none",
+     "sure": true,
+     "note": "파울"
+    },
+    {
+     "t": 60.0,
+     "pitch_end": 61.0,
+     "end": 61.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(3K) — 3아웃"
+    },
+    {
+     "t": 61.2,
+     "pitch_end": 62.2,
+     "end": 68.2,
+     "code": "none",
+     "sure": false,
+     "note": ""
+    },
+    {
+     "t": 68.2,
+     "pitch_end": 72.0,
+     "end": 92.0,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(4K)"
+    },
+    {
+     "t": 92.0,
+     "pitch_end": 94.5,
+     "end": 95.0,
+     "code": "none",
+     "sure": false,
+     "note": ""
+    },
+    {
+     "t": 95.0,
+     "pitch_end": 98.0,
+     "end": 98.2,
+     "code": "none",
+     "sure": false,
+     "note": ""
+    },
+    {
+     "t": 98.2,
+     "pitch_end": 102.2,
+     "end": 112.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(5K) — 3아웃"
+    },
+    {
+     "t": 112.2,
+     "pitch_end": 116.5,
+     "end": 117.0,
+     "code": "none",
+     "sure": true,
+     "note": "파울"
+    },
+    {
+     "t": 117.0,
+     "pitch_end": 121.0,
+     "end": 123.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(6K)"
+    },
+    {
+     "t": 123.5,
+     "pitch_end": 127.5,
+     "end": 131.2,
+     "code": "none",
+     "sure": false,
+     "note": ""
+    },
+    {
+     "t": 131.2,
+     "pitch_end": 134.0,
+     "end": 137.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(7K)"
+    },
+    {
+     "t": 137.2,
+     "pitch_end": 139.7,
+     "end": 150.2,
+     "code": "none",
+     "sure": false,
+     "note": ""
+    },
+    {
+     "t": 150.2,
+     "pitch_end": 153.0,
+     "end": 158.5,
+     "code": "none",
+     "sure": false,
+     "note": ""
+    },
+    {
+     "t": 158.5,
+     "pitch_end": 162.5,
+     "end": 177.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(8K)"
+    },
+    {
+     "t": 177.5,
+     "pitch_end": 180.2,
+     "end": 196.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(9K)"
+    },
+    {
+     "t": 196.2,
+     "pitch_end": 199.2,
+     "end": 199.5,
+     "code": "none",
+     "sure": false,
+     "note": "다시보기"
+    },
+    {
+     "t": 199.5,
+     "pitch_end": 203.0,
+     "end": 212.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(10K)"
+    },
+    {
+     "t": 212.5,
+     "pitch_end": 213.7,
+     "end": 216.0,
+     "code": "none",
+     "sure": false,
+     "note": ""
+    },
+    {
+     "t": 216.0,
+     "pitch_end": 220.2,
+     "end": 235.2,
+     "code": "none",
+     "sure": false,
+     "note": ""
+    }
+   ]
   }
  },
  "_note": "1080p 경기 하이라이트의 정답 — 사람이 투구 화면마다 점수판(전·후)과 그 사이 장면을 보고 매겼다. t·pitch_end·end = 그 투구 화면 시작·끝·다음 투구 화면 시작(초). code: reach(안타·실책 출루), out(인플레이 아웃), strikeout, out_any(삼진인지 인플레이 아웃인지 못 가림), walk, homerun, sac_fly, none(점수판이 그 타석 안에서만 바뀜), ?(결과를 못 봄 — 채점 제외). sure=false는 확실하지 않은 정답."

@@ -260,3 +260,31 @@ def test_white_out_dots_mean_the_strikeout_mark_covers_them():
     assert decode_mark(layout, gray, RGB_W, RGB_H) is None
     plain = Layout("t", {}, outs, mark=box)  # 옵션이 없으면 아웃 점은 안 본다
     assert decode_mark(plain, white, RGB_W, RGB_H) is None
+
+
+def test_dark_lit_arrow_and_new_layouts_load():
+    """SPOTV2는 켜진 화살표를 검게 칠한다(half_fill dark). 새 위치 파일 넷은 모두 읽힌다."""
+    from app.adapters.video.scorebug_layout import decode_half
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    box = (590 / RGB_W, 290 / RGB_H, 612 / RGB_W, 340 / RGB_H)
+    dark = Layout("t", {}, (), half=box, half_fill="dark", half_by="position")
+    assert decode_half(dark, _triangle(up=True, color=(15, 15, 15)), RGB_W, RGB_H) == "top"
+    for name in ("spotv2_box", "kbo_caster_box_up", "kbo_box_bottomright", "bar_two_line"):
+        layout = Layout.load(ROOT / "data" / "scorebug_layouts" / f"{name}.json")
+        assert layout.mark is not None and len(layout.outs) == 2 and len(layout.bases) == 3
+
+
+def test_dot_count_is_read_from_pixels_only_when_the_layout_has_dots():
+    """B●●● S●● 점수판 — 켜진 점 수가 볼·스트라이크. 점 위치가 없으면 None(VLM 숫자를 쓴다)."""
+    from app.adapters.video.scorebug_layout import decode_count
+
+    lit, off = (0.95, 0.45, 0.1), (0.75, 0.75, 0.75)
+    balls = ((0.1, 0.5), (0.2, 0.5), (0.3, 0.5))
+    strikes = ((0.5, 0.5), (0.6, 0.5))
+    colors = {balls[0]: lit, balls[1]: off, balls[2]: off, strikes[0]: lit, strikes[1]: lit}
+    layout = Layout("t", {}, (), balls=balls, strikes=strikes)
+    assert decode_count(layout, lambda p: colors[p]) == (1, 2)
+    assert decode_count(Layout("t", {}, ()), lambda p: colors[p]) is None
+    spotv2 = Layout.load(ROOT / "data" / "scorebug_layouts" / "spotv2_box.json")
+    assert len(spotv2.balls) == 3 and len(spotv2.strikes) == 2

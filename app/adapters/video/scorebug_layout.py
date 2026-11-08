@@ -29,6 +29,10 @@ MBC는 주자 칸을 흰색으로 채운다 — `base_fill: "bright"`면 밝고 
 아웃 점 자리를 흰 바탕으로 덮었다(채도 0.02 이하, 밝기 0.9 이상;
 평소 꺼진 점은 회색 밝기 0.68~0.74).
 `cover_val`이 있으면 아웃 점이 모두 그보다 밝고 색이 없을 때도 덮인 것(삼진 표시)으로 본다.
+
+볼·스트라이크를 숫자 대신 점으로 그리는 점수판(SPOTV2 'B●●● S●● O●●')은 VLM이 점을 못 세
+카운트를 거의 늘 0-0으로 읽었다(처음 본 시험 경기 판독 38장 중 2스트라이크 0장) — `balls`·
+`strikes` 점 위치가 있으면 아웃처럼 켜진 점 수를 센다.
 """
 
 import colorsys
@@ -42,6 +46,7 @@ FILLED_SAT = 0.5  # 이보다 채도가 높으면 채워진 칸(빨강·파랑 �
 FILLED_VAL = 0.3  # 너무 어두우면(검은 화면) 채워진 것으로 보지 않는다
 BRIGHT_VAL = 0.7  # base_fill "bright": 흰 칸은 밝기 0.92~1.00, 빈 칸 0.11~0.14 (MBC 실측)
 BRIGHT_SAT = 0.3
+DARK_VAL = 0.3  # mark_fill·half_fill "dark": 이보다 어두우면 검은 글자·화살표
 
 Point = tuple[float, float]
 Rgb = tuple[float, float, float]
@@ -56,13 +61,15 @@ class Layout:
     scale: float = 3.0  # VLM에 보낼 때 crop을 키우는 배율 — 넓은 띠는 1.5면 된다
     base_fill: str = "color"  # 주자 칸을 채우는 방식: color(색) | bright(흰색)
     half: Optional[tuple[float, float, float, float]] = None  # ▲/▼ 칸(x0, y0, x1, y1 비율)
-    half_fill: str = "color"  # 화살표 색: color | bright
+    half_fill: str = "color"  # 화살표 색: color | bright | dark
     half_by: str = "shape"  # shape(화살표 하나의 모양) | position(▲·▼ 중 켜진 쪽 위치)
     base_hue: Optional[tuple[float, float]] = None  # 주자 칸 색상 범위(도, lo>hi면 0도를 넘는다)
     mark: Optional[tuple[float, float, float, float]] = None  # 삼진 표시가 덮는 칸(비율)
     mark_hue: tuple[float, float] = (340.0, 20.0)  # 삼진 표시 글자 색상 범위(도) — 기본 빨강
     mark_fill: str = "color"  # 삼진 표시 글자: color(mark_hue 색) | dark(검은 글자)
     cover_val: Optional[float] = None  # 아웃 점이 모두 이보다 밝은 무채색이면 표시가 덮은 것
+    balls: tuple[Point, ...] = ()  # 볼 점 중심들(점으로 그리는 점수판만)
+    strikes: tuple[Point, ...] = ()  # 스트라이크 점 중심들
 
     @classmethod
     def load(cls, path: Path) -> "Layout":
@@ -74,6 +81,8 @@ class Layout:
             raise ValueError(f"{path}: half_by는 shape 또는 position이다")
         if raw.get("mark_fill", "color") not in ("color", "dark"):
             raise ValueError(f"{path}: mark_fill은 color 또는 dark다")
+        if bool(raw.get("balls")) != bool(raw.get("strikes")):
+            raise ValueError(f"{path}: balls·strikes 점 위치는 둘 다 적는다")
         cover = raw.get("cover_val")
         if cover is not None and (not raw.get("mark") or not 0 < float(cover) <= 1):
             raise ValueError(f"{path}: cover_val은 mark와 함께, 0~1 사이 밝기다")
@@ -94,6 +103,8 @@ class Layout:
             mark_hue=_pair(raw.get("mark_hue")) or (340.0, 20.0),
             mark_fill=str(raw.get("mark_fill", "color")),
             cover_val=float(raw["cover_val"]) if raw.get("cover_val") is not None else None,
+            balls=tuple((float(x), float(y)) for x, y in raw.get("balls") or []),
+            strikes=tuple((float(x), float(y)) for x, y in raw.get("strikes") or []),
         )
 
 
@@ -112,6 +123,8 @@ def hue_in(rgb: Rgb, hues: Optional[tuple[float, float]]) -> bool:
 
 def is_filled(rgb: Rgb, mode: str = "color") -> bool:
     _, s, v = colorsys.rgb_to_hsv(*rgb)
+    if mode == "dark":  # 흰 바탕에 켜진 쪽만 검게 칠하는 화살표(SPOTV2)
+        return v < DARK_VAL
     if mode == "bright":
         return v > BRIGHT_VAL and s < BRIGHT_SAT
     return s > FILLED_SAT and v > FILLED_VAL
@@ -124,6 +137,14 @@ def decode(layout: Layout, sample: Callable[[Point], Rgb]) -> tuple[list[int], i
                    and (layout.base_fill == "bright" or hue_in(sample(p), layout.base_hue)))
     outs = sum(1 for p in layout.outs if is_filled(sample(p)))
     return bases, outs
+
+
+def decode_count(layout: Layout, sample: Callable[[Point], Rgb]) -> Optional[tuple[int, int]]:
+    """(볼, 스트라이크) — 위치 파일에 점 위치가 있을 때만. 없으면 None(VLM 답을 쓴다)."""
+    if not layout.balls or not layout.strikes:
+        return None
+    lit = [sum(1 for p in pts if is_filled(sample(p))) for pts in (layout.balls, layout.strikes)]
+    return lit[0], lit[1]
 
 
 HALF_MIN_PIXELS = 8  # 화살표로 볼 최소 화소 수(1280×720 프레임)
@@ -160,7 +181,6 @@ def decode_half(layout: Layout, pixels: bytes, width: int, height: int) -> Optio
 
 
 MARK_MIN_PIXELS = 40  # 삼진 표시로 볼 최소 화소 수(1280×720) — 'nK' 글자는 수백 화소
-DARK_VAL = 0.3  # mark_fill "dark": 이보다 어두우면 검은 글자
 COVER_SAT = 0.1  # cover_val: 아웃 점 자리가 이보다 색이 없어야 흰 바탕
 
 

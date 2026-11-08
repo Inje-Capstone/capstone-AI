@@ -1305,3 +1305,41 @@ def test_strikeout_mark_does_not_name_an_out_that_scored_or_a_jump_without_views
     readings, cues, _ = observe({"scorebug": {"scoreboard": jump}})
     no_views = [c for c in cues if not c.text.startswith("[관절]")]
     assert [j.code for j in judge(readings, no_views, min_repeat=1)] == ["out"]
+
+
+def test_late_board_after_review_still_finds_the_steal_slide():
+    """비디오 판독 뒤 2분 늦게 고친 점수판(2루→3루, 카운트 그대로) — 투구가 없었으면 앞 판독 무렵의
+    슬라이딩이 도루 단서다. 사이에 투구가 있었으면 다른 플레이일 수 있어 쓰지 않는다."""
+    reads = twice(R(0, outs=1, balls=1, strikes=1, bases=(False, True, False)),
+                  R(120, outs=1, balls=1, strikes=1, bases=(False, False, True)))
+    slide = Cue(1.0, "slide", "[관절] 슬라이딩·다이빙 1.0~1.5초")
+    earlier = _view(-3, "in_play")  # 앞 투구 화면(관절 화면 단서가 있는 영상)
+    assert [j.code for j in judge(reads, [earlier, slide])] == ["steal"]
+    pitched = [earlier, slide, _view(60, "no_play")]
+    assert [j.code for j in judge(reads, pitched)] != ["steal"]
+    # 앞 판독 전의 슬라이딩(앞 플레이 몫), 관절 화면 단서가 없는 영상, '폭투' 해설은 도루가 아니다
+    before = Cue(-1.0, "slide", "[관절] 슬라이딩·다이빙 -1.0~-0.5초")
+    assert [j.code for j in judge(reads, [earlier, before])] != ["steal"]
+    assert [j.code for j in judge(reads, [slide])] != ["steal"]
+    wp = Cue(2.0, "speech", "아 폭투가 나오면서")
+    assert [j.code for j in judge(reads, [earlier, slide, wp])] != ["steal"]
+
+
+def test_strikeout_pitch_view_ending_just_after_the_mark_does_not_block_the_jump():
+    """표시가 그 삼진 투구 화면보다 0.5초 먼저 떴다 — 그 화면은 '사이의 투구'가 아니다."""
+    board = [_board(0, 0, 2, 2), _board(3, 0, 0, 0, mark="strikeout"),
+             _board(15, 2, 2, 1, [1], inning=2, half="top")]
+    readings, cues, _ = observe({"scorebug": {"scoreboard": board}})
+    cues = sorted(cues + [_view(3.5, "no_play")], key=lambda c: c.t)
+    assert "strikeout" in [j.code for j in judge(readings, cues, min_repeat=1)]
+
+
+def test_strikeout_mark_alone_at_the_end_of_a_finished_video():
+    """다 본 영상 끝 2초 전 삼진 — 뒤에 아웃 판독이 없다. 표시만으로 삼진(선언),
+    그 투구 화면 끝 시각. 실시간(finished=False)은 아웃 판독이 뒤에 올 수 있어 내지 않는다."""
+    board = [_board(0, 1, 2, 2), _board(3, 0, 0, 0, mark="strikeout")]
+    readings, cues, _ = observe({"scorebug": {"scoreboard": board}})
+    cues = sorted(cues + [_view(-20, "in_play"), _view(3.5, "no_play")], key=lambda c: c.t)
+    [j] = judge(readings, cues, min_repeat=1, finished=True)
+    assert (j.code, j.kind, j.t, j.transition) == ("strikeout", "call", 3.5, None)
+    assert judge(readings, cues, min_repeat=1) == []
