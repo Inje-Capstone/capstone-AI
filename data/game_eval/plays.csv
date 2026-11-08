@@ -32,8 +32,8 @@
 3QYUP4AgNpI,576.3,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,강백호 3아웃
 3QYUP4AgNpI,595.3,?,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→001,제외,"노시환 — 외야 타구, 결과 모름"
 3QYUP4AgNpI,619.1,?,False,out walk,video_only refined,점수판 아웃+1 득점+0 주자 001→001 | 점수판 아웃+0 득점+1 주자 001→100; 해설 '김태현은 볼넷을 얻어냈습니다. 지휘중 36경기에서 4승 5패 2홀드를 기록했던 한화의 7회추 공격이 계속됩니다. 타석에 정은원.' (650s),제외,내야수 다이빙 — 결과 모름
-3QYUP4AgNpI,658.9,homerun,True,out,video_only,점수판 아웃+2 득점+2 주자 100→000,틀림,정은원 홈런
-3QYUP4AgNpI,692.9,none,False,,,,조용함,
+3QYUP4AgNpI,658.9,homerun,True,homerun,video_only,점수판 아웃+1 득점+2 주자 100→000; [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (695s),맞음,정은원 홈런
+3QYUP4AgNpI,692.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,1루 땅볼 3아웃(다시 보고 고침 — 696·700초 점수판은 3아웃 반영 전 2사)
 3QYUP4AgNpI,714.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,김성윤 안타
 3QYUP4AgNpI,724.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,구자욱 안타
 3QYUP4AgNpI,733.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 110→111,맞음,디아즈 안타(전광판 HIT) — 다시 보고 고침
@@ -125,14 +125,14 @@ wyC8BnovUUA,514.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000
 wyC8BnovUUA,539.0,none,True,,,,조용함,
 wyC8BnovUUA,554.0,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,
 wyC8BnovUUA,587.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
-wyC8BnovUUA,598.6,out,True,strikeout,conflict,점수판 아웃+1 득점+0 주자 100→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (632s); 영상은 삼진 — 해설과 달라 보류,틀림,3아웃
-wyC8BnovUUA,624.4,?,False,,,,제외,결과 모름 — 투수 교체
+wyC8BnovUUA,598.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,3아웃
+wyC8BnovUUA,624.4,?,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,제외,결과 모름 — 투수 교체
 wyC8BnovUUA,674.4,steal,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,틀림,2루 도루
 wyC8BnovUUA,692.2,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→100,맞음,적시 2루타 5-1
 wyC8BnovUUA,732.0,none,False,,,,조용함,
-wyC8BnovUUA,765.2,out_any,True,,,,놓침,3아웃
+wyC8BnovUUA,765.2,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 100→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (772s),맞음,3아웃
 wyC8BnovUUA,792.8,out_any,True,,,,놓침,삼진으로 보임
-wyC8BnovUUA,804.8,out_any,False,strikeout,confirmed,점수판 아웃+1 득점+0 주자 100→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (808s),맞음,
+wyC8BnovUUA,804.8,out_any,False,out,video_only,점수판 아웃+2 득점+0 주자 000→000,맞음,
 wyC8BnovUUA,814.5,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '-3진.-1위 선수가 6회 올라와서 3디 2개 포함. 세 타자만으로 이 링을 깔끔하게 틀어막습니다.' (830s),맞음,3아웃
 wyC8BnovUUA,847.3,out,False,out,video_only,점수판 아웃+3 득점+0 주자 000→000,맞음,땅볼 — 이닝이 합쳐짐
 wyC8BnovUUA,870.1,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,

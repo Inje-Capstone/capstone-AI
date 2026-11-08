@@ -149,10 +149,34 @@ def _drop_spikes(runs: list[tuple[Reading, int]]) -> list[tuple[Reading, int]]:
     for i, (r, n) in enumerate(runs):
         if out and i + 1 < len(runs):
             a, c = out[-1][0], runs[i + 1][0]
+            # 두 번 이상 읽혔고 앞뒤 모두 타석 여러 개를 건너뛴 것으로 설명되면 남긴다(하이라이트)
+            if n >= 2 and _skippable(a, r) and _skippable(r, c):
+                out.append((r, n))
+                continue
             if possible_step(a, c) and not (possible_step(a, r) and possible_step(r, c)):
                 continue
         out.append((r, n))
     return out
+
+
+def _skippable(a: Reading, b: Reading) -> bool:
+    """a 뒤에 타석 여러 개를 건너뛰고 b가 보일 수 있나.
+
+    `possible_step`(한 번에 바뀔 수 있나)과 달리 타자가 여럿 지나갈 수 있다 — 하이라이트는
+    다음 장면으로 건너뛴다. 반 이닝이 바뀌면 순서만, 같은 반 이닝이면 점수·아웃이 줄지 않고
+    주자는 아웃·득점 없이 사라지지 않으며, 카운트가 새로 시작했으면 한 명 이상 늘었어야 한다.
+    3아웃 판독은 남기지 않는다 — 다음 반 이닝 전이가 아웃 없는 '출루'가 된다(독립 리뷰).
+    """
+    if b.away < a.away or b.home < a.home or b.outs >= 3:
+        return False
+    if _half_order(a) != _half_order(b):
+        return _half_order(b) > _half_order(a)
+    if b.outs < a.outs:
+        return False
+    after = b.runners() + (b.outs - a.outs) + (b.away - a.away) + (b.home - a.home)
+    if b.balls < a.balls or b.strikes < a.strikes:  # 새 타자 — 타석이 하나 이상 끝났다
+        return after >= a.runners() + 1
+    return after >= a.runners()
 
 
 def _half_order(r: Reading) -> tuple[int, int]:
