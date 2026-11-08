@@ -1026,6 +1026,48 @@ def test_dive_then_the_batter_on_base_is_a_missed_dive():
     assert result.detail["result"] == "reach"
 
 
+def test_a_dive_before_the_previous_board_is_a_replay_of_an_earlier_play():
+    """외야 다이빙 캐치 다시보기(직전 상태 전)가 다음 타석 땅볼을 '몸을 던진 수비'로 만들었다."""
+    j = one(R(20, outs=1, balls=1, strikes=2), R(30, outs=2), [Cue(15, "dive")])
+    assert j.code == "out"
+    later = one(R(20, outs=1, balls=1, strikes=2), R(30, outs=2), [Cue(25, "dive")])
+    assert later.code == "dive_out"
+
+
+def test_half_change_with_the_new_half_under_way_is_two_plays():
+    """'3회말 2사' → '4회초 무사 1루' — 3아웃 땅볼과 4회초 안타가 '아웃' 하나로 합쳐졌다.
+
+    앞 반 이닝이 2사였고 사이에 투구 화면이 둘 이상이면 첫 투구에서 앞 반 이닝이 끝났다고 본다.
+    """
+    seen = twice(R(0, outs=2, half="bot", away=0, home=4), R(20, inning=4, bases=FIRST, home=4))
+    views = [_view(4, "in_play"), _view(16, "in_play")]
+    js = judge(seen, views)
+    assert [(j.code, j.t) for j in js] == [("out", 4.0), ("reach", 20.0)]
+    (tr,) = [j.transition for j in js if j.code == "out"]
+    assert tr.half_change and tr.after.half == "top" and not any(tr.after.bases)
+    # 투구 화면이 하나뿐이거나, 앞 반 이닝이 2사가 아니면(남은 아웃이 여럿) 가르지 않는다
+    assert len(judge(seen, views[:1])) == 1
+    one_out = twice(R(0, outs=1, half="bot", home=4), R(20, inning=4, bases=FIRST, home=4))
+    assert len(judge(one_out, views)) == 1
+    # 반 이닝을 건너뛰었으면 가르지 않는다
+    skipped = twice(R(0, outs=2, half="bot", home=4), R(20, inning=5, bases=FIRST, home=4))
+    assert len(judge(skipped, views)) == 1
+
+
+def test_split_new_half_does_not_reuse_the_previous_halfs_cues():
+    """독립 리뷰 재현 두 가지 — 앞 반 이닝 3아웃의 다이빙이 새 반 이닝 안타에 붙고, 같은 시각
+    투구 화면 단서 둘이 두 전이를 같은 시각으로 만들어 대조에서 판정이 섞였다."""
+    seen = twice(R(0, outs=2, half="bot", home=4), R(20, inning=4, bases=FIRST, home=4))
+    dived = judge(seen, [_view(4, "in_play"), Cue(8, "dive"), _view(16, "in_play")])
+    assert [j.code for j in dived] == ["dive_out", "reach"]
+    same_time = [_view(20, "no_play"), _view(20, "view_unknown")]
+    checked = judge_checked(seen, same_time)
+    assert len(checked) == 1
+    events = to_relay_events(judge_checked(seen, [_view(4, "in_play"), _view(16, "in_play")]))
+    state = replay(events, "A", "H")
+    assert (state.inning, state.half, state.outs, state.bases) == (4, "top", 0, FIRST)
+
+
 def test_runner_on_first_makes_a_dive_out_ambiguous():
     """1루 주자 포스아웃 + 타자 1루와 타자 아웃 + 주자 그대로는 점수판 모양이 같다."""
     j = one(R(0, bases=FIRST), R(10, outs=1, bases=FIRST), [Cue(5, "dive")])
