@@ -1,6 +1,6 @@
 # 1080p 경기 하이라이트 채점
 
-> `python scripts/eval_games.py --snapshots ../clips_private/game_eval`로 다시 만든다. 정답은 `labels.json`(사람이 투구 화면마다 매김), 칸별 결과는 `plays.csv`.
+> `python scripts/eval_games.py --snapshots ../clips_private/game_eval_final --ablation`로 다시 만든다. 정답은 `labels.json`(사람이 투구 화면마다 매김), 칸별 결과는 `plays.csv`.
 
 | 영상 | 채점 칸 | 맞음 | 틀림 | 놓침 | 헛판정/조용함 |
 |---|---|---|---|---|---|
@@ -74,4 +74,4 @@
 | 점수판+관절+해설 | 98 | 10 | 10 | 3 |
 | 점수판+관절(해설 없이) | 96 | 12 | 10 | 3 |
 | 점수판+해설(관절 없이) | 88 | 17 | 13 | 4 |
-| 점수판만 | 88 | 17 | 13 | 4 |
+| 점수판만 | 89 | 16 | 13 | 4 |
