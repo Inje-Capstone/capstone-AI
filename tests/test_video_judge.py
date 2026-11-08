@@ -1064,6 +1064,14 @@ def test_swing_on_ball_three_means_a_hit_not_a_walk():
     assert one(R(0, balls=3), R(10, bases=FIRST), cues).code == "reach"
 
 
+def test_a_swing_before_the_three_ball_board_belongs_to_the_previous_batter():
+    """3-1이 보인 뒤에 결정구를 던졌다 — 그 전 스윙은 앞 타석(3아웃) 공이다(삼성-LG 11-08)."""
+    j = one(R(20, balls=3, strikes=1), R(23, bases=FIRST), [Cue(11, "swing")])
+    assert j.code == "walk"
+    # 3-1이 보인 뒤의 스윙은 이 타석 공이다
+    assert one(R(20, balls=3, strikes=1), R(30, bases=FIRST), [Cue(25, "swing")]).code == "reach"
+
+
 def test_take_on_ball_three_backs_the_walk():
     j = one(R(0, balls=3), R(10, bases=FIRST), [Cue(5, "no_swing", "[관절] 타자가 공을 그냥 보냄")])
     assert j.code == "walk"

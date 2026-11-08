@@ -46,7 +46,7 @@
 | out | out walk | 1 |
 | out_any | (없음) | 3 |
 | out_any | out | 8 |
-| out_any | out reach | 1 |
+| out_any | out walk | 1 |
 | out_any | strikeout | 8 |
 | out_any | strikeout reach reach | 1 |
 | reach | (없음) | 1 |

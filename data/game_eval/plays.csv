@@ -72,7 +72,7 @@ T93FGIYBM8E,386.1,out,False,out balk,video_only video_only,점수판 아웃+1 �
 T93FGIYBM8E,401.9,reach,True,out,video_only,점수판 아웃+2 득점+2 주자 011→000,틀림,2타점 안타 2-4
 T93FGIYBM8E,429.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
 T93FGIYBM8E,436.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
-T93FGIYBM8E,456.2,out_any,False,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 배트를 휘두름 (459s),맞음,3아웃
+T93FGIYBM8E,456.2,out_any,False,out walk,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,3아웃
 T93FGIYBM8E,468.0,walk,True,,,,놓침,볼넷(배트 놓고 1루로 걸어감 — 다시 보고 확인)
 T93FGIYBM8E,482.0,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 100→001 | 점수판 아웃+0 득점+0 주자 001→011,맞음,2루타 — 주자 3루
 T93FGIYBM8E,513.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 011→011,맞음,
