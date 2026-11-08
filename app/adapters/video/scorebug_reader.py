@@ -403,11 +403,11 @@ class ScorebugReader:
                 half = decode_half(self.layout, px, RGB_W, RGB_H)
                 if half:
                     r["half"] = half
+                if not _board_whole(self.layout, px):  # 전환·사라지는 중 — 표시도 믿지 않는다
+                    return None
                 mark = decode_mark(self.layout, px, RGB_W, RGB_H)
                 if mark:  # 주자·아웃 칸이 덮였다 — 상태 판독에서 빠지고 단서가 된다
                     r["mark"] = mark
-                elif not _board_whole(self.layout, px):
-                    return None
             return r
         except (subprocess.CalledProcessError, OSError) as exc:  # 출력 파일이 안 생김 등
             raise VideoAnalyzerError(f"점수판 판독 실패: {exc}") from exc
@@ -444,7 +444,7 @@ class ScorebugReader:
                 return {"corner": "layout" if fixed else corner, "scoreboard": [],
                         "requests": self.requests}
             ref = min(int(t_ref - start), len(thumbs) - 1)
-            readings, failed = [], 0
+            readings, failed, dropped = [], 0, 0
             if self.every and self.changes:
                 plan = plan_both(thumbs, ref, self.every, self.max_reads)
             elif self.every:
@@ -472,10 +472,10 @@ class ScorebugReader:
                     if half:  # 초·말도 화살표 화소가 VLM보다 믿을 만하다
                         r["half"] = half
                     mark = decode_mark(self.layout, px, RGB_W, RGB_H)
-                    if mark:  # 주자·아웃 칸이 삼진 표시로 덮였다 — 상태 판독에서 빠진다
+                    if not _board_whole(self.layout, px):  # 전환·사라지는 중 — 표시도 버린다
+                        r, dropped = None, dropped + 1
+                    elif mark:  # 주자·아웃 칸이 삼진 표시로 덮였다 — 상태 판독에서 빠진다
                         r["mark"] = mark
-                    elif not _board_whole(self.layout, px):
-                        r = None
                 if r:
                     readings.append(r)
         except (subprocess.CalledProcessError, VideoAnalyzerError) as exc:
@@ -485,6 +485,7 @@ class ScorebugReader:
             "scoreboard": readings,
             "requests": self.requests,
             "failed_reads": failed,
+            "dropped_reads": dropped,  # 바탕 색(panel)이 안 맞아 버린 판독
             "every": self.every,  # 있으면 같은 상태를 여러 번 읽었다 → 안정화 2 (observe)
             "layout": self.layout.name if self.layout else None,
         }
