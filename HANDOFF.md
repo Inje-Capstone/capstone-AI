@@ -78,7 +78,8 @@ L=data/scorebug_layouts/sbs_sports_2026.json   # 중계사별: mbc_sports_plus.j
 - 점수판 판독은 한 번에 하나만 돌린다(동시에 보내면 NVIDIA 분당 한도 429로 절반 넘게 실패). `--read-gap` 기본 1.6초
 - 새 중계사는 `scripts/scorebug_layout.py`로 주자·아웃 위치를 잰다. 아래 띠 점수판은 `crop`, 흰 주자 칸은 `base_fill: bright`, 초·말 화살표 칸은 `half`(위치 파일 3개 참고)
 - 관절은 CPU로 영상 1초당 약 3.5~4초(15분 하이라이트 60~80분)
-- 실시간(VLM 영상 입력 없이): `live_video.py LIVE1 game.mp4 --away KIA --home 삼성 --scorebug-layout <위치 파일> --asr --height 1080 --workers 1` — 5초 조각마다 점수판 한 장. 상태 추적은 되지만 홈런 카드는 받아쓰기 품질에 달려 있다(LOG.md)
+- 실시간(VLM 영상 입력 없이): `live_video.py LIVE1 game.mp4 --away KIA --home 삼성 --scorebug-layout <위치 파일> --asr --height 1080 --workers 1` — 5초 조각마다 점수판 한 장 + 같은 조각을 화소로 훑어 삼진 표시('nK'). 상태 추적은 되지만 홈런 카드는 받아쓰기 품질에 달려 있다(LOG.md)
+- 새 중계사: 점수판 위치 파일 하나를 잰다 — 칸 15가지와 재는 법은 `data/scorebug_layouts/README.md`(9종, 정답 아는 장면으로 2/2~10/10 확인)
 
 **리플레이 (경기 끝난 영상)**
 ```bash
