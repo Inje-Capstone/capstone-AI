@@ -118,6 +118,47 @@ def test_single_read_spike_is_dropped_and_replay_never_overflows_outs():
     replay(events, "A", "H")  # 예전엔 GameStateError
 
 
+def test_skipped_plays_before_a_half_change_are_not_a_spike():
+    """하이라이트가 홈런 뒤 다음 타석으로 건너뛰면 '1사 1루 → 2사 주자 없음·2점'이 한 번에 보인다.
+
+    한 플레이로는 불가능한 모양이라, 다음 판독이 반 이닝이 바뀐 것(늘 '가능')이면 튄 판독으로
+    버려져 홈런 + 아웃 둘이 이닝 끝 전이 하나('아웃')로 합쳐졌다(2026-11-08 한화-삼성 정은원 홈런).
+    두 번 이상 읽혔고 앞뒤 모두 타석 여러 개로 설명되면 남긴다.
+    """
+    on1 = (True, False, False)
+    seen = [R(0, outs=1, bases=on1, balls=1), R(30, outs=2, away=2), R(31, outs=2, away=2),
+            R(40, half="bot", away=2)]
+    assert [r.outs for r in stabilize(seen, min_repeat=1)] == [1, 2, 0]
+    cues = [_view(2, "in_play")]
+    assert [j.code for j in judge(seen, cues, min_repeat=1)][0] == "homerun"
+    # 한 장뿐이면 예전처럼 튄 판독, 아무 일 없이 새 타자(카운트만 0-0)도 튄 판독
+    assert [r.outs for r in stabilize(seen[:2] + seen[3:], min_repeat=1)] == [1, 0]
+    reset = [R(0, bases=on1, balls=3, strikes=1), R(5, bases=on1), R(6, bases=on1),
+             R(40, half="bot")]
+    assert [r.balls for r in stabilize(reset, min_repeat=1)] == [3, 0]
+    # 3아웃 판독은 남기지 않는다 — 다음 반 이닝 전이가 아웃 없는 '출루'가 됐다(독립 리뷰)
+    three = [R(0, outs=1), R(10, outs=3), R(11, outs=3), R(20, half="bot")]
+    assert [j.code for j in judge(three, [], min_repeat=1)] == ["out"]
+
+
+def test_skipped_half_inning_before_a_strikeout_pair_is_not_a_spike():
+    """반 이닝을 통째로 건너뛴 뒤 두 번 읽힌 새 이닝 첫 판독 — 뒤로도 삼진 둘을 건너뛰어도 남긴다.
+
+    PO 1차전(2026-11-08): '5회말 2사 1루 3-2' → '6회말 무사 1-2'(두 장) → '6회말 2사'. 가운데가
+    버려져 5회말 세 번째 아웃(삼진)이 6회말 아웃 둘과 한 전이로 합쳐져 놓쳤다. 점수가 줄면 오독.
+    """
+    on1 = (True, False, False)
+    seen = [R(0, outs=2, bases=on1, balls=3, strikes=2, half="bot"),
+            R(20, inning=4, half="bot", balls=1, strikes=2), R(20.5, inning=4, half="bot", balls=1,
+                                                                 strikes=2),
+            R(40, inning=4, half="bot", outs=2)]
+    assert [(r.inning, r.outs) for r in stabilize(seen, min_repeat=1)] == [(3, 2), (4, 0), (4, 2)]
+    # 점수를 높게 잘못 읽은 두 장(1:2) 뒤 다음 반 이닝이 0:0이면 예전처럼 튄 판독
+    misread = [R(0, half="bot"), R(10, half="bot", away=1, home=2),
+               R(11, half="bot", away=1, home=2), R(20, inning=4)]
+    assert [(r.inning, r.away) for r in stabilize(misread, min_repeat=1)] == [(3, 0), (4, 0)]
+
+
 def test_half_change_counts_remaining_outs_and_top_to_bot_is_forward():
     (tr,) = transitions(stabilize(twice(R(0, outs=1), R(10, half="bot"))))
     assert tr.half_change and tr.outs_made == 2
