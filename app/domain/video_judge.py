@@ -371,7 +371,9 @@ def judge_transition(
         # 2스트라이크에서 공이 안 맞았는데 아웃 — 삼진이다(휘둘렀는지는 모른다)
         if no_play and (tr.count_reset or tr.half_change) and same_bases and not tr.runs:
             return make("result", "strikeout", 0.5, [no_play])
-    dive = _has(near, "dive")
+    # 직전 상태가 보이기 전의 다이빙은 앞 플레이(다시보기)다 — 외야 다이빙 캐치 다시보기가 다음
+    # 타석 땅볼·안타를 '몸을 던진 수비'로 만들었다(삼성-LG, 2026-11-08)
+    dive = _has([c for c in near if c.t > tr.before.t], "dive")
     if dive and not tr.runs and not b[0]:
         # 1루가 비어 있어야 아웃이 타자의 것이다 — 1루 주자가 있으면 '주자 포스아웃 + 타자 1루'와
         # '타자 아웃 + 주자 그대로'가 점수판에서 같은 모양이다
@@ -391,8 +393,39 @@ def judge_transition(
 
 GAME_END_SEC = 120.0  # 마지막 점수판 뒤 이 안의 투구만 마지막 타석으로 본다
 SPLIT_SEC = 25.0  # 점수판이 아웃과 득점을 나눠 반영하는 간격(하이라이트 실측 11·21초)
+NEW_HALF_LEAD = 3.0  # 새 반 이닝 첫 투구의 스윙이 그 투구 화면 단서보다 앞서는 시간(실측 약 1초)
 OUTS_SPLIT_SEC = 8.0  # 병살 아웃을 하나씩 올리는 간격(실측 4초) — 다음 투구까지는 15초 넘게 걸린다
 DP_WORDS = ("병살", "더블플레이", "더블 플레이")
+
+
+def _split_half(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transition]:
+    """반 이닝이 바뀐 전이에 새 반 이닝 플레이까지 들어 있으면 둘로 가른다(하이라이트).
+
+    '3회말 2사' → '4회초 무사 1루'처럼 새 반 이닝이 이미 진행됐으면 3아웃 플레이와 새 반 이닝
+    첫 플레이가 한 전이로 합쳐져 '아웃' 하나가 됐다(삼성-LG 3아웃 땅볼 + 4회초 안타). 앞 반 이닝이
+    2아웃이었고(남은 아웃 하나 = 다음 결정구) 사이에 투구 화면이 둘 이상이면, 첫 투구 화면에서
+    앞 반 이닝이 끝나고 새 반 이닝이 빈 상태로 시작한 것으로 본다. 바로 다음 반 이닝일 때만.
+    """
+    out: list[Transition] = []
+    for tr in trs:
+        a, b = tr.before, tr.after
+        nxt = (a.inning, "bot") if a.half == "top" else (a.inning + 1, "top")
+        new_runs = (b.home - a.home) if b.half == "bot" else (b.away - a.away)
+        progressed = b.outs > 0 or any(b.bases) or new_runs > 0
+        # 같은 시각의 투구 화면 단서(경기장·못 가름)는 공 하나다 — 시각이 같으면 대조가 섞인다
+        views = sorted({c.t for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                        and a.t < c.t <= b.t})
+        if not (tr.half_change and (b.inning, b.half) == nxt and a.outs == 2 and progressed
+                and len(views) >= 2):
+            out.append(tr)
+            continue
+        away, home = (b.away, a.home) if b.half == "bot" else (a.away, b.home)
+        empty = (b.inning, b.half, 0, 0, 0, (False, False, False), away, home)
+        out += transitions([a, Reading(views[0], *empty)])
+        # 새 반 이닝은 둘째 투구 화면 직전에 시작했다 — 그 사이 단서(앞 플레이 다이빙 다시보기 등)는
+        # 새 반 이닝 첫 플레이의 것이 아니다(독립 리뷰). 스윙은 투구 화면 단서보다 1초쯤 앞선다
+        out += transitions([Reading(max(views[0], views[1] - NEW_HALF_LEAD), *empty), b])
+    return out
 
 
 def _merge_split(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transition]:
@@ -684,7 +717,7 @@ def judge(
     stable = stabilize(readings, min_repeat=min_repeat)
     out = []
     spent: Counter = Counter()
-    trs = _merge_split(transitions(stable), cues)
+    trs = _split_half(_merge_split(transitions(stable), cues), cues)
     for tr in trs + (_game_end(stable, cues) if finished else []):
         j = _judge_spending_words(tr, cues, window, spent)
         if j is not None:

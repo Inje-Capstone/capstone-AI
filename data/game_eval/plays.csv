@@ -65,8 +65,8 @@ T93FGIYBM8E,287.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000
 T93FGIYBM8E,304.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,3아웃
 T93FGIYBM8E,315.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
 T93FGIYBM8E,328.1,out,True,dive_out,video_only,"점수판 아웃+1 득점+0 주자 000→000; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 2.0배 미끄러짐, 333.7~337.4초 (334s)",맞음,외야수 다이빙 캐치
-T93FGIYBM8E,351.6,out,True,,,,놓침,땅볼 3아웃
-T93FGIYBM8E,364.1,reach,True,out,video_only,점수판 아웃+1 득점+0 주자 000→100,틀림,안타
+T93FGIYBM8E,351.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼 3아웃
+T93FGIYBM8E,364.1,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
 T93FGIYBM8E,373.9,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타
 T93FGIYBM8E,386.1,out,False,out balk,video_only video_only,점수판 아웃+1 득점+0 주자 110→110 | 점수판 아웃+0 득점+0 주자 110→011,맞음,외야 뜬공 — 주자 2·3루로
 T93FGIYBM8E,401.9,reach,True,out,video_only,점수판 아웃+2 득점+2 주자 011→000,틀림,2타점 안타 2-4
@@ -86,8 +86,8 @@ T93FGIYBM8E,637.4,?,False,walk,video_only,점수판 아웃+0 득점+0 주자 010
 T93FGIYBM8E,656.4,?,False,,,,제외,투수 교체 — 결과 모름
 T93FGIYBM8E,684.7,out,False,out runner,video_only video_only,점수판 아웃+1 득점+0 주자 110→110 | 점수판 아웃+0 득점+0 주자 110→101,맞음,"주자 진루, 타자 아웃"
 T93FGIYBM8E,696.7,none,False,runner,video_only,점수판 아웃+0 득점+0 주자 101→011,헛판정,
-T93FGIYBM8E,708.4,reach,True,,,,놓침,2타점 안타 7-4
-T93FGIYBM8E,728.5,out,True,out,video_only,점수판 아웃+1 득점+2 주자 011→000,맞음,땅볼
+T93FGIYBM8E,708.4,reach,True,out,video_only,점수판 아웃+1 득점+2 주자 011→000,틀림,2타점 안타 7-4
+T93FGIYBM8E,728.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
 T93FGIYBM8E,738.0,out_any,False,strikeout reach reach,video_only video_only video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (743s) | 점수판 아웃+0 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,
 T93FGIYBM8E,751.5,hbp,True,,,,놓침,몸에 맞는 공(타석에서 몸을 숙임 — 다시 보고 고침)
 T93FGIYBM8E,781.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,3아웃
