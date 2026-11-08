@@ -248,7 +248,10 @@ def judge_transition(
     hr_word = (_has(near, "ball_over_fence") or _speech(near, *HR_WORDS)
                or _speech(between, *HR_WORDS))
     batter_home = tr.runs >= 1 and tr.runs == tr.runners_before + 1 and not any(a)
-    if batter_home and (hr_word or (not tr.half_change and in_play)):
+    # 투구 화면 단서(관절)가 아예 없는 실시간 — 아웃 없이 타자까지 홈을 밟은 모양이면 홈런으로 본다
+    blind = not any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) for c in cues)
+    shape_only = blind and not tr.half_change and not tr.outs_made and one_play(tr)
+    if batter_home and (hr_word or (not tr.half_change and in_play) or shape_only):
         # 홈런은 아웃을 만들지 않는다 — 아웃이 섞였으면 다른 플레이가 합쳐진 전이다
         merged = tr.outs_made > 0 or not one_play(tr)
         return make("result", "homerun", 0.5, [hr_word, in_play], merged=merged)

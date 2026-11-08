@@ -1051,7 +1051,8 @@ def test_count_dropping_alone_is_a_misread_not_a_new_batter():
 
 def test_a_compound_word_does_not_count_as_a_second_mention():
     reads = twice(R(0), R(10, away=1), R(20, away=2))
-    heard = [Cue(5, "speech", "홈런스타 이벤트, 홈런!")]
+    # 관절 화면 단서가 있는 분석
+    heard = [Cue(5, "speech", "홈런스타 이벤트, 홈런!"), _view(15, "no_play")]
     assert [j.code for j in judge(reads, heard)] == ["homerun", "reach"]
 
 
@@ -1095,7 +1096,9 @@ def test_ball_in_play_and_everyone_scores_is_a_home_run_without_the_word():
     (tr,) = transitions(stabilize(twice(R(0, balls=1, bases=(True, False, False)),
                                         R(10, away=2))))
     assert judge_transition(tr, [_view(4, "in_play")]).code == "homerun"
-    assert judge_transition(tr, []).code != "homerun"
+    # 화면 단서가 있는데 공이 안 맞았으면(클로즈업) 홈런이 아니다
+    # (단서가 아예 없으면 모양만으로 — 실시간)
+    assert judge_transition(tr, [_view(4, "no_play")]).code != "homerun"
 
 
 def test_the_view_must_belong_to_this_at_bat():
@@ -1362,3 +1365,12 @@ def test_mark_alone_needs_a_recent_reading_and_scanned_marks_need_no_crop_reads(
     assert judge(readings, cues, min_repeat=1, finished=True) == []
     _, cues, _ = observe({"scorebug": {"scoreboard": [], "marks": [5.0]}})
     assert [c.t for c in cues if c.kind == "k_mark"] == [5.0]
+
+
+def test_homerun_from_the_board_shape_alone_when_there_are_no_view_cues():
+    """실시간(관절 없음) — 아웃 없이 주자 1명 + 타자까지 들어와 루가 비었다(2점). 말이 없어도 홈런.
+    관절 화면 단서가 있는 분석에서는 예전처럼 넓은 화면이나 말이 있어야 한다."""
+    reads = twice(R(0, outs=1, balls=1, strikes=1, bases=(True, False, False)),
+                  R(20, outs=1, away=2))
+    assert [j.code for j in judge(reads, [])] == ["homerun"]
+    assert [j.code for j in judge(reads, [_view(5, "no_play")])] != ["homerun"]
