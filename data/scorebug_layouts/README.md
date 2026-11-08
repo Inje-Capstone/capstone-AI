@@ -15,6 +15,7 @@
 | `kbo_caster_box.json` | SPOTV 캐스터 이름 띠가 붙은 상자 | YiiGl9UUV2E | 2/2 |
 | `kbo_caster_box_up.json` | 같은 판, 위 띠가 얇아 30px 위 | xtXEisvgTR0 | 9/9 |
 | `spotv2_box.json` | SPOTV2(B·S·O 점 줄) | 89gNJQjBRrQ | 2/2, 초말 4/4 |
+| `kbs_postseason_box.json` | KBS N 포스트시즌 왼쪽 위 상자(볼·스트라이크·아웃 모두 점, ▲/▼ 하나, 보라 'nK') | p-BBD0DMTYw | 5/5, 초말 5/5, 카운트 5/5, 표시 2/2 |
 | `sbs_sports.json` | SBS 2024(중간발표 시연 클립) | | |
 
 ## 칸

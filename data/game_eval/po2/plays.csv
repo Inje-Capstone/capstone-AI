@@ -1,0 +1,40 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+p-BBD0DMTYw,157.6,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,"3회초 1사 2루로 — 주자 진루, 아웃 종류 모름"
+p-BBD0DMTYw,172.9,none,True,,,,조용함,파울
+p-BBD0DMTYw,201.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 010→101,맞음,안타 — 1·3루
+p-BBD0DMTYw,224.7,sac_fly,True,sac_fly,refined,점수판 아웃+1 득점+1 주자 101→100; 해설 '첫 발 스타트 잘 되면서 노바운드 캐치를 잘 해줬고 이후에 손목까지 상당히 매끄러웠어요. 하지만 하주석 선수가 또 태그업 주사위에' (240s),맞음,희생플라이 1-0
+p-BBD0DMTYw,259.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
+p-BBD0DMTYw,275.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→000,맞음,외야 타구 3아웃
+p-BBD0DMTYw,292.3,walk,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 배트를 휘두름 (296s),틀림,3-2 볼넷으로 보임
+p-BBD0DMTYw,308.3,out_any,False,out,video_only,점수판 아웃+2 득점+0 주자 100→010,맞음,"아웃 하나 — 주자 2루로, 다음 판독은 2사 2루(아웃 하나는 못 봄)"
+p-BBD0DMTYw,327.3,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→010,맞음,적시 2루타 1-1
+p-BBD0DMTYw,369.4,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→100,맞음,적시타 2-1
+p-BBD0DMTYw,434.7,homerun,True,homerun out,confirmed video_only,"점수판 아웃+0 득점+2 주자 100→000; 해설 '2번 타석 상당히 중요한 정말 분위기를 가지고 올 수 있는 홈런을 때려냅니다. 2, 4, 5의 연속 적시타가 나오면서 2, 4, 5의 연속 적시타가 나오면서' (460s); [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (437s) | 점수판 아웃+1 득점+0 주자 000→000",맞음,2점 홈런 4-1
+p-BBD0DMTYw,494.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
+p-BBD0DMTYw,519.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,1루 땅볼 3아웃
+p-BBD0DMTYw,543.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,내야 타구 출루
+p-BBD0DMTYw,571.8,walk,True,hbp,confirmed,점수판 아웃+0 득점+0 주자 100→110; 해설 '- 초구에 맞았습니다. 연속 4사구.' (580s),틀림,볼넷 — 1·2루
+p-BBD0DMTYw,581.3,hbp,True,walk,confirmed,점수판 아웃+0 득점+0 주자 110→111; 해설 '3:1의 볼카운트입니다. 볼넷이에요. 구재혁 선수를 볼넷으로 던져내리고 있습니다.' (570s),틀림,몸에 맞는 공 — 만루
+p-BBD0DMTYw,603.6,none,True,walk,confirmed,점수판 아웃+0 득점+1 주자 111→111; 해설 '- 투아웃 마일로. 그리고 스트레이트 풀카운트. 볼넷입니다.' (620s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (611s),헛판정,볼
+p-BBD0DMTYw,624.4,walk,True,,,,놓침,밀어내기 볼넷 5-1
+p-BBD0DMTYw,648.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→000,맞음,3루 땅볼 3아웃
+p-BBD0DMTYw,669.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,외야 뜬공 3아웃
+p-BBD0DMTYw,713.4,reach,True,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,내야안타
+p-BBD0DMTYw,743.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
+p-BBD0DMTYw,771.3,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 110→011,맞음,적시 2루타 6-1
+p-BBD0DMTYw,805.5,sac_fly,True,sac_fly out walk,refined video_only video_only,점수판 아웃+1 득점+1 주자 011→001; 해설 '박성규의 희생플라이 타점으로 삼성이 또 한 점을 더했습니다. 7대1입니다. 박성규 선수 활약이 좋습니다.' (820s) | 점수판 아웃+1 득점+0 주자 001→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,"희생플라이 7-1 — 2루 주자 3루로(점수판은 아웃 먼저, 득점 나중)"
+p-BBD0DMTYw,831.6,walk,True,,,,놓침,볼넷
+p-BBD0DMTYw,841.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,2루 포스아웃 — 타자 1루
+p-BBD0DMTYw,854.8,reach,True,reach,refined,점수판 아웃+0 득점+0 주자 010→101,맞음,안타 — 1·3루
+p-BBD0DMTYw,870.9,none,True,,,,조용함,파울
+p-BBD0DMTYw,879.9,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 101→101; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (883s); [점수판] 삼진 표시(K) (884s),맞음,삼진(3K 표시)
+p-BBD0DMTYw,920.2,reach,True,balk reach,video_only video_only,점수판 아웃+0 득점+1 주자 101→010 | 점수판 아웃+0 득점+0 주자 010→101,맞음,적시타 7-2
+p-BBD0DMTYw,967.4,strikeout,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 101→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (972s),맞음,삼진으로 보임 — 3아웃
+p-BBD0DMTYw,993.0,homerun,True,out homerun out,video_only refined video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+1 주자 000→000; 해설 '-정말 완벽한 타이밍에서 큰 타구를 만들어냈습니다.-역대 플레이오프 최고령 홈런입니다.' (1020s) | 점수판 아웃+2 득점+0 주자 000→000,맞음,최형우 솔로 홈런 8-2
+p-BBD0DMTYw,1062.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
+p-BBD0DMTYw,1079.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,진루타 — 1사 3루
+p-BBD0DMTYw,1094.6,out,True,runner out out,video_only video_only video_only,점수판 아웃+0 득점+0 주자 010→001 | 점수판 아웃+1 득점+1 주자 001→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,1루 땅볼 타점 8-3
+p-BBD0DMTYw,1123.4,none,True,,,,조용함,스트라이크
+p-BBD0DMTYw,1141.9,strikeout,False,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '스윙! 스톨가웃입니다! 연속 3진에 1테임! 체인지업을 많이 쓰지 않아요 계속해서 아끼고 아끼고 아끼다가' (1170s),맞음,삼진으로 보임(투구 궤적 다시보기)
+p-BBD0DMTYw,1166.1,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; [점수판] 삼진 표시(K) (1172s),맞음,삼진(2K 표시)
+p-BBD0DMTYw,1183.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,3루 땅볼 — 경기 끝
