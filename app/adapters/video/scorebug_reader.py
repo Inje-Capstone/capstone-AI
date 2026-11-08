@@ -406,6 +406,8 @@ class ScorebugReader:
                 mark = decode_mark(self.layout, px, RGB_W, RGB_H)
                 if mark:  # 주자·아웃 칸이 덮였다 — 상태 판독에서 빠지고 단서가 된다
                     r["mark"] = mark
+                elif not _board_whole(self.layout, px):
+                    return None
             return r
         except (subprocess.CalledProcessError, OSError) as exc:  # 출력 파일이 안 생김 등
             raise VideoAnalyzerError(f"점수판 판독 실패: {exc}") from exc
@@ -472,6 +474,8 @@ class ScorebugReader:
                     mark = decode_mark(self.layout, px, RGB_W, RGB_H)
                     if mark:  # 주자·아웃 칸이 삼진 표시로 덮였다 — 상태 판독에서 빠진다
                         r["mark"] = mark
+                    elif not _board_whole(self.layout, px):
+                        r = None
                 if r:
                     readings.append(r)
         except (subprocess.CalledProcessError, VideoAnalyzerError) as exc:
@@ -484,6 +488,16 @@ class ScorebugReader:
             "every": self.every,  # 있으면 같은 상태를 여러 번 읽었다 → 안정화 2 (observe)
             "layout": self.layout.name if self.layout else None,
         }
+
+
+def _board_whole(layout: Layout, px: bytes) -> bool:
+    """점수판이 온전히 보이나 — 바탕 고정 색(panel)이 없으면 늘 참(예전과 같다).
+
+    전환 효과·사라지는 중인 프레임은 VLM이 숫자를 읽어도 주자·아웃 화소가 엉터리였다
+    (만루·3스트라이크 같은 값, panel 있는 8편 판독 671장 중 8장). 바탕 색이 안 맞으면 그 판독을
+    버린다 — 조정용 98 → 99/118, 시험용 58/61 그대로(2026-11-08).
+    """
+    return not layout.panel or board_shown(layout, rgb_sampler(px, RGB_W, RGB_H))
 
 
 def scan_marks(layout: Optional[Layout], video: Path, start: float = 0.0,

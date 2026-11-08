@@ -329,3 +329,15 @@ def test_mark_scan_counts_only_frames_with_the_board_and_merges_one_mark(monkeyp
     for name in ("kbo_topleft_box", "kbo_caster_box", "kbo_caster_box_up", "spotv2_box",
                  "kbo_box_bottomright", "bar_two_line"):
         assert Layout.load(ROOT / "data" / "scorebug_layouts" / f"{name}.json").panel
+
+
+def test_reading_is_dropped_when_the_board_background_does_not_match():
+    """전환 효과·사라지는 중인 프레임 — 바탕 색(panel)이 안 맞으면 판독을 버린다.
+    panel이 없으면 예전대로."""
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W, _board_whole
+
+    white = bytes((230, 230, 230)) * (RGB_W * RGB_H)
+    tinted = bytes((200, 120, 150)) * (RGB_W * RGB_H)  # 전환 효과로 물든 프레임
+    layout = Layout("t", {}, (), panel=((0.1, 0.1, 0.9, 0.9, 0.9),))
+    assert _board_whole(layout, white) and not _board_whole(layout, tinted)
+    assert _board_whole(Layout("t", {}, ()), tinted)

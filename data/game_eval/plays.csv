@@ -1,7 +1,7 @@
 ﻿video,t,truth,sure,engine,check,evidence,verdict,note
 3QYUP4AgNpI,41.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,1회말 김지찬 안타
-3QYUP4AgNpI,52.5,homerun,True,,,,놓침,김성윤 2점 홈런
-3QYUP4AgNpI,103.8,out_any,True,homerun,refined,점수판 아웃+3 득점+2 주자 100→000; 해설 '- 그렇죠.- 조금 더 핵심해져 있는 것 같네요.- 이래부터 터진 김석윤의 투런 홈런. 2대0으로 앞서가는 삼성 마이온즈입니다.' (90s),틀림,2회초 강백호 아웃(삼진으로 보임)
+3QYUP4AgNpI,52.5,homerun,True,homerun,refined,점수판 아웃+3 득점+2 주자 100→000; 해설 '- 그렇죠.- 조금 더 핵심해져 있는 것 같네요.- 이래부터 터진 김석윤의 투런 홈런. 2대0으로 앞서가는 삼성 마이온즈입니다.' (90s),맞음,김성윤 2점 홈런
+3QYUP4AgNpI,103.8,out_any,True,strikeout,refined,점수판 아웃+1 득점+0 주자 000→000; 해설 '- 김도영 선수와 어깨를 나란히 할 수 있는 그런 능력 이상을 가지고 있단 말이에요.- 떨어지는 공에 스윙 삼진.' (100s),맞음,2회초 강백호 아웃(삼진으로 보임)
 3QYUP4AgNpI,115.6,none,True,,,,조용함,
 3QYUP4AgNpI,129.1,out_any,False,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '-너픈봉의 헛스윙 삼진.-투아웃.' (130s),맞음,노시환 아웃 — 4·5번 화면 중 어디인지 모름
 3QYUP4AgNpI,136.1,none,False,,,,조용함,
@@ -32,8 +32,8 @@
 3QYUP4AgNpI,576.3,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,강백호 3아웃
 3QYUP4AgNpI,595.3,?,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→001,제외,"노시환 — 외야 타구, 결과 모름"
 3QYUP4AgNpI,619.1,?,False,out walk,video_only refined,점수판 아웃+1 득점+0 주자 001→001 | 점수판 아웃+0 득점+1 주자 001→100; 해설 '김태현은 볼넷을 얻어냈습니다. 지휘중 36경기에서 4승 5패 2홀드를 기록했던 한화의 7회추 공격이 계속됩니다. 타석에 정은원.' (650s),제외,내야수 다이빙 — 결과 모름
-3QYUP4AgNpI,658.9,homerun,True,homerun,video_only,점수판 아웃+1 득점+2 주자 100→000; [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (695s),맞음,정은원 홈런
-3QYUP4AgNpI,692.9,none,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,헛판정,
+3QYUP4AgNpI,658.9,homerun,True,out,video_only,점수판 아웃+2 득점+2 주자 100→000,틀림,정은원 홈런
+3QYUP4AgNpI,692.9,none,False,,,,조용함,
 3QYUP4AgNpI,714.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,김성윤 안타
 3QYUP4AgNpI,724.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,구자욱 안타
 3QYUP4AgNpI,733.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 110→111,맞음,디아즈 안타(전광판 HIT) — 다시 보고 고침
