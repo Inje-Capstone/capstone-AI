@@ -288,3 +288,41 @@ def test_dot_count_is_read_from_pixels_only_when_the_layout_has_dots():
     assert decode_count(Layout("t", {}, ()), lambda p: colors[p]) is None
     spotv2 = Layout.load(ROOT / "data" / "scorebug_layouts" / "spotv2_box.json")
     assert len(spotv2.balls) == 3 and len(spotv2.strikes) == 2
+
+
+def test_mark_scan_counts_only_frames_with_the_board_and_merges_one_mark(monkeypatch):
+    """화소 훑기 — 바탕 색(panel)이 맞는 장면에서만 표시를 세고, 붙어 있는 표시는 하나로."""
+    import numpy as np
+
+    import app.adapters.video.frames as frames_mod
+    from app.adapters.video.scorebug_layout import board_shown, rgb_sampler
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W, scan_marks
+
+    panel = ((0.1, 0.1, 0.9, 0.9, 0.9),)
+    box = (0.5, 0.5, 0.52, 0.53)
+    layout = Layout("t", {}, (), mark=box, panel=panel)
+
+    def frame(board: bool, mark: bool):
+        img = np.zeros((RGB_H, RGB_W, 3), np.uint8)  # BGR
+        if board:
+            img[60:84, 120:140] = (230, 230, 230)
+        if mark:
+            img[362:380, 642:662] = (40, 20, 220)  # 빨간 글자
+        return img
+
+    seq = [(0.0, frame(True, False)), (0.5, frame(True, True)), (1.0, frame(True, True)),
+           (1.5, frame(False, True)), (5.0, frame(True, True))]
+
+    class Fake:
+        frames = iter(seq)
+
+    monkeypatch.setattr(frames_mod, "open_frames", lambda *a, **k: Fake())
+    assert scan_marks(layout, ROOT / "x.mp4") == [0.5, 5.0]
+    assert scan_marks(Layout("t", {}, (), mark=box), ROOT / "x.mp4") == []  # panel 없으면 안 훑음
+    import cv2
+    shown = cv2.cvtColor(frame(True, False), cv2.COLOR_BGR2RGB).tobytes()
+    assert board_shown(layout, rgb_sampler(shown, RGB_W, RGB_H))
+    assert not board_shown(Layout("t", {}, ()), rgb_sampler(shown, RGB_W, RGB_H))
+    for name in ("kbo_topleft_box", "kbo_caster_box", "kbo_caster_box_up", "spotv2_box",
+                 "kbo_box_bottomright", "bar_two_line"):
+        assert Layout.load(ROOT / "data" / "scorebug_layouts" / f"{name}.json").panel

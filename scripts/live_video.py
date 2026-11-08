@@ -132,14 +132,19 @@ class ScorebugSegments:
     def analyze(self, clip: VideoClip) -> Any:
         from types import SimpleNamespace
 
+        from app.adapters.video.scorebug_reader import scan_marks
+
         mid = clip.duration / 2
         r = self.reader.read_frame(clip.path, mid)
         if r:
             r["t"] = round(clip.start + mid, 2)
+        # 가운데 한 장은 2~3초짜리 삼진 표시를 놓친다 — 조각을 화소로 훑는다(API 없음)
+        marks = [{"t": round(clip.start + t, 2), "mark": "strikeout"}
+                 for t in scan_marks(getattr(self.reader, "layout", None), clip.path)]
         speech = []
         if self.transcriber is not None:  # 조각 소리 받아쓰기 — 홈런·삼진 말로 판정을 확인·보완
             speech = self._speech(clip)
-        return SimpleNamespace(scoreboard=[r] if r else [], speech=speech, events=[])
+        return SimpleNamespace(scoreboard=([r] if r else []) + marks, speech=speech, events=[])
 
     def _speech(self, clip: VideoClip) -> list[dict[str, Any]]:
         """홀수 번째 조각에서 앞 조각과 소리를 이어 10초 창으로 받아 적는다. 5초 조각만으로는

@@ -346,6 +346,13 @@ def main() -> int:
             if args.min_repeat:
                 snap["scorebug"]["min_repeat"] = args.min_repeat
             save(out_path, snap)
+        bug = snap.get("scorebug") or {}
+        if reader.layout is not None and reader.layout.panel and bug and "marks" not in bug:
+            from app.adapters.video.scorebug_reader import scan_marks
+
+            # 삼진 표시는 2~3초 — 판독 사이에 뜬 것을 화소로 훑어 찾는다(API 없음)
+            snap["scorebug"]["marks"] = scan_marks(reader.layout, args.video, *span)
+            save(out_path, snap)
         if reader.requests >= args.max_reads:
             print(f"점수판 판독이 상한({args.max_reads})에 걸렸다 — 빠진 구간이 있다. "
                   "--max-reads를 올려 다시 돌린다", file=sys.stderr)

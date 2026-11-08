@@ -1018,6 +1018,8 @@ def observe(snap: dict) -> tuple[list[Reading], list[Cue], int]:
     crop = (snap.get("scorebug") or {}).get("scoreboard") or []
     if crop:
         readings, marks = from_snapshot({"scoreboard": crop})
+        # 화소로 훑어 찾은 삼진 표시(scorebug_reader.scan_marks) — 판독 사이 2~3초짜리 표시
+        marks += [Cue(float(t), K_MARK, K_MARK_TEXT) for t in snap["scorebug"].get("marks") or []]
         cues = sorted(cues + marks, key=lambda c: c.t)
         # 하이라이트를 일정 간격으로 읽으면 한 상태가 한 번만 읽히는 일이 많다 — 분석할 때
         # 정한 기준(analyze_video --min-repeat)이 있으면 그것을 쓴다

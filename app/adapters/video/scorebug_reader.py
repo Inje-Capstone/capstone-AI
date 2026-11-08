@@ -23,6 +23,7 @@ from app.adapters.video.base import VideoAnalyzerError, _json_payload
 from app.adapters.video.http import completion_text, post_json
 from app.adapters.video.scorebug_layout import (
     Layout,
+    board_shown,
     decode,
     decode_count,
     decode_half,
@@ -39,6 +40,8 @@ CORNERS = {
 }
 VERSION = "scorebug-crop-v1"  # 스냅샷 캐시 키 — 판독 방식·지시문을 바꾸면 올린다
 THUMB_W, THUMB_H = 96, 48
+MARK_SCAN_FPS = 2.0  # 삼진 표시 훑기 — 표시가 2~3초 떠 있어 초당 2장이면 4장 이상 걸린다
+MARK_GAP = 3.0  # 이보다 떨어진 표시는 다른 삼진
 RGB_W, RGB_H = 1280, 720  # 주자·아웃 화소 읽기용 프레임 크기 (scorebug_layout)
 PIXEL_TOL = 30  # 같은 화소로 볼 밝기 차
 MASK_MIN = 0.3  # 기준과 같은 값으로 이 비율 이상 나온 화소 = 점수판 그래픽
@@ -481,3 +484,27 @@ class ScorebugReader:
             "every": self.every,  # 있으면 같은 상태를 여러 번 읽었다 → 안정화 2 (observe)
             "layout": self.layout.name if self.layout else None,
         }
+
+
+def scan_marks(layout: Optional[Layout], video: Path, start: float = 0.0,
+               end: Optional[float] = None, fps: float = MARK_SCAN_FPS) -> list[float]:
+    """VLM 없이 화소로 [start, end)를 훑어 삼진 표시가 뜬 시각들(표시마다 처음 본 때).
+
+    위치 파일에 panel(바탕 색)과 mark(표시 칸)가 있을 때만 — 점수판이 보이는 장면만 센다.
+    """
+    if layout is None or not layout.panel or layout.mark is None:
+        return []
+    import cv2
+
+    from app.adapters.video.frames import open_frames
+
+    found: list[float] = []
+    last: Optional[float] = None
+    for t, img in open_frames(video, start, end, target_fps=fps, size=(RGB_W, RGB_H)).frames:
+        px = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).tobytes()
+        if board_shown(layout, rgb_sampler(px, RGB_W, RGB_H)) and decode_mark(
+                layout, px, RGB_W, RGB_H):
+            if last is None or t - last > MARK_GAP:
+                found.append(round(float(t), 2))
+            last = t
+    return found

@@ -1343,3 +1343,11 @@ def test_strikeout_mark_alone_at_the_end_of_a_finished_video():
     [j] = judge(readings, cues, min_repeat=1, finished=True)
     assert (j.code, j.kind, j.t, j.transition) == ("strikeout", "call", 3.5, None)
     assert judge(readings, cues, min_repeat=1) == []
+
+
+def test_scanned_marks_become_strikeout_cues():
+    """화소로 훑어 찾은 표시(scorebug.marks)도 판독 표시와 같은 단서다."""
+    board = [_board(0, 1, 2, 1), _board(5, 0, 0, 2)]
+    readings, cues, _ = observe({"scorebug": {"scoreboard": board, "marks": [3.0]}})
+    assert [c.t for c in cues if c.kind == "k_mark"] == [3.0]
+    assert [j.code for j in judge(readings, cues, min_repeat=1)] == ["strikeout"]
