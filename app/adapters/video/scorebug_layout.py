@@ -115,6 +115,7 @@ def is_filled(rgb: Rgb, mode: str = "color") -> bool:
     _, s, v = colorsys.rgb_to_hsv(*rgb)
     if mode == "dark":  # 흰 바탕에 켜진 쪽만 검게 칠하는 화살표(SPOTV2)
         return v < DARK_VAL
+    if mode == "bright":
         return v > BRIGHT_VAL and s < BRIGHT_SAT
     return s > FILLED_SAT and v > FILLED_VAL
 
