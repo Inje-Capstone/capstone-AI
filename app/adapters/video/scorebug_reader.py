@@ -403,6 +403,8 @@ class ScorebugReader:
                 half = decode_half(self.layout, px, RGB_W, RGB_H)
                 if half:
                     r["half"] = half
+                if not _board_whole(self.layout, px):  # 전환·사라지는 중 — 표시도 믿지 않는다
+                    return None
                 mark = decode_mark(self.layout, px, RGB_W, RGB_H)
                 if mark:  # 주자·아웃 칸이 덮였다 — 상태 판독에서 빠지고 단서가 된다
                     r["mark"] = mark
@@ -442,7 +444,7 @@ class ScorebugReader:
                 return {"corner": "layout" if fixed else corner, "scoreboard": [],
                         "requests": self.requests}
             ref = min(int(t_ref - start), len(thumbs) - 1)
-            readings, failed = [], 0
+            readings, failed, dropped = [], 0, 0
             if self.every and self.changes:
                 plan = plan_both(thumbs, ref, self.every, self.max_reads)
             elif self.every:
@@ -470,7 +472,9 @@ class ScorebugReader:
                     if half:  # 초·말도 화살표 화소가 VLM보다 믿을 만하다
                         r["half"] = half
                     mark = decode_mark(self.layout, px, RGB_W, RGB_H)
-                    if mark:  # 주자·아웃 칸이 삼진 표시로 덮였다 — 상태 판독에서 빠진다
+                    if not _board_whole(self.layout, px):  # 전환·사라지는 중 — 표시도 버린다
+                        r, dropped = None, dropped + 1
+                    elif mark:  # 주자·아웃 칸이 삼진 표시로 덮였다 — 상태 판독에서 빠진다
                         r["mark"] = mark
                 if r:
                     readings.append(r)
@@ -481,9 +485,20 @@ class ScorebugReader:
             "scoreboard": readings,
             "requests": self.requests,
             "failed_reads": failed,
+            "dropped_reads": dropped,  # 바탕 색(panel)이 안 맞아 버린 판독
             "every": self.every,  # 있으면 같은 상태를 여러 번 읽었다 → 안정화 2 (observe)
             "layout": self.layout.name if self.layout else None,
         }
+
+
+def _board_whole(layout: Layout, px: bytes) -> bool:
+    """점수판이 온전히 보이나 — 바탕 고정 색(panel)이 없으면 늘 참(예전과 같다).
+
+    전환 효과·사라지는 중인 프레임은 VLM이 숫자를 읽어도 주자·아웃 화소가 엉터리였다
+    (만루·3스트라이크 같은 값, panel 있는 8편 판독 671장 중 8장). 바탕 색이 안 맞으면 그 판독을
+    버린다 — 조정용 98 → 99/118, 시험용 58/61 그대로(2026-11-08).
+    """
+    return not layout.panel or board_shown(layout, rgb_sampler(px, RGB_W, RGB_H))
 
 
 def scan_marks(layout: Optional[Layout], video: Path, start: float = 0.0,

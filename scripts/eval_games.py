@@ -124,8 +124,8 @@ def grade(stem: str, game: dict[str, Any], snap: dict[str, Any]) -> list[dict[st
 
 def report(rows: list[dict[str, Any]], titles: dict[str, str]) -> str:
     lines = ["# 1080p 경기 하이라이트 채점", "",
-             "> `python scripts/eval_games.py --snapshots ../clips_private/game_eval`로 "
-             "다시 만든다. "
+             "> `python scripts/eval_games.py --snapshots <analyze_video 결과 폴더> "
+             "[--ablation]`로 다시 만든다(조정용 3경기는 ../clips_private/game_eval_final). "
              "정답은 `labels.json`(사람이 투구 화면마다 매김), 칸별 결과는 `plays.csv`.", ""]
     head = ["영상", "채점 칸", "맞음", "틀림", "놓침", "헛판정/조용함"]
     table = []
