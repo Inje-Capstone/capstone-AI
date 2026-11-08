@@ -33,6 +33,11 @@ MBC는 주자 칸을 흰색으로 채운다 — `base_fill: "bright"`면 밝고 
 볼·스트라이크를 숫자 대신 점으로 그리는 점수판(SPOTV2 'B●●● S●● O●●')은 VLM이 점을 못 세
 카운트를 거의 늘 0-0으로 읽었다(처음 본 시험 경기 판독 38장 중 2스트라이크 0장) — `balls`·
 `strikes` 점 위치가 있으면 아웃처럼 켜진 점 수를 센다.
+
+삼진 표시는 2~3초만 떠 있어, 바뀔 때·8초마다 읽는 판독(실시간은 5초 조각마다 한 장)이 놓친다 —
+처음 본 시험 경기에서 표시가 떠 있는 동안 판독이 없던 삼진이 셋. `panel`(점수판 바탕의 고정 색
+지점 x, y, r, g, b)이 있으면 VLM 없이 화소로 영상을 훑어(초당 2장) 표시를 찾는다. 바탕 색이 모두
+맞을 때만 센다 — 점수판이 없는 장면(관중·더그아웃)을 표시로 잘못 세지 않게.
 """
 
 import colorsys
@@ -69,6 +74,7 @@ class Layout:
     mark_fill: str = "color"  # 삼진 표시 글자: color(mark_hue 색) | dark(검은 글자)
     cover_val: Optional[float] = None  # 아웃 점이 모두 이보다 밝은 무채색이면 표시가 덮은 것
     balls: tuple[Point, ...] = ()  # 볼 점 중심들(점으로 그리는 점수판만)
+    panel: tuple[tuple[float, float, float, float, float], ...] = ()  # 바탕 고정 색(x, y, r, g, b)
     strikes: tuple[Point, ...] = ()  # 스트라이크 점 중심들
 
     @classmethod
@@ -81,6 +87,8 @@ class Layout:
             raise ValueError(f"{path}: half_by는 shape 또는 position이다")
         if raw.get("mark_fill", "color") not in ("color", "dark"):
             raise ValueError(f"{path}: mark_fill은 color 또는 dark다")
+        if any(len(pt) != 5 for pt in raw.get("panel") or []):
+            raise ValueError(f"{path}: panel 지점은 x, y, r, g, b 다섯 숫자다")
         if bool(raw.get("balls")) != bool(raw.get("strikes")):
             raise ValueError(f"{path}: balls·strikes 점 위치는 둘 다 적는다")
         cover = raw.get("cover_val")
@@ -105,6 +113,7 @@ class Layout:
             cover_val=float(raw["cover_val"]) if raw.get("cover_val") is not None else None,
             balls=tuple((float(x), float(y)) for x, y in raw.get("balls") or []),
             strikes=tuple((float(x), float(y)) for x, y in raw.get("strikes") or []),
+            panel=tuple(tuple(float(v) for v in pt) for pt in raw.get("panel") or []),  # type: ignore[misc]
         )
 
 
@@ -137,6 +146,17 @@ def decode(layout: Layout, sample: Callable[[Point], Rgb]) -> tuple[list[int], i
                    and (layout.base_fill == "bright" or hue_in(sample(p), layout.base_hue)))
     outs = sum(1 for p in layout.outs if is_filled(sample(p)))
     return bases, outs
+
+
+PANEL_TOL = 0.1  # 바탕 색과 채널마다 이만큼 안이면 같은 색(점수판이 보인다)
+
+
+def board_shown(layout: Layout, sample: Callable[[Point], Rgb]) -> bool:
+    """점수판이 화면에 있나 — 바탕 고정 색 지점이 모두 맞으면. panel이 없으면 모른다(False)."""
+    if not layout.panel:
+        return False
+    return all(max(abs(a - b) for a, b in zip(sample((x, y)), (r, g, bl))) <= PANEL_TOL
+               for x, y, r, g, bl in layout.panel)
 
 
 def decode_count(layout: Layout, sample: Callable[[Point], Rgb]) -> Optional[tuple[int, int]]:
