@@ -292,7 +292,10 @@ def test_dot_count_is_read_from_pixels_only_when_the_layout_has_dots():
 
 def test_mark_scan_counts_only_frames_with_the_board_and_merges_one_mark(monkeypatch):
     """화소 훑기 — 바탕 색(panel)이 맞는 장면에서만 표시를 세고, 붙어 있는 표시는 하나로."""
-    import numpy as np
+    import pytest
+
+    np = pytest.importorskip("numpy")  # 영상 의존성(numpy·cv2)이 없는 CI에서는 건너뛴다
+    pytest.importorskip("cv2")
 
     import app.adapters.video.frames as frames_mod
     from app.adapters.video.scorebug_layout import board_shown, rgb_sampler
