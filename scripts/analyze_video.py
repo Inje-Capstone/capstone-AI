@@ -347,12 +347,20 @@ def main() -> int:
                 snap["scorebug"]["min_repeat"] = args.min_repeat
             save(out_path, snap)
         bug = snap.get("scorebug") or {}
-        if reader.layout is not None and reader.layout.panel and bug and "marks" not in bug:
+        layout = reader.layout
+        if layout is not None and layout.panel and bug:
             from app.adapters.video.scorebug_reader import scan_marks
 
-            # 삼진 표시는 2~3초 — 판독 사이에 뜬 것을 화소로 훑어 찾는다(API 없음)
-            snap["scorebug"]["marks"] = scan_marks(reader.layout, args.video, *span)
-            save(out_path, snap)
+            # 위치 파일의 바탕·표시 칸이나 구간이 바뀌면 다시 훑는다(이름만 같은 옛 결과 금지)
+            key = repr((layout.panel, layout.mark, layout.mark_fill, layout.mark_hue,
+                        layout.cover_val, span))
+            if bug.get("marks_key") != key:
+                try:  # 삼진 표시는 2~3초 — 판독 사이에 뜬 것을 화소로 훑어 찾는다(API 없음)
+                    bug["marks"] = scan_marks(layout, args.video, *span)
+                    bug["marks_key"] = key
+                    save(out_path, snap)
+                except Exception as exc:  # noqa: BLE001 — 훑기가 실패해도 해설·관절 단계는 간다
+                    print(f"삼진 표시 훑기 실패: {exc}", file=sys.stderr)
         if reader.requests >= args.max_reads:
             print(f"점수판 판독이 상한({args.max_reads})에 걸렸다 — 빠진 구간이 있다. "
                   "--max-reads를 올려 다시 돌린다", file=sys.stderr)

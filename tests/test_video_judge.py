@@ -1351,3 +1351,14 @@ def test_scanned_marks_become_strikeout_cues():
     readings, cues, _ = observe({"scorebug": {"scoreboard": board, "marks": [3.0]}})
     assert [c.t for c in cues if c.kind == "k_mark"] == [3.0]
     assert [j.code for j in judge(readings, cues, min_repeat=1)] == ["strikeout"]
+
+
+def test_mark_alone_needs_a_recent_reading_and_scanned_marks_need_no_crop_reads():
+    """판독이 오래전에 끊긴 뒤의 표시는 그 타석으로 볼 수 없다.
+    점수판 판독이 없어도 훑은 표시는 단서다."""
+    board = [_board(0, 1, 2, 2), _board(1, 1, 2, 2)]
+    readings, cues, _ = observe({"scorebug": {"scoreboard": board, "marks": [300.0]}})
+    cues = sorted(cues + [_view(-5, "in_play")], key=lambda c: c.t)
+    assert judge(readings, cues, min_repeat=1, finished=True) == []
+    _, cues, _ = observe({"scorebug": {"scoreboard": [], "marks": [5.0]}})
+    assert [c.t for c in cues if c.kind == "k_mark"] == [5.0]

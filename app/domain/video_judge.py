@@ -584,6 +584,7 @@ K_MARK = "k_mark"  # 점수판이 주자·아웃 칸을 'nK'로 덮은 판독(sc
 K_MARK_TEXT = "[점수판] 삼진 표시(K)"
 K_MARK_SEC = 8.0  # 표시가 뜬 뒤 아웃이 올라간 판독까지(처음 본 시험 경기 실측 2~5초)
 K_MARK_JUMP_SEC = 30.0  # 사이에 투구 화면이 없으면(하이라이트가 다음 장면으로 건너뜀) 여기까지
+K_MARK_STALE_SEC = 60.0  # 표시만으로 삼진을 낼 때 바로 전 판독이 이보다 오래면 안 낸다
 K_MARK_OWN_VIEW = 2.0  # 표시 뒤 이 안에 끝난 투구 화면은 그 삼진 투구 자신(표시가 0.5초 먼저 뜸)
 
 
@@ -619,7 +620,11 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
         if not after:
             outs_near = any(j.transition is not None and j.transition.outs_made >= 1
                             and m.t - 3.0 <= j.t <= m.t + K_MARK_JUMP_SEC for j in judged)
-            if finished and not outs_near and all(abs(a.t - m.t) > K_MARK_JUMP_SEC for a in alone):
+            # 바로 전 판독이 오래전이면(판독이 끊김) 그 상태를 이 표시의 타석으로 볼 수 없다.
+            # 상태가 그대로라 판독이 37초 비었던 정상 사례(정우주 3K)는 넘기도록 60초
+            recent = m.t - prev[-1].t <= K_MARK_STALE_SEC
+            if (finished and recent and not outs_near
+                    and all(abs(a.t - m.t) > K_MARK_JUMP_SEC for a in alone)):
                 where = prev[-1]
                 # 표시가 그 삼진 투구 화면보다 먼저 떴으면 판정을 그 투구(화면 끝)에 붙인다
                 own = [c.t for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
@@ -1015,11 +1020,13 @@ def observe(snap: dict) -> tuple[list[Reading], list[Cue], int]:
         cues = sorted(
             cues + [Cue(float(s["t"]), "speech", s["text"]) for s in asr], key=lambda c: c.t
         )
-    crop = (snap.get("scorebug") or {}).get("scoreboard") or []
+    bug = snap.get("scorebug") or {}
+    # 화소로 훑어 찾은 삼진 표시(scorebug_reader.scan_marks) — 판독 사이 2~3초짜리 표시
+    scanned = [Cue(float(t), K_MARK, K_MARK_TEXT) for t in bug.get("marks") or []]
+    cues = sorted(cues + scanned, key=lambda c: c.t)
+    crop = bug.get("scoreboard") or []
     if crop:
         readings, marks = from_snapshot({"scoreboard": crop})
-        # 화소로 훑어 찾은 삼진 표시(scorebug_reader.scan_marks) — 판독 사이 2~3초짜리 표시
-        marks += [Cue(float(t), K_MARK, K_MARK_TEXT) for t in snap["scorebug"].get("marks") or []]
         cues = sorted(cues + marks, key=lambda c: c.t)
         # 하이라이트를 일정 간격으로 읽으면 한 상태가 한 번만 읽히는 일이 많다 — 분석할 때
         # 정한 기준(analyze_video --min-repeat)이 있으면 그것을 쓴다

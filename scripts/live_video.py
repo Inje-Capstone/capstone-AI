@@ -138,9 +138,14 @@ class ScorebugSegments:
         r = self.reader.read_frame(clip.path, mid)
         if r:
             r["t"] = round(clip.start + mid, 2)
-        # 가운데 한 장은 2~3초짜리 삼진 표시를 놓친다 — 조각을 화소로 훑는다(API 없음)
-        marks = [{"t": round(clip.start + t, 2), "mark": "strikeout"}
-                 for t in scan_marks(getattr(self.reader, "layout", None), clip.path)]
+        # 가운데 한 장은 2~3초짜리 삼진 표시를 놓친다 — 조각을 화소로 훑는다(API 없음).
+        # 훑기가 실패해도(조각을 못 엶) 판독·받아쓰기는 그대로 낸다
+        try:
+            found = scan_marks(getattr(self.reader, "layout", None), clip.path)
+        except (VideoAnalyzerError, OSError) as exc:
+            print(f"삼진 표시 훑기 실패({clip.path.name}): {exc}", file=sys.stderr)
+            found = []
+        marks = [{"t": round(clip.start + t, 2), "mark": "strikeout"} for t in found]
         speech = []
         if self.transcriber is not None:  # 조각 소리 받아쓰기 — 홈런·삼진 말로 판정을 확인·보완
             speech = self._speech(clip)
