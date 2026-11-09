@@ -1736,3 +1736,33 @@ def test_game_end_out_in_the_top_half_ignores_home_run_recap_words():
     cues = [_view(20, "in_play"), Cue(30, "speech", "구자욱의 홈런으로 앞서 나간 삼성")]
     codes = [j.code for j in judge(last, cues, finished=True)]
     assert codes == ["out"]
+
+
+def test_board_changed_in_the_view_where_the_before_state_first_showed():
+    """KS4 — 직전 상태(3-0 만루 전)가 그 투구 화면 안에서 처음 보였고 화면이 끝나기 전에 볼넷으로
+    바뀌었다. 관절이 잰 투구 순간(스윙 시각)이 판독 시각보다 늦게 잡혀 앞 투구 칸으로 갔다 —
+    투구 화면 시작으로도 그 투구의 결과를 안다."""
+    on23 = (False, True, True)
+    walk = twice(R(10, outs=1, balls=3, bases=on23), R(14, outs=1, bases=(True, True, True)))
+    cues = [Cue(9.9, "shot_start", ""), Cue(15, "pitch_seen", ""), _view(17, "no_play")]
+    (j,) = judge(walk, cues)
+    assert j.code == "walk" and j.detail["pitch_t"] == 17
+    # 직전 상태가 화면이 시작되기 전에 보였으면(앞 투구에서) 투구 순간이 있어야 붙인다
+    early = [Cue(12, "shot_start", ""), Cue(15, "pitch_seen", ""), _view(17, "no_play")]
+    (j,) = judge(walk, early)
+    assert "pitch_t" not in j.detail
+    # 독립 리뷰 — 투구 하나짜리가 아닌 긴 화면(다른 투구가 섞임)이나, 화면에서 잰 투구가 직전
+    # 상태보다 앞이면(이 전이의 투구가 아님) 붙이지 않는다
+    long_shot = [Cue(9.9, "shot_start", ""), Cue(25, "pitch_seen", ""), _view(40, "in_play")]
+    (j,) = judge(walk, long_shot)
+    assert "pitch_t" not in j.detail and j.code == "walk"
+    before_pitch = [Cue(8, "shot_start", ""), Cue(9, "pitch_seen", ""), _view(17, "no_play")]
+    (j,) = judge(walk, before_pitch)
+    assert "pitch_t" not in j.detail
+
+
+def test_pose_cues_carry_the_pitch_view_start():
+    swing = {"t": 5.0, "t0": 3.0, "t1": 7.0, "swing": True, "view": "no_play"}
+    cues = pose_cues({"swings": [swing]})
+    assert sorted((c.t, c.kind) for c in cues) == [
+        (3.0, "shot_start"), (5.0, "pitch_seen"), (5.0, "swing"), (7.0, "no_play")]

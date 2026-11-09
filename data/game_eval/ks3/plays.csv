@@ -6,8 +6,8 @@
 4PR9g8KArTo,242.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
 4PR9g8KArTo,254.7,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,아웃 — 2루 포스아웃으로 보임(타자 1루)
 4PR9g8KArTo,266.5,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 100→110; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (274s),맞음,볼넷 — 1·2루
-4PR9g8KArTo,283.0,reach,True,reach walk,video_only refined,점수판 아웃+0 득점+1 주자 110→110 | 점수판 아웃+0 득점+0 주자 110→111,맞음,적시타 1-1
-4PR9g8KArTo,308.5,walk,True,,,,놓침,볼넷 — 만루
+4PR9g8KArTo,283.0,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 110→110,맞음,적시타 1-1
+4PR9g8KArTo,308.5,walk,True,walk,refined,점수판 아웃+0 득점+0 주자 110→111; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (313s),맞음,볼넷 — 만루
 4PR9g8KArTo,318.3,double_play,True,out,video_only,점수판 아웃+2 득점+0 주자 111→000,틀림,병살 — 1회말 끝
 4PR9g8KArTo,333.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
 4PR9g8KArTo,358.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타

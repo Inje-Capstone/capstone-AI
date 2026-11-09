@@ -37,9 +37,9 @@ OUT = ROOT / "data" / "game_eval"
 # 정답 종류 → 맞다고 볼 엔진 판정 코드
 ACCEPT = {
     "reach": {"reach", "dive_hit", "ground_rule_double"},
-    "out": {"out", "dive_out"},
+    "out": {"out", "dive_out", "infield_fly"},  # 인필드 플라이는 타자 아웃(5.09(a)(5))
     "strikeout": {"strikeout", "dropped_third_strike"},
-    "out_any": {"out", "strikeout", "dive_out", "dropped_third_strike"},
+    "out_any": {"out", "strikeout", "dive_out", "dropped_third_strike", "infield_fly"},
     "walk": {"walk"},
     "hbp": {"hbp"},
     "walk_or_hbp": {"walk", "hbp"},

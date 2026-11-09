@@ -1,7 +1,7 @@
 ﻿video,t,truth,sure,engine,check,evidence,verdict,note
 IT2iLKT3a6c,141.9,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
-IT2iLKT3a6c,151.1,out,True,out walk,video_only refined,점수판 아웃+1 득점+0 주자 100→010 | 점수판 아웃+0 득점+0 주자 010→110,맞음,희생번트로 보임 — 1사 2루
-IT2iLKT3a6c,170.9,walk,True,,,,놓침,볼넷 — 1·2루
+IT2iLKT3a6c,151.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,희생번트로 보임 — 1사 2루
+IT2iLKT3a6c,170.9,walk,True,walk,refined,점수판 아웃+0 득점+0 주자 010→110; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (177s),맞음,볼넷 — 1·2루
 IT2iLKT3a6c,180.7,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 110→110,맞음,삼진으로 보임 — 2사
 IT2iLKT3a6c,201.7,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+1 주자 110→110; [관절] 타자가 배트를 휘두름 (204s) | 점수판 아웃+0 득점+0 주자 110→101,맞음,적시타 1-0
 IT2iLKT3a6c,232.7,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 101→000,맞음,3아웃 — 외야 뜬공으로 보임
@@ -14,8 +14,8 @@ IT2iLKT3a6c,401.6,out_any,False,out,video_only,점수판 아웃+2 득점+0 주�
 IT2iLKT3a6c,424.7,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 100→001,맞음,적시 3루타 1-4
 IT2iLKT3a6c,464.4,out,True,out reach,video_only refined,점수판 아웃+1 득점+0 주자 001→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,외야 뜬공 3아웃
 IT2iLKT3a6c,483.7,reach,True,,,,놓침,안타
-IT2iLKT3a6c,496.0,reach,True,reach out,video_only refined,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+1 득점+0 주자 110→110,맞음,안타 — 1·2루
-IT2iLKT3a6c,515.7,out_any,False,,,,놓침,1사 1·2루 — 포스아웃으로 보임
+IT2iLKT3a6c,496.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
+IT2iLKT3a6c,515.7,out_any,False,out,refined,점수판 아웃+1 득점+0 주자 110→110,맞음,1사 1·2루 — 포스아웃으로 보임
 IT2iLKT3a6c,542.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→011,맞음,희생번트 — 2사 2·3루
 IT2iLKT3a6c,553.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 011→000,맞음,땅볼 3아웃
 IT2iLKT3a6c,583.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
