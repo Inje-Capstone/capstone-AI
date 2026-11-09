@@ -1,0 +1,44 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+4PR9g8KArTo,173.7,reach,True,,,,놓침,2루타 — 무사 2루
+4PR9g8KArTo,192.4,out,False,out,video_only,점수판 아웃+2 득점+0 주자 010→010,맞음,땅볼로 보임 — 다음 판독 2사(아웃 하나는 못 봄)
+4PR9g8KArTo,208.9,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→010,맞음,적시 2루타 1-0
+4PR9g8KArTo,232.2,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 010→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (236s),맞음,3아웃 — 삼진으로 보임
+4PR9g8KArTo,242.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
+4PR9g8KArTo,254.7,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,아웃 — 2루 포스아웃으로 보임(타자 1루)
+4PR9g8KArTo,266.5,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 100→110; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (274s),맞음,볼넷 — 1·2루
+4PR9g8KArTo,283.0,reach,True,reach walk,video_only refined,점수판 아웃+0 득점+1 주자 110→110 | 점수판 아웃+0 득점+0 주자 110→111,맞음,적시타 1-1
+4PR9g8KArTo,308.5,walk,True,,,,놓침,볼넷 — 만루
+4PR9g8KArTo,318.3,double_play,True,out,video_only,점수판 아웃+2 득점+0 주자 111→000,틀림,병살 — 1회말 끝
+4PR9g8KArTo,333.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
+4PR9g8KArTo,358.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
+4PR9g8KArTo,369.9,none,True,,,,조용함,파울
+4PR9g8KArTo,381.1,out_any,True,strikeout,conflict,점수판 아웃+1 득점+0 주자 100→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (384s); 영상은 삼진 — 해설과 달라 보류,맞음,3아웃 — 삼진으로 보임
+4PR9g8KArTo,394.1,walk_or_hbp,True,walk walk,confirmed confirmed,점수판 아웃+0 득점+0 주자 000→100; 해설 '선수 타자 이재현의 출루 성공입니다. 풀카운트. 벗어납니다. 볼넷. 연속 타자 볼넷입니다.' (400s) | 점수판 아웃+0 득점+0 주자 100→110; 해설 '선수 타자 이재현의 출루 성공입니다. 풀카운트. 벗어납니다. 볼넷. 연속 타자 볼넷입니다.' (400s),맞음,3-1에서 1루 — 몸을 숙임(사구로 보임)
+4PR9g8KArTo,403.1,walk,False,out,video_only,점수판 아웃+1 득점+0 주자 110→110,틀림,"볼넷으로 보임 — 1·2루, 뒤 아웃은 투구 화면을 못 찾음(415초)"
+4PR9g8KArTo,424.4,none,True,,,,조용함,볼
+4PR9g8KArTo,436.7,walk,False,walk out runner,video_only video_only video_only,점수판 아웃+0 득점+0 주자 110→111; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (443s) | 점수판 아웃+1 득점+0 주자 111→111 | 점수판 아웃+0 득점+1 주자 111→101,맞음,3-0 볼넷으로 보임 — 뒤 희생플라이로 보이는 1점은 투구 화면을 못 찾음
+4PR9g8KArTo,473.2,reach,True,reach reach reach out,video_only video_only video_only video_only,점수판 아웃+0 득점+0 주자 101→101 | 점수판 아웃+0 득점+1 주자 101→101 | 점수판 아웃+0 득점+1 주자 101→001 | 점수판 아웃+1 득점+0 주자 001→000,맞음,2타점 적시타 4-1 — 3아웃은 못 봄
+4PR9g8KArTo,531.5,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,"아웃 — 루킹 삼진으로 보임(다시 보고 고침 — 점수판 2-2 1사 → 다음 투구 전 2사, 처음엔 '파울'로 매김)"
+4PR9g8KArTo,548.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
+4PR9g8KArTo,557.8,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 100→000; 해설 '스윙 삼진 이번 이닝 들어와서 소현준 선수의 투구 패턴에도 변화가 좀 있었고요. 결과는 삼진 삼진 그러니까 이제 제2라운드에서' (580s),맞음,3아웃 — 삼진으로 보임
+4PR9g8KArTo,579.3,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '스윙 삼진 이번 이닝 들어와서 소현준 선수의 투구 패턴에도 변화가 좀 있었고요. 결과는 삼진 삼진 그러니까 이제 제2라운드에서' (580s); [점수판] 삼진 표시(K) (583s),맞음,아웃 — 포수 포구(삼진으로 보임)
+4PR9g8KArTo,595.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공 3아웃
+4PR9g8KArTo,624.1,strikeout,True,out,video_only,점수판 아웃+2 득점+0 주자 000→000,틀림,삼진(6K 표시) — 다음 판독 2사(아웃 하나는 못 봄)
+4PR9g8KArTo,634.9,out,True,,,,놓침,뜬공 3아웃
+4PR9g8KArTo,651.9,out_any,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,아웃으로 보임 — 6회초 첫 판독이 1사(장면 못 봄)
+4PR9g8KArTo,665.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
+4PR9g8KArTo,674.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,출루 — 내야 타구로 보임
+4PR9g8KArTo,692.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,뜬공 3아웃
+4PR9g8KArTo,718.5,out_any,False,out,video_only,점수판 아웃+2 득점+0 주자 000→000,맞음,아웃으로 보임 — 다음 판독 2사(장면 못 봄)
+4PR9g8KArTo,731.5,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '스윙 3진으로 1인 종결.' (730s),맞음,3아웃 — 장면 못 봄
+4PR9g8KArTo,743.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
+4PR9g8KArTo,760.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,아웃(타구) — 2루 주자 그대로
+4PR9g8KArTo,776.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,땅볼 3아웃
+4PR9g8KArTo,806.8,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [점수판] 삼진 표시(K) (811s),맞음,삼진(1K 표시)
+4PR9g8KArTo,811.8,out,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
+4PR9g8KArTo,821.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
+4PR9g8KArTo,835.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,뜬공 3아웃
+4PR9g8KArTo,870.6,homerun,True,homerun out out,confirmed video_only video_only,점수판 아웃+0 득점+1 주자 000→000; 해설 '박승규의 올 한국 시리즈 첫 번째 홈런이 터집니다. 스코어 5대1 넉 점 차로 달아납니다. 선수 라이언스.' (900s); [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (874s) | 점수판 아웃+2 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,솔로 홈런 5-1
+4PR9g8KArTo,931.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (935s); [점수판] 삼진 표시(K) (935s),맞음,삼진(2K 표시)
+4PR9g8KArTo,940.7,walk_or_hbp,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,틀림,3-1에서 1루 — 볼넷으로 보임
+4PR9g8KArTo,946.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,뜬공 — 경기 끝

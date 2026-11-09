@@ -1667,3 +1667,72 @@ def test_swing_on_ball_four_with_a_close_up_is_a_walk():
     assert j.code == "walk" and j.detail.get("observed") == "swing_on_ball_four"
     (j,) = judge(reads, swung + [_view(4, "in_play")])
     assert j.code == "reach"
+
+
+def test_runs_with_two_outs_before_the_inning_ends_came_from_a_non_out_play():
+    """2아웃에서 점수가 나고 반 이닝이 끝났다 — 세 번째 아웃 플레이로는 점수가 안 난다(5.08(a)).
+    하이라이트가 적시타 뒤 3아웃을 건너뛰면 '아웃'으로 나갔다(조정용·PO 1차전)."""
+    third = (False, False, True)
+    reads = twice(R(0, outs=2, bases=third, balls=1, half="top"), R(20, half="bot", away=1))
+    (j,) = judge(reads, [])
+    assert j.code == "reach" and j.detail.get("merged")
+    # 반 이닝을 여럿 건너뛰면(투수 모음) 점수가 어느 반 이닝 것인지 모른다 — 예전처럼 아웃
+    skip = twice(R(0, outs=2, bases=third, balls=1, half="top"),
+                 R(20, inning=4, half="top", away=1))
+    assert judge(skip, [])[0].code == "out"
+    # 상대 팀(다음 반 이닝 공격 팀)의 점수만 늘었으면 아니다
+    other = twice(R(0, outs=2, bases=third, balls=1, half="top"), R(20, half="bot", home=1))
+    assert judge(other, [])[0].code == "out"
+
+
+# ── 2026-11-09 한국시리즈 3차전(KBS N 상자, 처음 본 경기) ──────────────────────
+
+
+def test_inning_read_backwards_is_repaired_between_stable_states():
+    """KS3 — VLM이 7회초~8회말 판독 35장을 '1회'로 읽었다(점수판은 7▲·8▲·8▼). 회차는 거꾸로 가지
+    않고 점수도 줄지 않으니 회차만 틀렸다 — 초·말과 아웃 순서로 다시 매긴다."""
+    on2 = (False, True, False)
+    # 실제 경기처럼 앞뒤 안정 상태가 더 많이 읽혔다(앞 경기 판독이 사슬을 받친다)
+    seen = [R(0, inning=7, outs=1, bases=on2, balls=2, strikes=1, away=1, home=4)] * 8 + [
+        R(10, inning=1, outs=2, bases=on2, strikes=2, away=1, home=4)] * 3 + [
+        R(30, inning=1, strikes=1, away=1, home=4)] * 3 + [
+        R(40, inning=1, outs=1, away=1, home=4)] * 3 + [
+        R(60, inning=8, half="bot", outs=1, balls=3, strikes=1, away=1, home=4)] * 8
+    stable = stabilize(seen, min_repeat=1)
+    assert [(r.inning, r.half, r.outs) for r in stable] == [
+        (7, "top", 1), (7, "top", 2), (8, "top", 0), (8, "top", 1), (8, "bot", 1)]
+    # 한 장 회차 오독이 진짜 판독을 끌어올리지 않는다 — 안정 상태 사이만 고친다
+    early = [R(0, inning=2, outs=1)] * 2 + [R(5, inning=4, outs=1)] + [R(10, inning=2, outs=2)] * 2
+    assert [r.inning for r in stabilize(early, min_repeat=1)] == [2, 2]
+    # 아웃 오독 한 장('1회 무사' 한 장)이 회차를 올리지 않는다 — 다음 회차는 두 번 이상 읽혔을 때만
+    noisy = [R(0, inning=7, outs=1, away=1, home=4)] * 8 + [
+        R(10, inning=1, outs=1, away=1, home=4)] * 3 + [
+        R(20, inning=1, away=1, home=4)] + [R(30, inning=1, outs=2, away=1, home=4)] * 3 + [
+        R(60, inning=8, half="bot", outs=1, away=1, home=4)] * 8
+    assert all(r.inning != 8 or r.half == "bot" for r in stabilize(noisy, min_repeat=1))
+
+
+def test_single_read_that_starts_the_next_half_is_not_a_spike():
+    """KS3 — 새 반 이닝 첫 판독('5회초 무사', 한 장)이 다음 판독('2사', 타석을 건너뜀)과 한 번에 안
+    이어진다고 버려졌다. 앞 → 뒤가 반 이닝을 넘으면 늘 '가능'이라 생긴 일 — 새 반 이닝에서 이어지면
+    남긴다(삼진 6K를 놓침)."""
+    seen = [R(0, half="bot", outs=2, balls=1, strikes=1)] * 2 + [
+        R(30, inning=5, balls=1, strikes=1)] + [R(40, inning=5, outs=2, strikes=2)] * 2
+    assert [(r.inning, r.outs) for r in stabilize(seen, min_repeat=1)] == [(3, 2), (5, 0), (5, 2)]
+
+
+def test_board_read_after_the_next_batter_saw_pitches_is_not_that_pitch():
+    """KS3 — 삼진 뒤 점수판이 다음 타자 3-1에서야 읽혀 그 투구 화면 도중이 됐다. 새 타자 카운트가
+    벌써 진행됐으면 진행 중인 투구는 새 타자 것 — 앞 타석 결과를 그 투구에 붙이지 않는다."""
+    k = twice(R(0, outs=1, strikes=2), R(10, outs=2, balls=3, strikes=1))
+    (j,) = [j for j in judge(k, _pitch(8, 12)) if j.transition is not None]
+    assert "pitch_t" not in j.detail
+
+
+def test_game_end_out_in_the_top_half_ignores_home_run_recap_words():
+    """KS3 — 9회초 2사(홈 팀 리드) 뒤 마지막 투구가 경기 끝 아웃인데, 경기를 정리하는 해설의 '홈런'
+    때문에 끝내기 홈런으로 보고 막았다. 초 공격엔 끝내기가 없다."""
+    last = twice(R(0, inning=9, outs=2, bases=(True, False, False), home=5, away=1))
+    cues = [_view(20, "in_play"), Cue(30, "speech", "구자욱의 홈런으로 앞서 나간 삼성")]
+    codes = [j.code for j in judge(last, cues, finished=True)]
+    assert codes == ["out"]

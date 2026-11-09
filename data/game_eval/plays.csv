@@ -86,7 +86,7 @@ T93FGIYBM8E,637.4,?,False,walk,video_only,점수판 아웃+0 득점+0 주자 010
 T93FGIYBM8E,656.4,?,False,,,,제외,투수 교체 — 결과 모름
 T93FGIYBM8E,684.7,out,False,out runner,video_only video_only,점수판 아웃+1 득점+0 주자 110→110 | 점수판 아웃+0 득점+0 주자 110→101,맞음,"주자 진루, 타자 아웃"
 T93FGIYBM8E,696.7,none,False,runner,video_only,점수판 아웃+0 득점+0 주자 101→011,헛판정,
-T93FGIYBM8E,708.4,reach,True,out,video_only,점수판 아웃+1 득점+2 주자 011→000,틀림,2타점 안타 7-4
+T93FGIYBM8E,708.4,reach,True,reach,video_only,점수판 아웃+1 득점+2 주자 011→000,맞음,2타점 안타 7-4
 T93FGIYBM8E,728.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
 T93FGIYBM8E,738.0,out_any,False,strikeout reach,video_only video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (743s) | 점수판 아웃+0 득점+0 주자 000→000,맞음,
 T93FGIYBM8E,751.5,hbp,True,hbp,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (758s),맞음,몸에 맞는 공(타석에서 몸을 숙임 — 다시 보고 고침)
@@ -110,7 +110,7 @@ wyC8BnovUUA,146.4,?,False,reach,video_only,점수판 아웃+0 득점+0 주자 00
 wyC8BnovUUA,154.9,none,True,,,,조용함,
 wyC8BnovUUA,161.1,steal,True,steal,video_only,"점수판 아웃+0 득점+0 주자 100→010; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 0.9배 미끄러짐, 170.4~170.8초 (170s)",맞음,2루 도루
 wyC8BnovUUA,174.9,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→001,맞음,적시타 1-0
-wyC8BnovUUA,223.0,reach,False,out,video_only,점수판 아웃+1 득점+1 주자 001→000,틀림,적시타 2-0 — 뒤에 3아웃
+wyC8BnovUUA,223.0,reach,False,reach,video_only,점수판 아웃+1 득점+1 주자 001→000,맞음,적시타 2-0 — 뒤에 3아웃
 wyC8BnovUUA,255.7,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
 wyC8BnovUUA,270.0,double_play,True,double_play,video_only,점수판 아웃+2 득점+0 주자 100→000,맞음,병살
 wyC8BnovUUA,298.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공 3아웃
