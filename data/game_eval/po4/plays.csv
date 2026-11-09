@@ -18,8 +18,8 @@ ejMdL3m6Dpc,202.2,none,True,,,,조용함,볼
 ejMdL3m6Dpc,205.7,none,True,balk,video_only,점수판 아웃+0 득점+0 주자 110→011,헛판정,포수 클로즈업
 ejMdL3m6Dpc,211.2,none,True,reach,video_only,점수판 아웃+0 득점+0 주자 011→011,헛판정,카운트만
 ejMdL3m6Dpc,228.2,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 011→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (235s),맞음,3아웃 — 삼진으로 보임
-ejMdL3m6Dpc,240.0,none,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,헛판정,
-ejMdL3m6Dpc,244.2,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,아웃 — 다음 판독은 2사(아웃 하나는 못 봄)
+ejMdL3m6Dpc,240.0,none,True,,,,조용함,
+ejMdL3m6Dpc,244.2,out_any,True,out out,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,아웃 — 다음 판독은 2사(아웃 하나는 못 봄)
 ejMdL3m6Dpc,261.5,none,True,,,,조용함,카운트만
 ejMdL3m6Dpc,278.8,out_any,True,,,,놓침,3아웃
 ejMdL3m6Dpc,290.0,reach,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,틀림,안타
@@ -28,8 +28,8 @@ ejMdL3m6Dpc,299.3,none,True,reach,video_only,점수판 아웃+0 득점+0 주자 
 ejMdL3m6Dpc,301.3,none,True,,,,조용함,파울
 ejMdL3m6Dpc,325.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→101,맞음,안타 — 1·2루
 ejMdL3m6Dpc,328.1,same,True,,,,제외,같은 타구 이어진 화면
-ejMdL3m6Dpc,336.1,none,True,out,video_only,점수판 아웃+1 득점+0 주자 101→101,헛판정,카운트만
-ejMdL3m6Dpc,353.8,double_play,False,out,video_only,점수판 아웃+1 득점+0 주자 101→000,틀림,병살로 보임 — 이닝 끝
+ejMdL3m6Dpc,336.1,none,True,,,,조용함,카운트만
+ejMdL3m6Dpc,353.8,double_play,False,strikeout out,video_only video_only,점수판 아웃+1 득점+0 주자 101→101; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (361s) | 점수판 아웃+1 득점+0 주자 101→000,틀림,병살로 보임 — 이닝 끝
 ejMdL3m6Dpc,400.1,none,True,,,,조용함,
 ejMdL3m6Dpc,404.1,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
 ejMdL3m6Dpc,423.4,none,True,,,,조용함,다시보기
@@ -50,10 +50,10 @@ ejMdL3m6Dpc,564.8,none,True,,,,조용함,
 ejMdL3m6Dpc,567.6,none,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (559s),헛판정,
 ejMdL3m6Dpc,573.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
 ejMdL3m6Dpc,575.6,same,True,,,,제외,같은 타구 이어진 화면
-ejMdL3m6Dpc,597.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,내야안타
+ejMdL3m6Dpc,597.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 배트를 휘두름 (598s),맞음,내야안타
 ejMdL3m6Dpc,598.8,same,True,,,,제외,같은 타구 이어진 화면
 ejMdL3m6Dpc,614.8,none,True,,,,조용함,카운트만
-ejMdL3m6Dpc,622.6,reach,True,hbp reach,video_only video_only,점수판 아웃+0 득점+0 주자 100→101; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (628s) | 점수판 아웃+0 득점+0 주자 101→011,맞음,안타 — 1·2루
+ejMdL3m6Dpc,622.6,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 100→101 | 점수판 아웃+0 득점+0 주자 101→011,맞음,안타 — 1·2루
 ejMdL3m6Dpc,639.6,none,True,,,,조용함,
 ejMdL3m6Dpc,648.6,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 011→000,맞음,3아웃 — 삼진으로 보임
 ejMdL3m6Dpc,650.9,none,True,,,,조용함,

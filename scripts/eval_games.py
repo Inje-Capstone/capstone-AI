@@ -3,8 +3,9 @@
 
 정답은 투구 화면마다 하나다: 그 투구부터 다음 투구까지 사이에 끝난 타석의 결과.
 엔진 판정의 시각(새 점수판이 처음 보인 때)이 그 투구 화면이 끝난 뒤부터 다음 투구 화면이 끝나기
-전까지면 그 정답의 판정으로 본다. 결과는 투구가 끝나야 보이고, 하이라이트는 다시보기가 길어
-새 점수판이 다음 투구 화면에서야 보이는 일이 많다.
+전까지면 그 정답의 판정으로 본다. 엔진이 '이 투구의 결과'를 댄 판정(`pitch_t` — 투구 순간 뒤
+그 투구 화면 도중에 바뀐 점수판)은 그 투구 화면 끝을 시각으로 쓴다. 결과는 투구가 끝나야
+보이고, 하이라이트는 다시보기가 길어 새 점수판이 다음 투구 화면에서야 보이는 일이 많다.
 
 - 맞음: 그 칸의 판정 중 하나가 정답과 같은 종류
 - 틀림: 판정은 냈는데 종류가 다름
@@ -114,7 +115,8 @@ def engine_judgments(snap: dict[str, Any]) -> list[dict[str, Any]]:
     for j in judge_checked(readings, cues, min_repeat=repeat, finished=True):
         if j.kind == "sub":
             continue
-        out.append({"t": round(j.t, 1), "code": j.code, "kind": j.kind,
+        # 엔진이 '이 투구의 결과'라고 댄 판정(투구 화면 도중 바뀐 점수판)은 그 투구 화면 끝
+        out.append({"t": round(j.detail.get("pitch_t", j.t), 1), "code": j.code, "kind": j.kind,
                     "confidence": round(j.confidence, 2), "check": j.detail.get("check", ""),
                     "merged": bool(j.detail.get("merged")), "evidence": j.evidence})
     return out

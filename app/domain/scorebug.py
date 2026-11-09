@@ -153,10 +153,22 @@ def _drop_spikes(runs: list[tuple[Reading, int]]) -> list[tuple[Reading, int]]:
             if n >= 2 and _skippable(a, r) and _skippable(r, c):
                 out.append((r, n))
                 continue
-            if possible_step(a, c) and not (possible_step(a, r) and possible_step(r, c)):
+            spike = possible_step(a, c) and not (possible_step(a, r) and possible_step(r, c))
+            if spike and not _next_is_spike(runs, i, a):
                 continue
         out.append((r, n))
     return out
+
+
+def _next_is_spike(runs: list[tuple[Reading, int]], i: int, a: Reading) -> bool:
+    """여러 번 읽힌 상태 `runs[i]`와 안 맞는 다음 판독이 한 번만 읽힌 것이고, 그 다음 상태는
+    이 상태에서 한 번에 올 수 있으면 — 튄 것은 다음 판독이다(KS1: 5번 읽힌 '1사 2루 2점'이
+    한 번 읽힌 '2사 주자 없음'(태그업 주자가 3루에 그려지기 전) 때문에 버려져 2타점 2루타를 놓침).
+    """
+    r, n = runs[i]
+    if n < 2 or i + 2 >= len(runs) or runs[i + 1][1] != 1:
+        return False
+    return possible_step(a, r) and possible_step(r, runs[i + 2][0])
 
 
 def _skippable(a: Reading, b: Reading) -> bool:
@@ -246,6 +258,17 @@ def single_runner_advance(before: Bases, after: Bases) -> Optional[int]:
         if tuple(moved) == tuple(after):
             return i + 2
     return None
+
+
+def forced_to_first(before: Bases, after: Bases, runs: int) -> bool:
+    """볼넷·몸에 맞는 공의 모양 — 타자가 1루, 밀려난 주자만 한 베이스씩(5.05(b)(1)).
+
+    1루부터 이어진 주자만 움직이고, 득점은 만루에서 하나뿐이다. 2·3루 주자가 1루 빈 채로
+    들어왔으면 볼넷이 아니다(KS1: 2·3루 2타점 적시타가 3볼에서 안 맞은 것으로 보여 '볼넷').
+    """
+    first, second, third = before
+    forced = (True, first or second, (first and second) or third)
+    return tuple(after) == forced and runs == (1 if all(before) else 0)
 
 
 def runner_removed(before: Bases, after: Bases) -> bool:
