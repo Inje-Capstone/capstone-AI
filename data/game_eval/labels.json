@@ -2850,9 +2850,9 @@
      "t": 519.8,
      "pitch_end": 523.5,
      "end": 543.5,
-     "code": "out",
+     "code": "strikeout",
      "sure": true,
-     "note": "1루 땅볼 3아웃"
+     "note": "헛스윙 삼진 3아웃(다시 보고 고침 — 타구 없이 투수가 마운드를 내려가고 해설 '스윙 스트라이크 아웃! 3진으로')"
     },
     {
      "t": 543.5,
@@ -4190,6 +4190,444 @@
      "t": 1020.3,
      "pitch_end": 1025.3,
      "end": 1040.3,
+     "code": "out_any",
+     "sure": true,
+     "note": "경기 끝 — 마지막 아웃"
+    }
+   ]
+  },
+  "luegoydhdxE": {
+   "title": "시험용 · 2026 KBO 한국시리즈 1차전 삼성-KT(수원) 하이라이트 · TVING",
+   "layout": "tving_postseason",
+   "plays": [
+    {
+     "t": 133.1,
+     "pitch_end": 134.4,
+     "end": 147.9,
+     "code": "reach",
+     "sure": true,
+     "note": "내야안타로 보임"
+    },
+    {
+     "t": 147.9,
+     "pitch_end": 150.1,
+     "end": 168.7,
+     "code": "out",
+     "sure": true,
+     "note": "외야 뜬공"
+    },
+    {
+     "t": 168.7,
+     "pitch_end": 171.9,
+     "end": 188.7,
+     "code": "double_play",
+     "sure": true,
+     "note": "풀카운트 삼진 + 2루 도루 저지(1K) — 3아웃"
+    },
+    {
+     "t": 188.7,
+     "pitch_end": 192.4,
+     "end": 209.9,
+     "code": "reach",
+     "sure": true,
+     "note": "안타"
+    },
+    {
+     "t": 209.9,
+     "pitch_end": 213.7,
+     "end": 227.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(1K 표시)"
+    },
+    {
+     "t": 227.5,
+     "pitch_end": 230.5,
+     "end": 243.2,
+     "code": "steal",
+     "sure": true,
+     "note": "2루 도루"
+    },
+    {
+     "t": 243.2,
+     "pitch_end": 245.2,
+     "end": 252.0,
+     "code": "?",
+     "sure": false,
+     "note": "3루로 — 폭투·도루 못 가림"
+    },
+    {
+     "t": 252.0,
+     "pitch_end": 254.7,
+     "end": 279.0,
+     "code": "walk",
+     "sure": true,
+     "note": "볼넷 — 1·3루"
+    },
+    {
+     "t": 279.0,
+     "pitch_end": 283.3,
+     "end": 331.8,
+     "code": "reach",
+     "sure": true,
+     "note": "2타점 2루타 2-0"
+    },
+    {
+     "t": 331.8,
+     "pitch_end": 336.3,
+     "end": 350.8,
+     "code": "out",
+     "sure": true,
+     "note": "뜬공 — 주자 3루로"
+    },
+    {
+     "t": 350.8,
+     "pitch_end": 354.1,
+     "end": 370.1,
+     "code": "reach",
+     "sure": false,
+     "note": "타점 타구 3-0 — 3아웃은 못 봄"
+    },
+    {
+     "t": 370.1,
+     "pitch_end": 371.4,
+     "end": 403.4,
+     "code": "out",
+     "sure": true,
+     "note": "땅볼 3아웃"
+    },
+    {
+     "t": 403.4,
+     "pitch_end": 412.1,
+     "end": 426.7,
+     "code": "out_any",
+     "sure": false,
+     "note": "아웃으로 보임 — 앞 상태 가려짐"
+    },
+    {
+     "t": 426.7,
+     "pitch_end": 431.2,
+     "end": 439.9,
+     "code": "out",
+     "sure": true,
+     "note": "땅볼 3아웃"
+    },
+    {
+     "t": 439.9,
+     "pitch_end": 442.9,
+     "end": 464.2,
+     "code": "reach",
+     "sure": true,
+     "note": "안타"
+    },
+    {
+     "t": 464.2,
+     "pitch_end": 467.7,
+     "end": 517.8,
+     "code": "homerun",
+     "sure": true,
+     "note": "2점 홈런 5-0"
+    },
+    {
+     "t": 517.8,
+     "pitch_end": 523.5,
+     "end": 526.5,
+     "code": "walk",
+     "sure": true,
+     "note": "볼넷"
+    },
+    {
+     "t": 526.5,
+     "pitch_end": 530.0,
+     "end": 540.3,
+     "code": "out_any",
+     "sure": false,
+     "note": "아웃 — 다음 판독 2사 2루(하나는 못 봄)"
+    },
+    {
+     "t": 540.3,
+     "pitch_end": 545.0,
+     "end": 554.8,
+     "code": "?",
+     "sure": false,
+     "note": "결과 모름"
+    },
+    {
+     "t": 554.8,
+     "pitch_end": 559.5,
+     "end": 567.6,
+     "code": "?",
+     "sure": false,
+     "note": "결과 모름"
+    },
+    {
+     "t": 567.6,
+     "pitch_end": 572.3,
+     "end": 583.3,
+     "code": "walk",
+     "sure": true,
+     "note": "볼넷 — 만루"
+    },
+    {
+     "t": 583.3,
+     "pitch_end": 593.1,
+     "end": 594.8,
+     "code": "none",
+     "sure": true,
+     "note": "볼"
+    },
+    {
+     "t": 594.8,
+     "pitch_end": 599.1,
+     "end": 614.6,
+     "code": "out",
+     "sure": true,
+     "note": "뜬공 3아웃"
+    },
+    {
+     "t": 614.6,
+     "pitch_end": 625.6,
+     "end": 640.4,
+     "code": "out_any",
+     "sure": false,
+     "note": "아웃 — 장면 못 봄"
+    },
+    {
+     "t": 640.4,
+     "pitch_end": 643.9,
+     "end": 664.4,
+     "code": "out_any",
+     "sure": true,
+     "note": "아웃 — 이닝 끝까지 못 봄"
+    },
+    {
+     "t": 664.4,
+     "pitch_end": 670.2,
+     "end": 713.4,
+     "code": "homerun",
+     "sure": true,
+     "note": "솔로 홈런 6-0"
+    },
+    {
+     "t": 713.4,
+     "pitch_end": 718.7,
+     "end": 720.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(6K 표시)(다시 보고 고침 — 타구 없이 점수판이 '6K 0-0 1아웃', 해설 '두 타자 연속 3진')"
+    },
+    {
+     "t": 720.5,
+     "pitch_end": 727.7,
+     "end": 745.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(7K 표시)"
+    },
+    {
+     "t": 745.7,
+     "pitch_end": 748.7,
+     "end": 769.0,
+     "code": "out",
+     "sure": true,
+     "note": "땅볼 3아웃"
+    },
+    {
+     "t": 769.0,
+     "pitch_end": 772.8,
+     "end": 799.5,
+     "code": "reach",
+     "sure": true,
+     "note": "내야안타"
+    },
+    {
+     "t": 799.5,
+     "pitch_end": 802.0,
+     "end": 819.3,
+     "code": "homerun",
+     "sure": true,
+     "note": "2점 홈런 8-0"
+    },
+    {
+     "t": 819.3,
+     "pitch_end": 821.3,
+     "end": 836.3,
+     "code": "reach",
+     "sure": true,
+     "note": "안타"
+    },
+    {
+     "t": 836.3,
+     "pitch_end": 840.6,
+     "end": 880.4,
+     "code": "homerun",
+     "sure": true,
+     "note": "구자욱 2점 홈런 2-8"
+    },
+    {
+     "t": 880.4,
+     "pitch_end": 883.1,
+     "end": 900.9,
+     "code": "reach",
+     "sure": true,
+     "note": "안타"
+    },
+    {
+     "t": 900.9,
+     "pitch_end": 908.6,
+     "end": 914.1,
+     "code": "reach",
+     "sure": true,
+     "note": "안타 — 1·2루"
+    },
+    {
+     "t": 914.1,
+     "pitch_end": 916.6,
+     "end": 967.2,
+     "code": "reach",
+     "sure": false,
+     "note": "내야 타구 출루로 보임 — 만루"
+    },
+    {
+     "t": 967.2,
+     "pitch_end": 970.0,
+     "end": 993.7,
+     "code": "out_any",
+     "sure": false,
+     "note": "땅볼 타점으로 보임 3-8 — 다음 판독 1사 만루(하나는 못 봄)"
+    },
+    {
+     "t": 993.7,
+     "pitch_end": 996.5,
+     "end": 1001.7,
+     "code": "out_any",
+     "sure": true,
+     "note": "삼진으로 보임 — 2사 만루"
+    },
+    {
+     "t": 1001.7,
+     "pitch_end": 1004.7,
+     "end": 1063.8,
+     "code": "reach",
+     "sure": true,
+     "note": "2타점 적시타 5-8"
+    },
+    {
+     "t": 1063.8,
+     "pitch_end": 1071.8,
+     "end": 1079.3,
+     "code": "out_any",
+     "sure": true,
+     "note": "3아웃 — 삼진으로 보임"
+    },
+    {
+     "t": 1079.3,
+     "pitch_end": 1084.1,
+     "end": 1097.3,
+     "code": "walk",
+     "sure": true,
+     "note": "볼넷"
+    },
+    {
+     "t": 1097.3,
+     "pitch_end": 1099.1,
+     "end": 1117.6,
+     "code": "reach",
+     "sure": true,
+     "note": "안타 — 1·2루"
+    },
+    {
+     "t": 1117.6,
+     "pitch_end": 1123.6,
+     "end": 1138.9,
+     "code": "out_any",
+     "sure": true,
+     "note": "삼진으로 보임 — 1사"
+    },
+    {
+     "t": 1138.9,
+     "pitch_end": 1142.6,
+     "end": 1168.2,
+     "code": "reach",
+     "sure": true,
+     "note": "적시타 6-8"
+    },
+    {
+     "t": 1168.2,
+     "pitch_end": 1178.7,
+     "end": 1194.9,
+     "code": "walk",
+     "sure": true,
+     "note": "볼넷 — 만루(다시 보고 고침 — 3-0에서 안 치고 배트를 놓고 1루로, 점수판 0-0 만루)"
+    },
+    {
+     "t": 1194.9,
+     "pitch_end": 1197.4,
+     "end": 1228.7,
+     "code": "out",
+     "sure": true,
+     "note": "뜬공 — 2사 만루"
+    },
+    {
+     "t": 1228.7,
+     "pitch_end": 1230.7,
+     "end": 1284.3,
+     "code": "reach",
+     "sure": false,
+     "note": "내야 타구 타점으로 보임 7-8 — 3아웃은 못 봄"
+    },
+    {
+     "t": 1284.3,
+     "pitch_end": 1293.8,
+     "end": 1301.0,
+     "code": "walk",
+     "sure": false,
+     "note": "3-2 볼넷으로 보임 — 다음 판독 2사 1루(아웃 하나 못 봄)"
+    },
+    {
+     "t": 1301.0,
+     "pitch_end": 1303.5,
+     "end": 1326.3,
+     "code": "reach",
+     "sure": true,
+     "note": "안타 — 1·2루"
+    },
+    {
+     "t": 1326.3,
+     "pitch_end": 1335.6,
+     "end": 1342.3,
+     "code": "walk_or_hbp",
+     "sure": true,
+     "note": "3-0에서 1루 — 볼넷·사구 못 가림"
+    },
+    {
+     "t": 1342.3,
+     "pitch_end": 1344.3,
+     "end": 1359.8,
+     "code": "out",
+     "sure": true,
+     "note": "땅볼 3아웃"
+    },
+    {
+     "t": 1359.8,
+     "pitch_end": 1364.3,
+     "end": 1380.1,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진(1K 표시)"
+    },
+    {
+     "t": 1380.1,
+     "pitch_end": 1396.4,
+     "end": 1408.1,
+     "code": "out_any",
+     "sure": true,
+     "note": "삼진으로 보임 — 2사"
+    },
+    {
+     "t": 1408.1,
+     "pitch_end": 1413.6,
+     "end": 1428.6,
      "code": "out_any",
      "sure": true,
      "note": "경기 끝 — 마지막 아웃"

@@ -11,7 +11,7 @@ p-BBD0DMTYw,327.3,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자
 p-BBD0DMTYw,369.4,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→100,맞음,적시타 2-1
 p-BBD0DMTYw,434.7,homerun,True,homerun out,confirmed video_only,"점수판 아웃+0 득점+2 주자 100→000; 해설 '2번 타석 상당히 중요한 정말 분위기를 가지고 올 수 있는 홈런을 때려냅니다. 2, 4, 5의 연속 적시타가 나오면서 2, 4, 5의 연속 적시타가 나오면서' (460s); [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (437s) | 점수판 아웃+1 득점+0 주자 000→000",맞음,2점 홈런 4-1
 p-BBD0DMTYw,494.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
-p-BBD0DMTYw,519.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,1루 땅볼 3아웃
+p-BBD0DMTYw,519.8,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (524s),맞음,헛스윙 삼진 3아웃(다시 보고 고침 — 타구 없이 투수가 마운드를 내려가고 해설 '스윙 스트라이크 아웃! 3진으로')
 p-BBD0DMTYw,543.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,내야 타구 출루
 p-BBD0DMTYw,571.8,walk,True,hbp,confirmed,점수판 아웃+0 득점+0 주자 100→110; 해설 '- 초구에 맞았습니다. 연속 4사구.' (580s),틀림,볼넷 — 1·2루
 p-BBD0DMTYw,581.3,hbp,True,walk,confirmed,점수판 아웃+0 득점+0 주자 110→111; 해설 '3:1의 볼카운트입니다. 볼넷이에요. 구재혁 선수를 볼넷으로 던져내리고 있습니다.' (570s),틀림,몸에 맞는 공 — 만루
@@ -19,18 +19,18 @@ p-BBD0DMTYw,603.6,none,True,walk,confirmed,점수판 아웃+0 득점+1 주자 11
 p-BBD0DMTYw,624.4,walk,True,,,,놓침,밀어내기 볼넷 5-1
 p-BBD0DMTYw,648.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→000,맞음,3루 땅볼 3아웃
 p-BBD0DMTYw,669.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,외야 뜬공 3아웃
-p-BBD0DMTYw,713.4,reach,True,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,내야안타
+p-BBD0DMTYw,713.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,내야안타
 p-BBD0DMTYw,743.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
 p-BBD0DMTYw,771.3,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 110→011,맞음,적시 2루타 6-1
-p-BBD0DMTYw,805.5,sac_fly,True,sac_fly out walk,refined video_only video_only,점수판 아웃+1 득점+1 주자 011→001; 해설 '박성규의 희생플라이 타점으로 삼성이 또 한 점을 더했습니다. 7대1입니다. 박성규 선수 활약이 좋습니다.' (820s) | 점수판 아웃+1 득점+0 주자 001→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,"희생플라이 7-1 — 2루 주자 3루로(점수판은 아웃 먼저, 득점 나중)"
-p-BBD0DMTYw,831.6,walk,True,,,,놓침,볼넷
+p-BBD0DMTYw,805.5,sac_fly,True,sac_fly out,refined video_only,점수판 아웃+1 득점+1 주자 011→001; 해설 '박성규의 희생플라이 타점으로 삼성이 또 한 점을 더했습니다. 7대1입니다. 박성규 선수 활약이 좋습니다.' (820s) | 점수판 아웃+1 득점+0 주자 001→000,맞음,"희생플라이 7-1 — 2루 주자 3루로(점수판은 아웃 먼저, 득점 나중)"
+p-BBD0DMTYw,831.6,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (840s),맞음,볼넷
 p-BBD0DMTYw,841.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,2루 포스아웃 — 타자 1루
-p-BBD0DMTYw,854.8,reach,True,reach,refined,점수판 아웃+0 득점+0 주자 010→101,맞음,안타 — 1·3루
+p-BBD0DMTYw,854.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 010→101,맞음,안타 — 1·3루
 p-BBD0DMTYw,870.9,none,True,,,,조용함,파울
 p-BBD0DMTYw,879.9,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 101→101; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (883s); [점수판] 삼진 표시(K) (884s),맞음,삼진(3K 표시)
 p-BBD0DMTYw,920.2,reach,True,balk reach,video_only video_only,점수판 아웃+0 득점+1 주자 101→010 | 점수판 아웃+0 득점+0 주자 010→101,맞음,적시타 7-2
 p-BBD0DMTYw,967.4,strikeout,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 101→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (972s),맞음,삼진으로 보임 — 3아웃
-p-BBD0DMTYw,993.0,homerun,True,out homerun out,video_only refined video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+1 주자 000→000; 해설 '-정말 완벽한 타이밍에서 큰 타구를 만들어냈습니다.-역대 플레이오프 최고령 홈런입니다.' (1020s) | 점수판 아웃+2 득점+0 주자 000→000,맞음,최형우 솔로 홈런 8-2
+p-BBD0DMTYw,993.0,homerun,True,out homerun out,video_only video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+1 주자 000→000 | 점수판 아웃+2 득점+0 주자 000→000,맞음,최형우 솔로 홈런 8-2
 p-BBD0DMTYw,1062.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
 p-BBD0DMTYw,1079.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,진루타 — 1사 3루
 p-BBD0DMTYw,1094.6,out,True,runner out out,video_only video_only video_only,점수판 아웃+0 득점+0 주자 010→001 | 점수판 아웃+1 득점+1 주자 001→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,1루 땅볼 타점 8-3

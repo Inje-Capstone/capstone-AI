@@ -5,10 +5,10 @@
 | 입력 | 판정 정답 | 오판 |
 |---|---|---|
 | 화면 + 해설 | 17/27 (63%) | 4/27 |
-| 해설만 | 10/27 (37%) | 2/27 |
+| 해설만 | 11/27 (41%) | 2/27 |
 | 화면만 | 7/27 (26%) | 6/27 |
 
-- 화면이 더한 클립 9개: kbo_balk_cuevas, kbo_foultip_k_walkoff, kbo_homesteal_lee, kbo_homesteal_hwang, kbo_doublesteal_japan, kbo_pickoff_ahn, kbo_sf_walkoff_lg, kbo_hr_kim, kbo_checkswing_review
+- 화면이 더한 클립 8개: kbo_balk_cuevas, kbo_foultip_k_walkoff, kbo_homesteal_lee, kbo_homesteal_hwang, kbo_doublesteal_japan, kbo_pickoff_ahn, kbo_sf_walkoff_lg, kbo_checkswing_review
 - 화면 때문에 놓친 클립 2개: kbo_doublesteal_kt, kbo_sf_walkoff_nc
 
 ## 영상 먼저 판정 → 해설 대조
@@ -17,8 +17,8 @@
 
 | 대조 결과 | 점수판 전이 | 단서 대체 |
 |---|---|---|
-| 영상·해설 일치 | 0 | 1 |
-| 영상만(해설 말 없음) | 0 | 6 |
+| 영상·해설 일치 | 0 | 2 |
+| 영상만(해설 말 없음) | 0 | 5 |
 | 해설이 종류를 댐 | 1 | 0 |
 | 해설뿐(영상 판정 없음) | 2 | 2 |
 | 불일치 — 카드 보류 | 0 | 6 |
@@ -50,7 +50,7 @@
 | kbo_headshot_kim | hbp | ✓ | ✓ | ✗ |
 | kbo_sf_walkoff_nc | sac_fly | ✗ dropped_third_strike | ✓ | ✗ dropped_third_strike |
 | kbo_sf_walkoff_lg | sac_fly | ✓ | ✗ | ✗ |
-| kbo_hr_kim | homerun | ✓ | ✗ | ✓ |
+| kbo_hr_kim | homerun | ✓ | ✓ | ✓ |
 | kbo_hr_slam_hilliard | homerun | ✓ | ✓ | ✓ |
 | kbo_squeeze_kia | squeeze | ✗ strikeout | ✗ strikeout | ✗ |
 | kbo_checkswing_review | video_review | ✓ | ✗ | ✗ check_swing,strikeout |

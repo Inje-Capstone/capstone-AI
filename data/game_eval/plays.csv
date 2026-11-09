@@ -1,6 +1,6 @@
 ﻿video,t,truth,sure,engine,check,evidence,verdict,note
 3QYUP4AgNpI,41.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,1회말 김지찬 안타
-3QYUP4AgNpI,52.5,homerun,True,homerun,refined,점수판 아웃+3 득점+2 주자 100→000; 해설 '- 그렇죠.- 조금 더 핵심해져 있는 것 같네요.- 이래부터 터진 김석윤의 투런 홈런. 2대0으로 앞서가는 삼성 마이온즈입니다.' (90s),맞음,김성윤 2점 홈런
+3QYUP4AgNpI,52.5,homerun,True,homerun,refined,점수판 아웃+3 득점+2 주자 100→000; 해설 '- 그렇죠.- 조금 더 핵심해져 있는 것 같네요.- 이래부터 터진 김석윤의 투런 홈런. 2대0으로 앞서가는 삼성 마이온즈입니다.' (90s); [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (55s),맞음,김성윤 2점 홈런
 3QYUP4AgNpI,103.8,out_any,True,strikeout,refined,점수판 아웃+1 득점+0 주자 000→000; 해설 '- 김도영 선수와 어깨를 나란히 할 수 있는 그런 능력 이상을 가지고 있단 말이에요.- 떨어지는 공에 스윙 삼진.' (100s),맞음,2회초 강백호 아웃(삼진으로 보임)
 3QYUP4AgNpI,115.6,none,True,,,,조용함,
 3QYUP4AgNpI,129.1,out_any,False,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '-너픈봉의 헛스윙 삼진.-투아웃.' (130s),맞음,노시환 아웃 — 4·5번 화면 중 어디인지 모름
@@ -20,8 +20,8 @@
 3QYUP4AgNpI,406.6,?,False,runner,video_only,점수판 아웃+0 득점+0 주자 100→010,제외,주자 1→2루(점수판 화소) — 도루·폭투인지 못 봄
 3QYUP4AgNpI,413.6,reach,False,reach,video_only,점수판 아웃+0 득점+0 주자 010→101,맞음,강백호 안타로 보임
 3QYUP4AgNpI,426.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 101→000,맞음,노시환 3아웃(인플레이)
-3QYUP4AgNpI,443.2,?,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,제외,"이재현 — 1루 판정 다시보기, 결과 모름"
-3QYUP4AgNpI,477.5,out_any,False,out,video_only,점수판 아웃+2 득점+0 주자 000→000,맞음,김태연 아웃 — 해설은 헛스윙 삼진
+3QYUP4AgNpI,443.2,?,False,out,video_only,점수판 아웃+3 득점+0 주자 000→000,제외,"이재현 — 1루 판정 다시보기, 결과 모름"
+3QYUP4AgNpI,477.5,out_any,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,김태연 아웃 — 해설은 헛스윙 삼진
 3QYUP4AgNpI,486.7,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,이도윤 2루타
 3QYUP4AgNpI,504.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,심우준 3아웃
 3QYUP4AgNpI,522.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,최인호 안타
@@ -31,7 +31,7 @@
 3QYUP4AgNpI,564.3,none,True,,,,조용함,
 3QYUP4AgNpI,576.3,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,강백호 3아웃
 3QYUP4AgNpI,595.3,?,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→001,제외,"노시환 — 외야 타구, 결과 모름"
-3QYUP4AgNpI,619.1,?,False,out walk,video_only refined,점수판 아웃+1 득점+0 주자 001→001 | 점수판 아웃+0 득점+1 주자 001→100; 해설 '김태현은 볼넷을 얻어냈습니다. 지휘중 36경기에서 4승 5패 2홀드를 기록했던 한화의 7회추 공격이 계속됩니다. 타석에 정은원.' (650s),제외,내야수 다이빙 — 결과 모름
+3QYUP4AgNpI,619.1,?,False,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 001→001 | 점수판 아웃+0 득점+1 주자 001→100,제외,내야수 다이빙 — 결과 모름
 3QYUP4AgNpI,658.9,homerun,True,homerun,video_only,점수판 아웃+1 득점+2 주자 100→000; [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (695s),맞음,정은원 홈런
 3QYUP4AgNpI,692.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,1루 땅볼 3아웃(다시 보고 고침 — 696·700초 점수판은 3아웃 반영 전 2사)
 3QYUP4AgNpI,714.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,김성윤 안타
@@ -48,17 +48,17 @@ T93FGIYBM8E,36.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 
 T93FGIYBM8E,46.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→101,맞음,안타 — 1·2루
 T93FGIYBM8E,62.3,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 101→110,맞음,적시타 0-1
 T93FGIYBM8E,84.8,none,False,,,,조용함,넓은 화면(투구 아님)
-T93FGIYBM8E,91.6,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 110→111 | 점수판 아웃+1 득점+0 주자 111→111,맞음,안타 — 만루
-T93FGIYBM8E,109.3,out_any,True,,,,놓침,삼진으로 보임
+T93FGIYBM8E,91.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 110→111,맞음,안타 — 만루
+T93FGIYBM8E,109.3,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 111→111,맞음,삼진으로 보임
 T93FGIYBM8E,125.9,sac_fly,True,sac_fly,video_only,점수판 아웃+1 득점+1 주자 111→110; [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (128s),맞음,희생플라이 0-2
 T93FGIYBM8E,141.9,none,False,,,,조용함,희생플라이 다시보기
 T93FGIYBM8E,149.1,none,False,,,,조용함,다시보기
 T93FGIYBM8E,157.4,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 110→010,맞음,2타점 2루타 0-4
 T93FGIYBM8E,192.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,땅볼 3아웃
-T93FGIYBM8E,206.9,none,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,헛판정,
-T93FGIYBM8E,216.4,?,False,,,,제외,점수판 없음 — 아웃 하나·출루 하나 순서 모름
-T93FGIYBM8E,233.2,?,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,제외,
-T93FGIYBM8E,243.5,?,False,,,,제외,
+T93FGIYBM8E,206.9,none,True,,,,조용함,
+T93FGIYBM8E,216.4,?,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (226s),제외,점수판 없음 — 아웃 하나·출루 하나 순서 모름
+T93FGIYBM8E,233.2,?,False,,,,제외,
+T93FGIYBM8E,243.5,?,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,제외,
 T93FGIYBM8E,252.0,double_play,True,double_play,refined,점수판 아웃+2 득점+0 주자 100→000; 해설 '- 꿈틀거리는 삼성 타선을 더블 플레이로 이닝을 끝내버리고 있는 LG였습니다.' (260s),맞음,병살 3아웃
 T93FGIYBM8E,270.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,
 T93FGIYBM8E,287.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,
@@ -72,8 +72,8 @@ T93FGIYBM8E,386.1,out,False,out balk,video_only video_only,점수판 아웃+1 �
 T93FGIYBM8E,401.9,reach,True,out,video_only,점수판 아웃+2 득점+2 주자 011→000,틀림,2타점 안타 2-4
 T93FGIYBM8E,429.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
 T93FGIYBM8E,436.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
-T93FGIYBM8E,456.2,out_any,False,out walk,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,3아웃
-T93FGIYBM8E,468.0,walk,True,,,,놓침,볼넷(배트 놓고 1루로 걸어감 — 다시 보고 확인)
+T93FGIYBM8E,456.2,out_any,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,3아웃
+T93FGIYBM8E,468.0,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (471s),맞음,볼넷(배트 놓고 1루로 걸어감 — 다시 보고 확인)
 T93FGIYBM8E,482.0,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 100→001 | 점수판 아웃+0 득점+0 주자 001→011,맞음,2루타 — 주자 3루
 T93FGIYBM8E,513.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 011→011,맞음,
 T93FGIYBM8E,531.3,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 011→100,맞음,2타점 안타 4-4
@@ -88,8 +88,8 @@ T93FGIYBM8E,684.7,out,False,out runner,video_only video_only,점수판 아웃+1 
 T93FGIYBM8E,696.7,none,False,runner,video_only,점수판 아웃+0 득점+0 주자 101→011,헛판정,
 T93FGIYBM8E,708.4,reach,True,out,video_only,점수판 아웃+1 득점+2 주자 011→000,틀림,2타점 안타 7-4
 T93FGIYBM8E,728.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
-T93FGIYBM8E,738.0,out_any,False,strikeout reach reach,video_only video_only video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (743s) | 점수판 아웃+0 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,
-T93FGIYBM8E,751.5,hbp,True,,,,놓침,몸에 맞는 공(타석에서 몸을 숙임 — 다시 보고 고침)
+T93FGIYBM8E,738.0,out_any,False,strikeout reach,video_only video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (743s) | 점수판 아웃+0 득점+0 주자 000→000,맞음,
+T93FGIYBM8E,751.5,hbp,True,hbp,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (758s),맞음,몸에 맞는 공(타석에서 몸을 숙임 — 다시 보고 고침)
 T93FGIYBM8E,781.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,3아웃
 T93FGIYBM8E,797.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
 T93FGIYBM8E,811.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→001,맞음,땅볼 — 주자 3루로
@@ -113,8 +113,8 @@ wyC8BnovUUA,174.9,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자
 wyC8BnovUUA,223.0,reach,False,out,video_only,점수판 아웃+1 득점+1 주자 001→000,틀림,적시타 2-0 — 뒤에 3아웃
 wyC8BnovUUA,255.7,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
 wyC8BnovUUA,270.0,double_play,True,double_play,video_only,점수판 아웃+2 득점+0 주자 100→000,맞음,병살
-wyC8BnovUUA,298.0,out,True,out out,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공 3아웃
-wyC8BnovUUA,311.0,out_any,True,,,,놓침,삼진으로 보임
+wyC8BnovUUA,298.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공 3아웃
+wyC8BnovUUA,311.0,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (325s),맞음,삼진으로 보임
 wyC8BnovUUA,330.1,none,True,,,,조용함,
 wyC8BnovUUA,341.1,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,3아웃
 wyC8BnovUUA,359.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
@@ -135,7 +135,7 @@ wyC8BnovUUA,792.8,out_any,True,,,,놓침,삼진으로 보임
 wyC8BnovUUA,804.8,out_any,False,out,video_only,점수판 아웃+2 득점+0 주자 000→000,맞음,
 wyC8BnovUUA,814.5,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '-3진.-1위 선수가 6회 올라와서 3디 2개 포함. 세 타자만으로 이 링을 깔끔하게 틀어막습니다.' (830s),맞음,3아웃
 wyC8BnovUUA,847.3,out,False,out,video_only,점수판 아웃+3 득점+0 주자 000→000,맞음,땅볼 — 이닝이 합쳐짐
-wyC8BnovUUA,870.1,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,
+wyC8BnovUUA,870.1,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [점수판] 삼진 표시(K) (877s),맞음,
 wyC8BnovUUA,888.4,?,False,reach,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 배트를 휘두름 (890s),제외,안타인지 볼넷인지 모름
 wyC8BnovUUA,917.7,out,False,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,외야 뜬공
 wyC8BnovUUA,949.7,out,False,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,다이빙 캐치로 보임 — 이닝 끝

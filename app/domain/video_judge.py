@@ -28,6 +28,7 @@ from app.domain.scorebug import (
     Reading,
     Transition,
     advanced_all_one_base,
+    forced_to_first,
     is_count_only,
     runner_removed,
     single_runner_advance,
@@ -75,6 +76,8 @@ POSE_TEXT = {"slide_tag": "미끄러져 들어온 주자에게 수비 손이 닿
              IN_PLAY: "투구 뒤 넓은 경기장 화면 — 공이 맞아 나감",
              NO_PLAY: "투구 뒤 선수 클로즈업 — 공이 안 맞음",
              VIEW_UNKNOWN: "투구 뒤 화면으로 공이 맞았는지 못 가름"}
+PITCH_SEEN = "pitch_seen"  # 관절로 잰 투구 순간 — 그 투구 화면이 끝난 때(투구 뒤 화면 단서)와 짝
+POSE_TEXT[PITCH_SEEN] = "투구 순간"
 # 영상 관측이 공식 판정과 갈린 장면 — 판정은 그대로 두고 기록만 한다(오심 검토 후보)
 OBSERVED_TAG_ON_SAFE = "tag_on_safe_runner"
 OBSERVED_SWING_ON_BALL_FOUR = "swing_on_ball_four"
@@ -94,6 +97,7 @@ CUE_KINDS = (
     "umpire_signal",
     "swing", "no_swing",  # 관절로 잰 타자 손 움직임(domain/swing.py)
     "dive",  # 관절로 찾은 슬라이딩 중 몸 아래가 잔디 — 주자가 아니라 수비
+    PITCH_SEEN,  # 관절로 잰 투구 순간 — 판정이 어느 투구의 결과인지(_in_progress_view)
     "speech",  # 해설 키워드 — text에 "보크", "도루" 등
 )
 
@@ -255,9 +259,12 @@ def judge_transition(
         # 뒤). 다른 증거가 없을 때만 — 있으면 다음 홈런의 말을 가져간다(독립 리뷰)
         replay = [c for c in cues if tr.t < c.t <= max(tr.t, tr.after.t) + HR_TALK_SEC]
         hr_word = _speech(replay, *HR_WORDS)
-    # 투구 화면 단서(관절)가 아예 없는 실시간 — 아웃 없이 타자까지 홈을 밟은 모양이면 홈런으로 본다
-    blind = not any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) for c in cues)
-    shape_only = blind and not tr.half_change and not tr.outs_made and one_play(tr)
+    # 이 전이에 투구 화면 단서(관절)가 없으면 — 관절을 안 돌리는 실시간, 관절이 그 투구를 못 본
+    # 녹화본(KS1: 투구 뒤 화면 단서가 빠진 2점 홈런이 '출루') — 아웃 없이 타자까지 홈을 밟은
+    # 모양이면 홈런으로 본다
+    unseen = not any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) and tr.before.t < c.t <= tr.t
+                     for c in cues) and _in_progress_view(tr, cues) is None
+    shape_only = unseen and not tr.half_change and not tr.outs_made and one_play(tr)
     if batter_home and (hr_word or (not tr.half_change and in_play) or shape_only):
         # 홈런은 아웃을 만들지 않는다 — 아웃이 섞였으면 다른 플레이가 합쳐진 전이다
         merged = tr.outs_made > 0 or not one_play(tr)
@@ -339,7 +346,9 @@ def judge_transition(
         if iff and b[0] and b[1] and tr.before.outs <= 1:  # 5.09(a)(5) 무사·1사 1·2루/만루
             return make("call", "infield_fly", 0.4, [iff, _speech(near, "인필드")])
     if tr.outs_made == 0 and tr.count_reset and a[0]:
-        hbp = _has(near, "hit_by_pitch") or _speech(near, *HBP_WORDS)
+        # 볼넷·사구는 밀려난 주자만 간다 — 모양이 안 맞으면 공이 맞아 나간 출루다(낫아웃은 예외)
+        forced = forced_to_first(b, a, tr.runs)
+        hbp = (_has(near, "hit_by_pitch") or _speech(near, *HBP_WORDS)) if forced else None
         if hbp:
             return make("result", "hbp", 0.5, [hbp])
         dts = _strike_three_miss(near) or _speech(near, "낫아웃", "낫 아웃")
@@ -349,10 +358,11 @@ def judge_transition(
             return make("call", "dropped_third_strike", prior,
                         [dts, _speech(near, "낫아웃", "낫 아웃")])
         # 공이 맞아 나갔으면(넓은 경기장 화면) 볼넷이 아니다 — 해설의 '볼넷'은 다른 타석 말이다
-        walk_speech = None if in_play else (_speech(near, *WALK_WORDS) or _has(near, "ball_four"))
+        walk_speech = None if in_play or not forced else (
+            _speech(near, *WALK_WORDS) or _has(near, "ball_four"))
         swung = _swung_last_pitch(near, tr.t, tr.before.t)
         batted = _has(near, "contact") or swung or in_play
-        if tr.before.balls == 3 and not batted:
+        if forced and tr.before.balls == 3 and not batted:
             return make("result", "walk", 0.6,
                         [walk_speech, _took_last_pitch(near, tr.t, tr.before.t), no_play])
         # 3볼에서 휘둘렀는데 1루 — 안타거나, 심판이 체크스윙을 '안 돌았다'로 본 볼넷이다
@@ -360,9 +370,13 @@ def judge_transition(
         if walk_speech:
             return make("result", "walk", 0.5, [walk_speech], **seen)
         if seen:
+            # 휘둘렀는데 투구 뒤 클로즈업(공이 안 맞음)이면 안타가 아니다 — 체크스윙을 '안 돌았다'로
+            # 본 볼넷이다(KS1 3-0 볼넷이 '출루'로, 2026-11-09)
+            if forced and no_play:
+                return make("result", "walk", 0.5, [no_play], **seen)
             return make("result", "reach", 0.5, [swung], **seen)
         # 볼 셋 전·스트라이크 둘 전에 공이 안 맞았는데 1루 — 몸에 맞는 공이다(낫아웃은 2스트라이크)
-        if no_play and tr.before.balls < 3 and tr.before.strikes < 2:
+        if forced and no_play and tr.before.balls < 3 and tr.before.strikes < 2:
             return make("result", "hbp", 0.5, [no_play])
     if tr.outs_made == 1 and tr.before.strikes == 2:
         dts = _strike_three_miss(near) or _speech(near, "낫아웃", "낫 아웃")
@@ -583,6 +597,9 @@ def _pitch_view(cues: Sequence[Cue], tr: Transition) -> Optional[Cue]:
     LAST_PITCH_SEC보다 넓게 본다)."""
     views = [c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
              and tr.before.t < c.t <= tr.t]
+    own = _in_progress_view(tr, cues)  # 점수판이 그 투구 화면 도중에 바뀌었으면 그 화면이다
+    if own is not None:
+        views.append(own)
     last = max(views, key=lambda c: c.t) if views else None
     return last if last is not None and last.kind != VIEW_UNKNOWN else None
 
@@ -694,10 +711,18 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
     viewed = any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) for c in cues)
     for m in sorted((c for c in cues if c.kind == K_MARK), key=lambda c: c.t):
         prev = [r for r in stable if r.t <= m.t]
-        if not prev or prev[-1].strikes != 2:
+        # 점수판이 그 투구 화면 도중 먼저 바뀌었으면(TVING) 표시 직전 판독은 이미 새 상태다 — 그
+        # 전이의 직전 상태를 본다
+        own = [j.transition.before for j in judged if j.transition is not None
+               and j.t <= m.t <= j.detail.get("pitch_t", j.t) and "pitch_t" in j.detail]
+        basis = own[0] if own else (prev[-1] if prev else None)
+        if basis is None or basis.strikes != 2:
             continue
+        # 점수판이 그 투구 화면 도중에 먼저 바뀌고 표시가 화면이 끝나기 전에 떴어도 그 전이다(TVING)
         after = [i for i, j in enumerate(judged) if j.transition is not None
-                 and j.transition.outs_made >= 1 and m.t <= j.t <= m.t + K_MARK_JUMP_SEC
+                 and j.transition.outs_made >= 1
+                 and m.t <= max(j.t, j.detail.get("pitch_t", j.t))
+                 and j.t <= m.t + K_MARK_JUMP_SEC
                  and (j.t <= m.t + K_MARK_SEC or viewed and not any(
                      c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
                      and m.t + K_MARK_OWN_VIEW < c.t <= j.t for c in cues))]
@@ -767,6 +792,10 @@ def judge(
         j = _judge_spending_words(tr, cues, window, spent)
         if j is not None:
             out.append(j)
+    for j in out:
+        own = _in_progress_view(j.transition, cues) if j.transition is not None else None
+        if own is not None:
+            j.detail["pitch_t"] = own.t
     _apply_k_marks(out, cues, stable, finished)
     seen_change: list[float] = []
     for c in sorted(cues, key=lambda c: c.t):
@@ -784,6 +813,36 @@ def judge(
     for j in out:
         _balk_kind(j, cues)
     return sorted(out, key=lambda j: j.t)
+
+
+def _in_progress_view(tr: Transition, cues: Sequence[Cue]) -> Optional[Cue]:
+    """새 점수판이 투구 순간 뒤, 그 투구 화면이 끝나기 전에 보였으면 그 투구 화면이 끝난 단서.
+
+    그 플레이는 이 투구의 결과다 — TVING은 투구 화면이 이어지는 동안(타자가 1루로 걷는 동안,
+    투수가 공을 받는 동안) 점수판을 바꿔 판정이 앞 투구 칸에 들어갔다(KS1 볼넷 둘·삼진 둘,
+    2026-11-09). 판정 시각(점수판이 바뀐 때)은 그대로 두고 `detail["pitch_t"]`로 싣는다.
+    아니다: 투구 순간이 직전 상태가 보이기 전(앞 타석 공), 반 이닝이 바뀐 전이(진행 중인 투구가
+    새 반 이닝 것일 수 있다 — PO 1차전 3아웃이 다음 이닝 삼진 화면을 가져감), 직전 상태 뒤에
+    공이 맞아 나간 화면이 이미 끝났다(그 타구의 결과가 늦게 보인 것 — 독립 리뷰). 관절이 없으면
+    (실시간) 없다.
+    """
+    if tr.half_change:
+        return None
+    thrown = [c.t for c in cues if c.kind == PITCH_SEEN and tr.before.t < c.t < tr.t]
+    if not thrown:
+        return None
+    pitch = max(thrown)
+    views = [c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)]
+    if any(c.kind == IN_PLAY and tr.before.t < c.t <= tr.t for c in views):
+        return None
+    ends = [c for c in views if c.t > pitch]
+    end = min(ends, key=lambda c: c.t) if ends else None
+    if end is None or end.t <= tr.t:
+        return None
+    # 그 투구의 화면 단서가 빠졌으면 다음 투구 화면을 빌리지 않는다(독립 리뷰)
+    if any(c.kind == PITCH_SEEN and pitch < c.t < end.t for c in cues):
+        return None
+    return end
 
 
 # ── 영상 먼저, 해설은 검사 ────────────────────────────────────────────────
@@ -1156,6 +1215,7 @@ def pose_cues(pose: dict) -> list[Cue]:
         if "t1" in s:  # 투구 화면이 끝난 때 — 못 가른 투구도 남겨 앞 공 화면을 대신 쓰지 않는다
             view = s.get("view") if s.get("view") in (IN_PLAY, NO_PLAY) else VIEW_UNKNOWN
             cues.append(Cue(float(s["t1"]), view, POSE_TAG + POSE_TEXT[view]))
+            cues.append(Cue(float(s["t"]), PITCH_SEEN, POSE_TAG + POSE_TEXT[PITCH_SEEN]))
     return cues
 
 

@@ -12,6 +12,7 @@ from app.domain.models import GameFeed, GameMeta
 from app.domain.scorebug import (
     Reading,
     advanced_all_one_base,
+    forced_to_first,
     possible_step,
     runner_removed,
     single_runner_advance,
@@ -1367,9 +1368,10 @@ def test_tag_up_words_after_the_late_run_count_for_the_sacrifice_fly():
 def test_home_run_words_during_the_replay_after_the_new_board():
     """PO 2차전 최형우 솔로 — '홈런입니다'가 새 점수판 9~19초 뒤 다시보기 동안 나왔다."""
     reads = twice(R(0, outs=1, half="bot", home=7), R(12, outs=1, half="bot", home=8))
-    late = [_view(-30, "no_play"), Cue(21, "speech", "역대 플레이오프 최고령 홈런입니다")]
+    # 이 투구 화면 단서가 '못 가름'이면 말이 있어야 홈런이다(단서가 아예 없으면 모양만으로 — 아래)
+    late = [_view(5, "view_unknown"), Cue(21, "speech", "역대 플레이오프 최고령 홈런입니다")]
     assert [j.code for j in judge(reads, late)] == ["homerun"]
-    too_late = [_view(-30, "no_play"), Cue(40, "speech", "역대 플레이오프 최고령 홈런입니다")]
+    too_late = [_view(5, "view_unknown"), Cue(40, "speech", "역대 플레이오프 최고령 홈런입니다")]
     assert [j.code for j in judge(reads, too_late)] != ["homerun"]
 
 
@@ -1553,3 +1555,115 @@ def test_homerun_from_the_board_shape_alone_when_there_are_no_view_cues():
                   R(20, outs=1, away=2))
     assert [j.code for j in judge(reads, [])] == ["homerun"]
     assert [j.code for j in judge(reads, [_view(5, "no_play")])] != ["homerun"]
+
+
+# ── 2026-11-09 한국시리즈 1차전(TVING, 처음 본 경기) ─────────────────────────────
+
+
+def test_a_state_read_many_times_survives_a_single_misread_right_after_it():
+    """KS1 2타점 2루타 — 5번 읽힌 '1사 2루 2점'이 바로 뒤 한 번 읽힌 '2사 주자 없음'(태그업 주자가
+    3루에 그려지기 전)과 안 맞아 튄 판독으로 버려졌다. 튄 것은 한 번 읽힌 쪽이다."""
+    corners, second, third = (True, False, True), (False, True, False), (False, False, True)
+    seen = [R(0, outs=1, bases=corners, strikes=2)] * 6 + [
+        R(30, outs=1, bases=second, balls=1, strikes=2, away=2)] * 5 + [
+        R(45, outs=2, away=2), R(46, outs=2, bases=third, away=2),
+        R(47, outs=2, bases=third, away=2)]
+    stable = stabilize(seen, min_repeat=1)
+    assert [(r.outs, r.bases, r.away) for r in stable] == [
+        (1, corners, 0), (1, second, 2), (2, third, 2)]
+    assert [j.code for j in judge(seen, [], min_repeat=1)] == ["reach", "out"]
+    # 다음 판독도 여러 번 읽혔으면 어느 쪽이 튄 것인지 모른다 — 예전처럼 앞쪽을 버린다
+    twice_next = seen[:11] + [R(45, outs=2, away=2), R(45.5, outs=2, away=2)] + seen[12:]
+    assert [r.bases for r in stabilize(twice_next, min_repeat=1)] == [corners, E, third]
+
+
+def test_walk_moves_only_forced_runners():
+    """볼넷·사구는 1루부터 이어진 주자만 한 베이스씩 — 2·3루 주자가 1루 빈 채로 들어오면 안타다."""
+    assert forced_to_first((False, True, True), (True, True, True), 0)
+    assert forced_to_first((True, True, True), (True, True, True), 1)
+    assert forced_to_first((False, False, True), (True, False, True), 0)
+    assert not forced_to_first((False, True, True), (True, False, False), 2)
+    reads = twice(R(0, outs=2, bases=(False, True, True), balls=3), R(10, outs=2, away=2,
+                                                                     bases=(True, False, False)))
+    assert [j.code for j in judge(reads, [_view(4, "no_play")])] == ["reach"]
+
+
+def test_batter_home_shape_is_a_home_run_when_this_pitch_was_not_seen():
+    """KS1 2점 홈런 — 관절이 그 투구 화면을 못 봐(단서 없음) '출루'였다. 다른 투구의 단서만
+    있으면 이 전이는 못 본 것과 같다 — 실시간처럼 모양만으로 홈런."""
+    reads = twice(R(0, outs=2, bases=(True, False, False), balls=1, half="bot", home=6),
+                  R(12, outs=2, half="bot", home=8))
+    assert [j.code for j in judge(reads, [_view(-30, "no_play")])] == ["homerun"]
+    # 그 투구 화면이 '안 맞음'이면 모양만으로 홈런이라 하지 않는다 — 점수판이 그 화면 도중에
+    # 바뀌어 화면이 뒤에 끝나도 같다(독립 리뷰)
+    assert [j.code for j in judge(reads, [_view(5, "no_play")])] != ["homerun"]
+    late_view = [Cue(2, "pitch_seen", ""), _view(14, "no_play")]
+    assert [j.code for j in judge(reads, late_view)] != ["homerun"]
+
+
+def _pitch(t_pitch, t_end, kind="no_play"):
+    return [Cue(t_pitch, "pitch_seen", "[관절] 투구 순간"), _view(t_end, kind)]
+
+
+def test_board_changed_during_the_pitch_view_is_that_pitch_result():
+    """TVING은 투구 화면이 이어지는 동안 점수판을 바꾼다 — 그 판정은 이 투구의 결과다
+    (`pitch_t` = 투구 화면 끝, 판정 시각은 점수판이 바뀐 때 그대로)이고 그 투구 화면 단서
+    (클로즈업)를 쓴다. 투구 순간 전에 바뀐 점수판은 앞 플레이라 그대로."""
+    walk = twice(R(0, outs=2, balls=3, strikes=2, bases=(True, True, False)),
+                 R(10, outs=2, bases=(True, True, True)))
+    (j,) = judge(walk, _pitch(8, 12))
+    assert j.code == "walk" and j.t == pytest.approx(10.0) and j.detail["pitch_t"] == 12
+    (j,) = judge(walk, _pitch(11, 14))  # 투구 순간이 점수판 뒤 — 다음 투구다
+    assert "pitch_t" not in j.detail
+    # 2스트라이크에서 아웃 — 바뀐 뒤 끝난 투구 화면이 클로즈업이면 삼진
+    k = twice(R(0, outs=1, balls=1, strikes=2), R(10, outs=2))
+    (j,) = judge(k, _pitch(8, 12))
+    assert j.code == "strikeout" and j.detail["pitch_t"] == 12
+    # 관절이 없으면(실시간) 없다
+    (j,) = judge(walk, [])
+    assert "pitch_t" not in j.detail
+
+
+def test_in_progress_view_is_not_borrowed_after_a_batted_ball_or_across_halves():
+    """독립 리뷰 — 직전 상태 뒤 공이 맞아 나간 화면이 이미 끝났으면 늦게 보인 그 타구의 결과다
+    (다음 투구·다시보기 화면을 결정구로 잡아 출루를 사구로 냈다). 직전 상태가 보이기 전의
+    투구, 반 이닝이 바뀐 전이도 아니다."""
+    on1, on12 = (True, False, False), (True, True, False)
+    reach = twice(R(0, outs=1, balls=1, bases=on1), R(10, outs=1, bases=on12))
+    cues = [Cue(2, "pitch_seen", ""), _view(5, "in_play")] + _pitch(8, 12)
+    (j,) = judge(reach, cues)
+    assert "pitch_t" not in j.detail and j.code != "hbp"
+    (j,) = judge(reach, _pitch(-3, 12))  # 투구 순간이 직전 상태보다 앞
+    assert "pitch_t" not in j.detail
+    half = twice(R(0, outs=2, strikes=2), R(10, half="bot"))
+    (j,) = judge(half, _pitch(8, 12))
+    assert "pitch_t" not in j.detail
+    # 그 투구의 화면 단서가 빠졌으면 다음 투구 화면을 빌리지 않는다
+    missing = [Cue(8, "pitch_seen", ""), Cue(20, "pitch_seen", ""), _view(24, "no_play")]
+    (j,) = judge(reach, missing)
+    assert "pitch_t" not in j.detail and j.code != "hbp"
+
+
+def test_strikeout_mark_shown_after_the_board_changed_in_the_same_view():
+    """독립 리뷰 — 점수판이 투구 화면 도중 먼저 바뀌고(10초) 표시가 화면이 끝나기 전(11.5초)에
+    떴다. 표시 뒤 아웃 판정만 찾으면 못 쓰고 '아웃'으로 남았다."""
+    k = twice(R(0, outs=1, balls=1, strikes=2), R(10, outs=2))
+    cues = _pitch(8, 12, "view_unknown") + [Cue(11.5, "k_mark", "[점수판] 삼진 표시(K)")]
+    (j,) = [j for j in judge(k, cues) if j.transition is not None]
+    assert j.code == "strikeout"
+    # 표시와 새 점수판이 같은 프레임에서 읽혀도(같은 시각) 그 전이의 표시다
+    same = _pitch(8, 12, "view_unknown") + [Cue(10.0, "k_mark", "[점수판] 삼진 표시(K)")]
+    (j,) = [j for j in judge(k, same) if j.transition is not None]
+    assert j.code == "strikeout"
+
+
+def test_swing_on_ball_four_with_a_close_up_is_a_walk():
+    """3볼에서 휘둘렀는데 투구 뒤 클로즈업(공이 안 맞음)이고 1루 — 체크스윙을 '안 돌았다'로 본
+    볼넷이다(관측만 남긴다). 넓은 경기장이면 예전처럼 출루."""
+    reads = twice(R(0, outs=2, balls=3, bases=(False, True, True)),
+                  R(10, outs=2, bases=(True, True, True)))
+    swung = [Cue(3, "swing", "[관절] 타자가 배트를 휘두름")]
+    (j,) = judge(reads, swung + [_view(4, "no_play")])
+    assert j.code == "walk" and j.detail.get("observed") == "swing_on_ball_four"
+    (j,) = judge(reads, swung + [_view(4, "in_play")])
+    assert j.code == "reach"

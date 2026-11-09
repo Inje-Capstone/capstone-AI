@@ -30,9 +30,9 @@ IT2iLKT3a6c,729.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자
 IT2iLKT3a6c,745.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,희생번트 — 1사 2루
 IT2iLKT3a6c,754.7,out,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 000→010 | 점수판 아웃+1 득점+0 주자 010→010,맞음,뜬공 — 2사 2루
 IT2iLKT3a6c,772.0,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→001,맞음,적시 2루타 5-1
-IT2iLKT3a6c,816.8,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 001→100,맞음,적시타 6-1 — 3아웃은 못 봄
-IT2iLKT3a6c,844.3,reach,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,틀림,안타
-IT2iLKT3a6c,857.6,double_play,True,reach double_play,video_only confirmed,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+2 득점+0 주자 100→000; 해설 '-더블 플레이.-확실히 바뀐 야수 쪽으로 타워가 잘 간다 이런 생각을 하고 있는데 사실 더블 플레이가 되리라고는' (870s),맞음,병살
+IT2iLKT3a6c,816.8,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+1 주자 001→100 | 점수판 아웃+1 득점+0 주자 100→000,맞음,적시타 6-1 — 3아웃은 못 봄
+IT2iLKT3a6c,844.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
+IT2iLKT3a6c,857.6,double_play,True,double_play,confirmed,점수판 아웃+2 득점+0 주자 100→000; 해설 '-더블 플레이.-확실히 바뀐 야수 쪽으로 타워가 잘 간다 이런 생각을 하고 있는데 사실 더블 플레이가 되리라고는' (870s),맞음,병살
 IT2iLKT3a6c,886.1,out,True,walk,conflict,점수판 아웃+0 득점+0 주자 000→100; 영상은 볼넷 — 해설과 달라 보류,틀림,땅볼 3아웃
 IT2iLKT3a6c,910.1,none,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,헛판정,다시보기
 IT2iLKT3a6c,973.5,walk,False,out,video_only,점수판 아웃+3 득점+0 주자 000→100,틀림,3-2 볼넷으로 보임

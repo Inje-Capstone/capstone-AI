@@ -327,7 +327,7 @@ def test_mark_scan_counts_only_frames_with_the_board_and_merges_one_mark(monkeyp
     assert board_shown(layout, rgb_sampler(shown, RGB_W, RGB_H))
     assert not board_shown(Layout("t", {}, ()), rgb_sampler(shown, RGB_W, RGB_H))
     for name in ("kbo_topleft_box", "kbo_caster_box", "kbo_caster_box_up", "spotv2_box",
-                 "kbo_box_bottomright", "bar_two_line"):
+                 "kbo_box_bottomright", "bar_two_line", "tving_postseason"):
         assert Layout.load(ROOT / "data" / "scorebug_layouts" / f"{name}.json").panel
 
 
