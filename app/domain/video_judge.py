@@ -78,6 +78,10 @@ POSE_TEXT = {"slide_tag": "미끄러져 들어온 주자에게 수비 손이 닿
              VIEW_UNKNOWN: "투구 뒤 화면으로 공이 맞았는지 못 가름"}
 PITCH_SEEN = "pitch_seen"  # 관절로 잰 투구 순간 — 그 투구 화면이 끝난 때(투구 뒤 화면 단서)와 짝
 POSE_TEXT[PITCH_SEEN] = "투구 순간"
+VIEW_START = "shot_start"  # 관절로 본 투구 화면이 시작된 때
+# 투구 하나짜리 화면의 길이 — 경기 17편 투구 화면 1064개 중 95%가 10초 안(중앙값 3.8초)
+ONE_PITCH_SHOT = 10.0
+POSE_TEXT[VIEW_START] = "투구 화면 시작"
 # 영상 관측이 공식 판정과 갈린 장면 — 판정은 그대로 두고 기록만 한다(오심 검토 후보)
 OBSERVED_TAG_ON_SAFE = "tag_on_safe_runner"
 OBSERVED_SWING_ON_BALL_FOUR = "swing_on_ball_four"
@@ -98,6 +102,7 @@ CUE_KINDS = (
     "swing", "no_swing",  # 관절로 잰 타자 손 움직임(domain/swing.py)
     "dive",  # 관절로 찾은 슬라이딩 중 몸 아래가 잔디 — 주자가 아니라 수비
     PITCH_SEEN,  # 관절로 잰 투구 순간 — 판정이 어느 투구의 결과인지(_in_progress_view)
+    VIEW_START,  # 관절로 본 투구 화면이 시작된 때(_in_progress_view)
     "speech",  # 해설 키워드 — text에 "보크", "도루" 등
 )
 
@@ -853,7 +858,24 @@ def _in_progress_view(tr: Transition, cues: Sequence[Cue]) -> Optional[Cue]:
         return None
     thrown = [c.t for c in cues if c.kind == PITCH_SEEN and tr.before.t < c.t < tr.t]
     if not thrown:
-        return None
+        # 직전 상태가 그 투구 화면 안에서 처음 보였고 화면이 끝나기 전에 바뀌었으면 그 투구의
+        # 결과다 —
+        # 관절이 잰 투구 순간(스윙 시각)이 판독 시각보다 늦게 잡혀도(KS4 볼넷 둘: 판독은 구간 시작
+        # 시각이라 이르다)
+        starts = [c.t for c in cues if c.kind == VIEW_START and c.t <= tr.before.t]
+        if not starts:
+            return None
+        # 투구 하나짜리 화면이어야 하고(긴 화면엔 다른 투구가 섞인다), 그 화면에서 잰 투구가 직전
+        # 상태가 보인 뒤다 — 앞 투구로 이미 바뀐 상태가 늦게 읽힌 게 아니다(독립 리뷰)
+        own = [c.t for c in cues if c.kind == PITCH_SEEN and max(starts) < c.t]
+        ends = [c.t for c in cues
+                if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) and c.t > max(starts)]
+        long_shot = bool(ends) and min(ends) - max(starts) > ONE_PITCH_SHOT
+        if not own or not ends or long_shot or min(own) <= tr.before.t:
+            return None
+        thrown, marker = [max(starts)], VIEW_START
+    else:
+        marker = PITCH_SEEN
     pitch = max(thrown)
     views = [c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)]
     if any(c.kind == IN_PLAY and tr.before.t < c.t <= tr.t for c in views):
@@ -863,7 +885,7 @@ def _in_progress_view(tr: Transition, cues: Sequence[Cue]) -> Optional[Cue]:
     if end is None or end.t <= tr.t:
         return None
     # 그 투구의 화면 단서가 빠졌으면 다음 투구 화면을 빌리지 않는다(독립 리뷰)
-    if any(c.kind == PITCH_SEEN and pitch < c.t < end.t for c in cues):
+    if any(c.kind == marker and pitch < c.t < end.t for c in cues):
         return None
     return end
 
@@ -1239,6 +1261,8 @@ def pose_cues(pose: dict) -> list[Cue]:
             view = s.get("view") if s.get("view") in (IN_PLAY, NO_PLAY) else VIEW_UNKNOWN
             cues.append(Cue(float(s["t1"]), view, POSE_TAG + POSE_TEXT[view]))
             cues.append(Cue(float(s["t"]), PITCH_SEEN, POSE_TAG + POSE_TEXT[PITCH_SEEN]))
+            if "t0" in s:
+                cues.append(Cue(float(s["t0"]), VIEW_START, POSE_TAG + POSE_TEXT[VIEW_START]))
     return cues
 
 

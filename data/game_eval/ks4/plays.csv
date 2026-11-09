@@ -1,0 +1,88 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+IT67rwYSXvA,25.0,?,False,,,,제외,인트로 — 투구 아님
+IT67rwYSXvA,27.3,?,False,,,,제외,인트로 — 투구 아님
+IT67rwYSXvA,32.3,?,False,,,,제외,인트로·선발 소개
+IT67rwYSXvA,136.1,homerun,True,homerun out reach out balk reach,video_only video_only video_only video_only video_only video_only,점수판 아웃+0 득점+1 주자 000→000 | 점수판 아웃+2 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+0 득점+0 주자 100→010 | 점수판 아웃+0 득점+0 주자 010→110,맞음,솔로 홈런 1-0
+IT67rwYSXvA,147.6,same,False,,,,제외,홈런 다시보기·더그아웃
+IT67rwYSXvA,245.7,none,True,out,video_only,점수판 아웃+1 득점+0 주자 110→110,헛판정,관중
+IT67rwYSXvA,248.0,reach,True,reach reach runner reach reach,video_only video_only video_only video_only video_only,점수판 아웃+0 득점+0 주자 110→110 | 점수판 아웃+0 득점+1 주자 110→111 | 점수판 아웃+0 득점+0 주자 111→101 | 점수판 아웃+0 득점+1 주자 101→110 | 점수판 아웃+0 득점+0 주자 110→111,맞음,2타점 적시타 1-2
+IT67rwYSXvA,295.8,same,False,,,,제외,적시타 뒤 관중·다시보기
+IT67rwYSXvA,320.3,none,True,,,,조용함,볼
+IT67rwYSXvA,331.8,walk,True,walk reach reach out,refined video_only video_only video_only,점수판 아웃+0 득점+1 주자 111→111; 해설 '또 한 명의 좌타자가 들어갔고 밀어내기 못 맞는 볼입니다. 이러면 또 한 점을 내주게 되는 로건 앨런.' (330s) | 점수판 아웃+0 득점+0 주자 111→111 | 점수판 아웃+1 득점+3 주자 111→000 | 점수판 아웃+2 득점+0 주자 000→000,맞음,"밀어내기 볼넷 1-3(다시 보고 고침 — 해설 '밀어내기', 점수판 만루에서 1점. 처음엔 홈런으로 봄) — 뒤 안타 둘·3아웃·2회초 2아웃은 투구 화면 못 찾음"
+IT67rwYSXvA,424.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공 3아웃
+IT67rwYSXvA,437.9,out_any,True,out out,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,아웃 — 다음 판독 2사(하나는 못 봄)
+IT67rwYSXvA,447.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→100,맞음,땅볼 3아웃
+IT67rwYSXvA,468.2,walk,True,,,,놓침,볼넷
+IT67rwYSXvA,479.2,steal,False,runner,video_only,점수판 아웃+0 득점+0 주자 100→010,틀림,"2루 도루로 보임(다시 보고 고침 — 1루 주자가 2루에 세이프, 처음엔 '볼'로 매김)"
+IT67rwYSXvA,484.7,hbp,True,reach,video_only,점수판 아웃+0 득점+0 주자 010→110,틀림,몸에 맞는 공 — 1·2루
+IT67rwYSXvA,487.0,same,False,,,,제외,사구 뒤 장면
+IT67rwYSXvA,502.7,same,False,,,,제외,사구 뒤 장면
+IT67rwYSXvA,516.2,double_play,False,double_play,video_only,점수판 아웃+2 득점+0 주자 110→010,맞음,병살로 보임 — 무사 1·2루 → 2사 3루
+IT67rwYSXvA,539.8,?,False,runner reach,video_only video_only,점수판 아웃+0 득점+0 주자 010→001 | 점수판 아웃+0 득점+0 주자 001→101,제외,"2루 주자 3루로 — 도루·폭투 못 가림(다시 보고 고침, 처음엔 '카운트만')"
+IT67rwYSXvA,549.0,walk,True,,,,놓침,볼넷 — 1·2루
+IT67rwYSXvA,558.8,none,True,,,,조용함,관중
+IT67rwYSXvA,562.5,none,False,,,,조용함,카운트만(장면 없음)
+IT67rwYSXvA,570.3,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 101→101,맞음,적시타 7-1
+IT67rwYSXvA,582.8,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 101→000,맞음,3아웃 — 장면 못 봄
+IT67rwYSXvA,593.8,walk,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 배트를 휘두름 (597s),틀림,볼넷
+IT67rwYSXvA,604.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
+IT67rwYSXvA,613.8,out,True,infield_fly,refined,"점수판 아웃+1 득점+0 주자 110→110; 해설 '멀리 가지 못하는 타구입니다. 내가 파워플라이, 인필드 플라이가 선언이 됐고요. 서두에 정말 19살 선수가 아닌 것 같다. 투구하는 모습을 보면 이런 취지의 말씀을 드렸습니다.' (620s); 해설 '멀리 가지 못하는 타구입니다. 내가 파워플라이, 인필드 플라이가 선언이 됐고요. 서두에 정말 19살 선수가 아닌 것 같다. 투구하는 모습을 보면 이런 취지의 말씀을 드렸습니다.' (620s)",맞음,뜬공
+IT67rwYSXvA,626.1,none,False,,,,조용함,견제(세이프) — 카운트만
+IT67rwYSXvA,653.6,none,True,,,,조용함,파울
+IT67rwYSXvA,660.4,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→000,맞음,뜬공 3아웃
+IT67rwYSXvA,687.9,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
+IT67rwYSXvA,697.2,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,볼넷 — 1·2루
+IT67rwYSXvA,702.4,none,True,,,,조용함,볼
+IT67rwYSXvA,707.4,?,False,balk,video_only,점수판 아웃+0 득점+0 주자 110→011,제외,"1·2루 → 2·3루 — 해설 '공이 뒤쪽으로 빠졌습니다'(폭투·포일로 보임, 도루와 못 가림). 처음엔 '그대로'로 매김"
+IT67rwYSXvA,709.7,same,False,,,,제외,"더블스틸 이어진 장면(다시 보고 고침, 처음엔 '카운트만')"
+IT67rwYSXvA,714.7,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 011→111,맞음,볼넷 — 만루
+IT67rwYSXvA,725.5,same,False,,,,제외,볼넷 다시보기
+IT67rwYSXvA,728.5,same,False,,,,제외,투수 교체
+IT67rwYSXvA,733.0,out,True,out,video_only,점수판 아웃+1 득점+1 주자 111→011,맞음,땅볼 타점 2-7 — 2루 포스아웃
+IT67rwYSXvA,743.0,walk,True,reach,video_only,점수판 아웃+0 득점+0 주자 011→111,틀림,볼넷 — 만루
+IT67rwYSXvA,757.5,walk,True,walk,confirmed,점수판 아웃+0 득점+1 주자 111→111; 해설 '- 계속되는 풀카운트 승부. 낮은 코스 또 한 번 빠집니다. 두타나 연속 밀어내기 몰랐죠.' (770s),맞음,밀어내기 볼넷 3-7
+IT67rwYSXvA,770.3,none,True,,,,조용함,투수
+IT67rwYSXvA,772.3,walk,True,,,,놓침,밀어내기 볼넷 4-7
+IT67rwYSXvA,799.5,strikeout,True,out,video_only,점수판 아웃+1 득점+1 주자 111→111,틀림,헛스윙 삼진 — 2사 만루
+IT67rwYSXvA,803.5,same,False,,,,제외,삼진 다시보기
+IT67rwYSXvA,808.0,same,False,,,,제외,삼진 다시보기
+IT67rwYSXvA,809.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→000,맞음,뜬공 3아웃
+IT67rwYSXvA,835.8,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (840s),맞음,볼넷
+IT67rwYSXvA,840.6,out_any,False,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,아웃 — 장면 못 봄(관중)
+IT67rwYSXvA,846.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,아웃(타구) — 1루 주자 그대로
+IT67rwYSXvA,854.6,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 010→110; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (861s),맞음,볼넷 — 1·2루
+IT67rwYSXvA,864.1,reach,True,reach,video_only,점수판 아웃+1 득점+2 주자 110→000,맞음,2타점 적시타 9-4 — 3아웃은 못 봄
+IT67rwYSXvA,872.9,same,False,,,,제외,적시타 다시보기
+IT67rwYSXvA,883.1,same,False,,,,제외,관중·6회초 전환
+IT67rwYSXvA,891.4,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (899s); [점수판] 삼진 표시(K) (898s),맞음,아웃 — 삼진으로 보임
+IT67rwYSXvA,901.9,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '-준교한 슛점. 빠르게 따라 붙으면서 김지찬 선수가 처리를 해 줬습니다. 삼진 두 개와 준교한 슛 플라이. 이렇게 세 타자를 모두 아웃 카운트 처리하는' (920s); [점수판] 삼진 표시(K) (907s),맞음,삼진(3K 표시)
+IT67rwYSXvA,915.1,none,True,,,,조용함,관중
+IT67rwYSXvA,916.4,none,True,,,,조용함,파울
+IT67rwYSXvA,921.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공 3아웃
+IT67rwYSXvA,936.7,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (940s),맞음,볼넷
+IT67rwYSXvA,944.4,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,뜬공 — 1루 주자 그대로
+IT67rwYSXvA,957.2,none,True,,,,조용함,볼
+IT67rwYSXvA,958.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,뜬공 — 2사
+IT67rwYSXvA,971.5,?,False,walk,confirmed,점수판 아웃+0 득점+0 주자 100→110; 해설 '- 또 하나의 볼넷. 이렇게 되면 12개의 449를 기록하게 되면서 KT가 한국 시리즈.' (980s),제외,3-2에서 1루 — 볼넷·낫아웃 못 가림
+IT67rwYSXvA,977.5,walk,True,walk,confirmed,점수판 아웃+0 득점+0 주자 110→111; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (983s),맞음,볼넷 — 만루
+IT67rwYSXvA,992.0,none,True,,,,조용함,타자 장면
+IT67rwYSXvA,995.0,none,False,,,,조용함,카운트만
+IT67rwYSXvA,999.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→000,맞음,뜬공 3아웃 — 만루
+IT67rwYSXvA,1002.7,same,False,,,,제외,뜬공 이어진 장면
+IT67rwYSXvA,1021.8,out_any,True,out,video_only,점수판 아웃+2 득점+0 주자 000→000,맞음,아웃 — 다음 판독 2사(하나는 못 봄)
+IT67rwYSXvA,1031.5,none,False,,,,조용함,파울로 보임
+IT67rwYSXvA,1034.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼 3아웃
+IT67rwYSXvA,1069.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
+IT67rwYSXvA,1086.1,reach,True,out,video_only,점수판 아웃+2 득점+1 주자 100→000,틀림,적시 3루타 10-4
+IT67rwYSXvA,1094.6,same,False,,,,제외,3루타 이어진 장면
+IT67rwYSXvA,1096.6,same,False,,,,제외,득점 장면
+IT67rwYSXvA,1106.3,same,False,,,,제외,관중
+IT67rwYSXvA,1109.3,same,False,,,,제외,3루 세이프 장면
+IT67rwYSXvA,1115.1,same,False,,,,제외,3루타 뒤 — 7회말 끝·8회초 1아웃은 못 봄
+IT67rwYSXvA,1136.9,homerun,False,out,video_only,점수판 아웃+2 득점+1 주자 000→000,틀림,솔로 홈런으로 보임 5-10 — 3아웃·9회초 1아웃은 못 봄
+IT67rwYSXvA,1160.4,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
+IT67rwYSXvA,1163.1,same,False,,,,제외,땅볼 다시보기
+IT67rwYSXvA,1173.7,none,True,,,,조용함,타자 장면 — 그대로
+IT67rwYSXvA,1180.2,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,경기 끝 — 마지막 아웃
+IT67rwYSXvA,1202.2,?,False,,,,제외,경기 끝 뒤
+IT67rwYSXvA,1241.0,?,False,,,,제외,엔딩
