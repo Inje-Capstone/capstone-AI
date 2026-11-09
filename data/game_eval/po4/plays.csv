@@ -88,7 +88,7 @@ ejMdL3m6Dpc,967.4,same,True,,,,제외,같은 타구 이어진 화면
 ejMdL3m6Dpc,990.2,none,True,,,,조용함,
 ejMdL3m6Dpc,999.5,none,True,,,,조용함,
 ejMdL3m6Dpc,1002.0,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 101→101,맞음,적시타 3-2
-ejMdL3m6Dpc,1032.3,reach,True,out out,video_only video_only,점수판 아웃+1 득점+1 주자 101→000 | 점수판 아웃+1 득점+0 주자 000→000,틀림,적시타 4-2 — 3아웃은 못 봄
+ejMdL3m6Dpc,1032.3,reach,True,reach out,video_only video_only,점수판 아웃+1 득점+1 주자 101→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,적시타 4-2 — 3아웃은 못 봄
 ejMdL3m6Dpc,1067.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
 ejMdL3m6Dpc,1070.6,none,True,,,,조용함,
 ejMdL3m6Dpc,1078.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,3아웃

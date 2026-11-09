@@ -270,6 +270,14 @@ def judge_transition(
         merged = tr.outs_made > 0 or not one_play(tr)
         return make("result", "homerun", 0.5, [hr_word, in_play], merged=merged)
 
+    # 2아웃에서 점수가 났는데 반 이닝이 끝났다 — 세 번째 아웃 플레이로는 점수가 안 난다(5.08(a)).
+    # 점수를 낸 건 그 앞의 아웃이 아닌 플레이(적시타 등)이고 3아웃은 하이라이트가 건너뛴 것이다
+    # (실측: 적시타 + 못 본 3아웃이 '아웃'으로 — 조정용·PO 1차전). 상태는 그대로, 카드는 안 뜬다.
+    # 바로 다음 반 이닝일 때, 앞 반 이닝 공격 팀의 점수만 — 반 이닝을 여럿 건너뛰면(투수 모음) 상대
+    # 팀 점수가 섞인다
+    if tr.half_change and tr.before.outs == 2 and _scored_before_third_out(tr):
+        return make("result", "reach", 0.5, merged=True)
+
     # 한 플레이로 설명이 안 되면(여러 플레이가 한 전이로 합쳐짐) 종류를 말하지 않는다
     if not one_play(tr):
         return make("result", "out" if tr.outs_made else "reach", 0.5, merged=True)
@@ -454,6 +462,15 @@ def _split_half(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transiti
     return out
 
 
+def _scored_before_third_out(tr: Transition) -> bool:
+    """반 이닝이 바로 다음으로 바뀐 전이에서 앞 반 이닝 공격 팀이 점수를 냈나."""
+    a, b = tr.before, tr.after
+    nxt = (a.inning, "bot") if a.half == "top" else (a.inning + 1, "top")
+    if (b.inning, b.half) != nxt:
+        return False
+    return (b.away - a.away if a.half == "top" else b.home - a.home) >= 1
+
+
 def _tagged_up(before: tuple, after: tuple) -> bool:
     """3루 주자가 들어오고 1·2루 주자는 그대로이거나 한 베이스씩 간 모양(새 주자 없음)."""
     first, second, third = before
@@ -546,9 +563,10 @@ def _game_end(stable: Sequence[Reading], cues: Sequence[Cue]) -> list[Transition
                and last.t < c.t <= last.t + GAME_END_SEC]
     if not ends or not pitches:
         return []
-    # 9회말 끝내기 홈런 뒤 영상이 끝나면 점수판이 안 바뀐 채 끝난다 — 그 말이 있으면 아웃이 아니다
+    # 9회말 끝내기 홈런 뒤 영상이 끝나면 점수판이 안 바뀐 채 끝난다 — 그 말이 있으면 아웃이 아니다.
+    # 초 공격(홈 팀이 앞섬)엔 끝내기가 없다 — 경기 정리 해설의 '홈런'이 마지막 아웃을 막았다(KS3)
     after_last = [c for c in cues if c.kind == "speech" and c.t > last.t]
-    if _speech(after_last, "끝내기", *HR_WORDS):
+    if last.half == "bot" and _speech(after_last, "끝내기", *HR_WORDS):
         return []
     t = max(c.t for c in pitches) + 1.0
     after = Reading(t, last.inning, last.half, 0, 0, 3, (False, False, False),
@@ -827,6 +845,11 @@ def _in_progress_view(tr: Transition, cues: Sequence[Cue]) -> Optional[Cue]:
     (실시간) 없다.
     """
     if tr.half_change:
+        return None
+    # 타석이 끝난 전이인데 새 타자 카운트가 벌써 진행됐으면 진행 중인 투구는 새 타자 것이다(KS3:
+    # 삼진 뒤 다음 타자 3-1에서야 읽힌 점수판이 그 투구 칸으로 가 삼진이 한 칸 밀림)
+    b, a = tr.before, tr.after
+    if (a.balls < b.balls or a.strikes < b.strikes) and (a.balls, a.strikes) != (0, 0):
         return None
     thrown = [c.t for c in cues if c.kind == PITCH_SEEN and tr.before.t < c.t < tr.t]
     if not thrown:

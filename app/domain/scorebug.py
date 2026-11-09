@@ -6,7 +6,7 @@
 """
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Optional
 
 Bases = tuple[bool, bool, bool]
@@ -101,6 +101,12 @@ def stabilize(readings: Sequence[Reading], min_repeat: int = 2) -> list[Reading]
     수지가 안 맞는 한 장을 버린다: 앞→뒤는 가능한데 앞→이것 또는 이것→뒤가 불가능할 때.
     """
     clean = [r for r in sorted(readings, key=lambda r: r.t) if _plausible(r)]
+    stable = _stabilize_clean(clean, min_repeat)
+    repaired = _repair_innings(clean, stable)
+    return stable if repaired is None else _stabilize_clean(repaired, min_repeat)
+
+
+def _stabilize_clean(clean: list[Reading], min_repeat: int) -> list[Reading]:
     runs: list[tuple[Reading, int]] = []
     for r in clean:
         if runs and runs[-1][0].key() == r.key():
@@ -114,6 +120,56 @@ def stabilize(readings: Sequence[Reading], min_repeat: int = 2) -> list[Reading]
         if not stable or candidate.key() != stable[-1].key():
             stable.append(candidate)
     return stable
+
+
+def _repair_innings(clean: list[Reading], stable: list[Reading]) -> Optional[list[Reading]]:
+    """회차만 거꾸로 간 판독을 앞뒤 안정 상태 사이에서 고친다. 고칠 게 없으면 None.
+
+    VLM이 회차 숫자를 잘못 읽는다 — KS3 하이라이트 7회초~8회말 판독 35장을 '1회'로 읽었다(점수판에는
+    7▲·8▲·8▼). 회차는 거꾸로 가지 않고 점수도 줄지 않으니, 앞 안정 상태보다 회차가 앞인데 점수는
+    앞뒤 사이인 판독은 회차만 틀렸다. 초·말(화소)과 아웃 순서를 따라 회차를 다시 매긴다 — 같은
+    초·말인데 아웃이 줄면 다음 회차(다른 반 이닝을 건너뜀), 초 → 말은 같은 회차, 말 → 초는
+    다음 회차.
+    다시 매긴 회차가 뒤 안정 상태보다 앞일 때만 받는다. 안정 상태(가장 긴 사슬) 사이만 보므로 한 장
+    회차 오독이 진짜 판독을 끌어올리지 않는다('4.강백호'). 같은 초·말에 아웃이 같거나 많으면 같은
+    회차로 본다 — 회차를 통째로 건너뛰었어도 판독만으로는 가를 수 없다(독립 리뷰, 기록만).
+    """
+    if len(stable) < 2:
+        return None
+    out = list(clean)
+    changed = False
+    for a, b in zip(stable, stable[1:]):
+        cur = a
+        fixed: dict[int, Reading] = {}
+        for i, r in enumerate(out):
+            if not a.t < r.t < b.t:
+                continue
+            score_ok = (a.away <= r.away <= b.away) and (a.home <= r.home <= b.home)
+            if _half_order(cur) <= _half_order(r) <= _half_order(b) or not score_ok:
+                if _half_order(cur) <= _half_order(r) <= _half_order(b):
+                    cur = r
+                continue
+            if _half_order(r) >= _half_order(cur):
+                continue
+            if r.half == cur.half:
+                inning = cur.inning if r.outs >= cur.outs else cur.inning + 1
+                # 아웃 오독 한 장이 회차를 올리지 않게 — 다음 회차로 올릴 땐 같은 판독이 두 번 이상
+                # 이어 읽혔어야 한다(독립 리뷰)
+                twice = any(0 <= k < len(out) and out[k].key() == r.key() for k in (i - 1, i + 1))
+                if inning > cur.inning and not twice:
+                    continue
+            else:
+                inning = cur.inning if cur.half == "top" else cur.inning + 1
+            new = replace(r, inning=inning)
+            if _half_order(new) > _half_order(b):
+                fixed = {}
+                break
+            fixed[i] = new
+            cur = new
+        for i, r in fixed.items():
+            out[i] = r
+            changed = True
+    return out if changed else None
 
 
 def _can_follow(a: Reading, b: Reading) -> bool:
@@ -154,7 +210,8 @@ def _drop_spikes(runs: list[tuple[Reading, int]]) -> list[tuple[Reading, int]]:
                 out.append((r, n))
                 continue
             spike = possible_step(a, c) and not (possible_step(a, r) and possible_step(r, c))
-            if spike and not _next_is_spike(runs, i, a):
+            if spike and not _next_is_spike(runs, i, a) and not (
+                    n == 1 and _starts_next_half(a, r, c)):
                 continue
         out.append((r, n))
     return out
@@ -168,7 +225,25 @@ def _next_is_spike(runs: list[tuple[Reading, int]], i: int, a: Reading) -> bool:
     r, n = runs[i]
     if n < 2 or i + 2 >= len(runs) or runs[i + 1][1] != 1:
         return False
-    return possible_step(a, r) and possible_step(r, runs[i + 2][0])
+    if not possible_step(a, r):
+        return False
+    if possible_step(r, runs[i + 2][0]):
+        return True
+    # 그 다음도 한 번만 읽힌 오독이면(점수 오독 한 장 — KS3) 두 번 이상 읽힌 다음 상태와 맞춘다
+    later = [rn for rn in runs[i + 3:i + 5] if rn[1] >= 2]
+    # 그 상태가 다른 반 이닝이면 '가능'은 늘 참이라 근거가 못 된다(독립 리뷰)
+    return (runs[i + 2][1] == 1 and bool(later) and _half_order(later[0][0]) == _half_order(r)
+            and possible_step(r, later[0][0]))
+
+
+def _starts_next_half(a: Reading, r: Reading, c: Reading) -> bool:
+    """한 번 읽힌 `r`이 a 뒤 새 반 이닝의 앞 상태이고 c까지 그 반 이닝에서 이어지면 튄 판독이
+    아니다.
+
+    a → c가 반 이닝을 넘으면 늘 '가능'이라, 새 반 이닝 첫 판독(KS3 '5회초 무사')이 c('2사')와
+    한 번에 안 이어진다는 이유로 버려졌다 — 하이라이트는 타석을 건너뛴다(삼진 6K를 놓침).
+    """
+    return _half_order(a) < _half_order(r) == _half_order(c) and _skippable(r, c)
 
 
 def _skippable(a: Reading, b: Reading) -> bool:
