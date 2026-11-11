@@ -17,8 +17,8 @@ luegoydhdxE,439.9,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자
 luegoydhdxE,464.2,homerun,True,homerun out,refined video_only,점수판 아웃+0 득점+2 주자 010→000; 해설 '-안타로 점수를 내고 또 이제 홈런 한 방으로 점수를 내고 여러 가지 방법으로 득점을 하고 있는데 안현민 선수가 KT 이제 작년 최고의 히트 상품이거든요.' (500s) | 점수판 아웃+3 득점+0 주자 000→000,맞음,2점 홈런 5-0
 luegoydhdxE,517.8,walk,True,walk,confirmed,점수판 아웃+0 득점+0 주자 000→100; 해설 '-솔케형 엄지옥 깊숙하네요. 볼넷으로 선두 타자가 출루합니다. 최은준 선수 입장에서는 방망이 잘 빼줬고요. 다시 번트.' (520s),맞음,볼넷
 luegoydhdxE,526.5,out_any,False,out,video_only,점수판 아웃+2 득점+0 주자 100→010,맞음,아웃 — 다음 판독 2사 2루(하나는 못 봄)
-luegoydhdxE,540.3,?,False,walk,video_only,점수판 아웃+0 득점+0 주자 010→110,제외,결과 모름
-luegoydhdxE,554.8,?,False,walk,video_only,점수판 아웃+0 득점+0 주자 110→111,제외,결과 모름
+luegoydhdxE,540.3,?,False,,,,제외,결과 모름
+luegoydhdxE,554.8,?,False,walk walk,video_only video_only,점수판 아웃+0 득점+0 주자 010→110; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (560s) | 점수판 아웃+0 득점+0 주자 110→111,제외,결과 모름
 luegoydhdxE,567.6,walk,True,,,,놓침,볼넷 — 만루
 luegoydhdxE,583.3,none,True,,,,조용함,볼
 luegoydhdxE,594.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→000,맞음,뜬공 3아웃
@@ -46,7 +46,7 @@ luegoydhdxE,1138.9,reach,True,reach,video_only,점수판 아웃+0 득점+1 주�
 luegoydhdxE,1168.2,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 110→111; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1179s),맞음,"볼넷 — 만루(다시 보고 고침 — 3-0에서 안 치고 배트를 놓고 1루로, 점수판 0-0 만루)"
 luegoydhdxE,1194.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→111,맞음,뜬공 — 2사 만루
 luegoydhdxE,1228.7,reach,False,runner out,video_only video_only,점수판 아웃+0 득점+1 주자 111→011 | 점수판 아웃+1 득점+0 주자 011→000,틀림,내야 타구 타점으로 보임 7-8 — 3아웃은 못 봄
-luegoydhdxE,1284.3,walk,False,walk,confirmed,점수판 아웃+0 득점+0 주자 000→100; 해설 '- 침착하게 볼넷으로 출루하는 대타 장성우 선수입니다. 1루에는 대주자 배정대 선수가 나가 있고요.- 스치면 넘어간다.' (1290s),맞음,3-2 볼넷으로 보임 — 다음 판독 2사 1루(아웃 하나 못 봄)
+luegoydhdxE,1284.3,walk,False,walk,confirmed,점수판 아웃+0 득점+0 주자 000→100; 해설 '- 침착하게 볼넷으로 출루하는 대타 장성우 선수입니다. 1루에는 대주자 배정대 선수가 나가 있고요.- 스치면 넘어간다.' (1290s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1294s),맞음,3-2 볼넷으로 보임 — 다음 판독 2사 1루(아웃 하나 못 봄)
 luegoydhdxE,1301.0,reach,True,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+0 득점+0 주자 100→011,맞음,안타 — 1·2루
 luegoydhdxE,1326.3,walk_or_hbp,True,walk,video_only,점수판 아웃+0 득점+0 주자 011→111; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1336s),맞음,3-0에서 1루 — 볼넷·사구 못 가림
 luegoydhdxE,1342.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→000,맞음,땅볼 3아웃

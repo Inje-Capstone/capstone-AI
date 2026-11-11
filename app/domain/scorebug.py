@@ -102,8 +102,43 @@ def stabilize(readings: Sequence[Reading], min_repeat: int = 2) -> list[Reading]
     """
     clean = [r for r in sorted(readings, key=lambda r: r.t) if _plausible(r)]
     stable = _stabilize_clean(clean, min_repeat)
+    fixed = _fix_count_as_score(clean, stable)
+    if fixed is not None:
+        clean, stable = fixed, _stabilize_clean(fixed, min_repeat)
     repaired = _repair_innings(clean, stable)
     return stable if repaired is None else _stabilize_clean(repaired, min_repeat)
+
+
+def _fix_count_as_score(clean: list[Reading], stable: list[Reading]) -> Optional[list[Reading]]:
+    """볼카운트를 점수로도 읽은 판독의 점수를 앞뒤 안정 상태의 점수로 되돌린다. 고칠 게 없으면 None.
+
+    가운데 'X-Y'로 볼카운트를 그리는 판(MBC 포스트시즌 상자)에서 VLM이 그 숫자를 점수에도 넣었다
+    (한국시리즈 5차전 '0-1 카운트 · 0:1', '3-0 카운트 · 3:0'). 점수가 카운트와 같고 앞뒤 안정 상태의
+    점수가 서로 같은데 이 판독만 다르면 — 점수는 줄지 않으니 이 판독의 점수가 틀렸다. 주자·아웃
+    (화소)과 회차는 그대로 쓴다. 버리면 마지막 아웃 앞 한 장 같은 상태를 잃는다(2사 삼진을 놓침).
+    사슬에 없는 상태를 더할 때만 고친다. 날 판독 이웃이 아니라 안정 상태와 견준다 —
+    이웃도 오독이면(투수 모음 판독이 0:0과 진짜 점수를
+    오감) 맞는 판독을 틀린 점수로 끌어당겼다. 0-0 카운트와 0:0 점수는 경기 초반에 늘 같아 근거가
+    못 된다 — PO 2차전 '2사 1·3루 0:0'을 1:0으로 고쳐 희생플라이를 놓쳤다.
+    """
+    out, changed = list(clean), False
+    for i, r in enumerate(clean):
+        score = (r.away, r.home)
+        if score != (r.balls, r.strikes) or score == (0, 0):
+            continue
+        prev = [s for s in stable if s.t < r.t]
+        nxt = [s for s in stable if s.t > r.t]
+        if not prev or not nxt:
+            continue
+        a, c = prev[-1], nxt[0]
+        if (a.away, a.home) == (c.away, c.home) != score:
+            fixed = replace(r, away=a.away, home=a.home)
+            # 고친 판독이 앞뒤 안정 상태와 같으면 그 상태가 처음 보인 시각만 당긴다 —
+            # 틀린 점수를 읽은
+            # 판독으로 시각을 옮기지 않는다(PO 4차전: 2사 상태가 0.2초 당겨져 앞 투구 칸으로 감)
+            if fixed.key() not in (a.key(), c.key()):
+                out[i], changed = fixed, True
+    return out if changed else None
 
 
 def _stabilize_clean(clean: list[Reading], min_repeat: int) -> list[Reading]:
@@ -211,7 +246,7 @@ def _drop_spikes(runs: list[tuple[Reading, int]]) -> list[tuple[Reading, int]]:
                 continue
             spike = possible_step(a, c) and not (possible_step(a, r) and possible_step(r, c))
             if spike and not _next_is_spike(runs, i, a) and not (
-                    n == 1 and _starts_next_half(a, r, c)):
+                    n == 1 and (_starts_next_half(a, r, c) or _ends_half(a, r, c))):
                 continue
         out.append((r, n))
     return out
@@ -244,6 +279,22 @@ def _starts_next_half(a: Reading, r: Reading, c: Reading) -> bool:
     한 번에 안 이어진다는 이유로 버려졌다 — 하이라이트는 타석을 건너뛴다(삼진 6K를 놓침).
     """
     return _half_order(a) < _half_order(r) == _half_order(c) and _skippable(r, c)
+
+
+def _ends_half(a: Reading, r: Reading, c: Reading) -> bool:
+    """한 번 읽힌 `r`이 a와 같은 반 이닝의 마지막 상태이고 c부터 다음 반 이닝이면 튄 판독이 아니다.
+
+    하이라이트는 3아웃 직전에 상태를 한 번만 비춘다. 한국시리즈 5차전 1회초 '무사 2-2 → 2사 2-2'
+    (삼진 + 못 본 아웃, 다음 타자도 2-2)는 카운트가 그대로라 한 번에 바뀔 수 없어 버려졌고,
+    무사에서 바로 2회말로 넘어가 삼진을 놓쳤다. 타석 여럿을 건너뛴 것으로 설명되면 남긴다.
+    아웃만 늘었을 때만 — 주자·점수까지 바뀐 한 장은 못 본 플레이를 판정으로 만든다(투수 모음
+    '1사 → 2사 2루' 한 장이 공 없는 칸에 '아웃'을 냈다). 3아웃 직전(2사)만 — 아웃 점 오독 한 장이
+    없는 아웃을 만들지 않게(독립 리뷰). 바로 다음 반 이닝일 필요는 없다(KS5 1회초 → 2회말).
+    """
+    return (_half_order(a) == _half_order(r) < _half_order(c)
+            and r.outs == 2 > a.outs and r.bases == a.bases
+            and (r.away, r.home) == (a.away, a.home)
+            and _skippable(r, c))
 
 
 def _skippable(a: Reading, b: Reading) -> bool:

@@ -186,6 +186,26 @@ def _speech(cues: Sequence[Cue], *words: str) -> Optional[Cue]:
     return None
 
 
+OUTFIELDERS = ("좌익수", "중견수", "우익수")
+CATCH_WORDS = ("잡았", "잡아냅", "잡아 냅", "잡습니다", "잡고", "잡아내")
+
+
+def _outfield_catch(cues: Sequence[Cue]) -> Optional[Cue]:
+    """외야수가 공을 잡았다는 한 마디 — '중견수 뒷걸음질 잡았고 3루 주자 홈으로'(한국시리즈 5차전).
+
+    아웃 하나에 득점이 났는데 외야수가 잡았으면 뜬공이다(땅볼 아웃은 내야수가 잡는다).
+    잡은 말이 외야수 뒤에 와야 하고, '안타'가 섞이면 아니다 — '우익수 앞 안타, 잡아서 2루 송구
+    아웃'은 안타 + 주자 아웃이다(독립 리뷰).
+    """
+    for c in cues:
+        if c.kind != "speech" or "안타" in c.text:
+            continue
+        spots = [c.text.find(w) for w in OUTFIELDERS if w in c.text]
+        if spots and any(w in c.text[min(spots):] for w in CATCH_WORDS):
+            return c
+    return None
+
+
 def _ev(c: Cue) -> str:
     if c.kind == "speech":
         return f"해설 '{c.text}' ({c.t:.0f}s)"
@@ -285,12 +305,22 @@ def judge_transition(
 
     # 한 플레이로 설명이 안 되면(여러 플레이가 한 전이로 합쳐짐) 종류를 말하지 않는다
     if not one_play(tr):
+        # 삼진 + 못 본 아웃(한국시리즈 5차전 1회초 '무사 2-2 → 2사', 다음 타자도 2-2) — 보인 투구가
+        # 2스트라이크에서 공이 안 맞았고 해설·장면이 삼진이면 그 타석은 삼진이다. 합쳐짐은 그대로
+        # 주자가 움직였거나 점수가 났으면 출루가 섞였다 — 그 출루가 보인 투구일 수 있다(독립 리뷰)
+        if tr.outs_made and tr.before.strikes == 2 and no_play and not tr.runs and b == a:
+            k = _has(near, "swing_miss") or _has(near, "strikeout") or _speech(near, "삼진")
+            if k:
+                return make("result", "strikeout", 0.5, [k, no_play], merged=True)
         return make("result", "out" if tr.outs_made else "reach", 0.5, merged=True)
 
     # 같은 타석 안의 주자 움직임 (카운트 유지 — 0-0 카운트면 리셋처럼 보여도 단서로 가른다)
+    # 3루 주자보다 많이 들어온 득점은 투구 하나의 진루(보크·폭투·도루)로 안 난다 — 공이 맞아 나갔다
+    # (한국시리즈 5차전: 1·2루 → 2·3루 + 1점 적시 2루타를 보크로 봤다)
     mid_pa = not tr.half_change and (
         not tr.count_reset or (tr.before.balls, tr.before.strikes) == (0, 0)
-    ) and not _has(near, "contact")
+    ) and not _has(near, "contact") and (
+        tr.runs <= int(b[2]) or bool(_speech(near, "폭투", "포일")))
     if mid_pa and tr.outs_made == 0 and b != a:
         # 보크(6.02(a))는 투구 없이 모든 주자가 한 베이스씩 — 볼카운트가 그대로다.
         # 폭투·포일·더블스틸도 같은 진루 모양이지만 투구가 있어 카운트가 바뀐다.
@@ -345,7 +375,7 @@ def judge_transition(
         # 득점을 합친 전이는 새 상태가 아웃보다 뒤에 보였다(PO 2차전). 앞 플레이 '태그업'은 안 본다
         told = [c for c in cues if tr.before.t < c.t <= max(tr.t, tr.after.t) + CUE_AFTER]
         sf = (_has(near, "deep_fly") or _speech(near, *SF_WORDS) or _speech(between, *SF_WORDS)
-              or _speech(told, *SF_STRONG))
+              or _speech(told, *SF_STRONG) or (b[2] and _outfield_catch(near)))
         if sf:
             return make("result", "sac_fly", 0.5, [sf])
         # 만루에서 3루 주자만 들어오고 1·2루 주자가 그대로 — 땅볼이면 주자 모두 포스로 뛴다(타자가
@@ -409,6 +439,18 @@ def judge_transition(
         # 2스트라이크에서 공이 안 맞았는데 아웃 — 삼진이다(휘둘렀는지는 모른다)
         if no_play and (tr.count_reset or tr.half_change) and same_bases and not tr.runs:
             return make("result", "strikeout", 0.5, [no_play])
+    if tr.outs_made == 1 and tr.before.strikes < 2 and no_play and not tr.runs and (
+            b == a or tr.half_change):
+        # 직전 판독이 타석 시작(0-0)이라 2스트라이크를 못 봤다 — 보인 투구가 휘둘렀는데
+        # 공이 안 맞았고
+        # 해설이 삼진이면 삼진이다(한국시리즈 5차전 2회말 '탈삼진'이 '아웃'으로). 둘 다 있어야 한다.
+        # 주자가 그대로인데 아웃이 늘었고 공이 안 맞았으니 타자 아웃이다 — 새 판독은 다음 타자의
+        # 카운트(0-1)라 '카운트가 0-0으로'는 따지지 않는다
+        swung = _swung_last_pitch(cues, no_play.t, tr.before.t)
+        # 직전 상태 전의 '삼진'은 앞 타자 말이다. 공이 맞은 단서가 있으면 아니다(독립 리뷰)
+        k = _speech([c for c in near if c.t > tr.before.t], "삼진")
+        if swung and k and not _has(near, "contact"):
+            return make("result", "strikeout", 0.5, [k, swung])
     # 직전 상태가 보이기 전의 다이빙은 앞 플레이(다시보기)다 — 외야 다이빙 캐치 다시보기가 다음
     # 타석 땅볼·안타를 '몸을 던진 수비'로 만들었다(삼성-LG, 2026-11-08)
     dive = _has([c for c in near if c.t > tr.before.t], "dive")
@@ -712,8 +754,12 @@ K_MARK_STALE_SEC = 60.0  # 표시만으로 삼진을 낼 때 바로 전 판독�
 K_MARK_OWN_VIEW = 2.0  # 표시 뒤 이 안에 끝난 투구 화면은 그 삼진 투구 자신(표시가 0.5초 먼저 뜸)
 
 
+def _half_key(r: Reading) -> tuple[int, str]:
+    return (r.inning, r.half)
+
+
 def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence[Reading],
-                   finished: bool = False) -> None:
+                   finished: bool = False, raw: Sequence[Reading] = ()) -> None:
     """삼진 표시 뒤 첫 아웃 판정을 삼진으로. 표시 하나는 판정 하나에만 쓴다.
 
     표시는 2~3초 떠 있어 연달아 두 번 읽히기도 한다 — 표시 뒤 첫 아웃 판정이 이미 쓰였으면
@@ -739,6 +785,15 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
         own = [j.transition.before for j in judged if j.transition is not None
                and j.t <= m.t <= j.detail.get("pitch_t", j.t) and "pitch_t" in j.detail]
         basis = own[0] if own else (prev[-1] if prev else None)
+        if basis is not None and basis.strikes != 2 and not own:
+            # 안정 상태가 아니라고 버린 한 장(타석을 건너뛴 2스트라이크)이 표시 바로 앞에 있으면 그
+            # 판독이 이 표시의 타석이다 — 투수 모음 5K: '1사 0-0' 뒤 '2사 2루 0-2' 한 장,
+            # 5초 뒤 K 표시
+            # (그 한 장은 주자가 늘어 못 본 플레이를 판정으로 만들어 상태에선 버린다)
+            late = [r for r in raw if basis.t < r.t < m.t and m.t - r.t <= K_MARK_SEC
+                    and _half_key(r) == _half_key(basis) and r.outs >= basis.outs]
+            if late and max(late, key=lambda r: r.t).strikes == 2:
+                basis = max(late, key=lambda r: r.t)
         if basis is None or basis.strikes != 2:
             continue
         # 점수판이 그 투구 화면 도중에 먼저 바뀌고 표시가 화면이 끝나기 전에 떴어도 그 전이다(TVING)
@@ -819,7 +874,7 @@ def judge(
         own = _in_progress_view(j.transition, cues) if j.transition is not None else None
         if own is not None:
             j.detail["pitch_t"] = own.t
-    _apply_k_marks(out, cues, stable, finished)
+    _apply_k_marks(out, cues, stable, finished, readings)
     seen_change: list[float] = []
     for c in sorted(cues, key=lambda c: c.t):
         is_change = c.kind == "pitching_change" or (

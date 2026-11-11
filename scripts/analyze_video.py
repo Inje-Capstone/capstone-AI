@@ -20,6 +20,7 @@ grade_video.py가 한다. 같은 경기 정답지(문자중계)가 있으면 채
 """
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -340,7 +341,9 @@ def main() -> int:
         version = f"{SCOREBUG_VERSION}-every{args.read_every:g}" + (
             f"-{args.layout.stem}" if args.layout else "") + (
             "-v2" if args.read_prompt == "v2" else "") + (
-            "-changes" if args.read_changes else "")
+            "-changes" if args.read_changes else "") + (
+            "-note" + hashlib.sha1(reader.layout.prompt_note.encode("utf-8")).hexdigest()[:6]
+            if reader.layout and reader.layout.prompt_note else "")
         if dedicated_pass(snap, "scorebug", version, span,
                           lambda s, n: reader.read(args.video, n, s)):
             if args.min_repeat:

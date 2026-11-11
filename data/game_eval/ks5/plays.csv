@@ -1,0 +1,50 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+H8ydwy0nGOI,139.9,strikeout,True,strikeout,refined,점수판 아웃+2 득점+0 주자 000→000; 해설 '-두 번째 승부. 두 발 투 스트라이. 신선재. 원태인이 최현주를 삼진으로 잡아내면서 출발하고 있습니다.' (140s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (144s),맞음,헛스윙 삼진 — 다음 판독 2사(하나는 못 봄)
+H8ydwy0nGOI,149.1,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '- 2:2.- 멘트를 내다가 참았는데 그대로 삼진아웃입니다. 1회를 산뜻하게 출발하는 원태인입니다.' (150s),맞음,3아웃 — 장면 못 봄(심판·투수)
+H8ydwy0nGOI,162.4,none,True,,,,조용함,볼
+H8ydwy0nGOI,173.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,타구 아웃 — 1사
+H8ydwy0nGOI,184.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
+H8ydwy0nGOI,199.4,strikeout,True,,,,놓침,헛스윙 삼진
+H8ydwy0nGOI,208.4,out,True,out,video_only,점수판 아웃+2 득점+0 주자 100→000,맞음,파울 뜬공 3아웃
+H8ydwy0nGOI,220.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 배트를 휘두름 (224s),맞음,안타 — 수비 다이빙 못 잡음
+H8ydwy0nGOI,238.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
+H8ydwy0nGOI,260.7,out,True,out balk,video_only video_only,점수판 아웃+1 득점+0 주자 110→110 | 점수판 아웃+0 득점+0 주자 110→011,맞음,희생번트 — 1사 2·3루
+H8ydwy0nGOI,277.8,sac_fly,True,sac_fly,refined,점수판 아웃+1 득점+1 주자 011→010; 해설 '센터 쪽 중견수 뒷걸음질 잡았고 3루 주자 태극 홈으로 들어갑니다.' (280s),맞음,희생플라이 1-0
+H8ydwy0nGOI,303.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,타구 3아웃 — 3회말 1아웃은 못 봄
+H8ydwy0nGOI,321.3,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (328s),맞음,볼넷(3-0)
+H8ydwy0nGOI,331.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,뜬공 — 1루 주자 귀루
+H8ydwy0nGOI,349.1,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+0 득점+1 주자 110→010,맞음,적시 2루타 1-1
+H8ydwy0nGOI,390.1,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→100,맞음,적시타 1-2
+H8ydwy0nGOI,440.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
+H8ydwy0nGOI,458.2,reach,True,reach,video_only,점수판 아웃+1 득점+1 주자 110→000,맞음,적시타 1-3 — 3아웃은 못 봄
+H8ydwy0nGOI,481.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
+H8ydwy0nGOI,498.5,out,True,,,,놓침,"땅볼 — 3루수→1루 아웃, 1루 주자 2루로(해설)"
+H8ydwy0nGOI,507.7,out,True,out,video_only,점수판 아웃+2 득점+0 주자 100→010,맞음,뜬공 — 2루 주자 그대로
+H8ydwy0nGOI,515.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,땅볼 3아웃 — 4회말은 안 나옴
+H8ydwy0nGOI,535.5,out_any,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,2-2에서 공 클로즈업 — 다음 판독 1사(삼진으로 보임)
+H8ydwy0nGOI,542.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
+H8ydwy0nGOI,557.5,walk,True,walk,confirmed,점수판 아웃+0 득점+0 주자 100→110; 해설 '바깥쪽 볼넷입니다. 자 최원준 선수가 소굴뻑판 몇 개의 투구에 지금 인내력을 좀 발휘합니다.' (560s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (564s),맞음,볼넷(3-1) — 1·2루
+H8ydwy0nGOI,571.6,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 110→110,맞음,"아웃 — 2-2, 주자 그대로(삼진으로 보임)"
+H8ydwy0nGOI,592.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→000,맞음,뜬공 3아웃
+H8ydwy0nGOI,612.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
+H8ydwy0nGOI,624.9,reach,True,out,video_only,점수판 아웃+1 득점+0 주자 100→110,틀림,"안타 — 1·2루, 다음 타자 아웃은 못 봄"
+H8ydwy0nGOI,635.6,none,False,,,,조용함,타자 소개 — 그대로
+H8ydwy0nGOI,640.6,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 110→110,맞음,적시타 1-4
+H8ydwy0nGOI,692.2,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 110→110,맞음,적시타 1-5
+H8ydwy0nGOI,727.0,none,True,,,,조용함,관중 — 카운트만
+H8ydwy0nGOI,735.0,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 110→011,맞음,적시 2루타 1-6 — 2·3루
+H8ydwy0nGOI,756.0,walk,True,walk,refined,점수판 아웃+0 득점+0 주자 011→111; 해설 '- 자동 고의 사고를 선택을 또 합니다.' (750s),맞음,볼넷 — 만루
+H8ydwy0nGOI,767.2,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 111→101,맞음,2타점 적시타 1-8
+H8ydwy0nGOI,792.0,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 101→001,맞음,2타점 장타 1-10 — 3루
+H8ydwy0nGOI,831.3,?,False,out,video_only,점수판 아웃+2 득점+1 주자 001→000,제외,번트 자세에서 공이 빠져 3루 주자 득점 1-11로 보임(폭투·포일) — 3아웃·6회초 2아웃은 못 봄
+H8ydwy0nGOI,860.3,out,True,out out,video_only video_only,점수판 아웃+2 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼 3아웃 — 6회말 안 나옴
+H8ydwy0nGOI,880.9,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '- 3진 아웃. 배타 이정훈을 돌려보냅니다.' (880s),맞음,"아웃 — 삼진으로 보임, 다음 판독 2사(하나는 못 봄)"
+H8ydwy0nGOI,901.1,out_any,True,out,video_only,점수판 아웃+2 득점+0 주자 000→000,맞음,"3아웃 — 장면 못 봄, 7회말·8회초 안 나옴"
+H8ydwy0nGOI,946.9,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,타구 출루 — 1루
+H8ydwy0nGOI,990.5,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+1 득점+0 주자 110→110,맞음,"안타 — 1·2루, 다음 타자 아웃은 못 봄"
+H8ydwy0nGOI,1005.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→101,맞음,"땅볼 — 2루 포스아웃, 1·3루"
+H8ydwy0nGOI,1032.0,reach,True,reach,video_only,점수판 아웃+1 득점+1 주자 101→000,맞음,적시타 1-12 — 3아웃은 못 봄
+H8ydwy0nGOI,1066.5,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '-몸에 삼진 아웃. 12년 만에 우승까지 아웃 카운트 2개가 남아 있습니다.-32...' (1070s),맞음,아웃 — 장면 못 봄
+H8ydwy0nGOI,1082.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼 — 2사
+H8ydwy0nGOI,1107.8,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 타자가 공을 그냥 보냄 (1110s),맞음,경기 끝 — 마지막 아웃(삼진으로 보임)
+H8ydwy0nGOI,1288.0,?,False,,,,제외,경기 끝 뒤 다시보기

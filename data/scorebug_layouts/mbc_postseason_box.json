@@ -1,0 +1,49 @@
+{
+ "_note": "2026 포스트시즌 MBC 왼쪽 위 상자(한국시리즈 5차전 H8ydwy0nGOI, 김나진·정민철 중계) — 제목 줄('KBO 한국시리즈 5차전 (삼성 3승 1패)') 아래 양옆 팀·점수 칸, 가운데 흰 칸에 다이아몬드(노란 칸 = 주자)·회차 숫자와 검은 ▲/▼ 하나·볼카운트 숫자('1-2')·아웃 빨간 점 2개. 1080p에서 잼. crop은 제목 줄을 뺀다(kbs_postseason_box와 같은 이유) prompt_note: VLM이 가운데 볼카운트('0-1')를 점수로도 읽었다(108장 중 9장) — 점수는 양옆 팀 칸 숫자라고 덧붙인다",
+ "name": "mbc_postseason_box",
+ "crop": [
+  0.0417,
+  0.0667,
+  0.1417,
+  0.088
+ ],
+ "scale": 2.0,
+ "base_fill": "color",
+ "base_hue": [
+  40,
+  70
+ ],
+ "bases": {
+  "1": [
+   0.1247,
+   0.0961
+  ],
+  "2": [
+   0.1128,
+   0.0815
+  ],
+  "3": [
+   0.1008,
+   0.0961
+  ]
+ },
+ "outs": [
+  [
+   0.1239,
+   0.1452
+  ],
+  [
+   0.1334,
+   0.1451
+  ]
+ ],
+ "half": [
+  0.113,
+  0.112,
+  0.1234,
+  0.1324
+ ],
+ "half_fill": "dark",
+ "half_by": "shape",
+ "prompt_note": "In this score bug the small 'X-Y' numbers in the middle panel under the inning are the COUNT (balls-strikes), never the score. The SCORES are the large single numbers under the team names: left panel = away, right panel = home."
+}

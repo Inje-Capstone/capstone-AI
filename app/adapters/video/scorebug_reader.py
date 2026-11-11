@@ -38,7 +38,9 @@ CORNERS = {
     "bottom_left": (0.0, 0.68, 0.45, 0.32),
     "bottom_right": (0.55, 0.68, 0.45, 0.32),
 }
-VERSION = "scorebug-crop-v1"  # 스냅샷 캐시 키 — 판독 방식·지시문을 바꾸면 올린다
+# 스냅샷 캐시 키 — 판독 방식·지시문을 바꾸면 올린다.
+# v2: 덩어리 판독 시각을 화소가 같아진 뒤로(_settled)
+VERSION = "scorebug-crop-v2"
 THUMB_W, THUMB_H = 96, 48
 MARK_SCAN_FPS = 2.0  # 삼진 표시 훑기 — 표시가 2~3초 떠 있어 초당 2장이면 4장 이상 걸린다
 MARK_GAP = 3.0  # 이보다 떨어진 표시는 다른 삼진
@@ -246,6 +248,8 @@ class ScorebugReader:
         self.base_url = base_url.rstrip("/")
         self.every, self.layout = every, layout
         self.prompt = prompt  # READ_PROMPT_V2: 회차는 ▲/▼ 옆 숫자만(타순·투구 수를 회차로 읽음)
+        if layout is not None and layout.prompt_note:  # 이 점수판만의 안내를 덧붙인다
+            self.prompt = f"{prompt} {layout.prompt_note}"
         # 요청 사이 최소 간격(초) — 호스팅 API는 분당 한도를 넘으면 429로 막는다. 한 줄로 이어
         # 보내도 장당 1.3초라 한도를 넘었다(2026-11-07). 다시 보내지 않고 미리 천천히 보낸다
         self.min_gap, self._last = min_gap, -1e9
@@ -382,6 +386,30 @@ class ScorebugReader:
                     return corner, t
         return None, 0.0
 
+    def _settled(self, video: Path, start: float, first: int, at: int,
+                 state: tuple[list[int], int]) -> float:
+        """덩어리(first..at초)에서 주자·아웃 화소가 읽은 프레임(at)과 같아진 첫 초.
+
+        plan_reads는 덩어리 시작(first)을 판독 시각으로 찍는다 — 상태가 덩어리 내내 같다고 보고.
+        점수판이 장면이 바뀌어도 이어 보이는 중계(MBC 포스트시즌 상자)는 덩어리가 수십 초라
+        그 안에서
+        상태가 바뀌었다: 한국시리즈 5차전 판독 108장 중 10장이 앞 판독보다 이른 시각(최대 43초)으로
+        찍혀 플레이가 엉뚱한 칸에 붙었다(2026-11-10). 읽은 프레임에서 거꾸로 1초씩 되짚어 화소가
+        처음 달라지는 곳 바로 뒤를 쓴다. 끝까지 같으면 예전처럼 덩어리 시작.
+        """
+        assert self.layout is not None
+        for i in range(at - 1, first - 1, -1):
+            try:  # 되짚다 프레임 하나를 못 읽어도 판독 전체를 버리지 않는다(독립 리뷰)
+                px = self._rgb(video, start + i + 0.5)
+            except (subprocess.CalledProcessError, OSError, VideoAnalyzerError):
+                return float(i + 1)
+            if len(px) < RGB_W * RGB_H * 3:
+                return float(i + 1)
+            bases, outs = decode(self.layout, rgb_sampler(px, RGB_W, RGB_H))
+            if (bases, outs) != (list(state[0]), state[1]):
+                return float(i + 1)
+        return float(first)
+
     def read_frame(self, video: Path, t: float) -> Optional[dict[str, Any]]:
         """한 장만 읽는다(실시간 조각) — 위치 파일의 영역(crop)으로 자르고, 주자·아웃·초말은 화소로.
 
@@ -476,6 +504,9 @@ class ScorebugReader:
                         r, dropped = None, dropped + 1
                     elif mark:  # 주자·아웃 칸이 삼진 표시로 덮였다 — 상태 판독에서 빠진다
                         r["mark"] = mark
+                    if r and at > first:  # 덩어리 안에서 주자·아웃이 바뀌었으면 바뀐 뒤로 찍는다
+                        settled = self._settled(video, start, first, at, (r["bases"], r["outs"]))
+                        r["t"] = round(start + settled, 2)
                 if r:
                     readings.append(r)
         except (subprocess.CalledProcessError, VideoAnalyzerError) as exc:

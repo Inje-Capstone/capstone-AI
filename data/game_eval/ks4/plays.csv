@@ -2,9 +2,9 @@
 IT67rwYSXvA,25.0,?,False,,,,제외,인트로 — 투구 아님
 IT67rwYSXvA,27.3,?,False,,,,제외,인트로 — 투구 아님
 IT67rwYSXvA,32.3,?,False,,,,제외,인트로·선발 소개
-IT67rwYSXvA,136.1,homerun,True,homerun out reach out balk reach,video_only video_only video_only video_only video_only video_only,점수판 아웃+0 득점+1 주자 000→000 | 점수판 아웃+2 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+0 득점+0 주자 100→010 | 점수판 아웃+0 득점+0 주자 010→110,맞음,솔로 홈런 1-0
+IT67rwYSXvA,136.1,homerun,True,homerun out reach out balk reach out,video_only video_only video_only video_only video_only video_only video_only,점수판 아웃+0 득점+1 주자 000→000 | 점수판 아웃+2 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+0 득점+0 주자 100→010 | 점수판 아웃+0 득점+0 주자 010→110 | 점수판 아웃+1 득점+0 주자 110→110,맞음,솔로 홈런 1-0
 IT67rwYSXvA,147.6,same,False,,,,제외,홈런 다시보기·더그아웃
-IT67rwYSXvA,245.7,none,True,out,video_only,점수판 아웃+1 득점+0 주자 110→110,헛판정,관중
+IT67rwYSXvA,245.7,none,True,,,,조용함,관중
 IT67rwYSXvA,248.0,reach,True,reach reach runner reach reach,video_only video_only video_only video_only video_only,점수판 아웃+0 득점+0 주자 110→110 | 점수판 아웃+0 득점+1 주자 110→111 | 점수판 아웃+0 득점+0 주자 111→101 | 점수판 아웃+0 득점+1 주자 101→110 | 점수판 아웃+0 득점+0 주자 110→111,맞음,2타점 적시타 1-2
 IT67rwYSXvA,295.8,same,False,,,,제외,적시타 뒤 관중·다시보기
 IT67rwYSXvA,320.3,none,True,,,,조용함,볼
@@ -18,8 +18,8 @@ IT67rwYSXvA,484.7,hbp,True,reach,video_only,점수판 아웃+0 득점+0 주자 0
 IT67rwYSXvA,487.0,same,False,,,,제외,사구 뒤 장면
 IT67rwYSXvA,502.7,same,False,,,,제외,사구 뒤 장면
 IT67rwYSXvA,516.2,double_play,False,double_play,video_only,점수판 아웃+2 득점+0 주자 110→010,맞음,병살로 보임 — 무사 1·2루 → 2사 3루
-IT67rwYSXvA,539.8,?,False,runner reach,video_only video_only,점수판 아웃+0 득점+0 주자 010→001 | 점수판 아웃+0 득점+0 주자 001→101,제외,"2루 주자 3루로 — 도루·폭투 못 가림(다시 보고 고침, 처음엔 '카운트만')"
-IT67rwYSXvA,549.0,walk,True,,,,놓침,볼넷 — 1·2루
+IT67rwYSXvA,539.8,?,False,runner,video_only,점수판 아웃+0 득점+0 주자 010→001,제외,"2루 주자 3루로 — 도루·폭투 못 가림(다시 보고 고침, 처음엔 '카운트만')"
+IT67rwYSXvA,549.0,walk,True,walk,conflict,"점수판 아웃+0 득점+0 주자 001→101; 해설 '- 너무 높게 들어가면서 또 하나의 볼넷. 계속해서 볼넷과 못 맞는 볼. 4, 4구가 많아지고 있습니다.' (550s); 영상은 몸에 맞는 공 — 해설과 달라 보류",맞음,볼넷 — 1·2루
 IT67rwYSXvA,558.8,none,True,,,,조용함,관중
 IT67rwYSXvA,562.5,none,False,,,,조용함,카운트만(장면 없음)
 IT67rwYSXvA,570.3,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 101→101,맞음,적시타 7-1
@@ -39,7 +39,7 @@ IT67rwYSXvA,714.7,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 0
 IT67rwYSXvA,725.5,same,False,,,,제외,볼넷 다시보기
 IT67rwYSXvA,728.5,same,False,,,,제외,투수 교체
 IT67rwYSXvA,733.0,out,True,out,video_only,점수판 아웃+1 득점+1 주자 111→011,맞음,땅볼 타점 2-7 — 2루 포스아웃
-IT67rwYSXvA,743.0,walk,True,reach,video_only,점수판 아웃+0 득점+0 주자 011→111,틀림,볼넷 — 만루
+IT67rwYSXvA,743.0,walk,True,reach,video_only,점수판 아웃+0 득점+0 주자 011→111; [관절] 타자가 배트를 휘두름 (748s),틀림,볼넷 — 만루
 IT67rwYSXvA,757.5,walk,True,walk,confirmed,점수판 아웃+0 득점+1 주자 111→111; 해설 '- 계속되는 풀카운트 승부. 낮은 코스 또 한 번 빠집니다. 두타나 연속 밀어내기 몰랐죠.' (770s),맞음,밀어내기 볼넷 3-7
 IT67rwYSXvA,770.3,none,True,,,,조용함,투수
 IT67rwYSXvA,772.3,walk,True,,,,놓침,밀어내기 볼넷 4-7
@@ -69,7 +69,7 @@ IT67rwYSXvA,992.0,none,True,,,,조용함,타자 장면
 IT67rwYSXvA,995.0,none,False,,,,조용함,카운트만
 IT67rwYSXvA,999.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→000,맞음,뜬공 3아웃 — 만루
 IT67rwYSXvA,1002.7,same,False,,,,제외,뜬공 이어진 장면
-IT67rwYSXvA,1021.8,out_any,True,out,video_only,점수판 아웃+2 득점+0 주자 000→000,맞음,아웃 — 다음 판독 2사(하나는 못 봄)
+IT67rwYSXvA,1021.8,out_any,True,strikeout,refined,점수판 아웃+2 득점+0 주자 000→000; 해설 '- 아 품번. 스윙 삼진. 원아웃.- 이재선 손을 커서 엄청 좋습니다.' (1020s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1025s),맞음,아웃 — 다음 판독 2사(하나는 못 봄)
 IT67rwYSXvA,1031.5,none,False,,,,조용함,파울로 보임
 IT67rwYSXvA,1034.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼 3아웃
 IT67rwYSXvA,1069.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
@@ -83,6 +83,6 @@ IT67rwYSXvA,1136.9,homerun,False,out,video_only,점수판 아웃+2 득점+1 주�
 IT67rwYSXvA,1160.4,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
 IT67rwYSXvA,1163.1,same,False,,,,제외,땅볼 다시보기
 IT67rwYSXvA,1173.7,none,True,,,,조용함,타자 장면 — 그대로
-IT67rwYSXvA,1180.2,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,경기 끝 — 마지막 아웃
+IT67rwYSXvA,1180.2,out_any,True,strikeout,refined,"점수판 아웃+1 득점+0 주자 000→000; 해설 '-나즘몬, 스윙 삼진. 오늘도 등판을 해서 경기를 끝마치는 이승민 선수였습니다. 최종 스포츠 10대 1입니다.' (1180s); [관절] 타자가 배트를 휘두름 (1182s)",맞음,경기 끝 — 마지막 아웃
 IT67rwYSXvA,1202.2,?,False,,,,제외,경기 끝 뒤
 IT67rwYSXvA,1241.0,?,False,,,,제외,엔딩

@@ -16,6 +16,7 @@
 | `kbo_caster_box_up.json` | 같은 판, 위 띠가 얇아 30px 위 | xtXEisvgTR0 | 9/9 |
 | `spotv2_box.json` | SPOTV2(B·S·O 점 줄) | 89gNJQjBRrQ | 2/2, 초말 4/4 |
 | `kbs_postseason_box.json` | KBS N 포스트시즌 왼쪽 위 상자(볼·스트라이크·아웃 모두 점, ▲/▼ 하나, 보라 'nK') — crop은 제목 줄 뺌(숫자가 회차 오독을 부름) | p-BBD0DMTYw, IT2iLKT3a6c | 5/5·3/3, 초말 5/5·3/3, 카운트 5/5·3/3, 표시 2/2 |
+| `mbc_postseason_box.json` | MBC 포스트시즌 왼쪽 위 상자(제목 줄 · 양옆 팀 칸 · 가운데 다이아몬드, 볼카운트는 숫자, 아웃 점 2개, 검은 ▲/▼) — crop은 제목 줄 뺌 | H8ydwy0nGOI | 17/17, 초말 15/15 |
 | `sbs_sports.json` | SBS 2024(중간발표 시연 클립) | | |
 
 ## 칸
@@ -37,6 +38,7 @@
 | `mark_fill`·`mark_hue` | 표시 글자 `color`(+색상 범위, 기본 빨강) · `dark`(검정) | |
 | `cover_val` | 아웃 점이 모두 이보다 밝은 무채색이면 표시가 덮은 것(0.85) | |
 | `panel` | 점수판 바탕 고정 색 `[x, y, r, g, b]` 2~3곳 — 있으면 영상을 화소로 훑어 표시를 찾는다 | |
+| `prompt_note` | VLM 판독 지시에 덧붙이는 이 점수판만의 안내(영어) — 볼카운트를 'X-Y'로 그려 점수와 헷갈리는 판 | |
 
 ## 새 중계사 재는 법
 
