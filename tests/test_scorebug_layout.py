@@ -341,3 +341,34 @@ def test_reading_is_dropped_when_the_board_background_does_not_match():
     layout = Layout("t", {}, (), panel=((0.1, 0.1, 0.9, 0.9, 0.9),))
     assert _board_whole(layout, white) and not _board_whole(layout, tinted)
     assert _board_whole(Layout("t", {}, ()), tinted)
+
+
+def test_paired_arrow_boxes_pick_the_darker_one(tmp_path):
+    """SBS 포스트시즌 상자 — ▲·▼가 작고 회색이며 사이 회차 숫자가 더 검다. 두 칸 평균 밝기를 견줘
+    어두운 쪽(켜진 화살표)을 고른다. 차이가 작으면(점수판 없음·전환) 모른다."""
+    from app.adapters.video.scorebug_layout import decode_half
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    top_box, bot_box = (0.10, 0.10, 0.12, 0.12), (0.10, 0.20, 0.12, 0.22)
+    layout = Layout("t", {}, (), half_pair=(top_box, bot_box))
+
+    def frame(top_v, bot_v):
+        px = bytearray(bytes((225, 225, 225)) * (RGB_W * RGB_H))
+        for (x0, y0, x1, y1), v in ((top_box, top_v), (bot_box, bot_v)):
+            for y in range(round(y0 * RGB_H), round(y1 * RGB_H) + 1):
+                for x in range(round(x0 * RGB_W), round(x1 * RGB_W) + 1):
+                    i = (y * RGB_W + x) * 3
+                    px[i:i + 3] = bytes((v, v, v))
+        return bytes(px)
+
+    assert decode_half(layout, frame(150, 225), RGB_W, RGB_H) == "top"
+    assert decode_half(layout, frame(225, 160), RGB_W, RGB_H) == "bot"
+    assert decode_half(layout, frame(220, 215), RGB_W, RGB_H) is None
+    shipped = Layout.load(ROOT / "data" / "scorebug_layouts" / "sbs_postseason_box.json")
+    assert shipped.half_pair is not None and shipped.half is None and shipped.prompt_note
+    bad = tmp_path / "bad.json"
+    bad.write_text('{"name": "b", "bases": {}, "outs": [], "half_pair": [[0, 0, 1, 1]]}',
+                   encoding="utf-8")
+    import pytest
+    with pytest.raises(ValueError):
+        Layout.load(bad)

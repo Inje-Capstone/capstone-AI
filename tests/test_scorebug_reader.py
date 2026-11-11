@@ -261,3 +261,24 @@ def test_prompt_note_null_and_unreadable_frame_while_settling(tmp_path, monkeypa
 
     reader._rgb = rgb
     assert reader._settled("g.mp4", 0.0, 10, 20, ([1], 0)) == 16.0
+
+
+def test_layout_reference_tries_more_moments_when_the_first_six_show_no_board(tmp_path):
+    """PO 3차전 — 5·20·35·50·65·80% 여섯 장면이 모두 점수판 없는 장면이라 판독을 아예 못 했다.
+    여섯이 안 되면 사이 장면을 더 본다(앞 여섯은 그대로라 예전 기준 화면은 안 바뀐다)."""
+    import app.adapters.video.scorebug_reader as sr
+
+    reader = sr.ScorebugReader("K", "http://x", "m", layout=_bar_layout(tmp_path))
+    asked = []
+    reader._frame = lambda video, t, vf: asked.append(t) or b"jpg"
+
+    def ask(images, text, max_tokens):
+        if len(asked) < 8:
+            return {"visible": False}
+        return {"visible": True, "inning": 1, "half": "top", "balls": 0, "strikes": 0, "outs": 0,
+                "bases": [], "away": 0, "home": 0}
+
+    reader._ask = ask
+    corner, t = reader.find_in_layout("g.mp4", 100.0)
+    assert corner == reader.layout.crop and t == 15.0  # 여섯 실패 → 10%, 15%
+    assert asked[:6] == [5.0, 20.0, 35.0, 50.0, 65.0, 80.0]
