@@ -1,0 +1,74 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+yzTjqEbCn_s,178.2,reach,True,reach balk,video_only video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 배트를 휘두름 (181s) | 점수판 아웃+0 득점+0 주자 100→010,맞음,2루타
+yzTjqEbCn_s,203.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,타구 아웃 — 2루 주자 그대로
+yzTjqEbCn_s,221.0,strikeout,False,out,video_only,점수판 아웃+1 득점+0 주자 010→010,틀림,헛스윙 삼진으로 보임 — 2사 2루
+yzTjqEbCn_s,248.0,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 010→110; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (256s),맞음,볼넷(3-2) — 1·2루
+yzTjqEbCn_s,259.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→000,맞음,뜬공 3아웃
+yzTjqEbCn_s,275.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
+yzTjqEbCn_s,299.0,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 010→110 | 점수판 아웃+0 득점+1 주자 110→001,맞음,적시 장타 1-0 — 3루
+yzTjqEbCn_s,366.6,out_any,True,out,video_only,점수판 아웃+3 득점+0 주자 001→000,맞음,"아웃 — 3루 주자 그대로, 남은 아웃·2회말 2아웃은 못 봄"
+yzTjqEbCn_s,397.9,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,내야 안타로 보임 — 1루
+yzTjqEbCn_s,426.4,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,3아웃 — 장면 못 봄
+yzTjqEbCn_s,433.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,2루타
+yzTjqEbCn_s,454.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,땅볼 3아웃
+yzTjqEbCn_s,475.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
+yzTjqEbCn_s,488.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,"번트 — 2루 포스아웃, 타자 1루로 보임"
+yzTjqEbCn_s,501.0,double_play,True,double_play,refined,점수판 아웃+2 득점+0 주자 100→000; 해설 '-이렇게.-이렇게.-더블 플레이.' (510s),맞음,"병살 — 1루수가 잡아 더블 플레이(해설), 4회초 안 나옴"
+yzTjqEbCn_s,525.0,reach,True,reach balk,video_only video_only,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+0 득점+0 주자 100→010,맞음,2루타
+yzTjqEbCn_s,546.8,out,True,out runner,video_only video_only,점수판 아웃+1 득점+0 주자 010→010 | 점수판 아웃+0 득점+0 주자 010→001,맞음,뜬공 — 2루 주자 3루로
+yzTjqEbCn_s,564.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 001→001,맞음,땅볼 — 3루 주자 그대로
+yzTjqEbCn_s,577.8,reach,True,reach,refined,점수판 아웃+1 득점+1 주자 001→000; 해설 '- 좌측으로 타구를 날려보냈습니다. 좌익수 앞에 떨어지는 안타.' (610s); [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (582s),맞음,2사 적시타 1-1(해설 '좌익수 앞에 떨어지는 안타') — 3아웃·5회 못 봄
+yzTjqEbCn_s,610.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
+yzTjqEbCn_s,618.4,none,False,,,,조용함,카운트만
+yzTjqEbCn_s,622.1,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
+yzTjqEbCn_s,648.9,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 110→111,맞음,안타 — 만루
+yzTjqEbCn_s,678.7,double_play,True,out,video_only,점수판 아웃+2 득점+0 주자 111→000,틀림,병살 — 만루 무득점
+yzTjqEbCn_s,707.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,내야 안타 — 1루
+yzTjqEbCn_s,716.7,reach,True,reach balk,video_only video_only,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+0 득점+0 주자 110→011,맞음,안타 — 2·3루
+yzTjqEbCn_s,735.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 011→011,맞음,땅볼 — 2·3루 그대로
+yzTjqEbCn_s,767.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 011→000,맞음,땅볼 3아웃 — 7회초 1아웃은 못 봄
+yzTjqEbCn_s,809.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공 — 2사
+yzTjqEbCn_s,819.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼 3아웃 — 7회말 2아웃은 못 봄
+yzTjqEbCn_s,838.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,내야 안타 — 1루
+yzTjqEbCn_s,853.8,none,True,,,,조용함,스트라이크 — 3-2
+yzTjqEbCn_s,870.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,땅볼 3아웃 — 8회초 1아웃은 못 봄
+yzTjqEbCn_s,895.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
+yzTjqEbCn_s,931.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110; [관절] 타자가 배트를 휘두름 (933s),맞음,안타 — 1·2루
+yzTjqEbCn_s,944.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→110,맞음,뜬공 — 1·2루 그대로
+yzTjqEbCn_s,977.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→000,맞음,땅볼 3아웃 — 8회말 2아웃은 못 봄
+yzTjqEbCn_s,1009.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼 3아웃 — 1루수 잡고 투수 커버(해설)
+yzTjqEbCn_s,1032.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,2루타
+yzTjqEbCn_s,1050.3,out,True,out runner,video_only video_only,점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+0 득점+0 주자 100→010,맞음,번트 — 투수가 잡아 1루 아웃(해설)
+yzTjqEbCn_s,1059.0,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 010→010; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1067s),맞음,헛스윙 삼진(해설 '스윙! 스트라이크!')
+yzTjqEbCn_s,1080.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,뜬공 3아웃 — 9회말 1아웃은 못 봄
+yzTjqEbCn_s,1098.3,reach,True,reach balk,video_only video_only,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+0 득점+0 주자 100→010,맞음,2루타
+yzTjqEbCn_s,1124.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,뜬공 — 2사 2루
+yzTjqEbCn_s,1149.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,땅볼 3아웃 — 연장
+yzTjqEbCn_s,1177.9,hbp,True,hbp,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1184s),맞음,몸에 맞는 공
+yzTjqEbCn_s,1208.9,out,True,out balk dive_hit,video_only video_only video_only,"점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+0 득점+0 주자 100→010 | 점수판 아웃+0 득점+0 주자 010→110; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 2.9배 미끄러짐, 1237.6~1238.3초 (1238s)",맞음,희생번트 — 다음 타자 출루는 못 봄
+yzTjqEbCn_s,1231.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→110,맞음,뜬공 — 1·2루 그대로
+yzTjqEbCn_s,1285.0,none,True,,,,조용함,스트라이크
+yzTjqEbCn_s,1307.3,reach,True,reach,video_only,점수판 아웃+1 득점+1 주자 110→000,맞음,적시타 2-1 — 3아웃·10회말 1아웃은 못 봄
+yzTjqEbCn_s,1353.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
+yzTjqEbCn_s,1363.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,출루 — 1·2루
+yzTjqEbCn_s,1397.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 110→111,맞음,출루 — 만루
+yzTjqEbCn_s,1419.2,none,True,,,,조용함,볼 — 3-0
+yzTjqEbCn_s,1437.7,walk,True,walk,confirmed,점수판 아웃+0 득점+1 주자 111→111; 해설 '- 지켜봤고 그대로 동점 밀어내기. 승부는 원점.- 자 김현수 선수가.' (1440s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1443s),맞음,밀어내기 볼넷 2-2
+yzTjqEbCn_s,1460.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→111,맞음,뜬공 — 2사 만루
+yzTjqEbCn_s,1475.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→000,맞음,땅볼 3아웃 — 11회초 2아웃은 못 봄
+yzTjqEbCn_s,1493.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
+yzTjqEbCn_s,1520.8,reach,True,reach runner,video_only video_only,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+0 득점+0 주자 110→101,맞음,안타 — 1·3루
+yzTjqEbCn_s,1541.0,steal,True,runner,video_only,점수판 아웃+0 득점+0 주자 101→011,틀림,2루 도루 — 2·3루
+yzTjqEbCn_s,1555.8,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 011→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1566s),맞음,루킹 삼진(해설) — 11회말 안 나옴
+yzTjqEbCn_s,1581.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
+yzTjqEbCn_s,1596.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,땅볼 — 1루 주자 아웃·타자 1루로 보임
+yzTjqEbCn_s,1625.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
+yzTjqEbCn_s,1647.9,reach,False,out out,video_only video_only,점수판 아웃+1 득점+1 주자 110→100 | 점수판 아웃+1 득점+0 주자 100→000,틀림,"투수 글러브에서 공을 늦게 빼 득점 3-2(해설) — 내야 안타·실책 못 가림, 남은 아웃 못 봄"
+yzTjqEbCn_s,1693.2,strikeout,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1696s),맞음,삼진으로 보임 — 공 클로즈업
+yzTjqEbCn_s,1702.7,none,True,,,,조용함,파울로 보임
+yzTjqEbCn_s,1718.7,strikeout,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1724s),맞음,헛스윙 삼진으로 보임 — 2사
+yzTjqEbCn_s,1733.5,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 공을 그냥 보냄 (1736s),맞음,볼넷
+yzTjqEbCn_s,1744.5,none,True,,,,조용함,스트라이크
+yzTjqEbCn_s,1765.2,none,False,,,,조용함,카운트만
+yzTjqEbCn_s,1774.8,?,False,runner,video_only,점수판 아웃+0 득점+0 주자 100→010,제외,카운트 진행 · 주자 2루로 — 도루·폭투 못 가림
+yzTjqEbCn_s,1792.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,경기 끝 — 2루 땅볼(해설)

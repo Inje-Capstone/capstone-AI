@@ -162,6 +162,7 @@ _ASR_WORDS = {"삼진": ("3진",)}
 _HOMONYMS = {
     "사구": ("고의사구", "고의 사구"),
     "홈런": ("홈런스타", "홈런더비", "홈런 더비", "홈런왕"),  # 광고·행사 자막(실측 '크보 홈런스타')
+    "안타": ("안타깝", "안타까", "무안타"),  # '안타깝게 놓쳤네요'는 안타가 아니다(독립 리뷰)
 }
 
 
@@ -302,6 +303,18 @@ def judge_transition(
     # 팀 점수가 섞인다
     if tr.half_change and tr.before.outs == 2 and _scored_before_third_out(tr):
         return make("result", "reach", 0.5, merged=True)
+    # 반 이닝을 건너뛰었어도 — 앞 공격 팀만 점수가 났고 보인 투구가 맞아 나갔고 해설이 안타라면
+    # 그 점수는 3아웃 전 안타다(한국시리즈 2차전 4회말 2사 3루 '좌익수 앞에 떨어지는 안타' 뒤 6회초)
+    # 새 반 이닝 첫 판독에 주자가 없고, 직전 상태 뒤 첫 투구 화면이 맞아 나간 것일 때만 — 새 반
+    # 이닝의 안타·투구를 앞 반 이닝 득점의 근거로 쓰지 않게(독립 리뷰). 말도 직전 상태 뒤의 것만
+    first = min((c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                 and tr.before.t < c.t <= tr.t), key=lambda c: c.t, default=None)
+    if (tr.half_change and tr.before.outs == 2 and not any(a)
+            and first is not None and first.kind == IN_PLAY
+            and _scored_before_third_out(tr, skipped=True)):
+        hit = _speech([c for c in near if c.t > tr.before.t], *HIT_WORDS)
+        if hit:
+            return make("result", "reach", 0.5, [hit, first], merged=True)
 
     # 한 플레이로 설명이 안 되면(여러 플레이가 한 전이로 합쳐짐) 종류를 말하지 않는다
     if not one_play(tr):
@@ -476,6 +489,8 @@ SPLIT_SEC = 25.0  # 점수판이 아웃과 득점을 나눠 반영하는 간격(
 HR_TALK_SEC = 20.0  # 홈런 말을 새 점수판 뒤 이만큼까지 듣는다(다시보기)
 NEW_HALF_LEAD = 3.0  # 새 반 이닝 첫 투구의 스윙이 그 투구 화면 단서보다 앞서는 시간(실측 약 1초)
 OUTS_SPLIT_SEC = 8.0  # 병살 아웃을 하나씩 올리는 간격(실측 4초) — 다음 투구까지는 15초 넘게 걸린다
+HIT_WORDS = ("안타", "적시타", "2루타", "3루타", "투베이스", "쓰리베이스")
+DP_SAID_SEC = 30.0  # 해설이 병살이라 할 때 두 아웃을 합치는 최대 간격(KS2 실측 18초)
 DP_WORDS = ("병살", "더블플레이", "더블 플레이")
 
 
@@ -509,12 +524,20 @@ def _split_half(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transiti
     return out
 
 
-def _scored_before_third_out(tr: Transition) -> bool:
-    """반 이닝이 바로 다음으로 바뀐 전이에서 앞 반 이닝 공격 팀이 점수를 냈나."""
+def _scored_before_third_out(tr: Transition, skipped: bool = False) -> bool:
+    """반 이닝이 바로 다음으로 바뀐 전이에서 앞 반 이닝 공격 팀이 점수를 냈나.
+
+    `skipped`: 반 이닝을 건너뛴 전이도 본다 — 대신 상대 팀 점수는 그대로여야 한다(건너뛴 반 이닝의
+    점수가 섞였을 수 있다 — 근거는 부르는 쪽이 해설로 더한다).
+    """
     a, b = tr.before, tr.after
     nxt = (a.inning, "bot") if a.half == "top" else (a.inning + 1, "top")
     if (b.inning, b.half) != nxt:
-        return False
+        if not skipped:
+            return False
+        other = b.home - a.home if a.half == "top" else b.away - a.away
+        if other:
+            return False
     return (b.away - a.away if a.half == "top" else b.home - a.home) >= 1
 
 
@@ -579,8 +602,18 @@ def _merge_split(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transit
         # 병살: 점수판이 아웃을 하나씩 두 번 올렸다(2아웃 → 4초 뒤 3아웃). 사이에 투구가 없어야 한다
         pitched = any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
                       and prev is not None and prev.t < c.t <= tr.t for c in cues)
+        # 해설이 병살이라 하면 간격이 길어도(다음 점수판이 다음 반 이닝 — 한국시리즈 2차전 '더블
+        # 플레이', 18초) 사이에 투구가 없을 때 합친다
+        # 첫 아웃의 직전 상태가 보인 뒤 ~ 둘째 아웃 사이의 말만, '병살 노려야'·'병살을 면했다'는
+        # 빼고,
+        # 30초 안만(독립 리뷰 — 앞 플레이 말·몇 분 떨어진 두 아웃)
+        said = [c for c in _near(cues, prev.t) if prev.before.t < c.t <= tr.t
+                and not any(w in c.text for w in ("노려", "노리", "면했", "면한", "피했"))
+                ] if prev is not None else []
+        dp_said = prev is not None and tr.t - prev.t <= DP_SAID_SEC and _speech(
+            said, *DP_WORDS) is not None
         outs_split = (
-            prev is not None and tr.t - prev.t <= OUTS_SPLIT_SEC and not pitched
+            prev is not None and (tr.t - prev.t <= OUTS_SPLIT_SEC or dp_said) and not pitched
             and prev.outs_made == 1 and prev.runs == 0 and not prev.half_change
             and tr.outs_made >= 1 and tr.runs == 0
             and (tr.half_change or (tr.before.balls, tr.before.strikes)

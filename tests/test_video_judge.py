@@ -1870,3 +1870,47 @@ def test_review_guards_on_the_new_ks5_rules():
                  R(10, outs=2, balls=2, strikes=2, bases=(False, False, True)),
                  [_view(4, "no_play"), Cue(5, "speech", "삼진")])
     assert merged.code != "strikeout"
+
+
+def test_double_play_split_across_a_long_gap_when_commentary_says_so():
+    """KS2 — 1사 1루 직선타 병살: 점수판이 2사(주자 그대로)를 먼저 보이고 18초 뒤 다음 반 이닝.
+    사이에 투구가 없고 해설이 '더블 플레이'면 두 아웃을 한 병살로 합친다. 말이 없으면 그대로 둘."""
+    seen = twice(R(0, outs=1, bases=(True, False, False)), R(9, outs=2, bases=(True, False, False)),
+                 R(27, half="bot"))
+    cues = [_view(5, "in_play"), Cue(10, "speech", "이렇게 더블 플레이")]
+    codes = [j.code for j in judge(seen, cues) if j.transition is not None]
+    assert codes == ["double_play"]
+    assert [j.code for j in judge(seen, [_view(5, "in_play")]) if j.transition is not None] == [
+        "out", "out"]
+
+
+def test_two_out_hit_before_skipped_half_innings_is_a_hit():
+    """KS2 — 4회말 2사 3루 '좌익수 앞에 떨어지는 안타'로 1점, 다음 판독은 6회초(5회를 건너뜀).
+    상대 팀 점수가 그대로이고 공이 맞아 나갔고 해설이 안타면 3아웃 전 안타(출루)다."""
+    before = R(0, inning=4, half="bot", outs=2, bases=(False, False, True))
+    after = R(10, inning=6, away=0, home=1)
+    hit = [_view(4, "in_play"), Cue(8, "speech", "좌익수 앞에 떨어지는 안타")]
+    assert one(before, after, hit).code == "reach"
+    assert one(before, after, [_view(4, "in_play")]).code != "reach"  # 말이 없으면 못 가른다
+    other = R(10, inning=6, away=1, home=1)  # 건너뛴 반 이닝에 상대 팀도 점수 — 섞였다
+    assert one(before, other, hit).code != "reach"
+
+
+def test_ks2_rules_do_not_fire_on_lookalike_words_or_other_plays():
+    """독립 리뷰 — '안타깝다'는 안타가 아니고, 새 반 이닝에 주자가 있으면(그 반 이닝 안타일 수 있음)
+    안 쓴다. '병살 노려야'·30초 넘게 떨어진 두 아웃은 합치지 않는다."""
+    before = R(0, inning=4, half="bot", outs=2, bases=(False, False, True))
+    after = R(10, inning=6, home=1)
+    sorry = [_view(4, "in_play"), Cue(8, "speech", "안타깝게 놓쳤네요")]
+    assert one(before, after, sorry).code != "reach"
+    runner = R(10, inning=6, home=1, bases=(True, False, False))
+    hit = [_view(4, "in_play"), Cue(8, "speech", "좌익수 앞 안타")]
+    assert one(before, runner, hit).code != "reach"
+    seen = twice(R(0, outs=1, bases=(True, False, False)), R(9, outs=2, bases=(True, False, False)),
+                 R(27, half="bot"))
+    aim = [_view(5, "in_play"), Cue(8, "speech", "여기서 병살 노려야죠")]
+    assert [j.code for j in judge(seen, aim) if j.transition is not None] == ["out", "out"]
+    far = twice(R(0, outs=1, bases=(True, False, False)), R(9, outs=2, bases=(True, False, False)),
+                R(60, half="bot"))
+    said = [_view(5, "in_play"), Cue(10, "speech", "더블 플레이")]
+    assert [j.code for j in judge(far, said) if j.transition is not None] == ["out", "out"]
