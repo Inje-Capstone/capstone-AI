@@ -1,0 +1,79 @@
+{
+ "_note": "2026 포스트시즌 SBS 왼쪽 위 상자(PO 3차전 U7GxmDzjCuk) — 제목 줄('2026 PO 3차전 - 1승 1패') 아래 위·아래 두 줄 팀·점수, 오른쪽 흰 칸에 ▲/▼ 둘(켜진 쪽 검정, 꺼진 쪽 회색)과 그 사이 회차 숫자, 볼(초록 3)·스트라이크(노랑 2)·아웃(빨강 2) 점, 다이아몬드(노란 칸 = 주자). 1080p에서 잼. crop은 제목 줄을 뺀다. ▲/▼는 작고 회색이며 사이 회차 숫자가 더 검어 한 칸으로 못 가린다 — half_pair로 두 칸 밝기를 견준다(켜짐 0.58~0.64, 꺼짐 0.88, 8/8). VLM이 회차·초말을 자주 틀려(9회를 6, 2회말을 초) prompt_note로 위치를 알려 준다",
+ "name": "sbs_postseason_box",
+ "crop": [
+  0.05,
+  0.0704,
+  0.1688,
+  0.0852
+ ],
+ "scale": 2.0,
+ "base_fill": "color",
+ "base_hue": [
+  30,
+  70
+ ],
+ "bases": {
+  "1": [
+   0.2025,
+   0.1169
+  ],
+  "2": [
+   0.1878,
+   0.1026
+  ],
+  "3": [
+   0.173,
+   0.1169
+  ]
+ },
+ "outs": [
+  [
+   0.1396,
+   0.1343
+  ],
+  [
+   0.1523,
+   0.1339
+  ]
+ ],
+ "balls": [
+  [
+   0.1395,
+   0.0923
+  ],
+  [
+   0.1523,
+   0.0923
+  ],
+  [
+   0.165,
+   0.0923
+  ]
+ ],
+ "strikes": [
+  [
+   0.1395,
+   0.1133
+  ],
+  [
+   0.1523,
+   0.1133
+  ]
+ ],
+ "half_pair": [
+  [
+   0.1229,
+   0.0815,
+   0.1292,
+   0.0954
+  ],
+  [
+   0.1229,
+   0.1269,
+   0.1302,
+   0.1417
+  ]
+ ],
+ "prompt_note": "Layout of this score bug: on the LEFT, two colored rows each with a team name and a large number - those two numbers are the SCORES (upper row = away, lower row = home). To the RIGHT of them is a white panel; its leftmost column has a small triangle on top, ONE digit (or two) in the middle, and a small triangle at the bottom - that middle number is the INNING, never a score. The dots right of it are balls, strikes and outs; do not put the inning into balls or strikes."
+}

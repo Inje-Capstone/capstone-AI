@@ -6673,6 +6673,284 @@
      "note": "경기 끝 — 2루 땅볼(해설)"
     }
    ]
+  },
+  "U7GxmDzjCuk": {
+   "title": "시험용 · 2026 KBO 플레이오프 3차전 삼성-KIA(광주) 하이라이트 · TVING(SBS 중계)",
+   "layout": "sbs_postseason_box",
+   "plays": [
+    {
+     "t": 81.8,
+     "pitch_end": 89.1,
+     "end": 90.8,
+     "code": "none",
+     "sure": true,
+     "note": "스트라이크"
+    },
+    {
+     "t": 90.8,
+     "pitch_end": 98.8,
+     "end": 119.9,
+     "code": "reach",
+     "sure": true,
+     "note": "안타 — 1루"
+    },
+    {
+     "t": 119.9,
+     "pitch_end": 122.4,
+     "end": 181.2,
+     "code": "homerun",
+     "sure": true,
+     "note": "2점 홈런 2-0 — 1회말 1아웃은 못 봄"
+    },
+    {
+     "t": 181.2,
+     "pitch_end": 188.7,
+     "end": 192.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "헛스윙 삼진(해설)"
+    },
+    {
+     "t": 192.7,
+     "pitch_end": 195.7,
+     "end": 211.4,
+     "code": "out_any",
+     "sure": true,
+     "note": "3아웃 — 2회초 2아웃은 못 봄"
+    },
+    {
+     "t": 211.4,
+     "pitch_end": 214.9,
+     "end": 269.5,
+     "code": "out",
+     "sure": false,
+     "note": "안타 뒤 2루 도전 아웃(비디오 판독, 해설) — 3아웃"
+    },
+    {
+     "t": 269.5,
+     "pitch_end": 276.5,
+     "end": 278.3,
+     "code": "walk",
+     "sure": true,
+     "note": "볼넷 — 다음 타자 아웃은 못 봄"
+    },
+    {
+     "t": 278.3,
+     "pitch_end": 282.3,
+     "end": 294.0,
+     "code": "reach",
+     "sure": true,
+     "note": "안타 — 1·2루"
+    },
+    {
+     "t": 294.0,
+     "pitch_end": 297.5,
+     "end": 315.8,
+     "code": "out",
+     "sure": true,
+     "note": "뜬공 — 1·2루 그대로"
+    },
+    {
+     "t": 315.8,
+     "pitch_end": 319.6,
+     "end": 348.3,
+     "code": "reach",
+     "sure": true,
+     "note": "적시타 2-1"
+    },
+    {
+     "t": 348.3,
+     "pitch_end": 350.6,
+     "end": 403.4,
+     "code": "reach",
+     "sure": true,
+     "note": "적시타 2-2"
+    },
+    {
+     "t": 403.4,
+     "pitch_end": 407.4,
+     "end": 427.7,
+     "code": "out_any",
+     "sure": true,
+     "note": "3아웃 — 3회초 안 나옴·3회말 1아웃 못 봄"
+    },
+    {
+     "t": 427.7,
+     "pitch_end": 430.4,
+     "end": 521.5,
+     "code": "homerun",
+     "sure": true,
+     "note": "솔로 홈런 2-3 — 남은 아웃·4회 안 나옴"
+    },
+    {
+     "t": 521.5,
+     "pitch_end": 526.5,
+     "end": 536.0,
+     "code": "reach",
+     "sure": true,
+     "note": "안타 — 1루"
+    },
+    {
+     "t": 536.0,
+     "pitch_end": 540.3,
+     "end": 557.8,
+     "code": "strikeout",
+     "sure": false,
+     "note": "헛스윙 삼진으로 보임"
+    },
+    {
+     "t": 557.8,
+     "pitch_end": 562.8,
+     "end": 616.6,
+     "code": "homerun",
+     "sure": true,
+     "note": "2점 홈런 4-3(해설 '투런') — 남은 아웃·5회말 안 나옴"
+    },
+    {
+     "t": 616.6,
+     "pitch_end": 619.1,
+     "end": 628.6,
+     "code": "reach",
+     "sure": true,
+     "note": "안타 — 1루"
+    },
+    {
+     "t": 628.6,
+     "pitch_end": 632.4,
+     "end": 645.9,
+     "code": "strikeout",
+     "sure": false,
+     "note": "삼진으로 보임 — 1루 주자 그대로"
+    },
+    {
+     "t": 645.9,
+     "pitch_end": 652.6,
+     "end": 678.9,
+     "code": "walk",
+     "sure": true,
+     "note": "볼넷(3-2) — 1·2루"
+    },
+    {
+     "t": 678.9,
+     "pitch_end": 682.4,
+     "end": 682.7,
+     "code": "none",
+     "sure": false,
+     "note": "카운트만"
+    },
+    {
+     "t": 682.7,
+     "pitch_end": 684.9,
+     "end": 719.0,
+     "code": "double_play",
+     "sure": false,
+     "note": "1루수 직선타 뒤 주자 아웃으로 보임(해설 '직선타')"
+    },
+    {
+     "t": 719.0,
+     "pitch_end": 722.5,
+     "end": 768.3,
+     "code": "homerun",
+     "sure": true,
+     "note": "솔로 홈런 4-4 — 남은 아웃 못 봄"
+    },
+    {
+     "t": 768.3,
+     "pitch_end": 771.0,
+     "end": 782.3,
+     "code": "reach",
+     "sure": true,
+     "note": "안타 — 1루"
+    },
+    {
+     "t": 782.3,
+     "pitch_end": 784.5,
+     "end": 802.5,
+     "code": "out",
+     "sure": true,
+     "note": "땅볼 — 1루 주자 2루로"
+    },
+    {
+     "t": 802.5,
+     "pitch_end": 805.0,
+     "end": 877.4,
+     "code": "reach",
+     "sure": true,
+     "note": "적시 2루타로 보임 5-4"
+    },
+    {
+     "t": 877.4,
+     "pitch_end": 879.4,
+     "end": 909.4,
+     "code": "reach",
+     "sure": true,
+     "note": "적시타 6-4"
+    },
+    {
+     "t": 909.4,
+     "pitch_end": 912.6,
+     "end": 988.0,
+     "code": "strikeout",
+     "sure": true,
+     "note": "헛스윙 삼진 3아웃(해설) — 7회말 2아웃은 못 봄"
+    },
+    {
+     "t": 988.0,
+     "pitch_end": 995.5,
+     "end": 1018.3,
+     "code": "out",
+     "sure": true,
+     "note": "뜬공 3아웃 — 8회초 안 나옴·8회말 1아웃 못 봄"
+    },
+    {
+     "t": 1018.3,
+     "pitch_end": 1024.5,
+     "end": 1026.0,
+     "code": "none",
+     "sure": false,
+     "note": "볼로 보임 — 3-2"
+    },
+    {
+     "t": 1026.0,
+     "pitch_end": 1034.8,
+     "end": 1049.8,
+     "code": "walk",
+     "sure": true,
+     "note": "볼넷 — 1루"
+    },
+    {
+     "t": 1049.8,
+     "pitch_end": 1053.5,
+     "end": 1123.6,
+     "code": "double_play",
+     "sure": true,
+     "note": "직선타 병살 — 주자가 뛰었다 못 돌아옴(해설)"
+    },
+    {
+     "t": 1123.6,
+     "pitch_end": 1125.6,
+     "end": 1125.9,
+     "code": "none",
+     "sure": false,
+     "note": "카운트만"
+    },
+    {
+     "t": 1125.9,
+     "pitch_end": 1136.1,
+     "end": 1154.1,
+     "code": "?",
+     "sure": false,
+     "note": "카운트 진행·주자 2루로 — 도루·폭투 못 가림"
+    },
+    {
+     "t": 1154.1,
+     "pitch_end": 1164.6,
+     "end": 1179.6,
+     "code": "walk",
+     "sure": true,
+     "note": "볼넷 — 1·2루"
+    }
+   ]
   }
  },
  "_note": "1080p 경기 하이라이트의 정답 — 사람이 투구 화면마다 점수판(전·후)과 그 사이 장면을 보고 매겼다. t·pitch_end·end = 그 투구 화면 시작·끝·다음 투구 화면 시작(초). code: reach(안타·실책 출루), out(인플레이 아웃), strikeout, out_any(삼진인지 인플레이 아웃인지 못 가림), walk, homerun, sac_fly, none(점수판이 그 타석 안에서만 바뀜), ?(결과를 못 봄 — 채점 제외). sure=false는 확실하지 않은 정답."

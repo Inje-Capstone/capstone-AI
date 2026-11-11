@@ -375,7 +375,7 @@ def judge_transition(
             return make("result", "strikeout", 0.5, [k])
         # 판정 시각 근처 말만 — 플레이 전의 '병살 노려야죠'를 병살로 받지 않는다(독립 리뷰)
         dp = _speech(near, *DP_WORDS)
-        if tr.half_change and not dp:
+        if tr.half_change and not dp and not tr.lost_runner:
             # 이닝이 바뀐 전이의 아웃 둘은 하이라이트에선 대개 여러 플레이가 합쳐진 것이다
             return make("result", "out", 0.5, merged=True)
         return make("result", "double_play", 0.8, [dp])
@@ -490,6 +490,7 @@ HR_TALK_SEC = 20.0  # 홈런 말을 새 점수판 뒤 이만큼까지 듣는다(
 NEW_HALF_LEAD = 3.0  # 새 반 이닝 첫 투구의 스윙이 그 투구 화면 단서보다 앞서는 시간(실측 약 1초)
 OUTS_SPLIT_SEC = 8.0  # 병살 아웃을 하나씩 올리는 간격(실측 4초) — 다음 투구까지는 15초 넘게 걸린다
 HIT_WORDS = ("안타", "적시타", "2루타", "3루타", "투베이스", "쓰리베이스")
+LOST_RUNNER_SEC = 60.0  # 사라진 주자의 아웃이 다음 판독(다음 반 이닝일 수도)에 올라오기까지
 DP_SAID_SEC = 30.0  # 해설이 병살이라 할 때 두 아웃을 합치는 최대 간격(KS2 실측 18초)
 DP_WORDS = ("병살", "더블플레이", "더블 플레이")
 
@@ -612,8 +613,21 @@ def _merge_split(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transit
                 ] if prev is not None else []
         dp_said = prev is not None and tr.t - prev.t <= DP_SAID_SEC and _speech(
             said, *DP_WORDS) is not None
+        # 앞 전이에서 주자가 아웃·득점 없이 사라졌으면(1사 1루 → 2사 주자 없음 — 직선타 뒤
+        # 귀루 못 한 주자의 아웃이 아직 안 올라감) 그 플레이는 안 끝났다 — 다음 아웃까지 한
+        # 플레이(PO 3차전, 41초)
+        # 타석이 끝난 전이(카운트가 새로)여야 하고 도루·견제 단서가 없어야 한다 — 도루 실패·견제사도
+        # 주자가 사라지지만 타자는 그대로다(독립 리뷰)
+        moved = prev is not None and (
+            any(c.kind in ("slide", "pickoff_throw") and prev.before.t < c.t <= prev.t
+                for c in cues)
+            or _speech(_near(cues, prev.t), "도루", "견제", "주루사") is not None)
+        lost = prev is not None and tr.t - prev.t <= LOST_RUNNER_SEC and prev.count_reset and (
+            not moved) and (
+            prev.outs_made + prev.runs + prev.runners_after < prev.runners_before + 1)
         outs_split = (
-            prev is not None and (tr.t - prev.t <= OUTS_SPLIT_SEC or dp_said) and not pitched
+            prev is not None and (tr.t - prev.t <= OUTS_SPLIT_SEC or dp_said or lost)
+            and not pitched
             and prev.outs_made == 1 and prev.runs == 0 and not prev.half_change
             and tr.outs_made >= 1 and tr.runs == 0
             and (tr.half_change or (tr.before.balls, tr.before.strikes)
@@ -622,7 +636,8 @@ def _merge_split(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transit
         if outs_split and prev is not None:
             out[-1] = Transition(t=prev.t, before=prev.before, after=tr.after,
                                  outs_made=prev.outs_made + tr.outs_made, runs=0,
-                                 half_change=tr.half_change, count_reset=True)
+                                 half_change=tr.half_change, count_reset=True,
+                                 lost_runner=bool(lost) and not dp_said)
             continue
         out.append(tr)
     return out

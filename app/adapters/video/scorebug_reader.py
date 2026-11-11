@@ -39,8 +39,9 @@ CORNERS = {
     "bottom_right": (0.55, 0.68, 0.45, 0.32),
 }
 # 스냅샷 캐시 키 — 판독 방식·지시문을 바꾸면 올린다.
-# v2: 덩어리 판독 시각을 화소가 같아진 뒤로(_settled)
-VERSION = "scorebug-crop-v2"
+# v2: 덩어리 판독 시각을 화소가 같아진 뒤로(_settled). v3: 기준 화면을 열두 곳 더 찾음(REF_MORE),
+# 위치 파일 half_pair
+VERSION = "scorebug-crop-v3"
 THUMB_W, THUMB_H = 96, 48
 MARK_SCAN_FPS = 2.0  # 삼진 표시 훑기 — 표시가 2~3초 떠 있어 초당 2장이면 4장 이상 걸린다
 MARK_GAP = 3.0  # 이보다 떨어진 표시는 다른 삼진
@@ -49,6 +50,10 @@ PIXEL_TOL = 30  # 같은 화소로 볼 밝기 차
 MASK_MIN = 0.3  # 기준과 같은 값으로 이 비율 이상 나온 화소 = 점수판 그래픽
 # 위치 파일 영역: 점수판이 보이는 때(기준 화면)를 찾아볼 곳 — 구간 비율
 REF_TRIES = (0.05, 0.2, 0.35, 0.5, 0.65, 0.8)
+# 위 여섯이 모두 점수판 없는 장면이면(PO 3차전 하이라이트 — 판독 0장) 사이를 더 본다.
+# 앞 여섯은 그대로라
+# 예전에 찾은 기준 화면은 바뀌지 않는다
+REF_MORE = (0.1, 0.15, 0.25, 0.3, 0.4, 0.45, 0.55, 0.6, 0.7, 0.75, 0.85, 0.9)
 PICK_TRIES = (0.3, 0.6, 0.45, 0.75)  # 모서리 고르기를 해 볼 곳(1초 다음) — 구간 비율
 MAYBE_VISIBLE = 0.55  # 기준 화면과 이만큼 닮으면 점수판이 보일 수 있다 (배경이 바뀌어도)
 SHOT_CHANGE = 0.05  # 이웃 프레임이 이만큼 달라지면 다른 장면(또는 점수판 변화)
@@ -445,7 +450,7 @@ class ScorebugReader:
     ) -> tuple[Optional[Region], float]:
         """위치 파일에 점수판 영역이 있으면 고를 필요 없이, 보이는 때(기준 화면)만 찾는다."""
         assert self.layout is not None and self.layout.crop is not None
-        for part in REF_TRIES:
+        for part in REF_TRIES + REF_MORE:
             t = start + min(max(0.0, duration * part), max(0.0, duration - 0.5))
             frame = self._frame(video, t, crop_filter(self.layout.crop, self.layout.scale))
             if normalize_reading(self._ask([frame], self.prompt, 256), t):

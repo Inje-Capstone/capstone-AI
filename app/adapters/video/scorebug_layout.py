@@ -55,6 +55,7 @@ DARK_VAL = 0.3  # mark_fill·half_fill "dark": 이보다 어두우면 검은 글
 
 Point = tuple[float, float]
 Rgb = tuple[float, float, float]
+Box = tuple[float, float, float, float]
 
 
 @dataclass(frozen=True)
@@ -79,6 +80,11 @@ class Layout:
     # VLM 판독 지시에 덧붙이는 이 점수판만의 안내(영어) — 볼카운트를 'X-Y'로 그리는 판은 VLM이
     # 그것을 점수로도 읽었다(MBC 포스트시즌 상자, 108장 중 9장)
     prompt_note: str = ""
+    # ▲·▼ 칸 둘(x0, y0, x1, y1 비율) — 켜진 쪽이 꺼진 쪽보다 어둡다.
+    # 화살표가 작고 회색이며 사이 회차
+    # 숫자가 더 검어 한 칸(half)으로는 못 가르는 판
+    # (SBS 포스트시즌 상자: 켜짐 0.58~0.64, 꺼짐 0.88)
+    half_pair: Optional[tuple[Box, Box]] = None
 
     @classmethod
     def load(cls, path: Path) -> "Layout":
@@ -118,7 +124,23 @@ class Layout:
             strikes=tuple((float(x), float(y)) for x, y in raw.get("strikes") or []),
             panel=tuple(tuple(float(v) for v in pt) for pt in raw.get("panel") or []),  # type: ignore[misc]
             prompt_note=str(raw.get("prompt_note") or "").strip(),
+            half_pair=_box_pair(raw.get("half_pair"), path),
         )
+
+
+def _box_pair(raw, path) -> Optional[tuple[tuple[float, ...], tuple[float, ...]]]:
+    if not raw:
+        return None
+    try:
+        boxes = [tuple(float(v) for v in box) for box in raw]
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{path}: half_pair는 ▲ 칸·▼ 칸 두 개, 칸마다 숫자 4개다") from exc
+    ok = len(boxes) == 2 and all(
+        len(b) == 4 and 0 <= b[0] < b[2] <= 1 and 0 <= b[1] < b[3] <= 1 for b in boxes)
+    if not ok:
+        raise ValueError(
+            f"{path}: half_pair는 ▲ 칸·▼ 칸 두 개, 칸마다 0~1 비율 x0 < x1, y0 < y1이다")
+    return boxes[0], boxes[1]
 
 
 def _pair(raw) -> Optional[tuple[float, float]]:
@@ -172,11 +194,35 @@ def decode_count(layout: Layout, sample: Callable[[Point], Rgb]) -> Optional[tup
 
 
 HALF_MIN_PIXELS = 8  # 화살표로 볼 최소 화소 수(1280×720 프레임)
+HALF_PAIR_DIFF = 0.12  # half_pair: 켜진 칸이 꺼진 칸보다 이만큼 어두워야(실측 차 0.24~0.30)
+HALF_PAIR_OFF = 0.8  # half_pair: 꺼진 칸의 최소 밝기(실측 0.87~0.89)
 HALF_TILT = 0.08  # 무게중심이 세로 범위 가운데에서 이만큼(범위 비율) 넘게 쏠려야 가른다
 
 
+def _mean_value(box: tuple[float, ...], pixels: bytes, width: int, height: int) -> float:
+    """비율 칸 안 화소 밝기(HSV의 V) 평균."""
+    x0, y0, x1, y1 = (round(v * n) for v, n in zip(box, (width, height, width, height)))
+    total, n = 0.0, 0
+    for y in range(max(0, y0), min(height, y1 + 1)):
+        for x in range(max(0, x0), min(width, x1 + 1)):
+            i = (y * width + x) * 3
+            total += max(pixels[i], pixels[i + 1], pixels[i + 2]) / 255
+            n += 1
+    return total / n if n else 1.0
+
+
 def decode_half(layout: Layout, pixels: bytes, width: int, height: int) -> Optional[str]:
-    """▲(top) / ▼(bot) / 모름(None) — 화살표 칸 안 채워진 화소의 세로 무게중심으로."""
+    """▲(top) / ▼(bot) / 모름(None) — 화살표 칸 안 채워진 화소의 세로 무게중심으로.
+
+    `half_pair`가 있으면 ▲ 칸과 ▼ 칸의 평균 밝기를 견줘 더 어두운 쪽(켜진 화살표)."""
+    if layout.half_pair is not None:
+        top, bot = (_mean_value(box, pixels, width, height) for box in layout.half_pair)
+        if abs(top - bot) < HALF_PAIR_DIFF:  # 둘 다 비슷하면(점수판이 없거나 전환 중) 모른다
+            return None
+        # 꺼진 칸은 밝은 회색이다 — 아니면 점수판이 아니다(독립 리뷰)
+        if max(top, bot) < HALF_PAIR_OFF:
+            return None
+        return "top" if top < bot else "bot"
     if layout.half is None:
         return None
     x0, y0, x1, y1 = (round(v * n) for v, n in zip(layout.half, (width, height, width, height)))

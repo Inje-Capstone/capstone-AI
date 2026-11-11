@@ -1914,3 +1914,27 @@ def test_ks2_rules_do_not_fire_on_lookalike_words_or_other_plays():
                 R(60, half="bot"))
     said = [_view(5, "in_play"), Cue(10, "speech", "더블 플레이")]
     assert [j.code for j in judge(far, said) if j.transition is not None] == ["out", "out"]
+
+
+def test_runner_vanishing_without_an_out_means_the_double_play_is_not_finished():
+    """PO 3차전 — 1사 1루 직선타 병살: 점수판이 '2사 주자 없음'(주자가 아웃 없이 사라짐)을
+    먼저 보이고
+    41초 뒤 다음 반 이닝. 사람 수가 안 맞으면 다음 아웃까지 한 플레이 — 병살이다(해설에 '병살'이
+    없어도). 주자가 그대로 남은 2사(따로 난 아웃일 수 있음)는 그렇게 보지 않는다."""
+    seen = twice(R(0, outs=1, bases=(True, False, False)), R(9, outs=2), R(50, half="bot"))
+    codes = [j.code for j in judge(seen, [_view(5, "in_play")]) if j.transition is not None]
+    assert codes == ["double_play"]
+    kept = twice(R(0, outs=1, bases=(True, False, False)), R(9, outs=2, bases=(True, False, False)),
+                 R(50, half="bot"))
+    assert [j.code for j in judge(kept, [_view(5, "in_play")]) if j.transition is not None] == [
+        "out", "out"]
+
+
+def test_caught_stealing_is_not_a_vanished_runner():
+    """독립 리뷰 — 도루 실패도 주자가 사라지지만 타자는 그대로(카운트가 이어짐)라 병살로
+    합치지 않는다."""
+    cs = twice(R(0, outs=1, bases=(True, False, False), balls=1, strikes=1),
+               R(9, outs=2, balls=1, strikes=1), R(50, half="bot"))
+    codes = [j.code for j in judge(cs, [Cue(6, "slide"), Cue(7, "speech", "도루 실패")])
+             if j.transition is not None]
+    assert "double_play" not in codes
