@@ -1766,3 +1766,107 @@ def test_pose_cues_carry_the_pitch_view_start():
     cues = pose_cues({"swings": [swing]})
     assert sorted((c.t, c.kind) for c in cues) == [
         (3.0, "shot_start"), (5.0, "pitch_seen"), (5.0, "swing"), (7.0, "no_play")]
+
+
+def test_single_read_that_ends_a_half_with_more_outs_is_not_a_spike():
+    """KS5 1회초 — '무사 2-2' 뒤 '2사 2-2'(삼진 + 못 본 아웃, 다음 타자도 2-2) 한 장이
+    카운트가 그대로라
+    한 번에 못 바뀐다고 버려졌다. 같은 반 이닝에서 아웃만 늘고 다음이 새 반 이닝이면 남긴다."""
+    seen = [R(0, strikes=2, balls=2)] * 2 + [R(9, outs=2, strikes=2, balls=2)] + [
+        R(30, half="bot", inning=3)] * 2
+    assert [(r.half, r.outs) for r in stabilize(seen, min_repeat=1)] == [
+        ("top", 0), ("top", 2), ("bot", 0)]
+    # 주자까지 바뀐 한 장은 못 본 플레이를 판정으로 만든다(투수 모음) — 예전처럼 버린다
+    runner = [R(0, outs=1)] * 2 + [R(9, outs=2, strikes=2, bases=(False, True, False))] + [
+        R(30, inning=4)] * 2
+    assert [(r.inning, r.outs) for r in stabilize(runner, min_repeat=1)] == [(3, 1), (4, 0)]
+
+
+def test_count_read_as_score_takes_the_score_of_the_states_around_it():
+    """KS5 MBC 상자 — 가운데 '3-0' 볼카운트를 점수 3:0으로도 읽었다. 앞뒤 안정 상태의 점수(1:0)가
+    같으면 그 점수로 고쳐, 볼넷 직전 상태를 살린다. 0-0·0:0은 우연히 늘 같아 고치지 않는다."""
+    seen = [R(0, outs=2, away=1, bases=(False, True, False))] * 2 + [
+        R(20, half="bot", outs=1, balls=3, away=3)] + [
+        R(28, half="bot", outs=1, away=1, bases=(True, False, False))] * 2
+    states = stabilize(seen, min_repeat=1)
+    assert [(r.half, r.balls, r.away) for r in states] == [("top", 0, 1), ("bot", 3, 1),
+                                                           ("bot", 0, 1)]
+    walk = judge(seen, [_view(25, "no_play")], min_repeat=1)
+    assert "walk" in [j.code for j in walk]
+    # 0-0 카운트와 0:0 점수는 고치지 않는다(PO 2차전 — 득점 전 그림이 잠깐 다시 보임)
+    flick = [R(0, outs=2, away=1, bases=(True, False, False))] + [
+        R(1, outs=2, bases=(True, False, True))] + [
+        R(9, outs=2, away=1, bases=(True, False, False))]
+    fixed = [r for r in stabilize(flick, min_repeat=1) if r.bases == (True, False, True)]
+    assert all(r.away == 0 for r in fixed)
+
+
+def test_runs_beyond_the_runner_on_third_are_not_a_balk():
+    """KS5 — 1·2루 → 2·3루 + 1점(적시 2루타)을 '모양은 보크'로 봤다. 3루 주자 없이 들어온 점수는
+    투구 하나의 진루로 안 난다 — 공이 맞아 나간 출루다."""
+    j = one(R(0, outs=1, bases=(True, True, False)), R(10, outs=1, bases=(False, True, True),
+                                                       home=1))
+    assert j.code != "balk" and j.code == "reach"
+
+
+def test_outfielder_catch_then_run_is_a_sac_fly():
+    """KS5 — '중견수 뒷걸음질 잡았고 3루 주자 홈으로'. '희생플라이' 말이 없어도 외야수가
+    잡고 득점이면
+    희생플라이다. 내야수가 잡은 땅볼 득점은 아니다."""
+    before = R(0, outs=1, bases=(False, True, True))
+    after = R(10, outs=2, bases=(False, True, False), away=1)
+    told = [Cue(8, "speech", "센터 쪽 중견수 뒷걸음질 잡았고 3루 주자 홈으로 들어갑니다")]
+    assert one(before, after, told).code == "sac_fly"
+    ground = [Cue(8, "speech", "유격수 잡아서 1루 아웃 그사이 3루 주자 홈으로")]
+    assert one(before, after, ground).code != "sac_fly"
+
+
+def test_strikeout_merged_with_an_unseen_out_keeps_the_strikeout():
+    """KS5 1회초 — 2스트라이크 삼진 + 못 본 아웃이 한 전이(무사 → 2사)로 합쳐졌다.
+    보인 투구가 공이 안
+    맞았고 해설이 삼진이면 그 타석은 삼진(합쳐짐 표시)."""
+    j = one(R(0, balls=2, strikes=2), R(10, outs=2, balls=2, strikes=2),
+            [_view(4, "no_play"), Cue(5, "speech", "삼진으로 잡아내면서 출발합니다")])
+    assert (j.code, j.detail.get("merged")) == ("strikeout", True)
+    plain = one(R(0, balls=2, strikes=2), R(10, outs=2, balls=2, strikes=2), [_view(4, "no_play")])
+    assert plain.code == "out"
+
+
+def test_strikeout_when_the_two_strike_count_was_never_read():
+    """KS5 2회말 — 직전 판독이 타석 시작(0-0)이라 2스트라이크를 못 봤다. 휘둘렀는데 공이 안 맞았고
+    해설이 '탈삼진'이면 삼진. 새 판독은 다음 타자 카운트(0-1)다. 해설이 없으면 그냥 아웃."""
+    before, after = R(0, outs=1, bases=(True, False, False)), R(10, outs=2, strikes=1,
+                                                                bases=(True, False, False))
+    cues = [Cue(4, "pitch_seen", "[관절] 투구 순간"), Cue(4, "swing", "[관절] 스윙"),
+            _view(6, "no_play")]
+    assert one(before, after, cues + [Cue(7, "speech", "두 번째 탈삼진")]).code == "strikeout"
+    assert one(before, after, cues).code == "out"
+
+
+def test_review_guards_on_the_new_ks5_rules():
+    """독립 리뷰 — 새 규칙이 엉뚱한 곳에서 서지 않게."""
+    # 외야수가 '안타'를 잡아 송구한 아웃은 희생플라이가 아니다. 3루 주자가 없으면 보지 않는다
+    sf_before = R(0, outs=1, bases=(False, True, True))
+    sf_after = R(10, outs=2, bases=(False, True, False), away=1)
+    hit = [Cue(8, "speech", "우익수 앞 안타 잡아서 2루 송구 타자 주자 아웃 그사이 득점")]
+    assert one(sf_before, sf_after, hit).code != "sac_fly"
+    no_third = one(R(0, outs=1, bases=(True, True, False)),
+                   R(10, outs=2, bases=(False, True, False), away=1),
+                   [Cue(8, "speech", "중견수 잡았고 홈으로")])
+    assert no_third.code != "sac_fly"
+    # 폭투 해설이 있으면 2·3루에서 둘 다 들어와도 같은 타석의 진루다
+    wp = one(R(0, outs=1, bases=(False, True, True), strikes=1),
+             R(10, outs=1, strikes=2, home=2), [Cue(8, "speech", "폭투 2루 주자까지 홈으로")])
+    assert wp.code == "wild_pitch"
+    # 못 본 2스트라이크 삼진 — 직전 상태 전의 '삼진'·공이 맞은 단서는 근거가 아니다
+    before, after = R(0, outs=1, bases=(True, False, False)), R(10, outs=2, strikes=1,
+                                                                bases=(True, False, False))
+    cues = [Cue(4, "pitch_seen", "[관절] 투구 순간"), Cue(4, "swing", "[관절] 스윙"),
+            _view(6, "no_play")]
+    assert one(before, after, cues + [Cue(-1, "speech", "앞 타자 삼진")]).code == "out"
+    assert one(before, after, cues + [Cue(7, "speech", "삼진"), Cue(5, "contact")]).code == "out"
+    # 합쳐진 전이에 주자가 늘었으면(출루 + 삼진) 삼진으로 보지 않는다
+    merged = one(R(0, balls=2, strikes=2, bases=(True, False, False)),
+                 R(10, outs=2, balls=2, strikes=2, bases=(False, False, True)),
+                 [_view(4, "no_play"), Cue(5, "speech", "삼진")])
+    assert merged.code != "strikeout"

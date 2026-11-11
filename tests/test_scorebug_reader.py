@@ -177,3 +177,87 @@ def test_single_frame_past_the_end_of_a_short_segment_is_a_read_error(tmp_path):
     reader._rgb = lambda video, t: b""
     with pytest.raises(VideoAnalyzerError):
         reader.read_frame("seg.mp4", 2.5)
+
+
+def _bar_layout(tmp_path, extra=""):
+    from app.adapters.video.scorebug_layout import Layout
+
+    path = tmp_path / "box.json"
+    path.write_text('{"name": "box", "crop": [0.04, 0.07, 0.14, 0.09], "bases": {"1": [0.5, 0.5]},'
+                    ' "outs": [[0.6, 0.6]]' + extra + '}', encoding="utf-8")
+    return Layout.load(path)
+
+
+def _token_pixels(monkeypatch, sr, states):
+    """_rgb가 시각마다 글자 하나를 주고, 그 글자를 (주자, 아웃)으로 읽게 바꾼다 — 실제 화소 없이."""
+    size = sr.RGB_W * sr.RGB_H * 3
+    monkeypatch.setattr(sr, "rgb_sampler", lambda px, w, h: px[:1])
+    monkeypatch.setattr(sr, "decode", lambda layout, s: states[s])
+    return lambda token: token * size
+
+
+def test_layout_prompt_note_is_added_to_the_read_prompt(tmp_path):
+    """볼카운트를 'X-Y'로 그리는 판(MBC 상자)은 VLM이 그것을 점수로도 읽었다 —
+    그 판만 안내를 덧붙인다."""
+    from app.adapters.video.scorebug_reader import READ_PROMPT_V2, ScorebugReader
+
+    plain = ScorebugReader("K", "http://x", "m", layout=_bar_layout(tmp_path),
+                           prompt=READ_PROMPT_V2)
+    assert plain.prompt == READ_PROMPT_V2
+    noted = ScorebugReader("K", "http://x", "m", prompt=READ_PROMPT_V2, layout=_bar_layout(
+        tmp_path, ', "prompt_note": "  The middle X-Y is the count.  "'))
+    assert noted.prompt == READ_PROMPT_V2 + " The middle X-Y is the count."
+
+
+def test_settled_moves_a_run_read_to_when_its_pixels_first_match(tmp_path, monkeypatch):
+    """덩어리 시작(10초)으로 찍던 판독 — 주자 화소가 15초에 바뀌었으면 15초. 끝까지 같으면 10초."""
+    import app.adapters.video.scorebug_reader as sr
+
+    px = _token_pixels(monkeypatch, sr, {b"A": ([], 0), b"B": ([1], 0)})
+    reader = sr.ScorebugReader("K", "http://x", "m", layout=_bar_layout(tmp_path))
+    reader._rgb = lambda video, t: px(b"A" if t < 15 else b"B")
+    assert reader._settled("g.mp4", 0.0, 10, 20, ([1], 0)) == 15.0
+    reader._rgb = lambda video, t: px(b"B")
+    assert reader._settled("g.mp4", 0.0, 10, 20, ([1], 0)) == 10.0
+    reader._rgb = lambda video, t: b"" if t < 17 else px(b"B")  # 프레임을 못 읽으면 거기서 멈춘다
+    assert reader._settled("g.mp4", 0.0, 10, 20, ([1], 0)) == 17.0
+
+
+def test_change_read_is_stamped_after_the_state_settles(tmp_path, monkeypatch):
+    """한국시리즈 5차전: 220초부터 이어 보인 점수판을 247초 뒤에 읽고 220초로 찍었다(1·2루)
+    — 247초로."""
+    import app.adapters.video.scorebug_reader as sr
+
+    px = _token_pixels(monkeypatch, sr, {b"A": ([1], 0), b"B": ([1, 2], 0)})
+    reader = sr.ScorebugReader("K", "http://x", "m", every=8, changes=True,
+                               layout=_bar_layout(tmp_path))
+    reader.find_in_layout = lambda video, duration, start: (reader.layout.crop, 0.0)
+    reader._thumbs = lambda video, corner, start, duration: [b"t"] * 40
+    monkeypatch.setattr(sr, "plan_both", lambda thumbs, ref, every, max_reads: [(20, 20), (20, 30)])
+    reader._frame = lambda video, t, vf: b"jpg"
+    reader._ask = lambda images, text, max_tokens: {
+        "visible": True, "inning": 3, "half": "top", "balls": 0, "strikes": 0, "outs": 0,
+        "bases": [], "away": 0, "home": 0}
+    reader._rgb = lambda video, t: px(b"A" if t < 227 else b"B")
+    out = reader.read("g.mp4", 40.0, start=200.0)
+    assert [(r["t"], r["bases"]) for r in out["scoreboard"]] == [(220.0, [1]), (227.0, [1, 2])]
+
+
+def test_prompt_note_null_and_unreadable_frame_while_settling(tmp_path, monkeypatch):
+    """독립 리뷰 — prompt_note: null은 'None'을 붙이지 않고, 되짚다 프레임을 못 읽으면
+    거기서 멈춘다."""
+    import subprocess
+
+    import app.adapters.video.scorebug_reader as sr
+
+    assert _bar_layout(tmp_path, ', "prompt_note": null').prompt_note == ""
+    px = _token_pixels(monkeypatch, sr, {b"B": ([1], 0)})
+    reader = sr.ScorebugReader("K", "http://x", "m", layout=_bar_layout(tmp_path))
+
+    def rgb(video, t):
+        if t < 16:
+            raise subprocess.CalledProcessError(1, "ffmpeg")
+        return px(b"B")
+
+    reader._rgb = rgb
+    assert reader._settled("g.mp4", 0.0, 10, 20, ([1], 0)) == 16.0

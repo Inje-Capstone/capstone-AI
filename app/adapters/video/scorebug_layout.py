@@ -76,6 +76,9 @@ class Layout:
     balls: tuple[Point, ...] = ()  # 볼 점 중심들(점으로 그리는 점수판만)
     panel: tuple[tuple[float, float, float, float, float], ...] = ()  # 바탕 고정 색(x, y, r, g, b)
     strikes: tuple[Point, ...] = ()  # 스트라이크 점 중심들
+    # VLM 판독 지시에 덧붙이는 이 점수판만의 안내(영어) — 볼카운트를 'X-Y'로 그리는 판은 VLM이
+    # 그것을 점수로도 읽었다(MBC 포스트시즌 상자, 108장 중 9장)
+    prompt_note: str = ""
 
     @classmethod
     def load(cls, path: Path) -> "Layout":
@@ -114,6 +117,7 @@ class Layout:
             balls=tuple((float(x), float(y)) for x, y in raw.get("balls") or []),
             strikes=tuple((float(x), float(y)) for x, y in raw.get("strikes") or []),
             panel=tuple(tuple(float(v) for v in pt) for pt in raw.get("panel") or []),  # type: ignore[misc]
+            prompt_note=str(raw.get("prompt_note") or "").strip(),
         )
 
 

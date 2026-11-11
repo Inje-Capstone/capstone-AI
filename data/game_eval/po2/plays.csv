@@ -32,8 +32,8 @@ p-BBD0DMTYw,920.2,reach,True,balk reach,video_only video_only,점수판 아웃+0
 p-BBD0DMTYw,967.4,strikeout,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 101→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (972s),맞음,삼진으로 보임 — 3아웃
 p-BBD0DMTYw,993.0,homerun,True,out homerun out,video_only video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+1 주자 000→000 | 점수판 아웃+2 득점+0 주자 000→000,맞음,최형우 솔로 홈런 8-2
 p-BBD0DMTYw,1062.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
-p-BBD0DMTYw,1079.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,진루타 — 1사 3루
-p-BBD0DMTYw,1094.6,out,True,runner out out,video_only video_only video_only,점수판 아웃+0 득점+0 주자 010→001 | 점수판 아웃+1 득점+1 주자 001→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,1루 땅볼 타점 8-3
+p-BBD0DMTYw,1079.8,out,True,out runner,video_only video_only,점수판 아웃+1 득점+0 주자 010→010 | 점수판 아웃+0 득점+0 주자 010→001,맞음,진루타 — 1사 3루
+p-BBD0DMTYw,1094.6,out,True,out out,video_only video_only,점수판 아웃+1 득점+1 주자 001→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,1루 땅볼 타점 8-3
 p-BBD0DMTYw,1123.4,none,True,,,,조용함,스트라이크
 p-BBD0DMTYw,1141.9,strikeout,False,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '스윙! 스톨가웃입니다! 연속 3진에 1테임! 체인지업을 많이 쓰지 않아요 계속해서 아끼고 아끼고 아끼다가' (1170s),맞음,삼진으로 보임(투구 궤적 다시보기)
 p-BBD0DMTYw,1166.1,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; [점수판] 삼진 표시(K) (1172s),맞음,삼진(2K 표시)

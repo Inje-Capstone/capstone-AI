@@ -49,7 +49,7 @@ T93FGIYBM8E,46.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 
 T93FGIYBM8E,62.3,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 101→110,맞음,적시타 0-1
 T93FGIYBM8E,84.8,none,False,,,,조용함,넓은 화면(투구 아님)
 T93FGIYBM8E,91.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 110→111,맞음,안타 — 만루
-T93FGIYBM8E,109.3,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 111→111,맞음,삼진으로 보임
+T93FGIYBM8E,109.3,out_any,True,strikeout,refined,점수판 아웃+1 득점+0 주자 111→111; 해설 '5번 타자 천송호가 들어와 있습니다. 스윙 3진아웃 지금 이 위기를 또 후라도가 일단락 시키면요. 분위기는 또 평행선입니다.' (110s); [관절] 타자가 배트를 휘두름 (112s),맞음,삼진으로 보임
 T93FGIYBM8E,125.9,sac_fly,True,sac_fly,video_only,점수판 아웃+1 득점+1 주자 111→110; [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (128s),맞음,희생플라이 0-2
 T93FGIYBM8E,141.9,none,False,,,,조용함,희생플라이 다시보기
 T93FGIYBM8E,149.1,none,False,,,,조용함,다시보기
@@ -82,13 +82,13 @@ T93FGIYBM8E,578.3,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자
 T93FGIYBM8E,601.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,뜬공 3아웃
 T93FGIYBM8E,617.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
 T93FGIYBM8E,628.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,희생번트로 보임 — 주자 2루
-T93FGIYBM8E,637.4,?,False,walk,video_only,점수판 아웃+0 득점+0 주자 010→110; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (642s),제외,점수판 없음
-T93FGIYBM8E,656.4,?,False,,,,제외,투수 교체 — 결과 모름
+T93FGIYBM8E,637.4,?,False,,,,제외,점수판 없음
+T93FGIYBM8E,656.4,?,False,walk,video_only,점수판 아웃+0 득점+0 주자 010→110; [관절] 타자가 공을 그냥 보냄 (657s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (661s),제외,투수 교체 — 결과 모름
 T93FGIYBM8E,684.7,out,False,out runner,video_only video_only,점수판 아웃+1 득점+0 주자 110→110 | 점수판 아웃+0 득점+0 주자 110→101,맞음,"주자 진루, 타자 아웃"
 T93FGIYBM8E,696.7,none,False,runner,video_only,점수판 아웃+0 득점+0 주자 101→011,헛판정,
 T93FGIYBM8E,708.4,reach,True,reach,video_only,점수판 아웃+1 득점+2 주자 011→000,맞음,2타점 안타 7-4
 T93FGIYBM8E,728.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
-T93FGIYBM8E,738.0,out_any,False,strikeout reach,video_only video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (743s) | 점수판 아웃+0 득점+0 주자 000→000,맞음,
+T93FGIYBM8E,738.0,out_any,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (743s),맞음,
 T93FGIYBM8E,751.5,hbp,True,hbp,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (758s),맞음,몸에 맞는 공(타석에서 몸을 숙임 — 다시 보고 고침)
 T93FGIYBM8E,781.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,3아웃
 T93FGIYBM8E,797.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
@@ -126,8 +126,8 @@ wyC8BnovUUA,539.0,none,True,,,,조용함,
 wyC8BnovUUA,554.0,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,
 wyC8BnovUUA,587.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
 wyC8BnovUUA,598.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,3아웃
-wyC8BnovUUA,624.4,?,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,제외,결과 모름 — 투수 교체
-wyC8BnovUUA,674.4,steal,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,틀림,2루 도루
+wyC8BnovUUA,624.4,?,False,,,,제외,결과 모름 — 투수 교체
+wyC8BnovUUA,674.4,steal,True,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→010,틀림,2루 도루
 wyC8BnovUUA,692.2,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→100,맞음,적시 2루타 5-1
 wyC8BnovUUA,732.0,none,False,,,,조용함,
 wyC8BnovUUA,765.2,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 100→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (772s),맞음,3아웃
@@ -143,6 +143,6 @@ wyC8BnovUUA,990.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자
 wyC8BnovUUA,1029.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,
 wyC8BnovUUA,1036.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→001,맞음,뜬공 — 주자 3루로
 wyC8BnovUUA,1049.5,walk,False,walk,video_only,점수판 아웃+0 득점+0 주자 001→101; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1056s),맞음,볼넷으로 보임(3-0)
-wyC8BnovUUA,1062.3,out,True,out out,video_only video_only,점수판 아웃+1 득점+0 주자 101→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,3아웃
-wyC8BnovUUA,1079.6,out,True,,,,놓침,땅볼
+wyC8BnovUUA,1062.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 101→000,맞음,3아웃
+wyC8BnovUUA,1079.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
 wyC8BnovUUA,1087.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,경기 끝
