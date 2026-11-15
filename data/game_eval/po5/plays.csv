@@ -8,7 +8,7 @@ IT2iLKT3a6c,232.7,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자
 IT2iLKT3a6c,270.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,2루타로 보임
 IT2iLKT3a6c,298.0,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 100→001 | 점수판 아웃+0 득점+0 주자 001→011,맞음,안타
 IT2iLKT3a6c,319.1,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 011→100,맞음,2타점 적시타 3-0
-IT2iLKT3a6c,355.3,steal,False,steal,confirmed,"점수판 아웃+0 득점+0 주자 100→010; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 2.5배 미끄러짐, 365.6~366.8초 (366s)",맞음,2루 도루로 보임
+IT2iLKT3a6c,355.3,steal,False,steal,confirmed,"점수판 아웃+0 득점+0 주자 100→010; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 0.4배 미끄러짐, 342.4~344.0초 (342s); 해설 '- 그리고 2타점 적시타. 경기 초반 삼성 라이언즈가 세 걸음을 달아납니다.- 갑니다.- 뒵니다 쏩니다. 도루 성공.' (350s)",맞음,2루 도루로 보임
 IT2iLKT3a6c,370.9,reach,False,reach out,video_only video_only,점수판 아웃+0 득점+1 주자 010→100 | 점수판 아웃+2 득점+0 주자 100→000,맞음,적시타로 보임 4-0 — 이닝 끝 아웃은 못 봄
 IT2iLKT3a6c,401.6,out_any,False,out,video_only,점수판 아웃+2 득점+0 주자 000→100,맞음,땅볼 아웃으로 보임 — 다음 판독은 2사 1루(하나는 못 봄)
 IT2iLKT3a6c,424.7,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 100→001,맞음,적시 3루타 1-4
@@ -19,16 +19,16 @@ IT2iLKT3a6c,515.7,out_any,False,out,video_only,점수판 아웃+1 득점+0 주�
 IT2iLKT3a6c,542.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→011,맞음,희생번트 — 2사 2·3루
 IT2iLKT3a6c,553.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 011→000,맞음,땅볼 3아웃
 IT2iLKT3a6c,583.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
-IT2iLKT3a6c,597.1,out,True,,,,놓침,외야 뜬공 3아웃
-IT2iLKT3a6c,619.4,reach,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,틀림,안타
-IT2iLKT3a6c,628.6,out,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+1 득점+0 주자 100→100,맞음,뜬공
+IT2iLKT3a6c,597.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,외야 뜬공 3아웃
+IT2iLKT3a6c,619.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
+IT2iLKT3a6c,628.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,뜬공
 IT2iLKT3a6c,654.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
 IT2iLKT3a6c,672.7,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 110→110; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (678s),맞음,삼진으로 보임 — 2사
 IT2iLKT3a6c,701.7,strikeout,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 110→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (717s),맞음,삼진으로 보임 — 3아웃
 IT2iLKT3a6c,713.7,none,True,,,,조용함,다시보기
 IT2iLKT3a6c,729.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
-IT2iLKT3a6c,745.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,희생번트 — 1사 2루
-IT2iLKT3a6c,754.7,out,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 000→010 | 점수판 아웃+1 득점+0 주자 010→010,맞음,뜬공 — 2사 2루
+IT2iLKT3a6c,745.0,out,True,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 100→000 | 점수판 아웃+0 득점+0 주자 000→010,맞음,희생번트 — 1사 2루
+IT2iLKT3a6c,754.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,뜬공 — 2사 2루
 IT2iLKT3a6c,772.0,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→001,맞음,적시 2루타 5-1
 IT2iLKT3a6c,816.8,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+1 주자 001→100 | 점수판 아웃+1 득점+0 주자 100→000,맞음,적시타 6-1 — 3아웃은 못 봄
 IT2iLKT3a6c,844.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타

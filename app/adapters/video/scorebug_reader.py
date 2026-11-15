@@ -40,8 +40,8 @@ CORNERS = {
 }
 # 스냅샷 캐시 키 — 판독 방식·지시문을 바꾸면 올린다.
 # v2: 덩어리 판독 시각을 화소가 같아진 뒤로(_settled). v3: 기준 화면을 열두 곳 더 찾음(REF_MORE),
-# 위치 파일 half_pair
-VERSION = "scorebug-crop-v3"
+# 위치 파일 half_pair. v4: 화소 상태가 새로 이어진 구간에 판독이 없으면 한 장 더(plan_state_changes)
+VERSION = "scorebug-crop-v4"
 THUMB_W, THUMB_H = 96, 48
 MARK_SCAN_FPS = 2.0  # 삼진 표시 훑기 — 표시가 2~3초 떠 있어 초당 2장이면 4장 이상 걸린다
 MARK_GAP = 3.0  # 이보다 떨어진 표시는 다른 삼진
@@ -122,6 +122,59 @@ def _match(a: bytes, b: bytes, mask: Sequence[int]) -> float:
     if not mask:
         return 0.0
     return sum(1 for i in mask if abs(a[i] - b[i]) <= PIXEL_TOL) / len(mask)
+
+
+STATE_MIN_SEC = 2  # 화소 상태가 이만큼(초) 이어져야 새 상태로 본다 — 전환 중 한 프레임은 버린다
+
+
+def visible_seconds(thumbs: Sequence[bytes], ref: int) -> list[bool]:
+    """썸네일마다 점수판이 보일 법한가(기준 화면과 MAYBE_VISIBLE 이상 닮음)."""
+    mask = graphic_mask(thumbs, ref)
+    return [bool(mask) and _match(t, thumbs[ref], mask) >= MAYBE_VISIBLE for t in thumbs]
+
+
+def plan_state_changes(states: Sequence[Optional[tuple]],
+                       reads: Sequence[tuple[float, tuple[int, ...], int]],
+                       min_len: int = STATE_MIN_SEC,
+                       limit: Optional[int] = None) -> list[tuple[int, int]]:
+    """화소 상태(주자·아웃·점 볼카운트)가 새로 이어진 구간에 계획된 판독이 없으면
+    (구간 첫 초, 다음 초).
+
+    8초마다 + 그림이 바뀔 때 읽어도 몇 초만 비친 상태를 놓쳤다 — 안타 뒤 '무사 1루'(3초), 삼진 뒤
+    '1사 1루'(13초 중 판독 없음)를 못 읽어 두 플레이가 한 전이로 합쳐졌다(PO 3차전 4칸, 한국시리즈
+    5차전 1칸, 2026-11-11). `states[i]`는 i초의 화소 상태, 점수판이 안 보이면 None. 앞서 이어진
+    상태와 같으면(가렸다 다시 보임) 다시 읽지 않는다. `reads`는 이미 얻은 판독(구간 시작 기준 초,
+    주자, 아웃) — 계획에 있었어도 VLM이 '안 보임'이라 한 판독은 빠지므로 읽어 낸 것만, 그리고 그
+    구간과 주자·아웃이 같은 판독만 센다(바로 앞 옛 상태 판독이 1초 여유 안에 있었다 — KS5).
+    `limit`(남은 판독 예산)를 넘으면 주자·아웃이 앞 구간과 달라진 구간부터 남긴다 — 시간순으로
+    자르면 볼카운트만 바뀐 앞쪽 구간이 예산을 쓰고 뒤쪽 플레이를 못 읽는다(독립 리뷰).
+    읽을 초는 구간 첫 초 + 1 — i초 썸네일·화소는 영상 i+0.5초 프레임이라(판독·_settled와 같은 약속)
+    둘째 초도 확인된 구간 안이다(PO 3차전 추가 판독 14장 모두 읽는 프레임이 구간 상태와 같았다).
+    한 장만 읽으므로 같은 상태가 두 번 읽혀야 믿는 설정(min_repeat 2)에서는 걸러진다 — 하이라이트
+    방식(every + changes)은 min_repeat 1로 돌린다.
+    """
+    found: list[tuple[int, bool]] = []  # (구간 첫 초, 주자·아웃이 앞 구간과 달라졌나)
+    prev: Optional[tuple] = None
+    i, n = 0, len(states)
+    while i < n:
+        s = states[i]
+        if s is None:
+            i += 1
+            continue
+        j = i
+        while j + 1 < n and states[j + 1] == s:
+            j += 1
+        if j - i + 1 >= min_len:
+            seen = any(i - 1 <= t <= j + 1 and (tuple(b), o) == (s[0], s[1]) for t, b, o in reads)
+            if s != prev and not seen:
+                found.append((i, prev is None or (s[0], s[1]) != (prev[0], prev[1])))
+            prev = s
+        i = j + 1
+    if limit is not None and len(found) > limit:
+        major = [f for f in found if f[1]][: max(0, limit)]
+        minor = [f for f in found if not f[1]][: max(0, limit - len(major))]
+        found = sorted(major + minor)
+    return [(i, i + 1) for i, _major in found]
 
 
 def plan_reads(thumbs: Sequence[bytes], ref: int, max_reads: int = 10) -> list[tuple[int, int]]:
@@ -339,6 +392,47 @@ class ScorebugReader:
             check=True,
         ).stdout
 
+    def pixel_states(self, video: Path, start: float, duration: float,
+                     thumbs: Sequence[bytes], ref: int) -> list[Optional[tuple]]:
+        """[start, start+duration)를 1초마다(썸네일과 같은 fps=1) 화소로 읽은
+        (주자, 아웃, 점 볼카운트).
+
+        점수판이 안 보일 법한 초(visible이 거짓)·바탕 색이 안 맞는 초는 None.
+        ffmpeg 한 번으로 흘려 읽는다.
+        """
+        assert self.layout is not None
+        visible = visible_seconds(thumbs, ref)
+        if not any(visible):  # 점수판이 보일 법한 초가 없으면 영상을 흘려 읽지 않는다
+            return [None] * len(visible)
+        size = RGB_W * RGB_H * 3
+        proc = subprocess.Popen(
+            [self.ffmpeg, "-hide_banner", "-loglevel", "error", "-ss", f"{start:.2f}", "-t",
+             f"{duration:.2f}", "-i", str(video), "-vf", f"fps=1,scale={RGB_W}:{RGB_H}",
+             "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        states: list[Optional[tuple]] = []
+        try:
+            assert proc.stdout is not None
+            while len(states) < len(visible):
+                px = proc.stdout.read(size)
+                if len(px) < size:
+                    break
+                i = len(states)
+                # 삼진 표시가 주자·아웃 칸을 덮은 초는 화소가 엉터리다 — 상태로 치지 않는다
+                # (독립 리뷰)
+                if not visible[i] or not _board_whole(self.layout, px) or decode_mark(
+                        self.layout, px, RGB_W, RGB_H):
+                    states.append(None)
+                    continue
+                sample = rgb_sampler(px, RGB_W, RGB_H)
+                bases, outs = decode(self.layout, sample)
+                states.append((tuple(bases), outs, decode_count(self.layout, sample)))
+        finally:
+            if proc.stdout is not None:
+                proc.stdout.close()
+            proc.wait()
+        return states + [None] * (len(visible) - len(states))
+
     def _thumbs(
         self, video: Path, corner: Union[str, Region], start: float, duration: float
     ) -> list[bytes]:
@@ -477,43 +571,23 @@ class ScorebugReader:
                 return {"corner": "layout" if fixed else corner, "scoreboard": [],
                         "requests": self.requests}
             ref = min(int(t_ref - start), len(thumbs) - 1)
-            readings, failed, dropped = [], 0, 0
             if self.every and self.changes:
                 plan = plan_both(thumbs, ref, self.every, self.max_reads)
             elif self.every:
                 plan = plan_periodic(thumbs, ref, self.every, self.max_reads)
             else:
                 plan = plan_reads(thumbs, ref, self.max_reads)
-            for first, at in plan:
-                try:  # 한 장 실패(503 등)로 클립 전체를 버리지 않는다
-                    answer = self._ask(
-                        [self._frame(video, start + at + 0.5, crop_filter(corner, scale))],
-                        self.prompt,
-                        256,
-                    )
-                except VideoAnalyzerError:
-                    failed += 1
-                    continue
-                r = normalize_reading(answer, start + first)
-                if r and self.layout is not None:
-                    px = self._rgb(video, start + at + 0.5)
-                    r["bases"], r["outs"] = decode(self.layout, rgb_sampler(px, RGB_W, RGB_H))
-                    count = decode_count(self.layout, rgb_sampler(px, RGB_W, RGB_H))
-                    if count:  # 점으로 그린 볼·스트라이크도 화소가 VLM보다 낫다
-                        r["balls"], r["strikes"] = count
-                    half = decode_half(self.layout, px, RGB_W, RGB_H)
-                    if half:  # 초·말도 화살표 화소가 VLM보다 믿을 만하다
-                        r["half"] = half
-                    mark = decode_mark(self.layout, px, RGB_W, RGB_H)
-                    if not _board_whole(self.layout, px):  # 전환·사라지는 중 — 표시도 버린다
-                        r, dropped = None, dropped + 1
-                    elif mark:  # 주자·아웃 칸이 삼진 표시로 덮였다 — 상태 판독에서 빠진다
-                        r["mark"] = mark
-                    if r and at > first:  # 덩어리 안에서 주자·아웃이 바뀌었으면 바뀐 뒤로 찍는다
-                        settled = self._settled(video, start, first, at, (r["bases"], r["outs"]))
-                        r["t"] = round(start + settled, 2)
-                if r:
-                    readings.append(r)
+            readings, failed, dropped = self._read_plan(video, start, plan, corner, scale)
+            more_ok = self.every and self.changes and self.layout is not None
+            if more_ok and len(plan) < self.max_reads:
+                # 읽어 낸 판독이 없는 화소 상태 구간을 한 장씩 더 읽는다(plan_state_changes)
+                states = self.pixel_states(video, start, duration, thumbs, ref)
+                extra = plan_state_changes(
+                    states, [(r["t"] - start, tuple(r["bases"]), r["outs"]) for r in readings],
+                    limit=self.max_reads - len(plan))
+                more, f2, d2 = self._read_plan(video, start, extra, corner, scale)
+                readings = sorted(readings + more, key=lambda r: r["t"])
+                failed, dropped = failed + f2, dropped + d2
         except (subprocess.CalledProcessError, VideoAnalyzerError) as exc:
             raise VideoAnalyzerError(f"점수판 판독 실패: {exc}") from exc
         return {
@@ -525,6 +599,44 @@ class ScorebugReader:
             "every": self.every,  # 있으면 같은 상태를 여러 번 읽었다 → 안정화 2 (observe)
             "layout": self.layout.name if self.layout else None,
         }
+
+    def _read_plan(self, video: Path, start: float, plan: Sequence[tuple[int, int]],
+                   corner: Union[str, Region], scale: float,
+                   ) -> tuple[list[dict[str, Any]], int, int]:
+        """계획(덩어리 시작, 읽을 초)마다 한 장씩 읽는다 → (판독들, 실패 수, 버린 수)."""
+        readings: list[dict[str, Any]] = []
+        failed = dropped = 0
+        for first, at in plan:
+            try:  # 한 장 실패(503 등)로 클립 전체를 버리지 않는다
+                answer = self._ask(
+                    [self._frame(video, start + at + 0.5, crop_filter(corner, scale))],
+                    self.prompt,
+                    256,
+                )
+            except VideoAnalyzerError:
+                failed += 1
+                continue
+            r = normalize_reading(answer, start + first)
+            if r and self.layout is not None:
+                px = self._rgb(video, start + at + 0.5)
+                r["bases"], r["outs"] = decode(self.layout, rgb_sampler(px, RGB_W, RGB_H))
+                count = decode_count(self.layout, rgb_sampler(px, RGB_W, RGB_H))
+                if count:  # 점으로 그린 볼·스트라이크도 화소가 VLM보다 낫다
+                    r["balls"], r["strikes"] = count
+                half = decode_half(self.layout, px, RGB_W, RGB_H)
+                if half:  # 초·말도 화살표 화소가 VLM보다 믿을 만하다
+                    r["half"] = half
+                mark = decode_mark(self.layout, px, RGB_W, RGB_H)
+                if not _board_whole(self.layout, px):  # 전환·사라지는 중 — 표시도 버린다
+                    r, dropped = None, dropped + 1
+                elif mark:  # 주자·아웃 칸이 삼진 표시로 덮였다 — 상태 판독에서 빠진다
+                    r["mark"] = mark
+                if r and at > first:  # 덩어리 안에서 주자·아웃이 바뀌었으면 바뀐 뒤로 찍는다
+                    settled = self._settled(video, start, first, at, (r["bases"], r["outs"]))
+                    r["t"] = round(start + settled, 2)
+            if r:
+                readings.append(r)
+        return readings, failed, dropped
 
 
 def _board_whole(layout: Layout, px: bytes) -> bool:

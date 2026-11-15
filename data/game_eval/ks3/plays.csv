@@ -23,7 +23,7 @@
 4PR9g8KArTo,557.8,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 100→000; 해설 '스윙 삼진 이번 이닝 들어와서 소현준 선수의 투구 패턴에도 변화가 좀 있었고요. 결과는 삼진 삼진 그러니까 이제 제2라운드에서' (580s),맞음,3아웃 — 삼진으로 보임
 4PR9g8KArTo,579.3,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '스윙 삼진 이번 이닝 들어와서 소현준 선수의 투구 패턴에도 변화가 좀 있었고요. 결과는 삼진 삼진 그러니까 이제 제2라운드에서' (580s); [점수판] 삼진 표시(K) (583s),맞음,아웃 — 포수 포구(삼진으로 보임)
 4PR9g8KArTo,595.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공 3아웃
-4PR9g8KArTo,624.1,strikeout,True,out,video_only,점수판 아웃+2 득점+0 주자 000→000,틀림,삼진(6K 표시) — 다음 판독 2사(아웃 하나는 못 봄)
+4PR9g8KArTo,624.1,strikeout,True,strikeout,video_only,점수판 아웃+2 득점+0 주자 000→000; [점수판] 삼진 표시(K) (631s),맞음,삼진(6K 표시) — 다음 판독 2사(아웃 하나는 못 봄)
 4PR9g8KArTo,634.9,out,True,,,,놓침,뜬공 3아웃
 4PR9g8KArTo,651.9,out_any,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,아웃으로 보임 — 6회초 첫 판독이 1사(장면 못 봄)
 4PR9g8KArTo,665.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼

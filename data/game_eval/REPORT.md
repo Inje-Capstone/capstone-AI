@@ -1,8 +1,10 @@
 # 1080p 경기 하이라이트 채점
 
-> `python scripts/eval_games.py --snapshots <analyze_video 결과 폴더> [--ablation]`로 다시 만든다(조정용 3경기는 ../clips_private/game_eval_final_rs). 정답은 `labels.json`(사람이 투구 화면마다 매김), 칸별 결과는 `plays.csv`.
+> `python scripts/eval_games.py --snapshots <analyze_video 결과 폴더> [--ablation]`로 다시 만든다(조정용 3경기는 ../clips_private/game_eval_final_sr). 정답은 `labels.json`(사람이 투구 화면마다 매김), 칸별 결과는 `plays.csv`.
 
-> 11-10: 판독 시각을 판독기 v2(덩어리 판독을 주자·아웃 화소가 같아진 뒤로)대로 다시 찍은 스냅샷 `../clips_private/game_eval_final_rs`로 채점한 값이다 — 판독 내용은 그대로, 시각만(`data/analysis/LOG.md` 2026-11-10).
+> 11-10: 판독 시각을 판독기 v2(덩어리 판독을 주자·아웃 화소가 같아진 뒤로)대로 다시 찍은 스냅샷 `../clips_private/game_eval_final_sr`로 채점한 값이다 — 판독 내용은 그대로, 시각만(`data/analysis/LOG.md` 2026-11-10).
+
+> 11-15: 판독기 v4(화소 상태가 새로 이어진 구간에 판독이 없으면 한 장 더)의 추가 판독을 더한 스냅샷 `../clips_private/game_eval_final_sr`로 채점한 값이다 — 기존 판독은 그대로(`data/analysis/LOG.md` 2026-11-15).
 
 | 영상 | 채점 칸 | 맞음 | 틀림 | 놓침 | 헛판정/조용함 |
 |---|---|---|---|---|---|
@@ -39,9 +41,10 @@
 | homerun | homerun out | 2 |
 | homerun | out | 1 |
 | out | dive_out | 1 |
-| out | out | 35 |
+| out | out | 34 |
 | out | out balk | 1 |
 | out | out runner | 1 |
+| out | out steal | 1 |
 | out | out walk | 1 |
 | out_any | (없음) | 1 |
 | out_any | out | 8 |
@@ -51,7 +54,7 @@
 | reach | reach out | 2 |
 | reach | reach reach | 2 |
 | sac_fly | sac_fly | 2 |
-| steal | out reach | 1 |
+| steal | caught_stealing reach | 1 |
 | steal | steal | 1 |
 | strikeout | strikeout | 2 |
 | walk | hbp | 1 |

@@ -18,8 +18,8 @@ H8ydwy0nGOI,390.1,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자
 H8ydwy0nGOI,440.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
 H8ydwy0nGOI,458.2,reach,True,reach,video_only,점수판 아웃+1 득점+1 주자 110→000,맞음,적시타 1-3 — 3아웃은 못 봄
 H8ydwy0nGOI,481.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
-H8ydwy0nGOI,498.5,out,True,,,,놓침,"땅볼 — 3루수→1루 아웃, 1루 주자 2루로(해설)"
-H8ydwy0nGOI,507.7,out,True,out,video_only,점수판 아웃+2 득점+0 주자 100→010,맞음,뜬공 — 2루 주자 그대로
+H8ydwy0nGOI,498.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,"땅볼 — 3루수→1루 아웃, 1루 주자 2루로(해설)"
+H8ydwy0nGOI,507.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,뜬공 — 2루 주자 그대로
 H8ydwy0nGOI,515.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,땅볼 3아웃 — 4회말은 안 나옴
 H8ydwy0nGOI,535.5,out_any,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,2-2에서 공 클로즈업 — 다음 판독 1사(삼진으로 보임)
 H8ydwy0nGOI,542.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
@@ -27,7 +27,7 @@ H8ydwy0nGOI,557.5,walk,True,walk,confirmed,점수판 아웃+0 득점+0 주자 10
 H8ydwy0nGOI,571.6,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 110→110,맞음,"아웃 — 2-2, 주자 그대로(삼진으로 보임)"
 H8ydwy0nGOI,592.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→000,맞음,뜬공 3아웃
 H8ydwy0nGOI,612.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
-H8ydwy0nGOI,624.9,reach,True,out,video_only,점수판 아웃+1 득점+0 주자 100→110,틀림,"안타 — 1·2루, 다음 타자 아웃은 못 봄"
+H8ydwy0nGOI,624.9,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+1 득점+0 주자 110→110,맞음,"안타 — 1·2루, 다음 타자 아웃은 못 봄"
 H8ydwy0nGOI,635.6,none,False,,,,조용함,타자 소개 — 그대로
 H8ydwy0nGOI,640.6,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 110→110,맞음,적시타 1-4
 H8ydwy0nGOI,692.2,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 110→110,맞음,적시타 1-5
@@ -38,8 +38,8 @@ H8ydwy0nGOI,767.2,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자
 H8ydwy0nGOI,792.0,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 101→001,맞음,2타점 장타 1-10 — 3루
 H8ydwy0nGOI,831.3,?,False,out,video_only,점수판 아웃+2 득점+1 주자 001→000,제외,번트 자세에서 공이 빠져 3루 주자 득점 1-11로 보임(폭투·포일) — 3아웃·6회초 2아웃은 못 봄
 H8ydwy0nGOI,860.3,out,True,out out,video_only video_only,점수판 아웃+2 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼 3아웃 — 6회말 안 나옴
-H8ydwy0nGOI,880.9,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '- 3진 아웃. 배타 이정훈을 돌려보냅니다.' (880s),맞음,"아웃 — 삼진으로 보임, 다음 판독 2사(하나는 못 봄)"
-H8ydwy0nGOI,901.1,out_any,True,out,video_only,점수판 아웃+2 득점+0 주자 000→000,맞음,"3아웃 — 장면 못 봄, 7회말·8회초 안 나옴"
+H8ydwy0nGOI,880.9,out_any,True,strikeout out,confirmed video_only,점수판 아웃+1 득점+0 주자 000→000; 해설 '- 3진 아웃. 배타 이정훈을 돌려보냅니다.' (880s) | 점수판 아웃+1 득점+0 주자 000→000,맞음,"아웃 — 삼진으로 보임, 다음 판독 2사(하나는 못 봄)"
+H8ydwy0nGOI,901.1,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,"3아웃 — 장면 못 봄, 7회말·8회초 안 나옴"
 H8ydwy0nGOI,946.9,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,타구 출루 — 1루
 H8ydwy0nGOI,990.5,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+1 득점+0 주자 110→110,맞음,"안타 — 1·2루, 다음 타자 아웃은 못 봄"
 H8ydwy0nGOI,1005.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→101,맞음,"땅볼 — 2루 포스아웃, 1·3루"
