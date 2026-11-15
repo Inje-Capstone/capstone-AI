@@ -1938,3 +1938,71 @@ def test_caught_stealing_is_not_a_vanished_runner():
     codes = [j.code for j in judge(cs, [Cue(6, "slide"), Cue(7, "speech", "도루 실패")])
              if j.transition is not None]
     assert "double_play" not in codes
+
+
+def _shot(t_start, t_pitch, t_end, kind):
+    return [Cue(t_start, "shot_start", "[관절] 투구 화면 시작"),
+            Cue(t_pitch, "pitch_seen", "[관절] 투구 순간"), _view(t_end, kind)]
+
+
+def test_the_pitch_view_that_made_the_state_is_not_the_third_out_pitch():
+    """준플레이오프 1차전 — '2사 2-2'를 만든 볼 화면이 끝난 직후(0.03초 뒤)에 그 상태가 읽혀,
+    반 이닝이
+    바뀐 전이를 가를 때 그 화면이 3아웃 투구로 쓰였다(삼진이 앞 칸에 붙음). 그 화면의 투구 순간이
+    상태보다 앞이면 그 상태를 만든 투구다 — 3아웃은 그 뒤 첫 투구 화면."""
+    seen = twice(R(10, outs=2, balls=2, strikes=2), R(40, half="bot", outs=1))
+    cues = (_shot(5, 7, 10.03, "no_play") + _shot(17, 20, 22, "view_unknown")
+            + _shot(26, 28, 30, "view_unknown")
+            + [Cue(21, "speech", "낮은 코스 들어갔습니다 삼진")])
+    js = [(j.code, round(j.t)) for j in judge(seen, cues) if j.transition is not None]
+    assert js == [("strikeout", 22), ("out", 40)]
+    # 관절이 그 화면의 투구 순간을 못 쟀으면 알 수 없다 — 예전대로 첫 화면
+    bare = [_view(10.03, "no_play"), _view(22, "view_unknown"), _view(30, "view_unknown")]
+    assert round([j for j in judge(seen, bare) if j.transition is not None][0].t) == 10
+
+
+def test_sac_fly_whose_run_shows_only_in_the_next_half():
+    """준플레이오프 1차전 — 점수판이 아웃만 먼저 올리고(3루 주자·점수 그대로) 득점은 다음 반 이닝
+    판독에서야 보였다(남은 아웃은 하이라이트가 건너뜀). 외야수가 잡았다는 말이 있고
+    공이 맞아 나갔으면
+    그 득점은 희생플라이다. 받아쓰기는 '우익수'를 '오익수'로도 적는다."""
+    first_third = (True, False, True)
+    seen = twice(R(0, half="bot", strikes=1, bases=first_third, away=1, home=2),
+                 R(10, half="bot", outs=1, bases=first_third, away=1, home=2),
+                 R(30, inning=4, balls=1, strikes=2, away=1, home=3))
+    said = Cue(8, "speech", "오른쪽 오익수 잡았습니다 3루주자 여유있게 홈플레이트를 밟았습니다")
+    codes = [j.code for j in judge(seen, [_view(6, "in_play"), said]) if j.transition is not None]
+    assert codes == ["sac_fly", "out"]
+    # 말이 없으면 뒤 타자의 적시타일 수도 있다 — 그대로 아웃 둘
+    plain = [j.code for j in judge(seen, [_view(6, "in_play")]) if j.transition is not None]
+    assert plain == ["out", "out"]
+    # 공이 안 맞은 화면이면(삼진 뒤 다른 플레이의 득점) 붙이지 않는다
+    no_play = [j.code for j in judge(seen, [_view(6, "no_play"), said]) if j.transition is not None]
+    assert "sac_fly" not in no_play
+
+
+def test_review_guards_on_the_spo1_rules():
+    """독립 리뷰 — 투구 순간을 못 잰 화면이 앞 화면의 투구 순간을 가져가지 않고, 늦은 득점은 정확히
+    1점·들어왔다는 말이 있을 때만, 외야수 낱말은 이름('김익수')·'못 잡았'·'2루타'에 안 맞는다."""
+    seen = twice(R(10, outs=2, balls=2, strikes=2), R(40, half="bot", outs=1))
+    cues = (_shot(5, 7, 10.03, "no_play") + [_view(22, "view_unknown"), _view(30, "view_unknown")]
+            + [Cue(21, "speech", "낮은 코스 들어갔습니다 삼진")])
+    js = [(j.code, round(j.t)) for j in judge(seen, cues) if j.transition is not None]
+    assert js == [("strikeout", 22), ("out", 40)]
+
+    first_third = (True, False, True)
+    before = R(0, half="bot", strikes=1, bases=first_third, away=1, home=2)
+    out1 = R(10, half="bot", outs=1, bases=first_third, away=1, home=2)
+
+    def codes(after, text):
+        cues = [_view(6, "in_play"), Cue(8, "speech", text)]
+        return [j.code for j in judge(twice(before, out1, after), cues) if j.transition is not None]
+
+    one_run = R(30, inning=4, balls=1, strikes=2, away=1, home=3)
+    two_runs = R(30, inning=4, balls=1, strikes=2, away=1, home=4)
+    assert codes(one_run, "우익수 잡았습니다 3루 주자 홈으로 들어옵니다") == ["sac_fly", "out"]
+    assert "sac_fly" not in codes(two_runs, "우익수 잡았습니다 3루 주자 홈으로 들어옵니다")
+    assert "sac_fly" not in codes(one_run, "우익수 잡았습니다 주자는 움직이지 못합니다")
+    assert "sac_fly" not in codes(one_run, "김익수가 잡았고 득점")
+    assert "sac_fly" not in codes(one_run, "우익수 못 잡았습니다 득점")
+    assert "sac_fly" not in codes(one_run, "우익수 키를 넘는 2루타 잡아서 송구 득점")

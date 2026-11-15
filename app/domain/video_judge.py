@@ -16,9 +16,10 @@ RelayEvent 형식이라 GameSim·detectors·카드가 그대로 받는다.
 판정 규칙표는 docs/exec-plans의 07-video-judge 계획과 1:1이다.
 """
 
+import re
 from collections import Counter
 from collections.abc import Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Optional
 
 from app.domain.balk_judge import BALK_WORDS, TYPE_LABELS, speech_type
@@ -187,7 +188,11 @@ def _speech(cues: Sequence[Cue], *words: str) -> Optional[Cue]:
     return None
 
 
-OUTFIELDERS = ("좌익수", "중견수", "우익수")
+# 외야수 — 받아쓰기가 '우익수'를 '오익수', '중견수'를 '준견수'로 적는다(준플레이오프 1차전·
+# 한국시리즈 2차전 실측). 실제로 본 변형만 받는다 — 'X익수' 전체는 '김익수' 같은 이름에도 맞는다
+# (독립 리뷰)
+OUTFIELDER = re.compile(r"[좌우오]익수|[중준]견수")
+SCORED_WORDS = ("득점", "홈으로", "홈인", "플레이트", "태그업")  # 주자가 들어왔다는 말
 CATCH_WORDS = ("잡았", "잡아냅", "잡아 냅", "잡습니다", "잡고", "잡아내")
 
 
@@ -199,10 +204,11 @@ def _outfield_catch(cues: Sequence[Cue]) -> Optional[Cue]:
     아웃'은 안타 + 주자 아웃이다(독립 리뷰).
     """
     for c in cues:
-        if c.kind != "speech" or "안타" in c.text:
+        # 안타·2루타·3루타가 섞였거나 '못 잡았'이면 포구가 아니다(독립 리뷰)
+        if c.kind != "speech" or any(w in c.text for w in ("안타", "루타", "못 잡")):
             continue
-        spots = [c.text.find(w) for w in OUTFIELDERS if w in c.text]
-        if spots and any(w in c.text[min(spots):] for w in CATCH_WORDS):
+        who = OUTFIELDER.search(c.text)
+        if who and any(w in c.text[who.start():] for w in CATCH_WORDS):
             return c
     return None
 
@@ -511,7 +517,7 @@ def _split_half(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transiti
         progressed = b.outs > 0 or any(b.bases) or new_runs > 0
         # 같은 시각의 투구 화면 단서(경기장·못 가름)는 공 하나다 — 시각이 같으면 대조가 섞인다
         views = sorted({c.t for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
-                        and a.t < c.t <= b.t})
+                        and a.t < c.t <= b.t and not _thrown_before(cues, c.t, a.t)})
         if not (tr.half_change and (b.inning, b.half) == nxt and a.outs == 2 and progressed
                 and len(views) >= 2):
             out.append(tr)
@@ -523,6 +529,24 @@ def _split_half(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transiti
         # 새 반 이닝 첫 플레이의 것이 아니다(독립 리뷰). 스윙은 투구 화면 단서보다 1초쯤 앞선다
         out += transitions([Reading(max(views[0], views[1] - NEW_HALF_LEAD), *empty), b])
     return out
+
+
+def _thrown_before(cues: Sequence[Cue], view_end: float, state_t: float) -> bool:
+    """`view_end`에 끝난 투구 화면의 투구가 `state_t`(그 상태가 처음 보인 때) 전에 던져졌나.
+
+    볼카운트를 올린 투구 화면이 끝나는 순간(0.03초 뒤)에 그 상태가 처음 읽히면, 그 화면은
+    상태 '뒤'의
+    투구로 잡힌다 — 준플레이오프 1차전: '2사 2-2'를 만든 볼 화면이 3아웃 투구로 쓰여 삼진이 앞 칸에
+    붙었다. 그 화면에서 잰 투구 순간이 상태보다 앞이면 그 상태를 만든 투구다. 관절이 투구 순간을
+    못 쟀으면(단서 없음) 알 수 없으니 예전대로 뒤의 투구로 둔다.
+    """
+    # 그 화면의 투구 순간 = 앞 투구 화면이 끝난 뒤 ~ 이 화면이 끝날 때. 화면 시작 단서로 자르면 시작
+    # 단서가 빠진 화면이 앞 화면의 투구 순간을 가져가고, 화면 안 다시보기 시작이 투구를 가린다
+    # (독립 리뷰)
+    prev_end = max((c.t for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                    and c.t < view_end), default=float("-inf"))
+    thrown = [c.t for c in cues if c.kind == PITCH_SEEN and prev_end < c.t <= view_end]
+    return bool(thrown) and max(thrown) <= state_t
 
 
 def _scored_before_third_out(tr: Transition, skipped: bool = False) -> bool:
@@ -581,6 +605,32 @@ def _merge_split(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transit
                  or not tr.count_reset)
             and tr.before.bases[2]
         )
+        # 아웃만 먼저 올라가고(3루 주자 그대로·점수 그대로) 득점은 바로 다음 반 이닝 판독에서야
+        # 보였다 — 하이라이트가 남은 아웃을 건너뛴 희생플라이(준플레이오프 1차전 '우익수 잡았습니다.
+        # 3루주자 … 홈플레이트'). 외야수 포구·희생플라이 말이 있고 공이 맞아 나갔을 때만 그 득점을
+        # 앞 아웃에 붙인다 — 뒤 타자의 적시타일 수도 있다
+        late_run = (
+            prev is not None and prev.outs_made == 1 and prev.runs == 0 and not prev.half_change
+            and prev.before.bases == prev.after.bases and prev.before.bases[2]
+            and prev.before.outs <= 1 and tr.half_change and _scored_before_third_out(tr)
+            and tr.runs == 1  # 둘 이상이면 뒤 타자의 타점이 섞였다(독립 리뷰)
+        )
+        if late_run and prev is not None:
+            said = [c for c in _near(cues, prev.t) if c.t > prev.before.t]
+            view = _pitch_view(cues, prev)
+            # 잡았다는 말만으로는 주자가 3루에 묶였을 수도 있다 — 들어왔다는 말까지 있어야 한다
+            sf = _speech(said, *SF_STRONG) or (
+                _outfield_catch(said) and _speech(said, *SCORED_WORDS))
+            if sf and view is not None and view.kind == IN_PLAY:
+                bot = prev.after.half == "bot"
+                kept = (prev.after.bases[0], prev.after.bases[1], False)
+                scored = replace(prev.after, bases=kept,
+                                 away=prev.after.away + (0 if bot else 1),
+                                 home=prev.after.home + (1 if bot else 0))
+                out[-1] = Transition(t=prev.t, before=prev.before, after=scored, outs_made=1,
+                                     runs=1, half_change=False, count_reset=prev.count_reset)
+                out += transitions([scored, tr.after])
+                continue
         if split and prev is not None:
             held = tr.after.bases == (tr.before.bases[0], tr.before.bases[1], False)
             # 다른 주자도 태그업해 한 베이스 갔으면(2루 → 3루) — 폭투·보크와 같은 모양이라 카운트가
