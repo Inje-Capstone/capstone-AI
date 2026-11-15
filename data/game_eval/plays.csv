@@ -126,8 +126,8 @@ wyC8BnovUUA,539.0,none,True,,,,조용함,
 wyC8BnovUUA,554.0,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,
 wyC8BnovUUA,587.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
 wyC8BnovUUA,598.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,3아웃
-wyC8BnovUUA,624.4,?,False,,,,제외,결과 모름 — 투수 교체
-wyC8BnovUUA,674.4,steal,True,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→010,틀림,2루 도루
+wyC8BnovUUA,624.4,?,False,hbp,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (632s),제외,결과 모름 — 투수 교체
+wyC8BnovUUA,674.4,steal,True,caught_stealing reach,confirmed video_only,"점수판 아웃+1 득점+0 주자 100→000; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 1.1배 미끄러짐, 678.3~678.9초 (678s) | 점수판 아웃+0 득점+0 주자 000→010",틀림,2루 도루
 wyC8BnovUUA,692.2,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→100,맞음,적시 2루타 5-1
 wyC8BnovUUA,732.0,none,False,,,,조용함,
 wyC8BnovUUA,765.2,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 100→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (772s),맞음,3아웃
@@ -141,7 +141,7 @@ wyC8BnovUUA,917.7,out,False,out,video_only,점수판 아웃+1 득점+0 주자 10
 wyC8BnovUUA,949.7,out,False,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,다이빙 캐치로 보임 — 이닝 끝
 wyC8BnovUUA,990.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
 wyC8BnovUUA,1029.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,
-wyC8BnovUUA,1036.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→001,맞음,뜬공 — 주자 3루로
+wyC8BnovUUA,1036.8,out,True,out steal,video_only video_only,"점수판 아웃+1 득점+0 주자 010→010 | 점수판 아웃+0 득점+0 주자 010→001; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 1.0배 미끄러짐, 1046.2~1047.0초 (1046s)",맞음,뜬공 — 주자 3루로
 wyC8BnovUUA,1049.5,walk,False,walk,video_only,점수판 아웃+0 득점+0 주자 001→101; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1056s),맞음,볼넷으로 보임(3-0)
 wyC8BnovUUA,1062.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 101→000,맞음,3아웃
 wyC8BnovUUA,1079.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼

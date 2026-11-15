@@ -8,7 +8,7 @@ luegoydhdxE,227.5,steal,True,steal,refined,점수판 아웃+0 득점+0 주자 10
 luegoydhdxE,243.2,?,False,balk,video_only,점수판 아웃+0 득점+0 주자 010→001,제외,3루로 — 폭투·도루 못 가림
 luegoydhdxE,252.0,walk,True,hbp,video_only,점수판 아웃+0 득점+0 주자 001→101; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (255s),틀림,볼넷 — 1·3루
 luegoydhdxE,279.0,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 101→010,맞음,2타점 2루타 2-0
-luegoydhdxE,331.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→001,맞음,뜬공 — 주자 3루로
+luegoydhdxE,331.8,out,True,out balk,video_only video_only,점수판 아웃+1 득점+0 주자 010→010 | 점수판 아웃+0 득점+0 주자 010→001,맞음,뜬공 — 주자 3루로
 luegoydhdxE,350.8,reach,False,out,video_only,점수판 아웃+1 득점+1 주자 001→000,틀림,타점 타구 3-0 — 3아웃은 못 봄
 luegoydhdxE,370.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼 3아웃
 luegoydhdxE,403.4,out_any,False,out,video_only,점수판 아웃+2 득점+0 주자 000→000,맞음,아웃으로 보임 — 앞 상태 가려짐

@@ -1,10 +1,10 @@
 ﻿video,t,truth,sure,engine,check,evidence,verdict,note
 yzTjqEbCn_s,178.2,reach,True,reach balk,video_only video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 배트를 휘두름 (181s) | 점수판 아웃+0 득점+0 주자 100→010,맞음,2루타
 yzTjqEbCn_s,203.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,타구 아웃 — 2루 주자 그대로
-yzTjqEbCn_s,221.0,strikeout,False,out,video_only,점수판 아웃+1 득점+0 주자 010→010,틀림,헛스윙 삼진으로 보임 — 2사 2루
+yzTjqEbCn_s,221.0,strikeout,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 010→010; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (235s),맞음,헛스윙 삼진으로 보임 — 2사 2루
 yzTjqEbCn_s,248.0,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 010→110; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (256s),맞음,볼넷(3-2) — 1·2루
 yzTjqEbCn_s,259.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→000,맞음,뜬공 3아웃
-yzTjqEbCn_s,275.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
+yzTjqEbCn_s,275.5,reach,True,reach balk,video_only video_only,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+0 득점+0 주자 100→010,맞음,2루타
 yzTjqEbCn_s,299.0,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 010→110 | 점수판 아웃+0 득점+1 주자 110→001,맞음,적시 장타 1-0 — 3루
 yzTjqEbCn_s,366.6,out_any,True,out,video_only,점수판 아웃+3 득점+0 주자 001→000,맞음,"아웃 — 3루 주자 그대로, 남은 아웃·2회말 2아웃은 못 봄"
 yzTjqEbCn_s,397.9,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,내야 안타로 보임 — 1루
@@ -57,7 +57,7 @@ yzTjqEbCn_s,1437.7,walk,True,walk,confirmed,점수판 아웃+0 득점+1 주자 1
 yzTjqEbCn_s,1460.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→111,맞음,뜬공 — 2사 만루
 yzTjqEbCn_s,1475.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→000,맞음,땅볼 3아웃 — 11회초 2아웃은 못 봄
 yzTjqEbCn_s,1493.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
-yzTjqEbCn_s,1520.8,reach,True,reach runner,video_only video_only,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+0 득점+0 주자 110→101,맞음,안타 — 1·3루
+yzTjqEbCn_s,1520.8,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+0 득점+0 주자 110→101,맞음,안타 — 1·3루
 yzTjqEbCn_s,1541.0,steal,True,runner,video_only,점수판 아웃+0 득점+0 주자 101→011,틀림,2루 도루 — 2·3루
 yzTjqEbCn_s,1555.8,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 011→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1566s),맞음,루킹 삼진(해설) — 11회말 안 나옴
 yzTjqEbCn_s,1581.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
