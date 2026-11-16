@@ -372,3 +372,65 @@ def test_paired_arrow_boxes_pick_the_darker_one(tmp_path):
     import pytest
     with pytest.raises(ValueError):
         Layout.load(bad)
+
+
+def _k_frame(pole_x=None):
+    """1280×720 — 검은 칸(x 60~150, y 110~138)에 노란 'K' 획(세로 막대 + 팔 둘). `pole_x`면 K 대신
+    그 x에 세로 노란 줄 하나(밤 경기 폴대)."""
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    px = bytearray(bytes((20, 20, 30)) * (RGB_W * RGB_H))
+    yellow = bytes((245, 228, 70))
+
+    def fill(x0, x1, y0, y1, color):
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                i = (y * RGB_W + x) * 3
+                px[i:i + 3] = color
+
+    fill(60, 150, 110, 138, bytes((0, 0, 0)))
+    if pole_x is not None:
+        fill(pole_x, pole_x + 5, 100, 150, yellow)
+    else:
+        fill(100, 106, 115, 135, yellow)  # 세로 막대
+        fill(112, 120, 115, 121, yellow)  # 위 팔
+        fill(112, 120, 129, 135, yellow)  # 아래 팔
+    return bytes(px)
+
+
+def test_mark_needs_its_stroke_points_lit_and_its_background_dark(tmp_path):
+    """SBS 포스트시즌 상자 — 삼진 뒤 투수 줄 왼쪽이 검은 칸의 노란 'K'. 투수 줄이 없는 장면에선 그
+    자리에 경기 화면이 비쳐 노란 폴대가 표시로 세어졌다(PO 3차전). 획 지점(mark_on)이 모두 표시 색,
+    글자 옆(mark_off)이 모두 어두워야 표시다."""
+    import pytest
+
+    from app.adapters.video.scorebug_layout import decode_mark
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    def pt(x, y):
+        return (x / RGB_W, y / RGB_H)
+
+    box = (98 / RGB_W, 113 / RGB_H, 122 / RGB_W, 137 / RGB_H)
+    on, off = (pt(103, 125), pt(116, 132)), (pt(118, 125), pt(90, 125), pt(130, 125))
+    plain = Layout("t", {}, (), mark=box, mark_hue=(40.0, 70.0))
+    strict = Layout("t", {}, (), mark=box, mark_hue=(40.0, 70.0), mark_on=on, mark_off=off)
+    k = _k_frame()
+    assert decode_mark(plain, k, RGB_W, RGB_H) == "strikeout"
+    assert decode_mark(strict, k, RGB_W, RGB_H) == "strikeout"
+    pole = _k_frame(pole_x=113)  # 폴대가 아래 팔 자리를 지난다 — 세로 막대 지점은 꺼져 있다
+    assert decode_mark(plain, pole, RGB_W, RGB_H) == "strikeout"  # 칸 화소 수만 세면 속는다
+    assert decode_mark(strict, pole, RGB_W, RGB_H) is None
+    notch = _k_frame(pole_x=117)  # 글자 옆 바탕 지점이 밝다
+    assert decode_mark(strict, notch, RGB_W, RGB_H) is None
+    sbs = Layout.load(ROOT / "data" / "scorebug_layouts" / "sbs_postseason_box.json")
+    assert sbs.mark is not None and len(sbs.mark_on) == 2 and len(sbs.mark_off) == 3
+    assert len(sbs.panel) == 4 and sbs.mark_hue == (40.0, 70.0)
+    bad = tmp_path / "bad.json"
+    bad.write_text('{"name": "x", "bases": {}, "outs": [], "mark_on": [[0.1, 0.1]]}',
+                   encoding="utf-8")
+    with pytest.raises(ValueError):  # mark 없이 지점만
+        Layout.load(bad)
+    bad.write_text('{"name": "x", "bases": {}, "outs": [], "mark": [0.1, 0.1, 0.2, 0.2], '
+                   '"mark_off": [[0.1, 0.1, 0.3]]}', encoding="utf-8")
+    with pytest.raises(ValueError):  # 지점은 x, y 둘
+        Layout.load(bad)

@@ -89,7 +89,7 @@ T93FGIYBM8E,696.7,none,False,runner,video_only,점수판 아웃+0 득점+0 주�
 T93FGIYBM8E,708.4,reach,True,reach,video_only,점수판 아웃+1 득점+2 주자 011→000,맞음,2타점 안타 7-4
 T93FGIYBM8E,728.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
 T93FGIYBM8E,738.0,out_any,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (743s),맞음,
-T93FGIYBM8E,751.5,hbp,True,hbp,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (758s),맞음,몸에 맞는 공(타석에서 몸을 숙임 — 다시 보고 고침)
+T93FGIYBM8E,751.5,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (758s),맞음,"볼넷 — 풀카운트 바깥쪽 볼(해설 '풀카운트 바깥쪽 빠지는군요', 직전 점수판 3-2). '타석에서 몸을 숙임'을 보고 사구로 고쳤던 것을 2026-11-16 정답 점검에서 되돌림(보호대를 푸는 동작)"
 T93FGIYBM8E,781.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,3아웃
 T93FGIYBM8E,797.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
 T93FGIYBM8E,811.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→001,맞음,땅볼 — 주자 3루로
@@ -141,8 +141,8 @@ wyC8BnovUUA,917.7,out,False,out,video_only,점수판 아웃+1 득점+0 주자 10
 wyC8BnovUUA,949.7,out,False,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,다이빙 캐치로 보임 — 이닝 끝
 wyC8BnovUUA,990.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
 wyC8BnovUUA,1029.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,
-wyC8BnovUUA,1036.8,out,True,out steal,video_only video_only,"점수판 아웃+1 득점+0 주자 010→010 | 점수판 아웃+0 득점+0 주자 010→001; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 1.0배 미끄러짐, 1046.2~1047.0초 (1046s)",맞음,뜬공 — 주자 3루로
-wyC8BnovUUA,1049.5,walk,False,walk,video_only,점수판 아웃+0 득점+0 주자 001→101; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1056s),맞음,볼넷으로 보임(3-0)
+wyC8BnovUUA,1036.8,out,True,out steal,video_only conflict,"점수판 아웃+1 득점+0 주자 010→010 | 점수판 아웃+0 득점+0 주자 010→001; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 1.0배 미끄러짐, 1046.2~1047.0초 (1046s); 영상은 도루 — 해설과 달라 보류",맞음,뜬공 — 주자 3루로
+wyC8BnovUUA,1049.5,walk,False,walk,confirmed,점수판 아웃+0 득점+0 주자 001→101; 해설 '-사실상의 고의사고를 봐야 할 것 같아요.' (1050s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1056s),맞음,볼넷으로 보임(3-0)
 wyC8BnovUUA,1062.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 101→000,맞음,3아웃
 wyC8BnovUUA,1079.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
 wyC8BnovUUA,1087.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,경기 끝

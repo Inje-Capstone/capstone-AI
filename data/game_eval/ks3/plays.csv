@@ -17,20 +17,20 @@
 4PR9g8KArTo,403.1,walk,False,walk out,confirmed video_only,점수판 아웃+0 득점+0 주자 100→110; 해설 '선수 타자 이재현의 출루 성공입니다. 풀카운트. 벗어납니다. 볼넷. 연속 타자 볼넷입니다.' (400s) | 점수판 아웃+1 득점+0 주자 110→110,맞음,"볼넷으로 보임 — 1·2루, 뒤 아웃은 투구 화면을 못 찾음(415초)"
 4PR9g8KArTo,424.4,none,True,,,,조용함,볼
 4PR9g8KArTo,436.7,walk,False,walk out runner,video_only video_only video_only,점수판 아웃+0 득점+0 주자 110→111; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (443s) | 점수판 아웃+1 득점+0 주자 111→111 | 점수판 아웃+0 득점+1 주자 111→101,맞음,3-0 볼넷으로 보임 — 뒤 희생플라이로 보이는 1점은 투구 화면을 못 찾음
-4PR9g8KArTo,473.2,reach,True,reach reach reach out,video_only video_only video_only video_only,점수판 아웃+0 득점+0 주자 101→101 | 점수판 아웃+0 득점+1 주자 101→101 | 점수판 아웃+0 득점+1 주자 101→001 | 점수판 아웃+1 득점+0 주자 001→000,맞음,2타점 적시타 4-1 — 3아웃은 못 봄
+4PR9g8KArTo,473.2,reach,True,reach reach out,video_only video_only video_only,점수판 아웃+0 득점+1 주자 101→101 | 점수판 아웃+0 득점+1 주자 101→001 | 점수판 아웃+1 득점+0 주자 001→000,맞음,2타점 적시타 4-1 — 3아웃은 못 봄
 4PR9g8KArTo,531.5,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,"아웃 — 루킹 삼진으로 보임(다시 보고 고침 — 점수판 2-2 1사 → 다음 투구 전 2사, 처음엔 '파울'로 매김)"
 4PR9g8KArTo,548.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
 4PR9g8KArTo,557.8,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 100→000; 해설 '스윙 삼진 이번 이닝 들어와서 소현준 선수의 투구 패턴에도 변화가 좀 있었고요. 결과는 삼진 삼진 그러니까 이제 제2라운드에서' (580s),맞음,3아웃 — 삼진으로 보임
 4PR9g8KArTo,579.3,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '스윙 삼진 이번 이닝 들어와서 소현준 선수의 투구 패턴에도 변화가 좀 있었고요. 결과는 삼진 삼진 그러니까 이제 제2라운드에서' (580s); [점수판] 삼진 표시(K) (583s),맞음,아웃 — 포수 포구(삼진으로 보임)
 4PR9g8KArTo,595.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공 3아웃
-4PR9g8KArTo,624.1,strikeout,True,strikeout,video_only,점수판 아웃+2 득점+0 주자 000→000; [점수판] 삼진 표시(K) (631s),맞음,삼진(6K 표시) — 다음 판독 2사(아웃 하나는 못 봄)
+4PR9g8KArTo,624.1,strikeout,True,strikeout,confirmed,점수판 아웃+2 득점+0 주자 000→000; [점수판] 삼진 표시(K) (631s),맞음,삼진(6K 표시) — 다음 판독 2사(아웃 하나는 못 봄)
 4PR9g8KArTo,634.9,out,True,,,,놓침,뜬공 3아웃
 4PR9g8KArTo,651.9,out_any,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,아웃으로 보임 — 6회초 첫 판독이 1사(장면 못 봄)
 4PR9g8KArTo,665.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,땅볼
 4PR9g8KArTo,674.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,출루 — 내야 타구로 보임
 4PR9g8KArTo,692.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,뜬공 3아웃
-4PR9g8KArTo,718.5,out_any,False,strikeout,refined,점수판 아웃+2 득점+0 주자 000→000; 해설 '스윙 3진으로 1인 종결.' (730s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (724s),맞음,아웃으로 보임 — 다음 판독 2사(장면 못 봄)
-4PR9g8KArTo,731.5,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (737s),맞음,3아웃 — 장면 못 봄
+4PR9g8KArTo,718.5,out_any,False,strikeout,confirmed,점수판 아웃+2 득점+0 주자 000→000; 해설 '스윙 섬진! 오른쪽에 오원석이 왼쪽에 손도견이 몸풀고 있습니다.' (720s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (724s),맞음,아웃으로 보임 — 다음 판독 2사(장면 못 봄)
+4PR9g8KArTo,731.5,out_any,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '스윙 3진으로 1인 종결.' (730s),맞음,3아웃 — 장면 못 봄
 4PR9g8KArTo,743.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2루타
 4PR9g8KArTo,760.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→010,맞음,아웃(타구) — 2루 주자 그대로
 4PR9g8KArTo,776.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,땅볼 3아웃

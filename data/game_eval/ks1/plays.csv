@@ -3,7 +3,7 @@ luegoydhdxE,133.1,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자
 luegoydhdxE,147.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,외야 뜬공
 luegoydhdxE,168.7,double_play,True,out out,video_only video_only,점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+1 득점+0 주자 100→000,틀림,풀카운트 삼진 + 2루 도루 저지(1K) — 3아웃
 luegoydhdxE,188.7,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
-luegoydhdxE,209.9,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 100→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (214s); [점수판] 삼진 표시(K) (215s),맞음,삼진(1K 표시)
+luegoydhdxE,209.9,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 100→100; 해설 '스트라이크 투에블 카운트입니다. 큰 공에 방망이 나갑니다. 헛스윙 섬진아. 하이페스트 볼은 김민혁이 당하네요. 기본적으로 김민혁 선수가' (210s); [점수판] 삼진 표시(K) (215s),맞음,삼진(1K 표시)
 luegoydhdxE,227.5,steal,True,steal,refined,점수판 아웃+0 득점+0 주자 100→010; 해설 '- 공 높게 주자 사퇴 끊었습니다. 공 빠졌어요. 주자는 뒤늦게 확인합니다. 더 가지는 않습니다. 도루 성공 원아웃 주자 1호.' (230s); 해설 '- 공 높게 주자 사퇴 끊었습니다. 공 빠졌어요. 주자는 뒤늦게 확인합니다. 더 가지는 않습니다. 도루 성공 원아웃 주자 1호.' (230s),맞음,2루 도루
 luegoydhdxE,243.2,?,False,balk,video_only,점수판 아웃+0 득점+0 주자 010→001,제외,3루로 — 폭투·도루 못 가림
 luegoydhdxE,252.0,walk,True,hbp,video_only,점수판 아웃+0 득점+0 주자 001→101; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (255s),틀림,볼넷 — 1·3루

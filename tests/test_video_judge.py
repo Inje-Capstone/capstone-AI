@@ -12,11 +12,13 @@ from app.domain.models import GameFeed, GameMeta
 from app.domain.scorebug import (
     Reading,
     advanced_all_one_base,
+    fold_cleared,
     forced_to_first,
     possible_step,
     runner_removed,
     single_runner_advance,
     stabilize,
+    third_out_cleared,
     transitions,
 )
 from app.domain.video_judge import (
@@ -2006,3 +2008,190 @@ def test_review_guards_on_the_spo1_rules():
     assert "sac_fly" not in codes(one_run, "김익수가 잡았고 득점")
     assert "sac_fly" not in codes(one_run, "우익수 못 잡았습니다 득점")
     assert "sac_fly" not in codes(one_run, "우익수 키를 넘는 2루타 잡아서 송구 득점")
+
+
+def test_count_cleared_after_the_third_out_is_not_a_play():
+    """준플레이오프 2차전(SBS 상자) — 2사에서 타석이 아웃으로 끝나면 아웃 셋을 안 그리고 카운트만
+    지운 '2사 0-0'을 2~3초 보인다. 그 판독은 플레이가 아니다: 빼고 전이를 만들어 직전 2스트라이크가
+    3아웃 전이의 직전 상태로 남는다(삼진). 그대로 두면 '아웃' + 볼카운트 0-0이었다."""
+    first = (True, False, False)
+    two = R(0, outs=2, balls=2, strikes=2, bases=first)
+    cleared = R(8, outs=2, bases=first)
+    assert third_out_cleared(two, cleared)
+    assert not third_out_cleared(R(0, outs=1, balls=2, strikes=2), R(8, outs=1))  # 2사에서만
+    assert not third_out_cleared(two, R(8, outs=2))  # 주자가 바뀌었으면 다른 플레이다
+    assert not third_out_cleared(R(0, outs=2, bases=first), cleared)  # 원래 0-0이면 지운 게 아니다
+    assert [r.t for r in fold_cleared([two, cleared, R(30, half="bot")])] == [0.0, 30.0]
+    seen = twice(two, cleared, R(30, half="bot", balls=3, strikes=2))
+    codes = [j.code for j in judge(seen, _pitch(3, 6)) if j.transition is not None]
+    assert codes == ["strikeout"]
+    # 공이 맞아 나갔으면 삼진이 아니다 — 종류 모를 아웃 하나
+    batted = [j.code for j in judge(seen, _pitch(3, 6, "in_play")) if j.transition is not None]
+    assert batted == ["out"]
+
+
+def test_game_ending_strikeout_when_the_last_read_only_cleared_the_count():
+    """준플레이오프 2차전 9회초 2사 2-2 — 삼진 뒤 마지막 판독이 '2사 0-0'이었다. 그 판독 뒤엔 투구가
+    없어 경기 끝 아웃을 못 냈고, 카운트만 지운 전이가 '출루'가 됐다."""
+    seen = twice(R(0, inning=9, outs=2, balls=2, strikes=2, away=3, home=6),
+                 R(5, inning=9, outs=2, away=3, home=6))
+    cues = _pitch(2, 3) + [Cue(3, "speech", "스윙 삼진 경기 끝")]
+    js = [j.code for j in judge(seen, cues, finished=True) if j.transition is not None]
+    assert js == ["strikeout"]
+
+
+def test_runner_read_once_before_the_count_cleared_third_out_is_kept():
+    """준플레이오프 2차전 4회말 — 2사 2-2에 사구로 나간 주자 한 장('2사 2-2 1루') 뒤 다음 타자의
+    3아웃으로 '2사 0-0 1루'가 보였다. 타석이 끝났는데 아무도 안 늘어 그 앞 한 장이 튄 판독으로
+    버려졌다. 지운 판독이 그 반 이닝의 마지막일 때만 남긴다 — 같은 반 이닝이 이어지면 카운트
+    오독."""
+    first = (True, False, False)
+    seen = [R(0, outs=2, balls=2, strikes=2, half="bot"),
+            R(29, outs=2, balls=2, strikes=2, half="bot", bases=first),
+            R(38, outs=2, half="bot", bases=first), R(45, inning=4, outs=1, balls=2, strikes=2)]
+    assert [(r.t, r.bases[0]) for r in stabilize(seen, min_repeat=1)][:2] == [(0.0, False),
+                                                                             (29.0, True)]
+    # 2-2에서 휘두르지 않은 공이 안 맞아 나갔는데 1루, 해설 '팔에 맞았습니다' — 몸에 맞는 공.
+    # 다음 타자의 3아웃은 따로
+    cues = _pitch(-1, 0.7) + _pitch(33, 34, "in_play") + [Cue(-4, "speech", "지금 팔에 맞았습니다")]
+    codes = [j.code for j in judge(seen, cues, min_repeat=1) if j.transition is not None]
+    assert codes == ["hbp", "out"]
+    # 같은 반 이닝이 이어지면(전환 중 카운트 오독 '2-1' 한 장) 예전처럼 그 한 장을 버린다
+    going = [R(0, outs=2, balls=3, strikes=2), R(3, outs=2, balls=2, strikes=1, bases=first),
+             R(8, outs=2, bases=first), R(16, outs=2, balls=2, strikes=2, bases=first)]
+    assert [r.t for r in stabilize(going, min_repeat=1)] == [0.0, 8.0, 16.0]
+
+
+def test_hit_by_pitch_with_two_strikes_needs_a_walk_to_be_impossible():
+    """2스트라이크에서도 휘두르지 않은 공이 안 맞아 나갔는데 1루면 몸에 맞는 공 — 단 직전 상태 뒤
+    던진 공으로 볼 넷을 채울 수 없을 때만. PO 3차전 8회말: 2-2 뒤 투구 화면이 둘(못 읽은 3-2를
+    거친 볼넷)이라 사구가 아니다. 휘둘렀으면 낫아웃일 수 있다."""
+    before, after = R(0, outs=1, balls=2, strikes=2), R(20, outs=1, bases=(True, False, False))
+    said = [Cue(-4, "speech", "자 지금 팔에 맞았습니다")]  # 조각 시작은 말보다 앞선다
+    assert one(before, after, _pitch(3, 5) + said).code == "hbp"
+    assert one(before, after, _pitch(3, 5)).code == "reach"  # 말이 없으면 낫아웃일 수도 있다
+    two_pitches = _pitch(3, 5) + _pitch(10, 14)
+    assert one(before, after, two_pitches + said).code == "reach"
+    swung = _pitch(15, 17) + [Cue(15, "swing", "[관절] 스윙")]
+    assert one(before, after, swung + said).code == "reach"
+    # 타구가 투수 몸에 맞은 말은 공이 맞아 나간 화면이라 여기 안 든다
+    comebacker = [_view(5, "in_play"), Cue(4, "speech", "타구가 투수 다리에 맞고 굴절됩니다")]
+    assert one(before, after, comebacker).code == "reach"
+    assert one(before, after, _pitch(3, 5) + [Cue(4, "speech", "타이밍 등에 맞춰 나옵니다")]
+               ).code == "reach"
+
+
+def test_swing_with_two_strikes_merged_with_an_unseen_out_is_a_strikeout():
+    """준플레이오프 2차전 2회초 '무사 0-2 → 2사' — 해설은 말이 없었지만 관절이 그 공의 스윙을
+    봤고 공이 안 맞아 나갔다. 휘두르지 않았으면(볼일 수 있다) 예전대로 아웃."""
+    before, after = R(0, strikes=2), R(9, outs=2)
+    swung = _pitch(0.4, 2.2) + [Cue(0.4, "swing", "[관절] 타자가 배트를 휘두름")]
+    j = one(before, after, swung)
+    assert (j.code, j.detail.get("merged")) == ("strikeout", True)
+    assert one(before, after, _pitch(0.4, 2.2)).code == "out"
+    took = _pitch(0.4, 2.2) + [Cue(0.4, "no_swing", "[관절] 타자가 공을 그냥 보냄")]
+    assert one(before, after, took).code == "out"
+
+
+def test_runner_picked_off_for_the_third_out():
+    """준플레이오프 2차전 3회초 2사 1·2루 — '1루 견제 아웃 … 마지막 아웃 카운트'. 반 이닝이 바뀐
+    전이엔 주자 모양이 없어 '아웃'이 됐다. 직전 상태 무렵 해설이 견제사·도루 실패를 말했고 그 뒤
+    공이 맞아 나간 화면도 삼진이라는 말도 없을 때만."""
+    on = (True, True, False)
+    before, after = R(10, outs=2, balls=2, strikes=2, bases=on), R(43, inning=4, half="bot")
+    said = Cue(9, "speech", "바깥쪽 스위퍼 그리고 1루 견제 아웃 베이스 위에서 마지막 아웃 카운트")
+    tag = Cue(9.9, "slide_tag", "[관절] 미끄러져 들어온 주자에게 수비 손이 닿음(태그)")
+    j = one(before, after, [said, tag])
+    assert (j.code, j.detail.get("caught")) == ("caught_stealing", True)
+    # 관절이 없어도(실시간) 같은 말이 반 이닝이 끝났다고 하면 — '마지막 아웃 카운트'
+    assert one(before, after, [said]).code == "caught_stealing"
+    assert one(before, after, [tag]).code == "out"  # 태그만으로는 모른다
+    assert one(before, after, [Cue(9, "speech", "견제 한 번 하고 다시 승부")]).code == "out"
+    assert one(before, after, [said, tag, _view(14, "in_play")]).code == "out"  # 타구가 있었다
+    k_said = Cue(12, "speech", "헛스윙 삼진")
+    assert one(before, after, [said, tag, k_said]).code != "caught_stealing"
+    assert one(before, after, [Cue(60, "speech", "견제 아웃 마지막 아웃")]).code == "out"  # 한참 뒤
+    empty = R(10, outs=2, balls=2, strikes=2)  # 주자가 없으면 잡힐 주자도 없다
+    assert one(empty, after, [said, tag]).code == "out"
+    one_out = R(10, outs=1, balls=2, strikes=2, bases=on)  # 2사가 아니면 아웃이 둘 이상이다
+    assert one(one_out, after, [said, tag]).code != "caught_stealing"
+
+
+def test_review_guards_on_the_spo2_rules():
+    """독립 리뷰 — 3아웃 견제사는 통계 이야기('도루 저지율')·앞의 둘째 아웃 이야기·삼진 단서에 서지
+    않고, 2스트라이크 사구는 '몸에 맞고 파울'에 서지 않는다. 1스트라이크 표시가 안 쓰인 판정은 다음
+    표시가 쓸 수 있다."""
+    on = (True, False, False)
+    two_out = R(10, outs=2, balls=1, strikes=1, bases=on)
+    nxt = R(43, inning=4, half="bot")
+    rate = Cue(12, "speech", "이 포수가 도루 저지율이 리그 최고죠")
+    assert one(two_out, nxt, [rate]).code == "out"
+    assert one(two_out, nxt, [rate, Cue(30, "speech", "내야 땅볼 아웃 이닝 끝")]).code == "out"
+    # 앞의 둘째 아웃이 견제사였고 셋째 아웃은 못 본 플레이 — 태그도 '이닝 끝' 말도 없으면 모른다
+    earlier = Cue(5, "speech", "1루 견제 아웃 됐습니다")
+    assert one(two_out, nxt, [earlier]).code == "out"
+    # 2사 1-2에서 헛스윙 삼진으로 끝났으면 앞 견제사 말이 있어도 삼진
+    k_before = R(10, outs=2, balls=1, strikes=2, bases=on)
+    k_cues = [earlier, _view(20, "no_play"), Cue(20, "swing_miss", "[장면] 헛스윙"),
+              Cue(7.5, "slide_tag", "[관절] 태그")]
+    assert one(k_before, nxt, k_cues).code == "strikeout"
+    # 한참 전(직전 상태 3초보다 앞)의 태그는 앞 플레이의 것이다
+    old_tag = Cue(2, "slide_tag", "[관절] 태그")
+    assert one(two_out, nxt, [earlier, old_tag]).code == "out"
+
+    b2, a2 = R(0, outs=1, balls=2, strikes=2), R(20, outs=1, bases=on)
+    assert one(b2, a2, _pitch(3, 5) + [Cue(4, "speech", "공이 발에 맞고 파울이 됩니다")]
+               ).code == "reach"
+    assert one(b2, a2, _pitch(3, 5) + [Cue(4, "speech", "손에 맞았습니다 파울")]).code == "reach"
+
+
+def test_sac_fly_split_without_a_pitch_view_needs_the_commentary():
+    """준플레이오프 2차전 7회말 1사 1·3루 — 아웃이 먼저, 5초 뒤 득점이 따로 올라왔고 그 투구 화면은
+    다른 각도라 못 봤다(공이 맞아 나갔는지 모름). 해설이 희생플라이·태그업을 말했을 때만 합친다.
+    받아쓰기는 '태그업'을 '탭업'으로도 적는다."""
+    corners = (True, False, True)
+    seen = twice(R(0, half="bot", outs=1, balls=1, strikes=1, bases=corners, away=2, home=5),
+                 R(19, half="bot", outs=2, bases=corners, away=2, home=5),
+                 R(24, half="bot", outs=2, bases=(True, False, False), away=2, home=6))
+
+    def codes(cues):
+        return [j.code for j in judge(seen, cues) if j.transition is not None]
+
+    assert codes([Cue(26, "speech", "나성범의 희생 플라이")]) == ["sac_fly"]
+    assert codes([Cue(16, "speech", "3루 주자 탭업")]) == ["sac_fly"]
+    assert codes([]) == ["out", "reach"]  # 말이 없으면 그대로 둘
+    assert "sac_fly" not in codes([Cue(26, "speech", "희생 플라이"), _view(10, "no_play")])
+    assert "sac_fly" not in codes([Cue(26, "speech", "폭투로 3루 주자 득점 희생 플라이는 아니고")])
+
+
+def test_strikeout_mark_when_only_one_strike_was_read():
+    """준플레이오프 2차전 5회초 — '1-1' 판독 15초 뒤 삼진 표시(K), 1-2는 못 읽었다. 진행 중인
+    타석이 방금 보였으면 그 타석의 삼진이다. 오래된 판독·0-0(아웃이 이미 올라감)은 아니다."""
+    first = (True, False, False)
+    seen = twice(R(0, outs=1, balls=1, strikes=1, bases=first), R(15, outs=2, bases=first))
+    mark = Cue(14.9, "k_mark", "[점수판] 삼진 표시(K)")
+    (j,) = [j for j in judge(seen, _pitch(11, 13) + [mark]) if j.transition is not None]
+    assert j.code == "strikeout"
+    # 그 아웃의 공이 맞아 나갔으면(표시를 잘못 본 한 장) 삼진으로 바꾸지 않는다
+    (j,) = [j for j in judge(seen, _pitch(11, 13, "in_play") + [mark]) if j.transition is not None]
+    assert j.code == "out"
+    stale = twice(R(0, outs=1, balls=1, strikes=1, bases=first), R(45, outs=2, bases=first))
+    late = Cue(44.9, "k_mark", "[점수판] 삼진 표시(K)")
+    (j,) = [j for j in judge(stale, _pitch(41, 43) + [late]) if j.transition is not None]
+    assert j.code == "out"
+    # 표시뿐이고 아웃 판독이 없으면(영상 끝) 2스트라이크를 못 본 표시로는 삼진을 내지 않는다
+    alone = judge(twice(R(0, outs=1, balls=1, strikes=1, bases=first)), [mark], finished=True)
+    assert [j.code for j in alone] == []
+
+
+def test_whisper_spellings_of_strikeout_and_intentional_walk():
+    """준플레이오프 2차전 받아쓰기 — '스윙 섬진', '고의사고를 해 주는 거죠'. '섬진강'은 아니다."""
+    k = one(R(0, outs=1, balls=1, strikes=2), R(10, outs=2),
+            [_view(5, "view_unknown"), Cue(6, "speech", "한준수 스윙 섬진")])
+    assert k.code == "strikeout"
+    river = one(R(0, outs=1, balls=1, strikes=2), R(10, outs=2),
+                [_view(5, "view_unknown"), Cue(6, "speech", "섬진강 재첩 광고")])
+    assert river.code == "out"
+    ibb = one(R(0, outs=1, bases=(False, False, True)), R(10, outs=1, bases=(True, False, True)),
+              [Cue(6, "speech", "그냥 고의사고를 해 주는 거죠")])
+    assert ibb.code == "walk"

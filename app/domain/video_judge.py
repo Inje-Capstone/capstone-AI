@@ -29,6 +29,7 @@ from app.domain.scorebug import (
     Reading,
     Transition,
     advanced_all_one_base,
+    fold_cleared,
     forced_to_first,
     is_count_only,
     runner_removed,
@@ -66,6 +67,20 @@ WALK_WORDS = (
 FOUL_TIP_WORDS = ("파울팁", "파울 팁", "파울tv", "파울 tv")
 TRIPLE_WORDS = ("삼중살", "트리플 플레이", "트리플플레이")
 HBP_WORDS = ("몸에 맞", "사구", "데드볼", "헤드샷")  # 5.05(b)(2)
+# 몸 어디에 맞았다는 말 — 해설은 '사구' 대신 "팔에 맞았습니다"라고 한다(준플레이오프 2차전).
+# 타구가 야수 몸에 맞았다는 말과 겹쳐, 공이 안 맞아 나간 화면일 때만 쓴다
+HIT_BODY = re.compile(r"(팔꿈치|팔|손목|손등|손|어깨|옆구리|허리|엉덩이|허벅지|무릎|종아리|다리"
+                      r"|발등|발|등|머리|헬멧)에 맞(았|고|은|아|습)")
+# 주자가 베이스 위에서 잡혔다는 말 — '견제'·'도루'만으로는 견제구·도루 성공도 된다
+CAUGHT_WORDS = ("견제 아웃", "견제아웃", "견제사", "도루 실패", "도루 저지", "도루자", "주루사")
+ASR_LEAD = 10.0  # 받아쓰기 조각의 시작 시각은 그 말보다 이만큼까지 앞선다(조각 10초)
+CAUGHT_SEC = 30.0  # 직전 상태가 보인 뒤 이 안의 말만 — 반 이닝을 건너뛴 전이는 뒤가 길다
+CAUGHT_TAG_LEAD = 3.0  # 태그·슬라이딩은 직전 상태가 보이기 이만큼 전부터(실측 0.1초 전)
+# 그 아웃으로 반 이닝이 끝났다는 말 — 태그 단서가 없을 때(관절 없음) 견제사 말과 같이 있어야 한다
+INNING_OVER_WORDS = ("마지막 아웃", "쓰리 아웃", "쓰리아웃", "스리 아웃", "스리아웃", "이닝 종료",
+                     "이닝이 끝", "이닝 끝", "공수 교대")
+# 몸에 맞았다는 말이 사구가 아닌 경우 — 타구가 몸에 맞음, 몸에 맞고 파울
+NOT_HBP_WORDS = ("파울", "타구", "굴절", "튕")
 
 # 관절로 잰 동작 단서의 설명 머리말 — 카드 '영상 근거'에 그대로 나간다
 POSE_TAG = "[관절] "
@@ -154,8 +169,8 @@ _EN_WORDS = {
 
 
 # 받아쓰기(Whisper)가 숫자로 적는 말 — '삼진'을 '3진'으로(2026-11-07 하이라이트 실측: "4타자 연속
-# 3진"). '3진루' 같은 말은 해설에 없다
-_ASR_WORDS = {"삼진": ("3진",)}
+# 3진"). '3진루' 같은 말은 해설에 없다. '스윙 섬진', '고의사고를 해 주는 거죠'(준플레이오프 2차전)
+_ASR_WORDS = {"삼진": ("3진", "섬진"), "고의사구": ("고의사고",), "태그업": ("탭업",)}
 
 
 # 같은 글자의 다른 말 — '사구(死球)'는 몸에 맞는 공인데 '고의사구(四球)'는 고의4구다.
@@ -164,6 +179,8 @@ _HOMONYMS = {
     "사구": ("고의사구", "고의 사구"),
     "홈런": ("홈런스타", "홈런더비", "홈런 더비", "홈런왕"),  # 광고·행사 자막(실측 '크보 홈런스타')
     "안타": ("안타깝", "안타까", "무안타"),  # '안타깝게 놓쳤네요'는 안타가 아니다(독립 리뷰)
+    "섬진": ("섬진강",),  # 받아쓰기의 '삼진'(_ASR_WORDS) — 강 이름은 아니다
+    "도루 저지": ("도루 저지율",), "도루 실패": ("도루 실패율",),  # 통계 이야기(독립 리뷰)
 }
 
 
@@ -329,6 +346,9 @@ def judge_transition(
         # 주자가 움직였거나 점수가 났으면 출루가 섞였다 — 그 출루가 보인 투구일 수 있다(독립 리뷰)
         if tr.outs_made and tr.before.strikes == 2 and no_play and not tr.runs and b == a:
             k = _has(near, "swing_miss") or _has(near, "strikeout") or _speech(near, "삼진")
+            # 해설이 말이 없어도 그 공을 휘둘렀으면 삼진이다 — 2스트라이크에서 휘두른 공이 안 맞아
+            # 나갔는데 아웃이 늘었다(준플레이오프 2차전 2회초 '무사 0-2 → 2사', 헛스윙 다시보기)
+            k = k or _swung_last_pitch(cues, no_play.t, tr.before.t)
             if k:
                 return make("result", "strikeout", 0.5, [k, no_play], merged=True)
         return make("result", "out" if tr.outs_made else "reach", 0.5, merged=True)
@@ -372,6 +392,25 @@ def judge_transition(
         caught = _has(near, "slide") or _speech(near, "도루", "견제")
         if caught:
             return make("steal", "caught_stealing", 0.5, [caught], caught=True)
+
+    # 2사에서 주자가 견제·도루로 잡혀 반 이닝이 끝났다 — 반 이닝이 바뀐 전이엔 새 주자 모양이 없어
+    # 위 규칙(주자가 사라짐)을 못 쓴다. 직전 상태 무렵 해설이 견제사·도루 실패를 말했고, 그 뒤에
+    # 공이 맞아 나간 화면도 삼진 단서도 없을 때만(준플레이오프 2차전 3회초 '1루 견제 아웃 …
+    # 마지막 아웃 카운트'). 그 말은 앞의 둘째 아웃(견제사) 이야기일 수도 있다 — 직전 상태 무렵의
+    # 태그·슬라이딩이 보였거나 같은 말이 반 이닝이 끝났다고 할 때만(독립 리뷰)
+    if tr.half_change and tr.before.outs == 2 and tr.outs_made == 1 and any(b):
+        around = [c for c in cues
+                  if tr.before.t - ASR_LEAD <= c.t <= min(tr.t, tr.before.t + CAUGHT_SEC)]
+        said = _speech(around, *CAUGHT_WORDS)
+        batted = any(c.kind == IN_PLAY and c.t > tr.before.t for c in around)
+        # 2스트라이크에서 공이 안 맞아 나갔거나 헛스윙이 보였으면 삼진이 먼저다(아래 타석 결과)
+        k_seen = (_speech(around, "삼진") or _has(around, "swing_miss")
+                  or _has(around, "strikeout") or (tr.before.strikes == 2 and no_play))
+        tag = next((c for c in around if c.kind in ("slide_tag", "slide", "pickoff_throw")
+                    and c.t >= tr.before.t - CAUGHT_TAG_LEAD), None)
+        over = said is not None and any(w in said.text for w in INNING_OVER_WORDS)
+        if said and not batted and not k_seen and (tag or over):
+            return make("steal", "caught_stealing", 0.5, [said, tag], caught=True)
 
     # 타석 결과
     if tr.outs_made == 2:
@@ -440,6 +479,19 @@ def judge_transition(
         # 볼 셋 전·스트라이크 둘 전에 공이 안 맞았는데 1루 — 몸에 맞는 공이다(낫아웃은 2스트라이크)
         if forced and no_play and tr.before.balls < 3 and tr.before.strikes < 2:
             return make("result", "hbp", 0.5, [no_play])
+        # 2스트라이크면 낫아웃일 수도 있다 — 해설이 몸 어디에 맞았다고 했고 그 공을 휘두르지 않았을
+        # 때만(준플레이오프 2차전 4회말 2-2 '지금 팔에 맞았습니다'). 받아쓰기 조각은 시작 시각이
+        # 말보다 앞서 직전 상태가 보이기 조금 전 조각까지 듣는다. 직전 상태 뒤에 던진 공으로 볼 넷을
+        # 채울 수 있으면(2-2 뒤 투구 화면 둘 — PO 3차전 8회말 볼넷) 말하지 않는다
+        if forced and no_play and tr.before.strikes == 2 and not swung:
+            thrown = max(sum(1 for c in cues if c.kind in kinds and tr.before.t < c.t <= tr.t)
+                         for kinds in ((IN_PLAY, NO_PLAY, VIEW_UNKNOWN), (PITCH_SEEN,)))
+            # '발에 맞고 파울'·'타구가 다리에 맞고'는 사구가 아니다(독립 리뷰)
+            body = next((c for c in cues if c.kind == "speech" and HIT_BODY.search(c.text)
+                         and not any(w in c.text for w in NOT_HBP_WORDS)
+                         and tr.before.t - ASR_LEAD <= c.t <= tr.t + CUE_AFTER), None)
+            if body and tr.before.balls + thrown <= 3:
+                return make("result", "hbp", 0.5, [body, no_play])
     if tr.outs_made == 1 and tr.before.strikes == 2:
         dts = _strike_three_miss(near) or _speech(near, "낫아웃", "낫 아웃")
         if dts and dts_possible(tr.before):  # 낫아웃 상황이었지만 1루에서 아웃
@@ -645,7 +697,16 @@ def _merge_split(trs: Sequence[Transition], cues: Sequence[Cue]) -> list[Transit
         if split and prev is not None:
             view = _pitch_view(cues, prev)
             other = _speech(_near(cues, tr.t), "폭투", "포일", "보크", "도루", "홈스틸")
-            split = view is not None and view.kind == IN_PLAY and other is None
+            # 그 타석의 투구 화면이 아예 없으면(다른 각도로만 보여 줌) 공이 맞아 나갔는지 모른다 —
+            # 해설이 희생플라이·태그업을 말했을 때만(준플레이오프 2차전 7회말 '3루 주자 태그업 …
+            # 희생 플라이': 아웃 5초 뒤 득점이 '아웃' + '출루' 둘로 나왔다)
+            unseen = view is None and not any(
+                c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) and prev.before.t < c.t <= prev.t
+                for c in cues)
+            said = unseen and _speech(
+                [c for c in _near(cues, tr.t) if c.t > prev.before.t], *SF_STRONG)
+            split = other is None and (
+                (view is not None and view.kind == IN_PLAY) or bool(said))
         if split and prev is not None:
             out[-1] = Transition(t=prev.t, before=prev.before, after=tr.after, outs_made=1,
                                  runs=tr.runs, half_change=False, count_reset=prev.count_reset)
@@ -892,7 +953,15 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
                     and _half_key(r) == _half_key(basis) and r.outs >= basis.outs]
             if late and max(late, key=lambda r: r.t).strikes == 2:
                 basis = max(late, key=lambda r: r.t)
-        if basis is None or basis.strikes != 2:
+        # 2스트라이크째를 못 읽었어도 진행 중인 타석(1스트라이크)이 방금 보였으면 그 타석의
+        # 삼진이다 —
+        # 표시는 삼진 0~3초 뒤에 뜬다(준플레이오프 2차전 5회초: '1-1' 15초 뒤 표시, 1-2는 못 읽음).
+        # 아웃이 이미 올라간 뒤의 판독은 0-0이라 여기 안 든다
+        # 그 아웃의 공이 안 맞아 나갔을 때만 쓴다(아래) — 표시를 잘못 본 한 장이 타구 아웃을
+        # 삼진으로 바꾸지 않게
+        in_pa = (basis is not None and basis.strikes == 1 and not own
+                 and m.t - basis.t <= K_MARK_JUMP_SEC)
+        if basis is None or (basis.strikes != 2 and not in_pa):
             continue
         # 점수판이 그 투구 화면 도중에 먼저 바뀌고 표시가 화면이 끝나기 전에 떴어도 그 전이다(TVING)
         after = [i for i, j in enumerate(judged) if j.transition is not None
@@ -909,6 +978,8 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
                      and j.transition.outs_made >= 1 and j.transition.before.t < m.t <= j.t
                      and viewed and not any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
                                             and m.t + K_MARK_OWN_VIEW < c.t <= j.t for c in cues)]
+        if not after and basis.strikes != 2:
+            continue  # 2스트라이크를 못 본 표시만으로는 삼진을 내지 않는다
         if not after:
             outs_near = any(j.transition is not None and j.transition.outs_made >= 1
                             and m.t - 3.0 <= j.t <= m.t + K_MARK_JUMP_SEC for j in judged)
@@ -928,12 +999,18 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
         i = min(after, key=lambda i: judged[i].t)
         if i in used:
             continue
-        used.add(i)
         j = judged[i]
         tr = j.transition
         # 같은 이닝에 점수가 났으면 삼진이 아니다(희생플라이·땅볼 타점) — 이닝이 바뀐 전이의 점수는
         # 다른 공격 차례에서 났을 수 있다
         scored = tr is not None and tr.runs and not tr.half_change
+        if basis.strikes != 2 and tr is not None:
+            view = _pitch_view(cues, tr)
+            unbatted = (view is not None and view.kind == NO_PLAY and tr.outs_made == 1
+                        and (tr.half_change or tr.before.bases == tr.after.bases))
+            if not unbatted:
+                continue
+        used.add(i)
         if (j.code == "out" and tr is not None and not scored
                 and (tr.outs_made == 1 or j.detail.get("merged"))):
             judged[i] = Judgment(j.t, "result", "strikeout", max(j.confidence, 0.6),
@@ -960,7 +1037,8 @@ def judge(
     `window`: 전이 앞뒤로 단서를 볼 범위(초). 하이라이트는 느린 화면 뒤에야 점수판이 다시
     보여 단서와 멀리 떨어진다 — 클립 평가에선 클립 전체를 본다.
     """
-    stable = stabilize(readings, min_repeat=min_repeat)
+    # 3아웃 뒤 카운트만 지운 판독은 플레이가 아니다 — 빼고 전이를 만든다(scorebug.fold_cleared)
+    stable = fold_cleared(stabilize(readings, min_repeat=min_repeat))
     out = []
     spent: Counter = Counter()
     trs = _split_half(_merge_split(transitions(stable), cues), cues)

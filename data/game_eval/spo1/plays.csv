@@ -30,7 +30,7 @@ wh-Ql5Lb9Ps,669.4,same,False,,,,제외,네일 투구 다시보기
 wh-Ql5Lb9Ps,671.9,same,False,,,,제외,네일 투구 다시보기
 wh-Ql5Lb9Ps,675.7,same,False,,,,제외,다시보기·투수 교체
 wh-Ql5Lb9Ps,703.7,none,True,,,,조용함,카운트만
-wh-Ql5Lb9Ps,711.4,strikeout,True,strikeout,refined,점수판 아웃+1 득점+0 주자 000→000; 해설 '스윙 3진 아웃 대타 이재원을 3진으로 돌려세우고 있는 성현탁 선수입니다.' (720s); [관절] 타자가 배트를 휘두름 (719s),맞음,헛스윙 삼진(해설)
+wh-Ql5Lb9Ps,711.4,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '스윙 3진 아웃 대타 이재원을 3진으로 돌려세우고 있는 성현탁 선수입니다.' (720s); [관절] 타자가 배트를 휘두름 (719s); [점수판] 삼진 표시(K) (721s),맞음,헛스윙 삼진(해설)
 wh-Ql5Lb9Ps,735.7,none,True,,,,조용함,카운트만
 wh-Ql5Lb9Ps,753.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 2사 1루
 wh-Ql5Lb9Ps,786.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루(해설)
