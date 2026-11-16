@@ -74,3 +74,19 @@ def test_same_play_cells_hand_their_time_to_the_play_before_them():
     cells = eval_games.assign(plays, [{"t": 25.0, "code": "homerun"}, {"t": 35.0, "code": "out"}])
     assert [[j["code"] for j in c] for c in cells] == [["homerun"], [], [], ["out"]]
     assert eval_games.verdict("same", [{"code": "walk"}]) is None
+
+
+def test_a_late_judgment_skips_same_cells_to_reach_the_play_before_them():
+    """준플레이오프 3차전 — 적시타 칸 뒤 다시보기 두 칸('same') 다음 칸(볼 하나)에 늦게 보인 득점이
+    들어갔다. 'same' 칸은 늘 비어 있으니 그 뒤 첫 칸을 다음 칸으로 본다."""
+    plays = [{"t": 0.0, "pitch_end": 2.0, "end": 10.0, "code": "reach", "sure": True},
+             {"t": 10.0, "pitch_end": 12.0, "end": 20.0, "code": "same", "sure": True},
+             {"t": 20.0, "pitch_end": 22.0, "end": 30.0, "code": "same", "sure": True},
+             {"t": 30.0, "pitch_end": 32.0, "end": 40.0, "code": "none", "sure": True},
+             {"t": 40.0, "pitch_end": 42.0, "end": 50.0, "code": "out", "sure": True}]
+    cells = eval_games.assign(plays, [{"t": 35.0, "code": "reach"}, {"t": 45.0, "code": "out"}])
+    assert [[j["code"] for j in c] for c in cells] == [["reach"], [], [], [], ["out"]]
+    # 다음 칸이 플레이 칸이면 예전처럼 판정 하나는 그 칸 것이다
+    plays[3]["code"] = "walk"
+    cells = eval_games.assign(plays, [{"t": 35.0, "code": "walk"}, {"t": 45.0, "code": "out"}])
+    assert [[j["code"] for j in c] for c in cells] == [[], [], [], ["walk"], ["out"]]

@@ -1,5 +1,5 @@
 {
- "_note": "2026 포스트시즌 MBC 왼쪽 위 상자(한국시리즈 5차전 H8ydwy0nGOI, 김나진·정민철 중계) — 제목 줄('KBO 한국시리즈 5차전 (삼성 3승 1패)') 아래 양옆 팀·점수 칸, 가운데 흰 칸에 다이아몬드(노란 칸 = 주자)·회차 숫자와 검은 ▲/▼ 하나·볼카운트 숫자('1-2')·아웃 빨간 점 2개. 1080p에서 잼. crop은 제목 줄을 뺀다(kbs_postseason_box와 같은 이유) prompt_note: VLM이 가운데 볼카운트('0-1')를 점수로도 읽었다(108장 중 9장) — 점수는 양옆 팀 칸 숫자라고 덧붙인다",
+ "_note": "2026 포스트시즌 MBC 왼쪽 위 상자(한국시리즈 5차전 H8ydwy0nGOI, 김나진·정민철 중계) — 제목 줄('KBO 한국시리즈 5차전 (삼성 3승 1패)') 아래 양옆 팀·점수 칸, 가운데 흰 칸에 다이아몬드(노란 칸 = 주자)·회차 숫자와 검은 ▲/▼ 하나·볼카운트 숫자('1-2')·아웃 빨간 점 2개. 1080p에서 잼. crop은 제목 줄을 뺀다(kbs_postseason_box와 같은 이유) prompt_note: VLM이 가운데 볼카운트('0-1')를 점수로도 읽었다(108장 중 9장) — 점수는 양옆 팀 칸 숫자라고 덧붙인다. 삼진 뒤 투수 줄이 아주 검은 'nK' 띠(밝기 0.06~0.07)로 바뀐다 — mark(투수 줄 왼쪽, mark_fill dark, mark_dark 0.11: 같은 자리를 덮는 선수 이름 띠 0.16과 가름)·panel(가운데 흰 칸 넷)로 화소 훑기: 준PO 3차전 2·KS5 1·KS2 1, 이름 띠 헛짚음 0. 이 판은 아웃을 먼저 올리고 1초 뒤 띠를 띄운다. panel_drops false — 바탕 색이 안 맞는 판독(회차 띠 등)도 숫자가 맞아 버리지 않는다(버리면 KS5 −2·KS2 −1)",
  "name": "mbc_postseason_box",
  "crop": [
   0.0417,
@@ -45,5 +45,44 @@
  ],
  "half_fill": "dark",
  "half_by": "shape",
+ "mark": [
+  0.0911,
+  0.163,
+  0.1026,
+  0.1778
+ ],
+ "mark_fill": "dark",
+ "mark_dark": 0.11,
+ "panel": [
+  [
+   0.0885,
+   0.0741,
+   1.0,
+   0.99,
+   1.0
+  ],
+  [
+   0.1375,
+   0.0741,
+   1.0,
+   0.99,
+   1.0
+  ],
+  [
+   0.0885,
+   0.1296,
+   1.0,
+   0.99,
+   1.0
+  ],
+  [
+   0.1375,
+   0.1296,
+   1.0,
+   0.99,
+   1.0
+  ]
+ ],
+ "panel_drops": false,
  "prompt_note": "In this score bug the small 'X-Y' numbers in the middle panel under the inning are the COUNT (balls-strikes), never the score. The SCORES are the large single numbers under the team names: left panel = away, right panel = home."
 }

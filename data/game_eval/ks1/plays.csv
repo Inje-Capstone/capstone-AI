@@ -1,7 +1,7 @@
 ﻿video,t,truth,sure,engine,check,evidence,verdict,note
 luegoydhdxE,133.1,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,내야안타로 보임
 luegoydhdxE,147.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,외야 뜬공
-luegoydhdxE,168.7,double_play,True,out out,video_only video_only,점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+1 득점+0 주자 100→000,틀림,풀카운트 삼진 + 2루 도루 저지(1K) — 3아웃
+luegoydhdxE,168.7,double_play,True,strikeout out,video_only video_only,점수판 아웃+1 득점+0 주자 100→100; [점수판] 삼진 표시(K) (174s) | 점수판 아웃+1 득점+0 주자 100→000,틀림,풀카운트 삼진 + 2루 도루 저지(1K) — 3아웃
 luegoydhdxE,188.7,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타
 luegoydhdxE,209.9,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 100→100; 해설 '스트라이크 투에블 카운트입니다. 큰 공에 방망이 나갑니다. 헛스윙 섬진아. 하이페스트 볼은 김민혁이 당하네요. 기본적으로 김민혁 선수가' (210s); [점수판] 삼진 표시(K) (215s),맞음,삼진(1K 표시)
 luegoydhdxE,227.5,steal,True,steal,refined,점수판 아웃+0 득점+0 주자 100→010; 해설 '- 공 높게 주자 사퇴 끊었습니다. 공 빠졌어요. 주자는 뒤늦게 확인합니다. 더 가지는 않습니다. 도루 성공 원아웃 주자 1호.' (230s); 해설 '- 공 높게 주자 사퇴 끊었습니다. 공 빠졌어요. 주자는 뒤늦게 확인합니다. 더 가지는 않습니다. 도루 성공 원아웃 주자 1호.' (230s),맞음,2루 도루
@@ -50,6 +50,6 @@ luegoydhdxE,1284.3,walk,False,walk,confirmed,점수판 아웃+0 득점+0 주자 
 luegoydhdxE,1301.0,reach,True,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+0 득점+0 주자 100→011,맞음,안타 — 1·2루
 luegoydhdxE,1326.3,walk_or_hbp,True,walk,video_only,점수판 아웃+0 득점+0 주자 011→111; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1336s),맞음,3-0에서 1루 — 볼넷·사구 못 가림
 luegoydhdxE,1342.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→000,맞음,땅볼 3아웃
-luegoydhdxE,1359.8,strikeout,True,strikeout,refined,점수판 아웃+1 득점+0 주자 000→000; 해설 '헛스윙 삼진아웃! 선도타자를 삼진처리합니다. KT웨이즈의 수호신 박영현.' (1360s),맞음,삼진(1K 표시)
+luegoydhdxE,1359.8,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '헛스윙 삼진아웃! 선도타자를 삼진처리합니다. KT웨이즈의 수호신 박영현.' (1360s),맞음,삼진(1K 표시)
 luegoydhdxE,1380.1,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,삼진으로 보임 — 2사
 luegoydhdxE,1408.1,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1414s); [점수판] 삼진 표시(K) (1413s),맞음,경기 끝 — 마지막 아웃

@@ -7627,6 +7627,812 @@
      "note": "삼진 — 경기 끝(해설)"
     }
    ]
+  },
+  "PAlYUd-U8fI": {
+   "title": "시험용 · 2026 KBO 준플레이오프 3차전 KIA-LG(잠실) 하이라이트 · TVING(MBC 중계)",
+   "layout": "mbc_postseason_box",
+   "plays": [
+    {
+     "t": 44.8,
+     "pitch_end": 49.8,
+     "end": 50.0,
+     "code": "none",
+     "sure": false,
+     "note": "경기 전 라인업 화면"
+    },
+    {
+     "t": 50.0,
+     "pitch_end": 55.0,
+     "end": 55.5,
+     "code": "none",
+     "sure": false,
+     "note": "경기 전 라인업 화면"
+    },
+    {
+     "t": 55.5,
+     "pitch_end": 60.0,
+     "end": 60.3,
+     "code": "none",
+     "sure": false,
+     "note": "경기 전 라인업 화면"
+    },
+    {
+     "t": 60.3,
+     "pitch_end": 66.0,
+     "end": 84.8,
+     "code": "?",
+     "sure": false,
+     "note": "1회초 첫 투구 전 — 1회초 3아웃은 통째로 안 나옴"
+    },
+    {
+     "t": 84.8,
+     "pitch_end": 101.6,
+     "end": 110.1,
+     "code": "strikeout",
+     "sure": true,
+     "note": "박해민 루킹 삼진(해설 '루킹 스트라이크 아웃', 1K 띠) — 투구 여럿인 화면"
+    },
+    {
+     "t": 110.1,
+     "pitch_end": 113.1,
+     "end": 113.3,
+     "code": "none",
+     "sure": false,
+     "note": "오스틴 투구 전 투수 화면 — 카운트 그대로(2번 타자 아웃은 못 봄)"
+    },
+    {
+     "t": 113.3,
+     "pitch_end": 116.3,
+     "end": 116.6,
+     "code": "out",
+     "sure": true,
+     "note": "오스틴 우중간 뜬공 3아웃(해설 '오익수')"
+    },
+    {
+     "t": 116.6,
+     "pitch_end": 124.1,
+     "end": 129.1,
+     "code": "same",
+     "sure": false,
+     "note": "뜬공 이어진 화면"
+    },
+    {
+     "t": 129.1,
+     "pitch_end": 132.4,
+     "end": 137.6,
+     "code": "homerun",
+     "sure": true,
+     "note": "나성범 솔로 홈런 1-0(해설)"
+    },
+    {
+     "t": 137.6,
+     "pitch_end": 139.6,
+     "end": 148.4,
+     "code": "same",
+     "sure": false,
+     "note": "홈런 다시보기"
+    },
+    {
+     "t": 148.4,
+     "pitch_end": 150.4,
+     "end": 166.6,
+     "code": "same",
+     "sure": false,
+     "note": "홈런 다시보기 — 다음 판독 1사(아웃 하나는 못 봄)"
+    },
+    {
+     "t": 166.6,
+     "pitch_end": 169.7,
+     "end": 169.9,
+     "code": "reach",
+     "sure": true,
+     "note": "한준수 내야 안타(해설 '1루수가 가까스로 걷어냈는데 포구 안 됐고') — 1사 1루"
+    },
+    {
+     "t": 169.9,
+     "pitch_end": 180.2,
+     "end": 183.7,
+     "code": "same",
+     "sure": false,
+     "note": "내야 안타 이어진 화면"
+    },
+    {
+     "t": 183.7,
+     "pitch_end": 190.2,
+     "end": 190.4,
+     "code": "same",
+     "sure": false,
+     "note": "내야 안타 다시보기"
+    },
+    {
+     "t": 190.4,
+     "pitch_end": 192.2,
+     "end": 192.7,
+     "code": "same",
+     "sure": false,
+     "note": "투수·1루수 화면"
+    },
+    {
+     "t": 192.7,
+     "pitch_end": 194.9,
+     "end": 195.2,
+     "code": "reach",
+     "sure": true,
+     "note": "김규성 안타(2-2에서) — 1·2루"
+    },
+    {
+     "t": 195.2,
+     "pitch_end": 198.4,
+     "end": 202.9,
+     "code": "same",
+     "sure": false,
+     "note": "안타 이어진 화면(외야·주자)"
+    },
+    {
+     "t": 202.9,
+     "pitch_end": 210.4,
+     "end": 217.5,
+     "code": "walk",
+     "sure": true,
+     "note": "하주석 볼넷(3-0에서, 해설 '볼 4개가 연속') — 만루"
+    },
+    {
+     "t": 217.5,
+     "pitch_end": 219.7,
+     "end": 229.5,
+     "code": "none",
+     "sure": false,
+     "note": "볼·스트라이크 — 박정우 0-0 → 2-2"
+    },
+    {
+     "t": 229.5,
+     "pitch_end": 232.2,
+     "end": 232.5,
+     "code": "reach",
+     "sure": true,
+     "note": "박정우 적시타 2-0(해설 '좌측에 안타입니다… 홈으로 한 점') — 만루"
+    },
+    {
+     "t": 232.5,
+     "pitch_end": 235.5,
+     "end": 236.5,
+     "code": "same",
+     "sure": false,
+     "note": "적시타 이어진 화면(득점)"
+    },
+    {
+     "t": 236.5,
+     "pitch_end": 239.5,
+     "end": 262.2,
+     "code": "same",
+     "sure": false,
+     "note": "다시보기·투수 교체"
+    },
+    {
+     "t": 262.2,
+     "pitch_end": 267.8,
+     "end": 268.0,
+     "code": "none",
+     "sure": false,
+     "note": "투수 교체(케네디) — 카운트만"
+    },
+    {
+     "t": 268.0,
+     "pitch_end": 273.5,
+     "end": 273.8,
+     "code": "reach",
+     "sure": true,
+     "note": "박재현 적시타 3-0(해설 '빠져나가는 안타 주자 한 명 더 들어옵니다') — 만루"
+    },
+    {
+     "t": 273.8,
+     "pitch_end": 276.8,
+     "end": 278.0,
+     "code": "same",
+     "sure": false,
+     "note": "적시타 이어진 화면(득점)"
+    },
+    {
+     "t": 278.0,
+     "pitch_end": 281.0,
+     "end": 287.0,
+     "code": "same",
+     "sure": false,
+     "note": "적시타 이어진 화면"
+    },
+    {
+     "t": 287.0,
+     "pitch_end": 288.3,
+     "end": 306.8,
+     "code": "none",
+     "sure": false,
+     "note": "다시보기·김도영 타석 카운트 그대로(1-1)"
+    },
+    {
+     "t": 306.8,
+     "pitch_end": 309.8,
+     "end": 329.3,
+     "code": "homerun",
+     "sure": true,
+     "note": "김도영 만루 홈런 7-0(자막·해설)"
+    },
+    {
+     "t": 329.3,
+     "pitch_end": 330.6,
+     "end": 331.1,
+     "code": "same",
+     "sure": false,
+     "note": "만루 홈런 이어진 화면"
+    },
+    {
+     "t": 331.1,
+     "pitch_end": 333.6,
+     "end": 333.8,
+     "code": "same",
+     "sure": false,
+     "note": "만루 홈런 다시보기"
+    },
+    {
+     "t": 333.8,
+     "pitch_end": 337.1,
+     "end": 348.8,
+     "code": "same",
+     "sure": false,
+     "note": "만루 홈런 다시보기"
+    },
+    {
+     "t": 348.8,
+     "pitch_end": 357.1,
+     "end": 394.1,
+     "code": "?",
+     "sure": false,
+     "note": "카스트로 타석 — 2회초 남은 2아웃·3회초는 안 나옴, 결과 모름"
+    },
+    {
+     "t": 394.1,
+     "pitch_end": 407.9,
+     "end": 409.4,
+     "code": "none",
+     "sure": false,
+     "note": "3회말 넘어가는 화면"
+    },
+    {
+     "t": 409.4,
+     "pitch_end": 414.1,
+     "end": 421.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "구본혁 헛스윙 삼진(2-2, 다시보기에 포수가 낮은 공을 잡음) — 2사"
+    },
+    {
+     "t": 421.7,
+     "pitch_end": 424.2,
+     "end": 424.4,
+     "code": "out",
+     "sure": true,
+     "note": "박해민 1루 땅볼 3아웃(해설 '일루수가 잡았고 직접 베이스')"
+    },
+    {
+     "t": 424.4,
+     "pitch_end": 430.9,
+     "end": 439.2,
+     "code": "same",
+     "sure": false,
+     "note": "땅볼 이어진 화면 — 4회초는 통째로 안 나옴"
+    },
+    {
+     "t": 439.2,
+     "pitch_end": 445.4,
+     "end": 454.9,
+     "code": "out_any",
+     "sure": false,
+     "note": "오지환 아웃(2-2) — 공 뒤 관중석 화면, 종류 못 가림"
+    },
+    {
+     "t": 454.9,
+     "pitch_end": 457.4,
+     "end": 457.7,
+     "code": "out",
+     "sure": true,
+     "note": "오스틴 땅볼(해설 '땅볼이 됩니다') — 2사"
+    },
+    {
+     "t": 457.7,
+     "pitch_end": 463.4,
+     "end": 463.7,
+     "code": "same",
+     "sure": false,
+     "note": "땅볼 이어진 화면(1루 아웃)"
+    },
+    {
+     "t": 463.7,
+     "pitch_end": 476.7,
+     "end": 482.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "송찬의 삼진 3아웃(해설 '여섯 번째 탈삼진')"
+    },
+    {
+     "t": 482.2,
+     "pitch_end": 483.5,
+     "end": 486.2,
+     "code": "none",
+     "sure": false,
+     "note": "5회초 넘어가는 화면"
+    },
+    {
+     "t": 486.2,
+     "pitch_end": 488.5,
+     "end": 488.7,
+     "code": "reach",
+     "sure": true,
+     "note": "김선빈 안타(3-2, 해설 '뒤로 빠집니다… 이 안타는')"
+    },
+    {
+     "t": 488.7,
+     "pitch_end": 493.0,
+     "end": 501.7,
+     "code": "same",
+     "sure": false,
+     "note": "안타 이어진 화면 — 다음 판독 1사 1루(아웃 하나는 못 봄)"
+    },
+    {
+     "t": 501.7,
+     "pitch_end": 506.2,
+     "end": 509.0,
+     "code": "strikeout",
+     "sure": true,
+     "note": "김규성 삼진(1-2, 3K 띠) — 2사 1루"
+    },
+    {
+     "t": 509.0,
+     "pitch_end": 512.0,
+     "end": 512.2,
+     "code": "reach",
+     "sure": true,
+     "note": "하주석 안타(해설 '좌중간에 떨어지는 안타입니다. 주자는 한 베이스') — 1·2루"
+    },
+    {
+     "t": 512.2,
+     "pitch_end": 515.5,
+     "end": 516.7,
+     "code": "same",
+     "sure": false,
+     "note": "안타 이어진 화면(김선빈 2루 귀루)"
+    },
+    {
+     "t": 516.7,
+     "pitch_end": 519.0,
+     "end": 520.8,
+     "code": "same",
+     "sure": false,
+     "note": "안타 이어진 화면"
+    },
+    {
+     "t": 520.8,
+     "pitch_end": 526.0,
+     "end": 526.3,
+     "code": "none",
+     "sure": false,
+     "note": "투수 교체(김진수) — 카운트만"
+    },
+    {
+     "t": 526.3,
+     "pitch_end": 529.8,
+     "end": 530.0,
+     "code": "reach",
+     "sure": true,
+     "note": "박정우 적시타 8-0(해설 '글러브 맞고 튀었어요… 홈으로 한 점 더') — 만루"
+    },
+    {
+     "t": 530.0,
+     "pitch_end": 535.3,
+     "end": 549.3,
+     "code": "same",
+     "sure": false,
+     "note": "적시타 이어진 화면(득점)"
+    },
+    {
+     "t": 549.3,
+     "pitch_end": 558.3,
+     "end": 561.0,
+     "code": "out",
+     "sure": false,
+     "note": "5회초 3아웃 강습 땅볼(해설 '강습이고 처리가 좀 어렵죠') — 5회말·6회초 2아웃은 안 나옴"
+    },
+    {
+     "t": 561.0,
+     "pitch_end": 567.0,
+     "end": 572.6,
+     "code": "none",
+     "sure": false,
+     "note": "투수 교체(우강훈) — 카운트 그대로"
+    },
+    {
+     "t": 572.6,
+     "pitch_end": 575.6,
+     "end": 594.8,
+     "code": "homerun",
+     "sure": true,
+     "note": "나성범 솔로 홈런 9-0(2-2에서, 자막 9:0)"
+    },
+    {
+     "t": 594.8,
+     "pitch_end": 596.6,
+     "end": 598.1,
+     "code": "same",
+     "sure": false,
+     "note": "홈런 이어진 화면"
+    },
+    {
+     "t": 598.1,
+     "pitch_end": 599.3,
+     "end": 615.8,
+     "code": "same",
+     "sure": false,
+     "note": "홈런 다시보기 — 6회초 3아웃은 안 나옴"
+    },
+    {
+     "t": 615.8,
+     "pitch_end": 617.4,
+     "end": 617.6,
+     "code": "reach",
+     "sure": true,
+     "note": "구본혁 안타(해설 '페어볼입니다… 2루까지는 가지 못하는군요') — 무사 1루"
+    },
+    {
+     "t": 617.6,
+     "pitch_end": 621.1,
+     "end": 623.9,
+     "code": "same",
+     "sure": false,
+     "note": "안타 이어진 화면(좌익수)"
+    },
+    {
+     "t": 623.9,
+     "pitch_end": 628.4,
+     "end": 632.9,
+     "code": "same",
+     "sure": false,
+     "note": "안타 다시보기(해설 '좌측에 떨어지는 안타')"
+    },
+    {
+     "t": 632.9,
+     "pitch_end": 634.9,
+     "end": 635.1,
+     "code": "reach",
+     "sure": true,
+     "note": "박해민 2루타(해설 '박해민은 2루까지 … 3루와 2루') — 무사 2·3루"
+    },
+    {
+     "t": 635.1,
+     "pitch_end": 640.6,
+     "end": 651.1,
+     "code": "same",
+     "sure": false,
+     "note": "2루타 이어진 화면"
+    },
+    {
+     "t": 651.1,
+     "pitch_end": 654.4,
+     "end": 664.9,
+     "code": "none",
+     "sure": false,
+     "note": "투수 교체(정해영)"
+    },
+    {
+     "t": 664.9,
+     "pitch_end": 667.9,
+     "end": 668.2,
+     "code": "none",
+     "sure": false,
+     "note": "투수 교체 화면 — 카운트만"
+    },
+    {
+     "t": 668.2,
+     "pitch_end": 672.2,
+     "end": 675.4,
+     "code": "strikeout",
+     "sure": false,
+     "note": "오지환 헛스윙 삼진으로 보임(0-2, 다시보기, 해설 '아웃 카운트 하나') — 1사"
+    },
+    {
+     "t": 675.4,
+     "pitch_end": 676.7,
+     "end": 679.9,
+     "code": "same",
+     "sure": false,
+     "note": "다시보기·더그아웃"
+    },
+    {
+     "t": 679.9,
+     "pitch_end": 686.2,
+     "end": 686.4,
+     "code": "out",
+     "sure": true,
+     "note": "오스틴 2루수 땅볼 타점 9-1(해설 '2루수 이동하면서 잡았죠… 3루주자 홈을 밟습니다') — 2사 3루"
+    },
+    {
+     "t": 686.4,
+     "pitch_end": 690.4,
+     "end": 698.9,
+     "code": "same",
+     "sure": false,
+     "note": "땅볼 이어진 화면"
+    },
+    {
+     "t": 698.9,
+     "pitch_end": 700.9,
+     "end": 701.2,
+     "code": "out",
+     "sure": true,
+     "note": "송찬의 중견수 뜬공 3아웃(해설 '중견 잡아내면서 이닝 종료')"
+    },
+    {
+     "t": 701.2,
+     "pitch_end": 704.4,
+     "end": 704.9,
+     "code": "same",
+     "sure": false,
+     "note": "뜬공 이어진 화면"
+    },
+    {
+     "t": 704.9,
+     "pitch_end": 706.4,
+     "end": 709.9,
+     "code": "same",
+     "sure": false,
+     "note": "7회초 넘어가는 화면"
+    },
+    {
+     "t": 709.9,
+     "pitch_end": 714.7,
+     "end": 714.9,
+     "code": "none",
+     "sure": false,
+     "note": "투수 교체(김영우) — 카운트만"
+    },
+    {
+     "t": 714.9,
+     "pitch_end": 720.5,
+     "end": 727.2,
+     "code": "homerun",
+     "sure": true,
+     "note": "한준수 솔로 홈런 10-1(해설 '넘어갑니다')"
+    },
+    {
+     "t": 727.2,
+     "pitch_end": 729.5,
+     "end": 733.2,
+     "code": "same",
+     "sure": false,
+     "note": "홈런 이어진 화면"
+    },
+    {
+     "t": 733.2,
+     "pitch_end": 735.7,
+     "end": 747.7,
+     "code": "same",
+     "sure": false,
+     "note": "홈런 다시보기"
+    },
+    {
+     "t": 747.7,
+     "pitch_end": 751.2,
+     "end": 751.5,
+     "code": "same",
+     "sure": false,
+     "note": "홈런 다시보기"
+    },
+    {
+     "t": 751.5,
+     "pitch_end": 753.0,
+     "end": 763.2,
+     "code": "same",
+     "sure": false,
+     "note": "홈런 다시보기 — 7회초 남은 아웃은 안 나옴"
+    },
+    {
+     "t": 763.2,
+     "pitch_end": 772.0,
+     "end": 772.3,
+     "code": "walk_or_hbp",
+     "sure": false,
+     "note": "선두 타자 출루(해설 '선두 타자 출루') — 걸어 나감, 볼넷·사구 못 가림"
+    },
+    {
+     "t": 772.3,
+     "pitch_end": 778.3,
+     "end": 784.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "홍창기 루킹 삼진(해설 '루킹 3진 아웃', 2K 띠) — 2사 1루, 앞의 1아웃은 못 봄"
+    },
+    {
+     "t": 784.5,
+     "pitch_end": 789.8,
+     "end": 790.0,
+     "code": "same",
+     "sure": false,
+     "note": "삼진 다시보기(ABS 그래픽)"
+    },
+    {
+     "t": 790.0,
+     "pitch_end": 792.5,
+     "end": 792.8,
+     "code": "reach",
+     "sure": true,
+     "note": "박동원 안타(해설 '좌익수 앞에 떨어지는 안타') — 1·2루"
+    },
+    {
+     "t": 792.8,
+     "pitch_end": 796.5,
+     "end": 799.8,
+     "code": "same",
+     "sure": false,
+     "note": "안타 이어진 화면"
+    },
+    {
+     "t": 799.8,
+     "pitch_end": 802.8,
+     "end": 803.0,
+     "code": "reach",
+     "sure": true,
+     "note": "구본혁 안타(해설 '베이스가 꽉 찼습니다') — 만루"
+    },
+    {
+     "t": 803.0,
+     "pitch_end": 805.5,
+     "end": 807.0,
+     "code": "same",
+     "sure": false,
+     "note": "안타 이어진 화면"
+    },
+    {
+     "t": 807.0,
+     "pitch_end": 809.8,
+     "end": 816.3,
+     "code": "none",
+     "sure": false,
+     "note": "공 하나·투수 교체(이의리) 전 화면"
+    },
+    {
+     "t": 816.3,
+     "pitch_end": 821.8,
+     "end": 834.3,
+     "code": "none",
+     "sure": false,
+     "note": "투수 교체(이의리) — 카운트만"
+    },
+    {
+     "t": 834.3,
+     "pitch_end": 837.1,
+     "end": 837.3,
+     "code": "out",
+     "sure": true,
+     "note": "박해민 1루 땅볼 3아웃(1루수 다이빙, 투수 베이스 커버)"
+    },
+    {
+     "t": 837.3,
+     "pitch_end": 843.1,
+     "end": 853.3,
+     "code": "same",
+     "sure": false,
+     "note": "땅볼 이어진 화면"
+    },
+    {
+     "t": 853.3,
+     "pitch_end": 855.1,
+     "end": 857.8,
+     "code": "same",
+     "sure": false,
+     "note": "땅볼 이어진 화면(투수 1루 커버) — 8회말 안 나옴"
+    },
+    {
+     "t": 857.8,
+     "pitch_end": 862.3,
+     "end": 862.8,
+     "code": "?",
+     "sure": false,
+     "note": "투수 교체(박시원) 화면 — 그 사이 1아웃(김도영)은 못 봄"
+    },
+    {
+     "t": 862.8,
+     "pitch_end": 865.3,
+     "end": 865.6,
+     "code": "reach",
+     "sure": true,
+     "note": "카스트로 안타(해설 '빠른 타구, 1·2간 관통') — 1사 1루"
+    },
+    {
+     "t": 865.6,
+     "pitch_end": 871.4,
+     "end": 871.6,
+     "code": "same",
+     "sure": false,
+     "note": "안타 이어진 화면"
+    },
+    {
+     "t": 871.6,
+     "pitch_end": 877.6,
+     "end": 877.9,
+     "code": "?",
+     "sure": false,
+     "note": "주자 2루로(해설 '2루까지 성큼성큼… 10대1이라' — 무관심 진루), 카운트 3-0까지"
+    },
+    {
+     "t": 877.9,
+     "pitch_end": 883.9,
+     "end": 887.1,
+     "code": "walk",
+     "sure": true,
+     "note": "나성범 볼넷(3-0, 해설 '볼넷이에요') — 1·2루"
+    },
+    {
+     "t": 887.1,
+     "pitch_end": 889.6,
+     "end": 889.9,
+     "code": "reach",
+     "sure": true,
+     "note": "김선빈 안타(해설 '3루 쪽… 뒤쪽으로 흘러 나갑니다. 만루') — 1사 만루"
+    },
+    {
+     "t": 889.9,
+     "pitch_end": 893.4,
+     "end": 898.4,
+     "code": "same",
+     "sure": false,
+     "note": "안타 이어진 화면"
+    },
+    {
+     "t": 898.4,
+     "pitch_end": 904.4,
+     "end": 909.1,
+     "code": "?",
+     "sure": false,
+     "note": "한준수 3-2 — 공 뒤 투수만 보임, 다음 판독 2사 만루 +1점(희생플라이+출루 또는 밀어내기+아웃) 못 가림"
+    },
+    {
+     "t": 909.1,
+     "pitch_end": 913.4,
+     "end": 921.7,
+     "code": "reach",
+     "sure": true,
+     "note": "박민 2타점 장타(해설 '깊숙한 타구, 라인 안쪽… 주자들은 들어온다') 13-1"
+    },
+    {
+     "t": 921.7,
+     "pitch_end": 922.7,
+     "end": 937.2,
+     "code": "same",
+     "sure": false,
+     "note": "장타 이어진 화면 — 8회초 3아웃·8회말·9회초는 안 나옴"
+    },
+    {
+     "t": 937.2,
+     "pitch_end": 941.2,
+     "end": 950.2,
+     "code": "none",
+     "sure": false,
+     "note": "투수(황동하)·관중 화면 — 9회말 2사 1루"
+    },
+    {
+     "t": 950.2,
+     "pitch_end": 952.2,
+     "end": 964.7,
+     "code": "out",
+     "sure": true,
+     "note": "구본혁 뜬공 — 경기 끝(해설 '경기 종료')"
+    },
+    {
+     "t": 964.7,
+     "pitch_end": 965.9,
+     "end": 980.9,
+     "code": "same",
+     "sure": false,
+     "note": "경기 끝 화면"
+    }
+   ]
   }
  },
  "_note": "1080p 경기 하이라이트의 정답 — 사람이 투구 화면마다 점수판(전·후)과 그 사이 장면을 보고 매겼다. t·pitch_end·end = 그 투구 화면 시작·끝·다음 투구 화면 시작(초). code: reach(안타·실책 출루), out(인플레이 아웃), strikeout, out_any(삼진인지 인플레이 아웃인지 못 가림), walk, homerun, sac_fly, none(점수판이 그 타석 안에서만 바뀜), ?(결과를 못 봄 — 채점 제외). sure=false는 확실하지 않은 정답."

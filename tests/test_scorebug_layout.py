@@ -434,3 +434,31 @@ def test_mark_needs_its_stroke_points_lit_and_its_background_dark(tmp_path):
                    '"mark_off": [[0.1, 0.1, 0.3]]}', encoding="utf-8")
     with pytest.raises(ValueError):  # 지점은 x, y 둘
         Layout.load(bad)
+
+
+def test_dark_mark_threshold_tells_the_strikeout_bar_from_a_name_strip():
+    """MBC 포스트시즌 상자 — 삼진 뒤 투수 줄이 아주 검은 'nK' 띠(밝기 0.06)로 바뀐다. 같은
+    자리를 선수 이름 띠(0.16)도 덮는다(한국시리즈 2차전 '류현인'). mark_dark로 '어둡다'의 기준을
+    낮춰 가른다."""
+    from app.adapters.video.scorebug_layout import decode_mark
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W
+
+    def frame(level):
+        px = bytearray(bytes((240, 240, 240)) * (RGB_W * RGB_H))
+        for y in range(110, 130):
+            for x in range(110, 140):
+                i = (y * RGB_W + x) * 3
+                px[i:i + 3] = bytes((level, level, level))
+        return bytes(px)
+
+    box = (115 / RGB_W, 112 / RGB_H, 135 / RGB_W, 128 / RGB_H)
+    loose = Layout("t", {}, (), mark=box, mark_fill="dark")
+    strict = Layout("t", {}, (), mark=box, mark_fill="dark", mark_dark=0.11)
+    bar, strip = frame(15), frame(40)
+    assert decode_mark(loose, bar, RGB_W, RGB_H) == "strikeout"
+    assert decode_mark(loose, strip, RGB_W, RGB_H) == "strikeout"
+    assert decode_mark(strict, bar, RGB_W, RGB_H) == "strikeout"
+    assert decode_mark(strict, strip, RGB_W, RGB_H) is None
+    mbc = Layout.load(ROOT / "data" / "scorebug_layouts" / "mbc_postseason_box.json")
+    assert mbc.mark_fill == "dark" and mbc.mark_dark == 0.11 and len(mbc.panel) == 4
+    assert mbc.panel_drops is False  # 회차 띠·전환 중 판독도 숫자가 맞는 판

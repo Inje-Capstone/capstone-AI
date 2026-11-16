@@ -49,6 +49,8 @@ class Transition:
     # 하나씩 올라간 두 아웃을 합친 전이인데 앞 전이에서 주자가 아웃 없이 사라졌다
     # — 한 플레이(병살)다
     lost_runner: bool = False
+    # 직전 상태가 마지막으로 다시 읽힌 시각(새 상태 전) — 없으면 처음 보인 시각(before.t)
+    before_seen: Optional[float] = None
 
     @property
     def runners_before(self) -> int:
