@@ -42,14 +42,14 @@
 | out_any | strikeout | 3 |
 | reach | out | 1 |
 | reach | reach | 5 |
-| reach | reach reach runner reach reach | 1 |
+| reach | reach runner reach reach | 1 |
 | steal | runner | 1 |
 | strikeout | out | 1 |
 | strikeout | strikeout | 1 |
 | walk | (없음) | 2 |
 | walk | reach | 2 |
 | walk | walk | 8 |
-| walk | walk reach reach out | 1 |
+| walk | walk reach out | 1 |
 
 ## 입력별
 

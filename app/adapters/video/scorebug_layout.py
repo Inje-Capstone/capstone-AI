@@ -38,6 +38,11 @@ MBC는 주자 칸을 흰색으로 채운다 — `base_fill: "bright"`면 밝고 
 처음 본 시험 경기에서 표시가 떠 있는 동안 판독이 없던 삼진이 셋. `panel`(점수판 바탕의 고정 색
 지점 x, y, r, g, b)이 있으면 VLM 없이 화소로 영상을 훑어(초당 2장) 표시를 찾는다. 바탕 색이 모두
 맞을 때만 센다 — 점수판이 없는 장면(관중·더그아웃)을 표시로 잘못 세지 않게.
+
+SBS 포스트시즌 상자는 삼진 뒤 투수 줄 왼쪽을 검은 칸의 노란 'K'로 바꾼다. 투수 줄을 안 그리는
+장면에선 그 자리에 경기 화면이 비쳐, 밤 경기의 노란 폴대가 표시로 세어졌다(PO 3차전 170초).
+`mark_on`(글자 획이 지나는 지점 — 모두 mark_hue 색)과 `mark_off`(글자 옆 바탕 지점 — 모두
+어두움)가 있으면 그 지점들까지 맞아야 표시다.
 """
 
 import colorsys
@@ -74,6 +79,8 @@ class Layout:
     mark_hue: tuple[float, float] = (340.0, 20.0)  # 삼진 표시 글자 색상 범위(도) — 기본 빨강
     mark_fill: str = "color"  # 삼진 표시 글자: color(mark_hue 색) | dark(검은 글자)
     cover_val: Optional[float] = None  # 아웃 점이 모두 이보다 밝은 무채색이면 표시가 덮은 것
+    mark_on: tuple[Point, ...] = ()  # 표시 글자 획이 지나는 지점 — 모두 mark_hue 색이어야 표시
+    mark_off: tuple[Point, ...] = ()  # 표시 글자 옆 바탕 지점 — 모두 어두워야 표시
     balls: tuple[Point, ...] = ()  # 볼 점 중심들(점으로 그리는 점수판만)
     panel: tuple[tuple[float, float, float, float, float], ...] = ()  # 바탕 고정 색(x, y, r, g, b)
     strikes: tuple[Point, ...] = ()  # 스트라이크 점 중심들
@@ -103,6 +110,12 @@ class Layout:
         cover = raw.get("cover_val")
         if cover is not None and (not raw.get("mark") or not 0 < float(cover) <= 1):
             raise ValueError(f"{path}: cover_val은 mark와 함께, 0~1 사이 밝기다")
+        for key in ("mark_on", "mark_off"):
+            pts = raw.get(key) or []
+            if pts and not raw.get("mark"):
+                raise ValueError(f"{path}: {key}는 mark와 함께 적는다")
+            if any(len(pt) != 2 for pt in pts):
+                raise ValueError(f"{path}: {key} 지점은 x, y 두 숫자다")
         crop = raw.get("crop")
         half = raw.get("half")
         return cls(
@@ -120,6 +133,8 @@ class Layout:
             mark_hue=_pair(raw.get("mark_hue")) or (340.0, 20.0),
             mark_fill=str(raw.get("mark_fill", "color")),
             cover_val=float(raw["cover_val"]) if raw.get("cover_val") is not None else None,
+            mark_on=tuple((float(x), float(y)) for x, y in raw.get("mark_on") or []),
+            mark_off=tuple((float(x), float(y)) for x, y in raw.get("mark_off") or []),
             balls=tuple((float(x), float(y)) for x, y in raw.get("balls") or []),
             strikes=tuple((float(x), float(y)) for x, y in raw.get("strikes") or []),
             panel=tuple(tuple(float(v) for v in pt) for pt in raw.get("panel") or []),  # type: ignore[misc]
@@ -263,6 +278,14 @@ def decode_mark(layout: Layout, pixels: bytes, width: int, height: int) -> Optio
         hsv = [colorsys.rgb_to_hsv(*sample(p)) for p in layout.outs]
         if all(s < COVER_SAT and v >= layout.cover_val for _, s, v in hsv):
             return "strikeout"
+    if layout.mark_on or layout.mark_off:
+        # 글자 획 지점은 표시 색, 글자 옆 지점은 검은 바탕 — 칸에 비친 경기 화면의 같은 색
+        # 물체를 거른다
+        sample = rgb_sampler(pixels, width, height)
+        lit = all(is_filled(sample(p)) and hue_in(sample(p), layout.mark_hue)
+                  for p in layout.mark_on)
+        if not lit or not all(max(sample(p)) < DARK_VAL for p in layout.mark_off):
+            return None
     x0, y0, x1, y1 = (round(v * n) for v, n in zip(layout.mark, (width, height, width, height)))
     found = 0
     for y in range(max(0, y0), min(height, y1 + 1)):

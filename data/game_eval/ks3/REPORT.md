@@ -39,7 +39,7 @@
 | out_any | strikeout | 6 |
 | reach | (없음) | 1 |
 | reach | reach | 8 |
-| reach | reach reach reach out | 1 |
+| reach | reach reach out | 1 |
 | strikeout | strikeout | 3 |
 | walk | walk | 2 |
 | walk | walk out | 1 |

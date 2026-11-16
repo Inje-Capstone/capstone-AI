@@ -44,6 +44,7 @@ ACCEPT = {
     "hbp": {"hbp"},
     "walk_or_hbp": {"walk", "hbp"},
     "steal": {"steal"},
+    "caught_stealing": {"caught_stealing"},  # 도루 실패·견제사 — 주자가 베이스 위에서 잡힘
     "homerun": {"homerun"},
     "sac_fly": {"sac_fly"},
     "double_play": {"double_play"},
@@ -158,7 +159,8 @@ def report(rows: list[dict[str, Any]], titles: dict[str, str]) -> str:
                   f"놓침 {c['놓침']}.", ""]
     names = {"reach": "안타·출루", "out": "아웃(인플레이)", "out_any": "아웃(종류 모름)",
              "strikeout": "삼진", "walk": "볼넷", "hbp": "몸에 맞는 공", "walk_or_hbp": "볼넷·사구",
-             "homerun": "홈런", "sac_fly": "희생플라이", "double_play": "병살", "steal": "도루"}
+             "homerun": "홈런", "sac_fly": "희생플라이", "double_play": "병살", "steal": "도루",
+             "caught_stealing": "도루 실패·견제사"}
     by_code = []
     for code in names:
         part = [r for r in rows if r["truth"] == code and r["verdict"] in ("맞음", "틀림", "놓침")]

@@ -86,6 +86,32 @@ def possible_step(a: Reading, b: Reading) -> bool:
     return a.runners() <= after <= a.runners() + 1
 
 
+def third_out_cleared(a: Reading, b: Reading) -> bool:
+    """2사에서 카운트만 0-0으로 지워졌나 — 3아웃 뒤 아웃 셋을 안 그리고 카운트만 지우는 점수판.
+
+    SBS 포스트시즌 상자는 2사에서 타석이 아웃으로 끝나면 '2사 0-0'(주자·점수 그대로)을 2~3초
+    보이고 다음 반 이닝으로 넘어간다(준플레이오프 2차전 6회초 삼진·9회초 경기 끝 삼진). 타석은
+    끝났는데 주자·아웃·득점이 안 늘어 `possible_step`으로는 '한 번에 바뀔 수 없는' 판독이다.
+    """
+    return (_half_order(a) == _half_order(b) and a.outs == b.outs == 2 and a.bases == b.bases
+            and (a.away, a.home) == (b.away, b.home)
+            and (b.balls, b.strikes) == (0, 0) != (a.balls, a.strikes))
+
+
+def fold_cleared(stable: Sequence[Reading]) -> list[Reading]:
+    """3아웃 뒤 카운트만 지운 판독(third_out_cleared)을 뺀 상태 열 — 전이를 판정할 때 쓴다.
+
+    그 판독은 플레이가 아니고(아웃·주자·득점이 그대로), 직전 상태로 쓰면 3아웃 전이의 볼카운트가
+    0-0이 되어 2스트라이크 삼진을 못 가린다. 빼면 그 판독을 안 읽었을 때와 같은 전이가 된다.
+    """
+    out: list[Reading] = []
+    for r in stable:
+        if out and third_out_cleared(out[-1], r):
+            continue
+        out.append(r)
+    return out
+
+
 def stabilize(readings: Sequence[Reading], min_repeat: int = 2) -> list[Reading]:
     """튀는 판독을 걸러 낸 안정 상태 열. 각 상태의 첫 등장 판독을 돌려준다.
 
@@ -247,7 +273,14 @@ def _drop_spikes(runs: list[tuple[Reading, int]]) -> list[tuple[Reading, int]]:
             if n >= 2 and _skippable(a, r) and _skippable(r, c):
                 out.append((r, n))
                 continue
-            spike = possible_step(a, c) and not (possible_step(a, r) and possible_step(r, c))
+            # 다음 판독이 3아웃 뒤 카운트만 지운 것이고 그 반 이닝의 마지막이면 이 판독 탓이
+            # 아니다 —
+            # 2사에 사구로 나간 주자 한 장이 뒤의 '2사 0-0' 때문에 튄 판독으로 버려졌다(준플레이오프
+            # 2차전 4회말). 같은 반 이닝이 이어지면 카운트 오독이다(같은 경기 '2-1' 한 장)
+            ended = third_out_cleared(r, c) and (
+                i + 2 >= len(runs) or _half_order(runs[i + 2][0]) != _half_order(c))
+            spike = possible_step(a, c) and not (
+                possible_step(a, r) and (possible_step(r, c) or ended))
             if spike and not _next_is_spike(runs, i, a) and not (
                     n == 1 and (_starts_next_half(a, r, c) or _ends_half(a, r, c))):
                 continue

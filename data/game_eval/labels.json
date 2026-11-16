@@ -734,9 +734,9 @@
      "t": 751.5,
      "pitch_end": 758.2,
      "end": 781.8,
-     "code": "hbp",
+     "code": "walk",
      "sure": true,
-     "note": "몸에 맞는 공(타석에서 몸을 숙임 — 다시 보고 고침)"
+     "note": "볼넷 — 풀카운트 바깥쪽 볼(해설 '풀카운트 바깥쪽 빠지는군요', 직전 점수판 3-2). '타석에서 몸을 숙임'을 보고 사구로 고쳤던 것을 2026-11-16 정답 점검에서 되돌림(보호대를 푸는 동작)"
     },
     {
      "t": 781.8,
@@ -7283,6 +7283,348 @@
      "code": "out",
      "sure": true,
      "note": "경기 끝 — 뜬공(해설 '잡혔습니다')"
+    }
+   ]
+  },
+  "OgADTfSwq00": {
+   "title": "시험용 · 2026 KBO 준플레이오프 2차전 LG-KIA(광주) 하이라이트 · TVING(SBS 중계)",
+   "layout": "sbs_postseason_box",
+   "plays": [
+    {
+     "t": 65.3,
+     "pitch_end": 68.6,
+     "end": 75.1,
+     "code": "none",
+     "sure": true,
+     "note": "스트라이크 — 2사"
+    },
+    {
+     "t": 75.1,
+     "pitch_end": 78.6,
+     "end": 92.3,
+     "code": "out",
+     "sure": true,
+     "note": "3루수 파울플라이 3아웃(해설)"
+    },
+    {
+     "t": 92.3,
+     "pitch_end": 96.3,
+     "end": 103.6,
+     "code": "reach",
+     "sure": true,
+     "note": "박재현 안타 — 1사 1루"
+    },
+    {
+     "t": 103.6,
+     "pitch_end": 106.1,
+     "end": 117.1,
+     "code": "steal",
+     "sure": true,
+     "note": "2루 도루(해설 '알고 뛰었다') — 볼 하나, 1사 2루"
+    },
+    {
+     "t": 117.1,
+     "pitch_end": 126.4,
+     "end": 130.4,
+     "code": "walk",
+     "sure": true,
+     "note": "김도영 볼넷(3볼에서) — 1·2루"
+    },
+    {
+     "t": 130.4,
+     "pitch_end": 131.9,
+     "end": 153.1,
+     "code": "reach",
+     "sure": true,
+     "note": "카스트로 적시타 0-1(해설) — 1·3루"
+    },
+    {
+     "t": 153.1,
+     "pitch_end": 156.9,
+     "end": 177.9,
+     "code": "reach",
+     "sure": true,
+     "note": "나성범 적시 2루타 0-2 — 2·3루"
+    },
+    {
+     "t": 177.9,
+     "pitch_end": 180.7,
+     "end": 204.9,
+     "code": "reach",
+     "sure": true,
+     "note": "김선빈 2타점 2루타 0-4(해설) — 2루"
+    },
+    {
+     "t": 204.9,
+     "pitch_end": 209.7,
+     "end": 231.2,
+     "code": "reach",
+     "sure": true,
+     "note": "한준수 적시 2루타 0-5(해설) — 2루"
+    },
+    {
+     "t": 231.2,
+     "pitch_end": 234.0,
+     "end": 261.0,
+     "code": "reach",
+     "sure": true,
+     "note": "하주석 안타 — 1·3루, 남은 2아웃은 안 나옴"
+    },
+    {
+     "t": 261.0,
+     "pitch_end": 264.2,
+     "end": 271.3,
+     "code": "strikeout",
+     "sure": true,
+     "note": "헛스윙 삼진(0-2에서, 다시보기) — 다음 판독 2사(아웃 하나는 못 봄)"
+    },
+    {
+     "t": 271.3,
+     "pitch_end": 276.0,
+     "end": 282.5,
+     "code": "none",
+     "sure": true,
+     "note": "스트라이크"
+    },
+    {
+     "t": 282.5,
+     "pitch_end": 285.5,
+     "end": 287.3,
+     "code": "none",
+     "sure": true,
+     "note": "스트라이크"
+    },
+    {
+     "t": 287.3,
+     "pitch_end": 291.3,
+     "end": 303.0,
+     "code": "strikeout",
+     "sure": true,
+     "note": "이재원 삼진 3아웃(해설) — 2회말 안 나옴·3회초 1아웃은 못 봄"
+    },
+    {
+     "t": 303.0,
+     "pitch_end": 305.8,
+     "end": 319.6,
+     "code": "reach",
+     "sure": true,
+     "note": "박동원 2루타(해설)"
+    },
+    {
+     "t": 319.6,
+     "pitch_end": 322.1,
+     "end": 336.6,
+     "code": "reach",
+     "sure": true,
+     "note": "구본혁 적시타 1-5(해설) — 1루"
+    },
+    {
+     "t": 336.6,
+     "pitch_end": 339.1,
+     "end": 356.1,
+     "code": "reach",
+     "sure": true,
+     "note": "박해민 안타 — 1·2루(해설)"
+    },
+    {
+     "t": 356.1,
+     "pitch_end": 359.6,
+     "end": 386.9,
+     "code": "out",
+     "sure": true,
+     "note": "뜬공 — 2사 1·2루"
+    },
+    {
+     "t": 386.9,
+     "pitch_end": 389.9,
+     "end": 421.2,
+     "code": "caught_stealing",
+     "sure": true,
+     "note": "1루 견제사 3아웃(해설 '견제 아웃') — 3회말·4회초 안 나옴"
+    },
+    {
+     "t": 421.2,
+     "pitch_end": 424.7,
+     "end": 455.9,
+     "code": "hbp",
+     "sure": true,
+     "note": "김도영 몸에 맞는 공(해설 '팔에 맞았습니다') — 2사 1루"
+    },
+    {
+     "t": 455.9,
+     "pitch_end": 457.7,
+     "end": 469.0,
+     "code": "out",
+     "sure": true,
+     "note": "땅볼 3아웃(해설)"
+    },
+    {
+     "t": 469.0,
+     "pitch_end": 473.2,
+     "end": 501.7,
+     "code": "reach",
+     "sure": true,
+     "note": "오지환 안타 — 1사 1루(해설)"
+    },
+    {
+     "t": 501.7,
+     "pitch_end": 506.2,
+     "end": 515.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "박동원 루킹 삼진(다시보기에 주심 콜) — 2사 1루"
+    },
+    {
+     "t": 515.5,
+     "pitch_end": 518.3,
+     "end": 535.0,
+     "code": "reach",
+     "sure": true,
+     "note": "구본혁 안타 — 1·2루(해설)"
+    },
+    {
+     "t": 535.0,
+     "pitch_end": 536.8,
+     "end": 554.3,
+     "code": "reach",
+     "sure": true,
+     "note": "박해민 적시타 2-5(해설) — 1·2루"
+    },
+    {
+     "t": 554.3,
+     "pitch_end": 558.5,
+     "end": 569.3,
+     "code": "out",
+     "sure": true,
+     "note": "3루수 뜬공 3아웃(해설) — 5회말 안 나옴"
+    },
+    {
+     "t": 569.3,
+     "pitch_end": 573.3,
+     "end": 576.8,
+     "code": "strikeout",
+     "sure": true,
+     "note": "오스틴 삼진(풀카운트, 해설)"
+    },
+    {
+     "t": 576.8,
+     "pitch_end": 589.6,
+     "end": 598.3,
+     "code": "strikeout",
+     "sure": true,
+     "note": "앞은 오스틴 삼진 다시보기, 뒤 실제 투구(1-2)에 헛스윙 삼진·포수 태그 — 2사"
+    },
+    {
+     "t": 598.3,
+     "pitch_end": 602.1,
+     "end": 608.3,
+     "code": "walk",
+     "sure": true,
+     "note": "문보경 볼넷(해설) — 2사 1루"
+    },
+    {
+     "t": 608.3,
+     "pitch_end": 620.6,
+     "end": 642.9,
+     "code": "strikeout",
+     "sure": true,
+     "note": "이재원 삼진 3아웃(K 표시·해설) — 한 화면에 투구 여럿, 6회말 안 나옴"
+    },
+    {
+     "t": 642.9,
+     "pitch_end": 646.4,
+     "end": 659.9,
+     "code": "walk",
+     "sure": true,
+     "note": "오지환 볼넷(해설) — 무사 1루"
+    },
+    {
+     "t": 659.9,
+     "pitch_end": 664.1,
+     "end": 702.9,
+     "code": "double_play",
+     "sure": true,
+     "note": "1루수 땅볼 병살(해설 '더블 플레이') — 남은 아웃 안 나옴"
+    },
+    {
+     "t": 702.9,
+     "pitch_end": 708.7,
+     "end": 732.0,
+     "code": "reach",
+     "sure": true,
+     "note": "박재현 2루타 — 무사 2루"
+    },
+    {
+     "t": 732.0,
+     "pitch_end": 739.5,
+     "end": 808.8,
+     "code": "out",
+     "sure": true,
+     "note": "김도영 뜬공·주자 3루로 — 뒤의 고의사구·나성범 희생플라이(2-6)는 투구 화면이 없음"
+    },
+    {
+     "t": 808.8,
+     "pitch_end": 813.5,
+     "end": 828.8,
+     "code": "reach",
+     "sure": true,
+     "note": "박해민 안타 — 무사 1루"
+    },
+    {
+     "t": 828.8,
+     "pitch_end": 831.1,
+     "end": 849.8,
+     "code": "out",
+     "sure": true,
+     "note": "중견수 뜬공(해설) — 1사 1루"
+    },
+    {
+     "t": 849.8,
+     "pitch_end": 852.1,
+     "end": 864.1,
+     "code": "out",
+     "sure": true,
+     "note": "투수 땅볼(해설) — 2사 2루"
+    },
+    {
+     "t": 864.1,
+     "pitch_end": 868.6,
+     "end": 916.1,
+     "code": "reach",
+     "sure": true,
+     "note": "문정빈 적시타 3-6(해설) — 뒤 타자 출루·투수 교체는 투구 화면 없음"
+    },
+    {
+     "t": 916.1,
+     "pitch_end": 923.2,
+     "end": 937.7,
+     "code": "strikeout",
+     "sure": true,
+     "note": "헛스윙 삼진 3아웃(해설) — 8회말 안 나옴"
+    },
+    {
+     "t": 937.7,
+     "pitch_end": 941.2,
+     "end": 958.9,
+     "code": "strikeout",
+     "sure": true,
+     "note": "오지환 삼진(풀카운트, 해설 '6구 승부 삼진') — 다음 판독 2사(아웃 하나는 못 봄)"
+    },
+    {
+     "t": 958.9,
+     "pitch_end": 965.2,
+     "end": 977.5,
+     "code": "none",
+     "sure": true,
+     "note": "스트라이크(헛스윙)"
+    },
+    {
+     "t": 977.5,
+     "pitch_end": 980.0,
+     "end": 995.0,
+     "code": "strikeout",
+     "sure": true,
+     "note": "삼진 — 경기 끝(해설)"
     }
    ]
   }

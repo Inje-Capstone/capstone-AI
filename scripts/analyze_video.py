@@ -255,6 +255,11 @@ def report(estimate: Optional[OffsetEstimate]) -> None:
 
 
 def main() -> int:
+    # 한국어 윈도우에서 출력을 파일로 돌리면 cp949다 — '—' 같은 글자를 찍다 죽지 않게 한다
+    # (스냅샷을 저장한 뒤 마지막 안내 줄에서 UnicodeEncodeError, 2026-11-15 실측)
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="replace")
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("game_id")
     parser.add_argument("video", type=Path)
@@ -356,7 +361,7 @@ def main() -> int:
 
             # 위치 파일의 바탕·표시 칸이나 구간이 바뀌면 다시 훑는다(이름만 같은 옛 결과 금지)
             key = repr((layout.panel, layout.mark, layout.mark_fill, layout.mark_hue,
-                        layout.cover_val, span))
+                        layout.cover_val, layout.mark_on, layout.mark_off, span))
             if bug.get("marks_key") != key:
                 try:  # 삼진 표시는 2~3초 — 판독 사이에 뜬 것을 화소로 훑어 찾는다(API 없음)
                     bug["marks"] = scan_marks(layout, args.video, *span)

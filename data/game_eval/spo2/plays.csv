@@ -1,0 +1,43 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+OgADTfSwq00,65.3,none,True,,,,조용함,스트라이크 — 2사
+OgADTfSwq00,75.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,3루수 파울플라이 3아웃(해설)
+OgADTfSwq00,92.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,박재현 안타 — 1사 1루
+OgADTfSwq00,103.6,steal,True,steal,video_only,"점수판 아웃+0 득점+0 주자 100→010; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 1.6배 미끄러짐, 111.8~112.2초 (112s)",맞음,"2루 도루(해설 '알고 뛰었다') — 볼 하나, 1사 2루"
+OgADTfSwq00,117.1,walk,True,walk,conflict,점수판 아웃+0 득점+0 주자 010→110; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (126s); 영상은 볼넷 — 해설과 달라 보류,맞음,김도영 볼넷(3볼에서) — 1·2루
+OgADTfSwq00,130.4,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 110→101,맞음,카스트로 적시타 0-1(해설) — 1·3루
+OgADTfSwq00,153.1,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 101→011,맞음,나성범 적시 2루타 0-2 — 2·3루
+OgADTfSwq00,177.9,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 011→010,맞음,김선빈 2타점 2루타 0-4(해설) — 2루
+OgADTfSwq00,204.9,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→010,맞음,한준수 적시 2루타 0-5(해설) — 2루
+OgADTfSwq00,231.2,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 010→101 | 점수판 아웃+2 득점+0 주자 101→000,맞음,"하주석 안타 — 1·3루, 남은 2아웃은 안 나옴"
+OgADTfSwq00,261.0,strikeout,True,strikeout,video_only,점수판 아웃+2 득점+0 주자 000→000; [관절] 타자가 배트를 휘두름 (262s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (264s),맞음,"헛스윙 삼진(0-2에서, 다시보기) — 다음 판독 2사(아웃 하나는 못 봄)"
+OgADTfSwq00,271.3,none,True,,,,조용함,스트라이크
+OgADTfSwq00,282.5,none,True,,,,조용함,스트라이크
+OgADTfSwq00,287.3,strikeout,True,strikeout,confirmed,"점수판 아웃+1 득점+0 주자 000→000; 해설 '- 8승 3진 2개 포함해서 애덤 홀러가 LG의 두 번째 이닝으로 3, 4번째 이닝으로 끊어가고 있습니다.' (290s); [점수판] 삼진 표시(K) (291s)",맞음,이재원 삼진 3아웃(해설) — 2회말 안 나옴·3회초 1아웃은 못 봄
+OgADTfSwq00,303.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,박동원 2루타(해설)
+OgADTfSwq00,319.6,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→100,맞음,구본혁 적시타 1-5(해설) — 1루
+OgADTfSwq00,336.6,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,박해민 안타 — 1·2루(해설)
+OgADTfSwq00,356.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→110,맞음,뜬공 — 2사 1·2루
+OgADTfSwq00,386.9,caught_stealing,True,caught_stealing,refined,"점수판 아웃+1 득점+0 주자 110→000; 해설 '바깥쪽 스위퍼 그리고 일르 견제 아웃 베이스 위에서 마지막 아웃 카운트가 나옵니다.' (390s); [관절] 슬라이딩·다이빙 — 누운 채 몸길이 0.5배 미끄러짐, 390.7~391.3초 (391s)",맞음,1루 견제사 3아웃(해설 '견제 아웃') — 3회말·4회초 안 나옴
+OgADTfSwq00,421.2,hbp,True,hbp,refined,"점수판 아웃+0 득점+0 주자 000→100; 해설 '- 자, 지금 팔에 맞았습니다.' (420s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (425s)",맞음,김도영 몸에 맞는 공(해설 '팔에 맞았습니다') — 2사 1루
+OgADTfSwq00,455.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,땅볼 3아웃(해설)
+OgADTfSwq00,469.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,오지환 안타 — 1사 1루(해설)
+OgADTfSwq00,501.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 100→100; [점수판] 삼진 표시(K) (508s),맞음,박동원 루킹 삼진(다시보기에 주심 콜) — 2사 1루
+OgADTfSwq00,515.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,구본혁 안타 — 1·2루(해설)
+OgADTfSwq00,535.0,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 110→110,맞음,박해민 적시타 2-5(해설) — 1·2루
+OgADTfSwq00,554.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→000,맞음,3루수 뜬공 3아웃(해설) — 5회말 안 나옴
+OgADTfSwq00,569.3,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '- 폴카운트 사인은 나갔습니다. 욕구 승인 삼진.- 이번에는 이 변화구호가 행운을' (570s),맞음,"오스틴 삼진(풀카운트, 해설)"
+OgADTfSwq00,576.8,strikeout,True,strikeout,refined,점수판 아웃+1 득점+0 주자 000→000; 해설 '-떨어져 버렸어요.-네.- 바로 수현 신호.- 그 신호대로 떨어지면서 승용 3진.-이렇게 가운데서 떨어진다.' (580s),맞음,"앞은 오스틴 삼진 다시보기, 뒤 실제 투구(1-2)에 헛스윙 삼진·포수 태그 — 2사"
+OgADTfSwq00,598.3,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 공을 그냥 보냄 (600s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (602s),맞음,문보경 볼넷(해설) — 2사 1루
+OgADTfSwq00,608.3,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 100→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (621s); [점수판] 삼진 표시(K) (622s),맞음,"이재원 삼진 3아웃(K 표시·해설) — 한 화면에 투구 여럿, 6회말 안 나옴"
+OgADTfSwq00,642.9,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (646s),맞음,오지환 볼넷(해설) — 무사 1루
+OgADTfSwq00,659.9,double_play,True,double_play,confirmed,점수판 아웃+2 득점+0 주자 100→000; 해설 '- 아웃. 더블 플레이.- 토 아웃. 우상의 주자가 사라집니다.' (670s),맞음,1루수 땅볼 병살(해설 '더블 플레이') — 남은 아웃 안 나옴
+OgADTfSwq00,702.9,reach,True,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→010,맞음,박재현 2루타 — 무사 2루
+OgADTfSwq00,732.0,out,True,out balk walk sac_fly,video_only video_only refined refined,점수판 아웃+1 득점+0 주자 010→010 | 점수판 아웃+0 득점+0 주자 010→001 | 점수판 아웃+0 득점+0 주자 001→101; 해설 '- 손 보세요.- 그냥 고의사고를 해 주는 거죠. 이렇게 되면 수비 지형을 바꿔서.' (760s) | 점수판 아웃+1 득점+1 주자 101→100; 해설 '3루 주자 탭업.' (780s),맞음,김도영 뜬공·주자 3루로 — 뒤의 고의사구·나성범 희생플라이(2-6)는 투구 화면이 없음
+OgADTfSwq00,808.8,reach,True,out reach,video_only video_only,점수판 아웃+1 득점+0 주자 100→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,박해민 안타 — 무사 1루
+OgADTfSwq00,828.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,중견수 뜬공(해설) — 1사 1루
+OgADTfSwq00,849.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,투수 땅볼(해설) — 2사 2루
+OgADTfSwq00,864.1,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+1 주자 010→100 | 점수판 아웃+0 득점+0 주자 100→110,맞음,문정빈 적시타 3-6(해설) — 뒤 타자 출루·투수 교체는 투구 화면 없음
+OgADTfSwq00,916.1,strikeout,True,strikeout,refined,"점수판 아웃+1 득점+0 주자 110→000; 해설 '-한주원 스포츠. 스윙 섬진!-잘로 1, 2, 1으로.' (920s); [관절] 타자가 배트를 휘두름 (922s)",맞음,헛스윙 삼진 3아웃(해설) — 8회말 안 나옴
+OgADTfSwq00,937.7,strikeout,True,strikeout,confirmed,점수판 아웃+2 득점+0 주자 000→000; 해설 '- 6구 승 3진. 이제 아웃 카운트 한 개에 몰려 있는 LG 트윈스. 9번형 9번 타자 오늘 한타 2개.' (940s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (941s); [점수판] 삼진 표시(K) (943s),맞음,"오지환 삼진(풀카운트, 해설 '6구 승부 삼진') — 다음 판독 2사(아웃 하나는 못 봄)"
+OgADTfSwq00,958.9,none,True,,,,조용함,스트라이크(헛스윙)
+OgADTfSwq00,977.5,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '-지금 생삼진 경기 끝.-거음에서 두 경기 모두 승리를 덕식한 기아 타이거즈가 이제' (980s),맞음,삼진 — 경기 끝(해설)
