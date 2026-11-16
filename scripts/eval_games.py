@@ -89,12 +89,17 @@ def assign(plays: list[dict[str, Any]], judged: list[dict[str, Any]]) -> list[li
                 cells[k].append(j)
                 break
     for k in range(len(cells) - 1):
-        nxt = cells[k + 1]
+        # 'same' 칸은 시간이 앞 칸에 붙어 늘 비었다 — 그 뒤 첫 칸이 다음 칸이다(준플레이오프 3차전:
+        # 적시타 뒤 다시보기 두 칸('same') 다음 칸에 늦게 보인 득점이 들어가 놓침 + 헛판정)
+        n = k + 1
+        while n < len(cells) - 1 and plays[n]["code"] == SAME:
+            n += 1
+        nxt = cells[n]
         if cells[k] or not nxt or plays[k]["code"] in SKIP | {NONE}:  # 받는 쪽은 플레이 칸이어야
             continue
         # 다음 칸이 플레이가 아니면(다시보기·볼 하나·못 봄) 거기 든 판정은 앞 플레이가 늦게 보인 것
-        idle = plays[k + 1]["code"] in SKIP | {NONE}
-        if idle or (len(nxt) >= 2 and nxt[0]["t"] < spans[k + 1][0] + LATE):
+        idle = plays[n]["code"] in SKIP | {NONE}
+        if idle or (len(nxt) >= 2 and nxt[0]["t"] < spans[n][0] + LATE):
             cells[k].append(nxt.pop(0))
     return cells
 

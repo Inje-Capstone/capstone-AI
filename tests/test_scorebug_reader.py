@@ -367,3 +367,47 @@ def test_pixel_states_skip_hidden_seconds_and_pad_a_short_stream(tmp_path, monke
 
     monkeypatch.setattr(sr.subprocess, "Popen", no_stream)
     assert reader.pixel_states("g.mp4", 0.0, 2.0, [shown, hidden], 0) == [None, None]
+
+
+def test_reads_are_stamped_where_their_runners_and_outs_first_showed():
+    """판독기 v5 — 8초마다 읽은 판독은 읽은 초에 찍힌다. 주자·아웃이 앞 판독과 달라진 판독은 그 화소
+    상태가 끊기지 않고 보이기 시작한 초로 앞당긴다(준플레이오프 3차전: 아웃이 4초 늦게 찍혀 다음
+    타자의 안타 칸으로 갔다). 점수판이 가려진 초(None)에서 멈추고, 앞 판독보다 앞으로는 안 간다."""
+    from app.adapters.video.scorebug_reader import restamp_to_states
+
+    empty, one_out = ((), 0, None), ((), 1, None)
+    states = [empty] * 10 + [one_out] * 8 + [None] * 3 + [((1,), 1, None)] * 5
+    reads = [{"t": 100.0, "bases": [], "outs": 0},
+             {"t": 116.0, "bases": [], "outs": 1, "balls": 2, "strikes": 1},
+             # 같은 주자·아웃 — 그대로
+             {"t": 117.0, "bases": [], "outs": 1, "balls": 2, "strikes": 2},
+             {"t": 125.0, "bases": [1], "outs": 1}]
+    moved = restamp_to_states(reads, states, 100.0)
+    assert [r["t"] for r in reads] == [100.0, 110.0, 117.0, 121.0]
+    assert moved == [(116.0, 110.0), (125.0, 121.0)]
+    # 그 초의 화소가 판독과 다르면(오독·전환) 옮기지 않는다. 삼진 표시가 덮은 판독은 건너뛴다
+    # 1초 차이는 화소를 1초마다 읽는 간격 안이라 옮기지 않는다(PO 4차전: 투구 화면 끝 앞으로 넘어감)
+    near = [{"t": 100.0, "bases": [], "outs": 0}, {"t": 111.0, "bases": [], "outs": 1}]
+    assert restamp_to_states(near, states, 100.0) == [] and near[1]["t"] == 111.0
+    odd = [{"t": 100.0, "bases": [], "outs": 0}, {"t": 112.0, "bases": [2], "outs": 1}]
+    assert restamp_to_states(odd, states, 100.0) == [] and odd[1]["t"] == 112.0
+    marked = [{"t": 100.0, "bases": [], "outs": 0},
+              {"t": 113.0, "bases": [], "outs": 0, "mark": "strikeout"},
+              {"t": 115.0, "bases": [], "outs": 1}]
+    restamp_to_states(marked, states, 100.0)
+    assert [r["t"] for r in marked] == [100.0, 113.0, 110.0]
+
+
+def test_board_check_keeps_reads_when_the_layout_says_so():
+    """panel_drops false인 판(MBC 포스트시즌 상자)은 바탕 색이 안 맞아도 판독을 버리지 않는다 —
+    화소 상태·표시 훑기에서는 여전히 점수판이 없는 장면을 거른다."""
+    from app.adapters.video.scorebug_layout import Layout
+    from app.adapters.video.scorebug_reader import RGB_H, RGB_W, _board_whole
+
+    px = bytes((10, 10, 10)) * (RGB_W * RGB_H)  # 바탕 지점이 흰색이 아님 — 점수판 없음
+    panel = ((0.5, 0.5, 1.0, 1.0, 1.0),)
+    drops = Layout("t", {}, (), panel=panel)
+    keeps = Layout("t", {}, (), panel=panel, panel_drops=False)
+    assert not _board_whole(drops, px, reading=True)
+    assert _board_whole(keeps, px, reading=True)
+    assert not _board_whole(keeps, px)  # 화소 상태는 그대로 거른다

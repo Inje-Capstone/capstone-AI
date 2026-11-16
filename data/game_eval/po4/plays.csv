@@ -92,8 +92,8 @@ ejMdL3m6Dpc,1032.3,reach,True,reach out,video_only video_only,점수판 아웃+1
 ejMdL3m6Dpc,1067.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공
 ejMdL3m6Dpc,1070.6,none,True,,,,조용함,
 ejMdL3m6Dpc,1078.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,3아웃
-ejMdL3m6Dpc,1081.3,none,True,out out,video_only video_only,점수판 아웃+3 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000,헛판정,
-ejMdL3m6Dpc,1101.1,out_any,True,,,,놓침,아웃 — 삼진으로 보임
+ejMdL3m6Dpc,1081.3,none,True,out,video_only,점수판 아웃+3 득점+0 주자 000→000,헛판정,
+ejMdL3m6Dpc,1101.1,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1107s),맞음,아웃 — 삼진으로 보임
 ejMdL3m6Dpc,1112.1,none,True,,,,조용함,
 ejMdL3m6Dpc,1114.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,경기 끝 — 마지막 아웃
 ejMdL3m6Dpc,1117.6,none,True,,,,조용함,

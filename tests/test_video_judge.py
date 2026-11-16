@@ -1749,9 +1749,14 @@ def test_board_changed_in_the_view_where_the_before_state_first_showed():
     cues = [Cue(9.9, "shot_start", ""), Cue(15, "pitch_seen", ""), _view(17, "no_play")]
     (j,) = judge(walk, cues)
     assert j.code == "walk" and j.detail["pitch_t"] == 17
-    # 직전 상태가 화면이 시작되기 전에 보였으면(앞 투구에서) 투구 순간이 있어야 붙인다
+    # 직전 상태가 화면이 시작되기 전에 보였어도 그 사이 끝난 다른 투구 화면이 없으면 이 화면의
+    # 공이다(판독기 v5 — 준플레이오프 2차전·한국시리즈 1차전 볼넷). 다른 투구 화면이 끝났으면
+    # (그 공의 결과가 늦게 보였을 수 있다) 투구 순간이 있어야 붙인다
     early = [Cue(12, "shot_start", ""), Cue(15, "pitch_seen", ""), _view(17, "no_play")]
     (j,) = judge(walk, early)
+    assert j.detail.get("pitch_t") == 17
+    between = [_view(11, "no_play")] + early
+    (j,) = judge(walk, between)
     assert "pitch_t" not in j.detail
     # 독립 리뷰 — 투구 하나짜리가 아닌 긴 화면(다른 투구가 섞임)이나, 화면에서 잰 투구가 직전
     # 상태보다 앞이면(이 전이의 투구가 아님) 붙이지 않는다
@@ -2175,7 +2180,8 @@ def test_strikeout_mark_when_only_one_strike_was_read():
     # 그 아웃의 공이 맞아 나갔으면(표시를 잘못 본 한 장) 삼진으로 바꾸지 않는다
     (j,) = [j for j in judge(seen, _pitch(11, 13, "in_play") + [mark]) if j.transition is not None]
     assert j.code == "out"
-    stale = twice(R(0, outs=1, balls=1, strikes=1, bases=first), R(45, outs=2, bases=first))
+    # 1-1 판독이 오래됐고(45초 전) 아웃 판독도 표시와 떨어져(5초 뒤) 있으면 그 타석인지 모른다
+    stale = twice(R(0, outs=1, balls=1, strikes=1, bases=first), R(50, outs=2, bases=first))
     late = Cue(44.9, "k_mark", "[점수판] 삼진 표시(K)")
     (j,) = [j for j in judge(stale, _pitch(41, 43) + [late]) if j.transition is not None]
     assert j.code == "out"
@@ -2195,3 +2201,124 @@ def test_whisper_spellings_of_strikeout_and_intentional_walk():
     ibb = one(R(0, outs=1, bases=(False, False, True)), R(10, outs=1, bases=(True, False, True)),
               [Cue(6, "speech", "그냥 고의사고를 해 주는 거죠")])
     assert ibb.code == "walk"
+
+
+def test_strikeout_word_in_the_piece_that_holds_a_mid_at_bat_state():
+    """준플레이오프 3차전 — 받아쓰기는 10초 조각 시작 시각에 찍힌다. 직전 상태 '2사 2-1'이
+    471초에 보였고 '여섯 번째 탈삼진'은 470초 조각에 들었다. 직전 상태가 타석 중간이면 그 조각의
+    말을 듣는다 — 타석이 막 시작했으면(0-0) 앞 타자 말일 수 있어 듣지 않는다(독립 리뷰 가드는
+    그대로)."""
+    before, after = R(10, outs=2, balls=2, strikes=1), R(25, inning=4, half="bot")
+    cues = [Cue(13, "pitch_seen", "[관절] 투구 순간"), Cue(13, "swing", "[관절] 스윙"),
+            _view(15, "no_play"), Cue(9, "speech", "이렇게 무너집니다. 여섯 번째 탈삼진")]
+    assert one(before, after, cues).code == "strikeout"
+    fresh = R(10, outs=2)
+    assert one(fresh, after, cues).code == "out"
+    far = cues[:3] + [Cue(-5, "speech", "여섯 번째 탈삼진")]  # 조각이 직전 상태를 안 품음
+    assert one(before, after, far).code == "out"
+
+
+def test_strikeout_mark_shown_after_the_out_inside_the_same_view():
+    """MBC 포스트시즌 상자는 아웃을 먼저 올리고 1초 뒤 'nK' 띠를 띄운다 — 표시가 그 판정의 투구 화면
+    안이다. 2스트라이크째를 못 읽어 직전 판독이 1스트라이크여도 그 타석의 삼진이다(준플레이오프
+    3차전 1회말). 0스트라이크면(카운트를 못 읽음) 쓰지 않는다."""
+    seen = twice(R(0, balls=0, strikes=1), R(10, outs=1))
+    cues = _pitch(6, 12) + [Cue(11, "k_mark", "[점수판] 삼진 표시(K)")]
+    (j,) = [j for j in judge(seen, cues) if j.transition is not None]
+    assert j.code == "strikeout"
+    # 0스트라이크(카운트를 못 읽음)면 판정 화면 안이라는 것만으로는 안 쓴다 — 아웃 직후(K_MARK_LAG)
+    # 표시가 아니면 아웃 그대로
+    zero = twice(R(0), R(10, outs=1))
+    late = _pitch(6, 14) + [Cue(13.5, "k_mark", "[점수판] 삼진 표시(K)")]
+    (j,) = [j for j in judge(zero, late) if j.transition is not None]
+    assert j.code == "out"
+
+
+def test_strikeout_mark_right_after_the_out_reading():
+    """MBC 포스트시즌 상자는 아웃을 먼저 올리고 1초쯤 뒤 'nK' 띠를 띄운다. 직전 판독이 2스트라이크가
+    아니어도(못 읽음) 표시 직전 3초 안에 아웃 하나가 올라갔고 공이 맞아 나간 화면이 없으면 그 아웃의
+    삼진이다. 타구가 있었거나 주자가 움직였거나 표시가 한참 뒤면 아니다."""
+    mark = Cue(11.1, "k_mark", "[점수판] 삼진 표시(K)")
+    seen = twice(R(0, strikes=1), R(10, outs=1))
+    (j,) = [j for j in judge(seen, [mark]) if j.transition is not None]
+    assert j.code == "strikeout"
+    (j,) = [j for j in judge(seen, [mark, _view(6, "in_play")]) if j.transition is not None]
+    assert j.code == "out"
+    moved = twice(R(0, strikes=1, bases=(True, False, False)),
+                  R(10, outs=1, bases=(False, True, False)))
+    assert [j.code for j in judge(moved, [mark]) if j.transition is not None] != ["strikeout"]
+    late = Cue(14.5, "k_mark", "[점수판] 삼진 표시(K)")
+    (j,) = [j for j in judge(seen, [late]) if j.transition is not None]
+    assert j.code == "out"
+
+
+def test_board_changed_in_a_pitch_view_that_started_after_the_before_state():
+    """판독 시각을 화소가 바뀐 초로 앞당기면(판독기 v5) 점수판이 관절이 잰 투구 순간보다 1초쯤
+    먼저 바뀐 것으로 찍힌다(준플레이오프 2차전 3-0 볼넷). 직전 상태가 보인 뒤 시작한 투구 화면이고
+    그 사이 끝난 다른 투구 화면이 없으면 그 화면의 결과다. 새 상태 카운트가 벌써 진행됐거나(다음
+    타자 공), 화면이 시작하고 공을 던지기 전에 바뀌었으면 아니다."""
+    walk = twice(R(0, balls=3, bases=(False, True, False)),
+                 R(4, bases=(True, True, False)))
+    cues = _shot(1.0, 5.2, 10.4, "no_play")
+    (j,) = [j for j in judge(walk, cues) if j.transition is not None]
+    assert (j.code, j.detail.get("pitch_t")) == ("walk", 10.4)
+    counted = twice(R(0, balls=3, bases=(False, True, False)),
+                    R(4, balls=0, strikes=2, bases=(True, True, False)))
+    (j,) = [j for j in judge(counted, cues) if j.transition is not None]
+    assert "pitch_t" not in j.detail
+    early = _shot(3.8, 6.5, 9.0, "in_play")  # 화면 시작 0.2초 뒤 바뀜 — 앞 플레이
+    (j,) = [j for j in judge(walk, early) if j.transition is not None]
+    assert "pitch_t" not in j.detail
+
+
+def test_review_guards_on_the_spo3_rules():
+    """독립 리뷰 — 앞 타석 화면 단서가 빠졌을 때 다음 타자 화면이 앞 플레이를 가져가지 않고(홈런이
+    '출루', 땅볼이 '삼진'), 뒤쪽 다른 화면의 투구 순간을 빌리지 않는다. 표시가 판독 4초 뒤에
+    판정 화면 안에서 떠도 1스트라이크 타석의 삼진이다. 'nK' 띠 뒤에 찍힌 아웃, 3아웃 잔루 삼진도."""
+    hr = twice(R(0, balls=1, strikes=1), R(14, away=1))
+    cues = [Cue(10, "shot_start", ""), Cue(16, "pitch_seen", ""), _view(20, "no_play")]
+    assert [j.code for j in judge(hr, cues) if j.transition is not None] == ["homerun"]
+    grounder = twice(R(0, balls=1, strikes=2), R(14, outs=1))
+    b_view = [Cue(2, "shot_start", ""), Cue(12, "shot_start", ""), Cue(15, "pitch_seen", ""),
+              _view(18, "no_play")]
+    assert [j.code for j in judge(grounder, b_view) if j.transition is not None] == ["out"]
+    reach = twice(R(0, balls=1), R(14, bases=(True, False, False)))
+    own_no_pitch = [Cue(11, "shot_start", ""), _view(17, "no_play"),
+                    Cue(30, "shot_start", ""), Cue(33, "pitch_seen", ""), _view(36, "no_play")]
+    (j,) = [j for j in judge(reach, own_no_pitch) if j.transition is not None]
+    assert "pitch_t" not in j.detail
+    # 표시가 판독 4초 뒤, 판정 화면 안(in_pa own) — 1스트라이크 타석
+    one_k = twice(R(0, strikes=1), R(10, outs=1))
+    (j,) = [j for j in judge(one_k, _pitch(6, 16) + [Cue(14, "k_mark", "")])
+            if j.transition is not None]
+    assert j.code == "strikeout"
+    # 띠가 뜬 초는 화소가 없어 앞당긴 아웃 판독이 띠 뒤(13초)로 찍힘 — 그 사이 투구가 없으면 삼진
+    after_bar = twice(R(0), R(13, outs=1))
+    (j,) = [j for j in judge(after_bar, [Cue(11.2, "k_mark", "")]) if j.transition is not None]
+    assert j.code == "strikeout"
+    pitched = [Cue(11.2, "k_mark", ""), Cue(12.0, "pitch_seen", "")]
+    (j,) = [j for j in judge(after_bar, pitched) if j.transition is not None]
+    assert j.code == "out"
+    # 2사 1루 삼진으로 반 이닝 끝 — 점수판이 주자를 지운다
+    third = twice(R(0, outs=2, bases=(True, False, False)), R(10, half="bot"))
+    (j,) = [j for j in judge(third, [Cue(11, "k_mark", "")]) if j.transition is not None]
+    assert j.code == "strikeout"
+    # 직전 상태가 0스트라이크면 조각 확장으로 '삼진'을 듣지 않는다(회상일 수 있다)
+    early = R(10, outs=1, balls=1, strikes=0)
+    k_cues = [Cue(13, "pitch_seen", ""), Cue(13, "swing", ""), _view(15, "no_play"),
+              Cue(3, "speech", "오늘 삼진 여섯 개째")]
+    assert one(early, R(18, outs=2), k_cues).code == "out"
+
+
+def test_view_gap_counts_from_the_last_read_of_the_before_state():
+    """PO 4차전 — 직전 상태 '1사 2-2'가 처음 보인 건 4초 넘게 전이지만 투구 화면 시작 0.1초 전에
+    다시 읽혔다. '곧바로 시작한 화면'은 직전 상태가 마지막으로 확인된 때부터 잰다. 다시 읽히지
+    않았으면(4.1초 전 한 번) 그 사이 공이 있었을 수 있어 붙이지 않는다."""
+    first = [R(0, outs=1, balls=2, strikes=2), R(0.5, outs=1, balls=2, strikes=2)]
+    reread = first + [R(4, outs=1, balls=2, strikes=2)] + twice(R(8, outs=2))
+    cues = _shot(4.1, 8.8, 9.6, "no_play")
+    (j,) = [j for j in judge(reread, cues) if j.transition is not None]
+    assert j.detail.get("pitch_t") == 9.6
+    once = first + twice(R(8, outs=2))
+    (j,) = [j for j in judge(once, cues) if j.transition is not None]
+    assert "pitch_t" not in j.detail

@@ -81,6 +81,12 @@ class Layout:
     cover_val: Optional[float] = None  # 아웃 점이 모두 이보다 밝은 무채색이면 표시가 덮은 것
     mark_on: tuple[Point, ...] = ()  # 표시 글자 획이 지나는 지점 — 모두 mark_hue 색이어야 표시
     mark_off: tuple[Point, ...] = ()  # 표시 글자 옆 바탕 지점 — 모두 어두워야 표시
+    # mark_fill dark·mark_off의 '어둡다' 기준(밝기). MBC 포스트시즌 상자의 'nK' 띠
+    # (0.06~0.07)와 같은 자리를 덮는 선수 이름 띠(0.16)를 가른다
+    mark_dark: float = 0.3
+    # 바탕 색(panel)이 안 맞는 판독을 버리나. MBC 포스트시즌 상자는 회차 띠·전환 중에도 숫자가 맞는
+    # 판독이 많아(버리면 한국시리즈 5차전 −2, 2차전 −1) false — panel은 표시 훑기·화소 상태에만 쓴다
+    panel_drops: bool = True
     balls: tuple[Point, ...] = ()  # 볼 점 중심들(점으로 그리는 점수판만)
     panel: tuple[tuple[float, float, float, float, float], ...] = ()  # 바탕 고정 색(x, y, r, g, b)
     strikes: tuple[Point, ...] = ()  # 스트라이크 점 중심들
@@ -135,6 +141,8 @@ class Layout:
             cover_val=float(raw["cover_val"]) if raw.get("cover_val") is not None else None,
             mark_on=tuple((float(x), float(y)) for x, y in raw.get("mark_on") or []),
             mark_off=tuple((float(x), float(y)) for x, y in raw.get("mark_off") or []),
+            mark_dark=float(raw.get("mark_dark", DARK_VAL)),
+            panel_drops=bool(raw.get("panel_drops", True)),
             balls=tuple((float(x), float(y)) for x, y in raw.get("balls") or []),
             strikes=tuple((float(x), float(y)) for x, y in raw.get("strikes") or []),
             panel=tuple(tuple(float(v) for v in pt) for pt in raw.get("panel") or []),  # type: ignore[misc]
@@ -284,7 +292,7 @@ def decode_mark(layout: Layout, pixels: bytes, width: int, height: int) -> Optio
         sample = rgb_sampler(pixels, width, height)
         lit = all(is_filled(sample(p)) and hue_in(sample(p), layout.mark_hue)
                   for p in layout.mark_on)
-        if not lit or not all(max(sample(p)) < DARK_VAL for p in layout.mark_off):
+        if not lit or not all(max(sample(p)) < layout.mark_dark for p in layout.mark_off):
             return None
     x0, y0, x1, y1 = (round(v * n) for v, n in zip(layout.mark, (width, height, width, height)))
     found = 0
@@ -292,7 +300,7 @@ def decode_mark(layout: Layout, pixels: bytes, width: int, height: int) -> Optio
         for x in range(max(0, x0), min(width, x1 + 1)):
             i = (y * width + x) * 3
             rgb = (pixels[i] / 255, pixels[i + 1] / 255, pixels[i + 2] / 255)
-            if (max(rgb) < DARK_VAL if layout.mark_fill == "dark"
+            if (max(rgb) < layout.mark_dark if layout.mark_fill == "dark"
                     else is_filled(rgb) and hue_in(rgb, layout.mark_hue)):
                 found += 1
                 if found >= MARK_MIN_PIXELS:

@@ -41,7 +41,7 @@ CORNERS = {
 # 스냅샷 캐시 키 — 판독 방식·지시문을 바꾸면 올린다.
 # v2: 덩어리 판독 시각을 화소가 같아진 뒤로(_settled). v3: 기준 화면을 열두 곳 더 찾음(REF_MORE),
 # 위치 파일 half_pair. v4: 화소 상태가 새로 이어진 구간에 판독이 없으면 한 장 더(plan_state_changes)
-VERSION = "scorebug-crop-v4"
+VERSION = "scorebug-crop-v5"
 THUMB_W, THUMB_H = 96, 48
 MARK_SCAN_FPS = 2.0  # 삼진 표시 훑기 — 표시가 2~3초 떠 있어 초당 2장이면 4장 이상 걸린다
 MARK_GAP = 3.0  # 이보다 떨어진 표시는 다른 삼진
@@ -175,6 +175,43 @@ def plan_state_changes(states: Sequence[Optional[tuple]],
         minor = [f for f in found if not f[1]][: max(0, limit - len(major))]
         found = sorted(major + minor)
     return [(i, i + 1) for i, _major in found]
+
+
+RESTAMP_MIN_SEC = 2.0  # 판독 시각을 이만큼 이상 앞당길 때만 옮긴다(1초는 화소 판독 간격 안)
+
+
+def restamp_to_states(readings: Sequence[dict[str, Any]], states: Sequence[Optional[tuple]],
+                      start: float) -> list[tuple[float, float]]:
+    """판독마다, 주자·아웃이 바로 앞 판독과 달라진 판독이면 그 화소 상태가 이어 보이기 시작한 초로
+    시각을 앞당긴다(제자리에서 고친다). 옮긴 (옛 시각, 새 시각) 목록을 돌려준다.
+
+    8초마다 읽는 판독(plan_periodic)은 읽은 초에 찍힌다 — 상태가 몇 초 전에 바뀌었어도.
+    준플레이오프 3차전: 김도영의 아웃이 4초 늦게(다음 타자 투구 뒤에) 찍혀 그 타자의 안타 칸에
+    '아웃'이 갔고, 볼넷·안타가 한 칸씩 밀렸다(2026-11-16). 화소 상태(1초마다, `pixel_states`)를
+    거꾸로 따라가 같은 주자·아웃이 끊기지 않고 보인 첫 초로 옮긴다 — 점수판이 가려졌거나(None)
+    다른 상태면 멈춘다. 바로 앞 판독보다 앞으로는 옮기지 않는다. 볼카운트·점수는 화소에 없어 그
+    판독의 값 그대로 둔다(주자·아웃이 같은 동안엔 카운트만 바뀐 판독은 옮기지 않는다).
+    """
+    moved: list[tuple[float, float]] = []
+    prev: Optional[dict[str, Any]] = None
+    for r in sorted(readings, key=lambda r: r["t"]):
+        if r.get("mark"):  # 삼진 표시가 덮은 판독 — 주자·아웃 화소가 엉터리다
+            continue
+        key = (tuple(r["bases"]), r["outs"])
+        if prev is not None and (tuple(prev["bases"]), prev["outs"]) != key:
+            i = int(r["t"] - start)
+            if 0 <= i < len(states) and states[i] is not None and states[i][:2] == key:
+                while i - 1 >= 0 and states[i - 1] is not None and states[i - 1][:2] == key:
+                    i -= 1
+                new = round(start + i, 2)
+                # 1초 차이는 화소를 1초마다 읽는 간격 안이다 — 늦게 찍힌 판독만
+                # (RESTAMP_MIN_SEC 이상) 옮긴다. 1초를 당기면 투구 화면 끝 앞으로 넘어가 판정이
+                # 앞 칸에 붙었다(PO 4차전)
+                if prev["t"] < new <= r["t"] - RESTAMP_MIN_SEC:
+                    moved.append((r["t"], new))
+                    r["t"] = new
+        prev = r
+    return moved
 
 
 def plan_reads(thumbs: Sequence[bytes], ref: int, max_reads: int = 10) -> list[tuple[int, int]]:
@@ -530,7 +567,7 @@ class ScorebugReader:
                 half = decode_half(self.layout, px, RGB_W, RGB_H)
                 if half:
                     r["half"] = half
-                if not _board_whole(self.layout, px):  # 전환·사라지는 중 — 표시도 믿지 않는다
+                if not _board_whole(self.layout, px, reading=True):  # 전환·사라지는 중
                     return None
                 mark = decode_mark(self.layout, px, RGB_W, RGB_H)
                 if mark:  # 주자·아웃 칸이 덮였다 — 상태 판독에서 빠지고 단서가 된다
@@ -579,15 +616,19 @@ class ScorebugReader:
                 plan = plan_reads(thumbs, ref, self.max_reads)
             readings, failed, dropped = self._read_plan(video, start, plan, corner, scale)
             more_ok = self.every and self.changes and self.layout is not None
-            if more_ok and len(plan) < self.max_reads:
-                # 읽어 낸 판독이 없는 화소 상태 구간을 한 장씩 더 읽는다(plan_state_changes)
+            if more_ok:
                 states = self.pixel_states(video, start, duration, thumbs, ref)
-                extra = plan_state_changes(
-                    states, [(r["t"] - start, tuple(r["bases"]), r["outs"]) for r in readings],
-                    limit=self.max_reads - len(plan))
-                more, f2, d2 = self._read_plan(video, start, extra, corner, scale)
-                readings = sorted(readings + more, key=lambda r: r["t"])
-                failed, dropped = failed + f2, dropped + d2
+                if len(plan) < self.max_reads:
+                    # 읽어 낸 판독이 없는 화소 상태 구간을 한 장씩 더 읽는다(plan_state_changes)
+                    extra = plan_state_changes(
+                        states, [(r["t"] - start, tuple(r["bases"]), r["outs"]) for r in readings],
+                        limit=self.max_reads - len(plan))
+                    more, f2, d2 = self._read_plan(video, start, extra, corner, scale)
+                    readings = sorted(readings + more, key=lambda r: r["t"])
+                    failed, dropped = failed + f2, dropped + d2
+                # 판독 시각을 그 주자·아웃이 처음 보인 초로(restamp_to_states)
+                restamp_to_states(readings, states, start)
+                readings.sort(key=lambda r: r["t"])
         except (subprocess.CalledProcessError, VideoAnalyzerError) as exc:
             raise VideoAnalyzerError(f"점수판 판독 실패: {exc}") from exc
         return {
@@ -627,7 +668,8 @@ class ScorebugReader:
                 if half:  # 초·말도 화살표 화소가 VLM보다 믿을 만하다
                     r["half"] = half
                 mark = decode_mark(self.layout, px, RGB_W, RGB_H)
-                if not _board_whole(self.layout, px):  # 전환·사라지는 중 — 표시도 버린다
+                # 전환·사라지는 중 — 표시도 버린다
+                if not _board_whole(self.layout, px, reading=True):
                     r, dropped = None, dropped + 1
                 elif mark:  # 주자·아웃 칸이 삼진 표시로 덮였다 — 상태 판독에서 빠진다
                     r["mark"] = mark
@@ -639,13 +681,16 @@ class ScorebugReader:
         return readings, failed, dropped
 
 
-def _board_whole(layout: Layout, px: bytes) -> bool:
+def _board_whole(layout: Layout, px: bytes, reading: bool = False) -> bool:
     """점수판이 온전히 보이나 — 바탕 고정 색(panel)이 없으면 늘 참(예전과 같다).
 
     전환 효과·사라지는 중인 프레임은 VLM이 숫자를 읽어도 주자·아웃 화소가 엉터리였다
     (만루·3스트라이크 같은 값, panel 있는 8편 판독 671장 중 8장). 바탕 색이 안 맞으면 그 판독을
-    버린다 — 조정용 98 → 99/118, 시험용 58/61 그대로(2026-11-08).
+    버린다 — 조정용 98 → 99/118, 시험용 58/61 그대로(2026-11-08). 판독(`reading`)은 위치 파일이
+    panel_drops false면 버리지 않는다(MBC 포스트시즌 상자 — 2026-11-17).
     """
+    if reading and not layout.panel_drops:
+        return True
     return not layout.panel or board_shown(layout, rgb_sampler(px, RGB_W, RGB_H))
 
 

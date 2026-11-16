@@ -97,6 +97,11 @@ POSE_TEXT[PITCH_SEEN] = "투구 순간"
 VIEW_START = "shot_start"  # 관절로 본 투구 화면이 시작된 때
 # 투구 하나짜리 화면의 길이 — 경기 17편 투구 화면 1064개 중 95%가 10초 안(중앙값 3.8초)
 ONE_PITCH_SHOT = 10.0
+# 투구 화면이 시작되고 공이 던져지기까지 최소 시간(관절이 잰 투구 순간은 화면 시작 2~7초 뒤)
+PITCH_WINDUP = 1.5
+# 직전 상태가 보이고 이 안에 시작한 투구 화면은 그 다음 공의 화면이다(실측 0.3~1.1초 — 투구
+# 간격은 10초 넘게 걸린다)
+VIEW_GAP = 3.0
 POSE_TEXT[VIEW_START] = "투구 화면 시작"
 # 영상 관측이 공식 판정과 갈린 장면 — 판정은 그대로 두고 기록만 한다(오심 검토 후보)
 OBSERVED_TAG_ON_SAFE = "tag_on_safe_runner"
@@ -518,8 +523,14 @@ def judge_transition(
         # 주자가 그대로인데 아웃이 늘었고 공이 안 맞았으니 타자 아웃이다 — 새 판독은 다음 타자의
         # 카운트(0-1)라 '카운트가 0-0으로'는 따지지 않는다
         swung = _swung_last_pitch(cues, no_play.t, tr.before.t)
-        # 직전 상태 전의 '삼진'은 앞 타자 말이다. 공이 맞은 단서가 있으면 아니다(독립 리뷰)
-        k = _speech([c for c in near if c.t > tr.before.t], "삼진")
+        # 직전 상태 전의 '삼진'은 앞 타자 말이다. 공이 맞은 단서가 있으면 아니다(독립 리뷰).
+        # 받아쓰기는 조각(10초) 시작 시각에 찍힌다 — 직전 상태가 보인 순간을 품은 조각은 이
+        # 타석의 말도 담는다(준플레이오프 3차전: 상태 471초 '2-1', '여섯 번째 탈삼진' 조각 470초).
+        # 직전 상태가 이미 타석 중간(카운트가 0-0 아님)일 때만 — 타석이 막 시작했으면 그 조각은
+        # 앞 타자 말일 수 있다
+        mid_pa = tr.before.strikes >= 1  # 회상('삼진 여섯 개째')을 덜 받게 — 독립 리뷰
+        k = _speech([c for c in near if c.t > tr.before.t
+                     or (mid_pa and tr.before.t - c.t < ASR_LEAD)], "삼진")
         if swung and k and not _has(near, "contact"):
             return make("result", "strikeout", 0.5, [k, swung])
     # 직전 상태가 보이기 전의 다이빙은 앞 플레이(다시보기)다 — 외야 다이빙 캐치 다시보기가 다음
@@ -910,6 +921,9 @@ K_MARK_TEXT = "[점수판] 삼진 표시(K)"
 K_MARK_SEC = 8.0  # 표시가 뜬 뒤 아웃이 올라간 판독까지(처음 본 시험 경기 실측 2~5초)
 K_MARK_JUMP_SEC = 30.0  # 사이에 투구 화면이 없으면(하이라이트가 다음 장면으로 건너뜀) 여기까지
 K_MARK_STALE_SEC = 60.0  # 표시만으로 삼진을 낼 때 바로 전 판독이 이보다 오래면 안 낸다
+# 아웃을 먼저 올리고 표시를 띄우는 판(MBC 포스트시즌 상자)에서 아웃 뒤 표시까지(실측 1.1초)
+K_MARK_LAG = 3.0
+K_MARK_BAR = 4.0  # 'nK' 띠가 떠 있는 시간(2~3초) + 1초 — 그 뒤에 찍힌 아웃 판독도 이 표시의 것
 K_MARK_OWN_VIEW = 2.0  # 표시 뒤 이 안에 끝난 투구 화면은 그 삼진 투구 자신(표시가 0.5초 먼저 뜸)
 
 
@@ -959,9 +973,35 @@ def _apply_k_marks(judged: list[Judgment], cues: Sequence[Cue], stable: Sequence
         # 아웃이 이미 올라간 뒤의 판독은 0-0이라 여기 안 든다
         # 그 아웃의 공이 안 맞아 나갔을 때만 쓴다(아래) — 표시를 잘못 본 한 장이 타구 아웃을
         # 삼진으로 바꾸지 않게
-        in_pa = (basis is not None and basis.strikes == 1 and not own
+        # 판정 화면 안에서 점수판이 바뀐 뒤 뜬 표시(own)도 — MBC 포스트시즌 상자는 아웃을
+        # 먼저 올리고 1초 뒤 'nK'를 띄운다(준플레이오프 3차전 1회말: 2스트라이크째를 못 읽음,
+        # 직전 판독 0-1)
+        in_pa = (basis is not None and basis.strikes == 1
                  and m.t - basis.t <= K_MARK_JUMP_SEC)
         if basis is None or (basis.strikes != 2 and not in_pa):
+            # MBC 포스트시즌 상자는 아웃을 올린 1초쯤 뒤 'nK' 띠를 띄운다 — 표시 직전
+            # K_MARK_LAG 안에 아웃 하나가 올라갔고(주자·점수 그대로) 그 사이 공이 맞아 나간 화면이
+            # 없으면 그 아웃의 삼진이다(준플레이오프 3차전 1회말: 2스트라이크째를 못 읽음). 다음
+            # 타자가 삼진을 당하기엔 3초는 짧다
+            # 띠가 뜬 초는 화소 상태가 없어(pixel_states) 앞당긴 판독이 띠 뒤로 찍힌다 — 표시 뒤
+            # K_MARK_BAR 안의 아웃도, 그 사이 투구가 없으면(독립 리뷰). 3아웃이면 점수판이 주자를
+            # 지우니 주자 모양은 보지 않는다(독립 리뷰)
+            lag = [i for i, j in enumerate(judged) if i not in used and j.code == "out"
+                   and j.transition is not None
+                   and j.t - K_MARK_BAR <= m.t <= j.t + K_MARK_LAG
+                   and j.transition.outs_made == 1 and not j.transition.runs
+                   and (j.transition.before.bases == j.transition.after.bases
+                        or j.transition.half_change)
+                   and not any(c.kind == IN_PLAY and j.transition.before.t < c.t <= max(m.t, j.t)
+                               for c in cues)
+                   and not any(c.kind in (PITCH_SEEN, NO_PLAY, VIEW_UNKNOWN) and m.t < c.t < j.t
+                               for c in cues)]
+            if lag:
+                i = lag[-1]
+                used.add(i)
+                j = judged[i]
+                judged[i] = Judgment(j.t, "result", "strikeout", max(j.confidence, 0.6),
+                                     j.evidence + [_ev(m)], j.transition, dict(j.detail))
             continue
         # 점수판이 그 투구 화면 도중에 먼저 바뀌고 표시가 화면이 끝나기 전에 떴어도 그 전이다(TVING)
         after = [i for i, j in enumerate(judged) if j.transition is not None
@@ -1042,6 +1082,10 @@ def judge(
     out = []
     spent: Counter = Counter()
     trs = _split_half(_merge_split(transitions(stable), cues), cues)
+    # 직전 상태가 새 상태 전에 마지막으로 다시 읽힌 시각(_in_progress_view의 VIEW_GAP)
+    trs = [replace(tr, before_seen=max((r.t for r in readings if r.key() == tr.before.key()
+                                        and tr.before.t <= r.t < tr.t), default=tr.before.t))
+           for tr in trs]
     for tr in trs + (_game_end(stable, cues) if finished else []):
         j = _judge_spending_words(tr, cues, window, spent)
         if j is not None:
@@ -1094,13 +1138,35 @@ def _in_progress_view(tr: Transition, cues: Sequence[Cue]) -> Optional[Cue]:
         # 관절이 잰 투구 순간(스윙 시각)이 판독 시각보다 늦게 잡혀도(KS4 볼넷 둘: 판독은 구간 시작
         # 시각이라 이르다)
         starts = [c.t for c in cues if c.kind == VIEW_START and c.t <= tr.before.t]
+        # 직전 상태가 보인 뒤 시작한 투구 화면도 — 그 사이 끝난 투구 화면이 없으면 직전 상태 다음
+        # 공은 이 화면의 공이다. 판독 시각을 화소가 바뀐 초로 앞당기면(판독기 v5) 점수판이 관절이 잰
+        # 투구 순간보다 1초쯤 먼저 바뀐 것으로 찍힌다(준플레이오프 2차전 3-0 볼넷, 한국시리즈 1차전)
+        # 새 상태의 카운트가 0-0일 때만 — 벌써 진행된 카운트(0-2)면 그 화면의 공은 다음 타자
+        # 것이다(투수 모음 4K: 앞 아웃이 다음 타자 삼진 화면으로 옮겨 삼진 표시를 가져감).
+        # 화면이 시작하고 공을 던지기 전(PITCH_WINDUP)에 바뀐 점수판은 앞 플레이다(한국시리즈
+        # 3차전: 땅볼 아웃이 다음 화면 시작 0.2초 뒤에야 올라감)
+        # 그 화면이 직전 상태 뒤 첫 투구 화면이고 직전 상태가 보이고 곧바로(VIEW_GAP 안) 시작했어야
+        # 한다 — 그 사이 다른 투구가 끼어들 틈이 없다. 앞 타석 화면의 단서가 빠진 채 한참 뒤 다음
+        # 타자 화면이 앞 플레이를 가져가 홈런이 '출루', 땅볼이 '삼진'이 됐다(독립 리뷰)
+        # 직전 상태가 마지막으로 다시 읽힌 때부터 잰다(PO 4차전: 2-2가 1097초에 처음, 1101초에
+        # 다시 읽히고 1101.1초에 투구 화면 시작)
+        seen = max(tr.before.t, tr.before_seen if tr.before_seen is not None else tr.before.t)
+        after_before = [c.t for c in cues if c.kind == VIEW_START and seen < c.t <= tr.t]
+        later = [t for t in after_before if t <= tr.t - PITCH_WINDUP]
+        if (len(after_before) == 1 and later and later[0] - seen <= VIEW_GAP
+                and (a.balls, a.strikes) == (0, 0)
+                and not any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                            and seen < c.t < later[0] for c in cues)):
+            starts = [later[0]]
         if not starts:
             return None
         # 투구 하나짜리 화면이어야 하고(긴 화면엔 다른 투구가 섞인다), 그 화면에서 잰 투구가 직전
-        # 상태가 보인 뒤다 — 앞 투구로 이미 바뀐 상태가 늦게 읽힌 게 아니다(독립 리뷰)
-        own = [c.t for c in cues if c.kind == PITCH_SEEN and max(starts) < c.t]
+        # 상태가 보인 뒤다 — 앞 투구로 이미 바뀐 상태가 늦게 읽힌 게 아니다(독립 리뷰). 투구 순간은
+        # 그 화면이 끝나기 전 것만 — 뒤쪽 다른 화면의 투구를 빌리지 않는다(독립 리뷰)
         ends = [c.t for c in cues
                 if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) and c.t > max(starts)]
+        own = [c.t for c in cues if c.kind == PITCH_SEEN and max(starts) < c.t
+               and (not ends or c.t <= min(ends))]
         long_shot = bool(ends) and min(ends) - max(starts) > ONE_PITCH_SHOT
         if not own or not ends or long_shot or min(own) <= tr.before.t:
             return None

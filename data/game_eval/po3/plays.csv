@@ -1,11 +1,11 @@
 ﻿video,t,truth,sure,engine,check,evidence,verdict,note
 U7GxmDzjCuk,81.8,none,True,,,,조용함,스트라이크
 U7GxmDzjCuk,90.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,안타 — 1루
-U7GxmDzjCuk,119.9,homerun,True,homerun out,confirmed video_only,점수판 아웃+0 득점+2 주자 100→000; 해설 '- 종료되지 않았던 이닝이 투런 홈런으로 이어집니다. 스코어 2:0 삼성 라이언스.' (130s) | 점수판 아웃+1 득점+0 주자 000→000,맞음,2점 홈런 2-0 — 1회말 1아웃은 못 봄
+U7GxmDzjCuk,119.9,homerun,True,homerun out,confirmed video_only,점수판 아웃+0 득점+2 주자 100→000; 해설 '지난 경기에서 발사하고 17.7도의 홈런을 때렸고 오른쪽으로 멀리 보냅니다. 탐지장 넘어갑니다.' (120s); [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (122s) | 점수판 아웃+1 득점+0 주자 000→000,맞음,2점 홈런 2-0 — 1회말 1아웃은 못 봄
 U7GxmDzjCuk,181.2,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '8구 승 3진 결국은 이첸점을 끝까지 자기 포인트다' (180s),맞음,헛스윙 삼진(해설)
 U7GxmDzjCuk,192.7,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (196s),맞음,3아웃 — 2회초 2아웃은 못 봄
 U7GxmDzjCuk,211.4,out,False,dive_out,conflict,"점수판 아웃+1 득점+0 주자 000→000; [관절] 슬라이딩·다이빙 — 누운 채 몸길이 1.9배 미끄러짐, 250.7~257.7초 (251s); 영상은 몸을 던진 수비로 아웃 — 해설과 달라 보류",맞음,"안타 뒤 2루 도전 아웃(비디오 판독, 해설) — 3아웃"
-U7GxmDzjCuk,269.5,walk,True,walk out,refined video_only,점수판 아웃+0 득점+0 주자 000→100; 해설 '- 최원태가 2회만을 볼넷으로 출발하고 있습니다.' (270s) | 점수판 아웃+1 득점+0 주자 100→100,맞음,볼넷 — 다음 타자 아웃은 못 봄
+U7GxmDzjCuk,269.5,walk,True,walk out,confirmed video_only,점수판 아웃+0 득점+0 주자 000→100; 해설 '- 최원태가 2회만을 볼넷으로 출발하고 있습니다.' (270s) | 점수판 아웃+1 득점+0 주자 100→100,맞음,볼넷 — 다음 타자 아웃은 못 봄
 U7GxmDzjCuk,278.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,안타 — 1·2루
 U7GxmDzjCuk,294.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→110,맞음,뜬공 — 1·2루 그대로
 U7GxmDzjCuk,315.8,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 110→110,맞음,적시타 2-1

@@ -361,7 +361,8 @@ def main() -> int:
 
             # 위치 파일의 바탕·표시 칸이나 구간이 바뀌면 다시 훑는다(이름만 같은 옛 결과 금지)
             key = repr((layout.panel, layout.mark, layout.mark_fill, layout.mark_hue,
-                        layout.cover_val, layout.mark_on, layout.mark_off, span))
+                        layout.cover_val, layout.mark_on, layout.mark_off, layout.mark_dark,
+                        span))
             if bug.get("marks_key") != key:
                 try:  # 삼진 표시는 2~3초 — 판독 사이에 뜬 것을 화소로 훑어 찾는다(API 없음)
                     bug["marks"] = scan_marks(layout, args.video, *span)
