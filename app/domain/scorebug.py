@@ -6,15 +6,19 @@
 """
 
 from collections.abc import Sequence
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import Optional
 
 Bases = tuple[bool, bool, bool]
+# 판독 시각을 화소 상태가 바뀐 초로 이만큼 넘게 앞당겼으면 볼카운트(그 판독을 실제로 읽은
+# 화면의 값)는 그 시각의 카운트가 아니다 — 판독기의 RESTAMP_MIN_SEC와 같다
+LATE_COUNT_SEC = 2.0
 
 
 @dataclass(frozen=True)
 class Reading:
-    """한 시점의 점수판. `t`는 영상 기준 초."""
+    """한 시점의 점수판. `t`는 영상 기준 초. `read_t`는 그 판독을 실제로 읽은 화면의 시각 —
+    판독기가 `t`를 주자·아웃이 바뀐 초로 앞당겼을 때만 `t`와 다르다(없으면 모름)."""
 
     t: float
     inning: int
@@ -25,6 +29,12 @@ class Reading:
     bases: Bases
     away: int
     home: int
+    read_t: Optional[float] = field(default=None, compare=False)
+
+    def late_count(self) -> bool:
+        """볼카운트를 이 시각보다 LATE_COUNT_SEC 넘게 뒤에 읽었나 — 그 사이 투구가 더
+        있었을 수 있다."""
+        return self.read_t is not None and self.read_t - self.t >= LATE_COUNT_SEC
 
     def key(self) -> tuple:
         """시각을 뺀 상태 — 같은 화면이 반복되는지 비교할 때."""

@@ -1,0 +1,47 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+x-pkmgXjxquM,54.5,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (60s),맞음,1회초 1사 신민재 3-2 볼넷(해설 '볼넷을 골라서 1루에') — 1사 1루
+x-pkmgXjxquM,63.8,double_play,True,double_play,refined,점수판 아웃+2 득점+0 주자 100→000; 해설 '-더블플레이.-이거는 폰세 선수의 순간적인 판단이 아웃칸투 두 개를 만들어냈습니다.' (70s),맞음,"오스틴 3-2 투수 직선타, 1루 주자 귀루 못 해 병살 3아웃(해설 '폰세 글러브로… 더블플레이')"
+x-pkmgXjxquM,90.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,2회말 선두 채은성 1-2 내야 빠지는 안타(해설) — 무사 1루
+x-pkmgXjxquM,99.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,이진영 2-2 땅볼 2루 포스아웃 — 1사 1루
+x-pkmgXjxquM,108.6,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+0 득점+1 주자 110→110,맞음,하주석 1-1 좌전 안타(해설 '좌측에 안타') — 1사 1·2루
+x-pkmgXjxquM,122.4,reach,True,out,video_only,점수판 아웃+2 득점+0 주자 110→000,틀림,최재훈 0-1 좌전 적시타 1-0(해설 '좌익수 앞에 안타… 타점') — 병살 3아웃은 같은 칸
+x-pkmgXjxquM,198.7,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+2 득점+0 주자 100→100,맞음,3회초 선두 구본혁 1-2 유격수 내야 안타(해설 '세이프 됩니다') — 이어 아웃 둘은 투구 화면 없음
+x-pkmgXjxquM,222.7,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+1 득점+1 주자 110→000,맞음,2사 1루 신민재 초구 좌중간 적시 3루타 1-1(해설 '3루에서 세이프… 동점')
+x-pkmgXjxquM,281.5,homerun,True,homerun out,confirmed video_only,점수판 아웃+0 득점+1 주자 000→000; 해설 '- 김현수의 솔로 홈런.- 자 김현수 선수가 펀스에' (290s); [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (286s) | 점수판 아웃+2 득점+0 주자 000→000,맞음,4회초 1사 김현수 솔로 홈런 2-1(해설)
+x-pkmgXjxquM,317.3,strikeout,True,strikeout,video_only,점수판 아웃+2 득점+0 주자 000→000; [관절] 타자가 배트를 휘두름 (319s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (320s),맞음,4회말 노시환 1-2 헛스윙 삼진(해설 '배트를 끌어냅니다') — 2사
+x-pkmgXjxquM,325.1,out_any,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,이진영 1-2에서 3아웃 — 장면 못 봄
+x-pkmgXjxquM,339.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,5회초 선두 박동원 3루 땅볼(해설 '3루수 글로브에 들어갔어요… 1루로 아웃') — 1사
+x-pkmgXjxquM,361.3,strikeout,True,strikeout,refined,점수판 아웃+2 득점+0 주자 000→000; 해설 '- 아트 나가면서 삼진아웃.' (360s),맞음,"구본혁 1-2 헛스윙 삼진(해설 '배트 나가면서 삼진아웃') — 2사, 3아웃은 투구 화면 없음"
+x-pkmgXjxquM,369.4,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (375s),맞음,5회말 선두 하주석 3-0에서 볼넷(해설 '하주석 볼넷') — 무사 1루
+x-pkmgXjxquM,376.6,none,True,,,,조용함,최재훈 볼·스트라이크(1-1 → 2-2)
+x-pkmgXjxquM,381.6,out_any,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,최재훈 2-2에서 아웃(해설 '움직이지 못합니다') — 1사 1루
+x-pkmgXjxquM,388.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,"이도윤 1-1 땅볼, 1루 주자 2루 세이프(해설 '2루수 태그가 되지 않았습니다') — 2사 2루"
+x-pkmgXjxquM,418.2,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 010→000; 해설 '스코어링 포지션 스윙 삼진호 첫 한국 시리즈 선발된 판 5이닝 1실 진출' (420s),맞음,손아섭 0-2 헛스윙 삼진 3아웃(해설 '스코어링 포지션 스윙 삼진')
+x-pkmgXjxquM,435.7,hbp,True,hbp,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (440s),맞음,6회초 선두 홍창기 1-1 몸에 맞는 공(해설) — 무사 1루
+x-pkmgXjxquM,441.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,신민재 희생번트 — 1사 2루
+x-pkmgXjxquM,450.2,strikeout,True,out,video_only,점수판 아웃+1 득점+0 주자 010→110,틀림,"오스틴 1-2 삼진(해설 '이렇게 삼진아웃') — 2사, 이어 김현수 출루는 같은 칸"
+x-pkmgXjxquM,466.9,none,True,,,,조용함,문보경 볼·스트라이크(2-1 → 2-2)
+x-pkmgXjxquM,474.7,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 110→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (478s),맞음,2사 1·2루 문보경 2-2 헛스윙 삼진 3아웃(해설 '스윙 삼진! 위기를 벗어나는 폰세')
+x-pkmgXjxquM,498.5,out,True,out out,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,6회말 리베라토 우익수 뜬공(해설 '우익수. 잡았어요. 홍창기')
+x-pkmgXjxquM,515.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,2사 노시환 초구 안타(해설 '초구 공략') — 2사 1루
+x-pkmgXjxquM,524.3,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,채은성 초구 중견수 뜬공 3아웃(해설 '박해민 잡아내면서 이닝 종료')
+x-pkmgXjxquM,547.3,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (552s),맞음,7회말 선두 이진영 3-2 볼넷(해설 '볼넷 골라 나갑니다') — 무사 1루
+x-pkmgXjxquM,557.8,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,하주석 1-0 번트 2루 포스아웃·타자 1루(해설 '여유있게 아웃… 1루에서 세이프') — 1사 1루
+x-pkmgXjxquM,577.8,double_play,True,out out,video_only video_only,점수판 아웃+2 득점+0 주자 100→000 | 점수판 아웃+1 득점+0 주자 000→000,틀림,"최재훈 1-1 런앤히트 뜬공, 1루 주자 귀루 못 해 병살 3아웃(해설 '위로… 아웃됐어')"
+x-pkmgXjxquM,596.6,reach,True,reach runner,video_only video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 배트를 휘두름 (599s) | 점수판 아웃+0 득점+0 주자 100→010,맞음,8회초 1사 홍창기 3-1 외야 2루타 — 1사 2루
+x-pkmgXjxquM,612.1,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 010→110 | 점수판 아웃+0 득점+0 주자 110→101,맞음,신민재 1-2 내야 안타(해설 '신민재가 또다시 살아남습니다') — 1사 1·3루
+x-pkmgXjxquM,631.4,?,False,runner out,video_only video_only,점수판 아웃+0 득점+1 주자 101→010 | 점수판 아웃+2 득점+0 주자 010→000,제외,"오스틴 0-2 때 공이 빠져 3루 주자 득점 3-1(해설 '공 빠졌어요… 3루 주자 홈인') — 폭투·포일, 3아웃은 같은 칸"
+x-pkmgXjxquM,666.4,reach,True,reach balk,video_only video_only,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+0 득점+0 주자 100→010,맞음,8회말 선두 2루타(해설 '박해민 앞에 떨어졌던 이 타구 무사 2루') — 무사 2루
+x-pkmgXjxquM,687.2,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 010→110 | 점수판 아웃+0 득점+0 주자 110→101,맞음,"1·2간 안타, 주자 3루에 멈춤(해설 '연속 안타') — 무사 1·3루"
+x-pkmgXjxquM,698.2,out_any,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 101→101; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (708s),맞음,리베라토 1-2에서 아웃(뒤에 투수 교체) — 정답 점검: 처음엔 '투수 교체·카운트만'으로 매겼으나 점수판 700초 무사 1-2 → 714초 1사
+x-pkmgXjxquM,715.4,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 101→110,맞음,문현빈 2-2 좌전 적시타 3-2(해설 '좌익수 미끄러지면서 잡지 못했어요 3루 주자 홈으로') — 무사 1·2루
+x-pkmgXjxquM,742.5,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 110→110; 해설 '- 한 번 더 스트라이크. 중요한 공 하나. 스윙 삼진 아웃.- 자 지금은 오늘 가장 빠른.' (740s); [점수판] 삼진 표시(K) (748s),맞음,노시환 1-2 헛스윙 삼진(해설 '스윙 삼진 아웃')
+x-pkmgXjxquM,752.5,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 110→111; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (757s),맞음,채은성 3-0에서 볼넷(해설 '볼넷 이렇게 주자가 꽉 채워집니다') — 만루
+x-pkmgXjxquM,763.2,none,True,,,,조용함,황영묵 볼(2-1 → 3-1)
+x-pkmgXjxquM,771.0,walk,True,walk,confirmed,점수판 아웃+0 득점+1 주자 111→111; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (779s),맞음,황영묵 3-1 밀어내기 볼넷 3-3(해설 '밀어내기 볼넷')
+x-pkmgXjxquM,805.5,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 111→011,맞음,심우준 1-1 2타점 적시타 5-3(해설 '심우준의 이 타구')
+x-pkmgXjxquM,846.6,reach,True,reach,video_only,점수판 아웃+1 득점+2 주자 011→000,맞음,최재훈 1-2 2타점 적시타 7-3(해설 '두 점을 더 추가하면서 7:3') — 3아웃은 같은 칸
+x-pkmgXjxquM,887.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,9회초 선두 문보경 0-2 안타(해설 '선두 타자 출루') — 무사 1루
+x-pkmgXjxquM,896.4,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,오지환 3-2 땅볼 2루 포스아웃(해설 '땅볼이 됩니다') — 1사 1루
+x-pkmgXjxquM,905.4,hbp,True,hbp,confirmed,점수판 아웃+0 득점+0 주자 100→110; 해설 '몸에 맞았어요. 온전히 지금 활약을 못하고 있는데요. 자 2루수가 쫓아가고 2루에 던졌고 1루!' (910s),맞음,박동원 0-1 몸에 맞는 공(해설 '몸에 맞았어요') — 1사 1·2루
+x-pkmgXjxquM,913.9,double_play,True,,,,놓침,문성주 1-0 2루수 땅볼 병살 경기 끝 7-3(해설 '2루에 던졌고 1루! 더블플레이 경기 종료')

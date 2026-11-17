@@ -1,0 +1,29 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+LAbgb6yDMMw,124.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,1회초 1사 최원준 우전 안타(해설 '오른쪽 떨어지면서') — 1사 1루
+LAbgb6yDMMw,138.1,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,박건우 우전 안타(해설 '연속 안타') — 1사 1·2루
+LAbgb6yDMMw,153.4,reach,True,reach double_play,video_only refined,점수판 아웃+0 득점+1 주자 110→101 | 점수판 아웃+2 득점+0 주자 101→000; 해설 '주작 갔어요 때렸고 유격수 직접 바꾸어 1루에서 아웃입니다 병살타 이닝은 이렇게 종료되고 있습니다' (180s),맞음,데이비슨 초구 중전 적시타 1-0(해설 '중견수 앞에 떨어지는 안타… 선취 득점') — 병살타 3아웃은 투구 화면 없음
+LAbgb6yDMMw,192.4,reach,True,reach strikeout out out reach out balk,video_only video_only video_only video_only video_only video_only video_only,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+1 득점+0 주자 100→100; [점수판] 삼진 표시(K) (208s) | 점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+1 득점+0 주자 100→000 | 점수판 아웃+0 득점+0 주자 000→010 | 점수판 아웃+1 득점+0 주자 010→010 | 점수판 아웃+0 득점+0 주자 010→001,맞음,1회말 선두 안타(해설 '내야 빠져나갑니다') — 런다운 아웃·2회초는 같은 칸
+LAbgb6yDMMw,279.5,out,True,out,video_only,점수판 아웃+2 득점+1 주자 001→000,맞음,"2회초 1사 3루 3-2 1루 땅볼, 3루 주자 득점 2-0(해설 '득점에 성공… 디아즈가… 태그') — 2사"
+LAbgb6yDMMw,306.5,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,2회말 1사 김영웅 우측 2루타(해설 '2루까지 서서') — 1사 2루
+LAbgb6yDMMw,323.6,out,True,out balk,video_only video_only,점수판 아웃+1 득점+0 주자 010→010 | 점수판 아웃+0 득점+0 주자 010→001,맞음,"0-2 땅볼, 2루 주자 3루로(해설 '3루까지 갔습니다') — 2사 3루"
+LAbgb6yDMMw,345.8,out,True,out walk out runner out strikeout,video_only video_only video_only video_only video_only confirmed,점수판 아웃+1 득점+0 주자 001→000 | 점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+0 득점+0 주자 100→010 | 점수판 아웃+1 득점+0 주자 010→001 | 점수판 아웃+1 득점+0 주자 001→000; 해설 '스윙 3진' (400s); [점수판] 삼진 표시(K) (403s),맞음,3-2 1루 땅볼 3아웃(해설 '데이비슨이 직접 처리하면서… 공격이 마무리')
+LAbgb6yDMMw,406.4,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,3회말 선두 3루 땅볼(해설 '김휘집. 1루에. 이렇게 아웃 카운트') — 1사
+LAbgb6yDMMw,431.9,none,True,,,,조용함,볼·스트라이크(0-1 → 1-2)
+LAbgb6yDMMw,442.4,out_any,False,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 타자가 공을 그냥 보냄 (444s),맞음,1-2에서 아웃(장면 클로즈업) — 2사
+LAbgb6yDMMw,452.2,reach,True,reach out,video_only video_only,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+1 득점+0 주자 100→000,맞음,2사 이재현 중전 안타(해설 '중견수 앞에 똑 떨어집니다') — 직선타 3아웃은 투구 화면 없음
+LAbgb6yDMMw,475.0,walk,True,walk out strikeout,confirmed video_only refined,점수판 아웃+0 득점+0 주자 000→100; 해설 '라인드라이브 아웃으로 미닝 종료. 가다가 멈춰서 멈춰서 하기 때문에. 볼넷입니다. 볼넷을 얻으려고.' (470s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (480s) | 점수판 아웃+2 득점+0 주자 100→000 | 점수판 아웃+1 득점+0 주자 000→000; 해설 '루잉 삼진! 루잉 디아즈를 삼진 처리하는 데 성공하고 있는 구창모.' (520s),맞음,"4회초 1사 3-1에서 볼넷(해설 '볼넷입니다') — 1사 1루, 이어 땅볼 아웃은 같은 칸"
+LAbgb6yDMMw,516.2,strikeout,True,strikeout,refined,점수판 아웃+2 득점+0 주자 000→000; 해설 '루잉 삼진! 루잉 디아즈를 삼진 처리하는 데 성공하고 있는 구창모.' (520s),맞음,4회말 1사 디아즈 1-2 루킹 삼진(해설 '루킹 삼진! 디아즈를 삼진')
+LAbgb6yDMMw,534.0,homerun,True,homerun,confirmed,점수판 아웃+0 득점+1 주자 000→000; 해설 '김영준의 솔로 홈런 김영준은 때리기 전에 상당히 볼이 빠른걸 높았고' (550s); [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (537s),맞음,5회초 1사 김형준 솔로 홈런 3-0(해설)
+LAbgb6yDMMw,577.8,reach,True,reach reach out runner reach,video_only video_only video_only video_only video_only,점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+1 득점+0 주자 110→110 | 점수판 아웃+0 득점+0 주자 110→101 | 점수판 아웃+1 득점+1 주자 101→000,맞음,김주원 안타(해설 '홈런 이후에 김주원의 안타까지') — 이어 데이비슨 인정 2루타 4-0은 같은 칸
+LAbgb6yDMMw,685.7,out,True,out out,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000,맞음,5회말 선두 3루 땅볼(해설 '김휘집 의도적인 바운드 송구로 첫 번째 아웃') — 다음 아웃은 투구 화면 없음
+LAbgb6yDMMw,712.9,homerun,True,homerun out out reach,confirmed video_only video_only video_only,점수판 아웃+0 득점+1 주자 000→000; 해설 '넘어갑니다 삼성라이언스 이 가을의 첫 득점 이성규의 솔로 홈런' (720s); [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (717s) | 점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100,맞음,2사 이성규 솔로 홈런 4-1(해설 '이성규의 솔로 홈런')
+LAbgb6yDMMw,784.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,"6회말 1사 1루 2루 포스아웃(점수판 '2사 1루') — 정답 점검: 처음엔 병살로 매겼으나 794~813초 점수판이 2사 1루, 3아웃은 다음 타자 1-1 1루 쪽 땅볼(해설 '투수에게 토스하면서 6회말 공격이 마무리')"
+LAbgb6yDMMw,834.1,reach,True,out reach out out runner walk,video_only video_only video_only video_only video_only video_only,점수판 아웃+1 득점+0 주자 100→000 | 점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+0 득점+0 주자 100→010 | 점수판 아웃+0 득점+0 주자 010→110,맞음,7회초 김정호 초구 내야 안타(해설 '김정호의 안타 출루')
+LAbgb6yDMMw,890.6,walk_or_hbp,True,hbp,video_only,점수판 아웃+0 득점+0 주자 110→111; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (895s),맞음,2사 1·2루 1-0에서 출루 — 2사 만루(해설 '주자가 만루가 되었습니다')
+LAbgb6yDMMw,899.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 111→000,맞음,2사 만루 유격수 땅볼 2루 포스아웃 3아웃(해설 '이재현이 1루 주자를 2루에서 잡아내면서')
+LAbgb6yDMMw,949.2,strikeout,True,strikeout,confirmed,점수판 아웃+2 득점+0 주자 000→100; [점수판] 삼진 표시(K) (953s),맞음,7회말 김영웅 헛스윙 삼진(해설 '스윙 삼진') — 2사 1루
+LAbgb6yDMMw,957.7,out_any,False,strikeout out out,video_only video_only video_only,점수판 아웃+1 득점+0 주자 100→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (961s) | 점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+1 득점+0 주자 100→000,맞음,2사 1루 3아웃 — 장면 못 봄(다음은 8회말 2사)
+LAbgb6yDMMw,995.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,8회말 2사 빗맞은 유격수 뜬공 3아웃(해설 '유격수 김주원 라인 안쪽에서 잡아내면서')
+LAbgb6yDMMw,1021.0,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,9회말 선두 내야 안타(해설 '노스텝으로 그냥 송구… 강하지 못했어요') — 무사 1루
+LAbgb6yDMMw,1047.8,double_play,True,double_play walk balk,video_only conflict video_only,점수판 아웃+2 득점+0 주자 100→000 | 점수판 아웃+0 득점+0 주자 000→100; 영상은 볼넷 — 해설과 달라 보류 | 점수판 아웃+0 득점+0 주자 100→010,맞음,직선타 병살(해설 '라인드라이브 아웃… 아웃 카운트가 두 개가 잡힙니다') — 2사
+LAbgb6yDMMw,1104.8,strikeout,True,strikeout,refined,점수판 아웃+1 득점+0 주자 010→000; 해설 '다시 갑니다. 바깥쪽 볼입니다. 스윙 선진! 경기 끝!' (1100s),맞음,2사 1-2 헛스윙 삼진 경기 끝 4-1(해설 '스윙 삼진! 경기 끝')

@@ -179,9 +179,16 @@ _EN_WORDS = {
 # 4차전)는 땅볼 아웃 이야기다
 STRIKEOUT_CALLS = tuple(f"{a} {b}" for a in ("킹", "스윙")
                         for b in ("스트라이크 아웃", "스트라이크아웃"))
+# 받아쓰기가 '스윙 삼진'을 적은 다른 표기 — 앞말('스윙'·'스프링')이 붙은 꼴만(낱말 '선진'은
+# 보통 말이다). 2025 와일드카드 1·2차전 '스윙 선진!', 플레이오프 1차전 '스프링 섬지!'·'스프링
+# 선든'. 준플레이오프 1차전 '스윙. 선정.'은 넣으면 관절 없이 앞 칸 뜬공이 '삼진'이 돼 뺐다
+SWING_K_SPELLINGS = ("스윙 선진", "스프링 섬지", "스프링 선든",
+                     # '6번째 탈삼.'(조각 끝에서 잘린 '탈삼진', 준플레이오프 1차전) — '통산 탈삼'
+                     # 같은 기록 말과 안 겹치게 'n번째'를 붙인 꼴만(독립 리뷰)
+                     "번째 탈삼")
 # 받아쓰기(Whisper)가 숫자로 적는 말 — '삼진'을 '3진'으로(2026-11-07 하이라이트 실측: "4타자 연속
 # 3진"). '3진루' 같은 말은 해설에 없다. '스윙 섬진', '고의사고를 해 주는 거죠'(준플레이오프 2차전)
-_ASR_WORDS = {"삼진": ("3진", "섬진", *STRIKEOUT_CALLS),
+_ASR_WORDS = {"삼진": ("3진", "섬진", *STRIKEOUT_CALLS, *SWING_K_SPELLINGS),
               "고의사구": ("고의사고",), "태그업": ("탭업",),
               # 받아쓰기가 '몸에 맞는 공'을 '못 맞는 공'으로, '선제 투런'을 '선자 투럼'으로 적었다
               # (와일드카드 1차전 7회초 사구, 1회말 오스틴 홈런)
@@ -299,6 +306,13 @@ def judge_transition(
     if is_count_only(tr):
         return None
     near = _near(cues, tr.t, *window)
+    if tr.half_change:
+        # 새 반 이닝이 보인 뒤에 시작해 새 반 이닝의 투구 순간을 덮는 받아쓰기 조각은 그 투구 말이다
+        # — 2025 와일드카드 1차전 7회초 2사 만루 2루 포스아웃(3아웃)이 7회말 투구의 '스윙 삼진'으로
+        # '삼진'이었다. 새 투구 전의 조각은 앞 플레이 다시보기 말일 수 있어 그대로 둔다(병살 해설)
+        new_pitch = [c.t for c in cues if c.kind == PITCH_SEEN and c.t > tr.t]
+        near = [c for c in near if c.kind != "speech" or c.t <= tr.t
+                or not any(c.t <= p <= c.t + ASR_LEAD for p in new_pitch)]
     b, a = tr.before.bases, tr.after.bases
     def bits(bases: tuple) -> str:
         return "".join("1" if x else "0" for x in bases)
@@ -376,6 +390,25 @@ def judge_transition(
         hit = _speech(told, *HIT_WORDS)
         if hit:
             return make("result", "reach", 0.5, [hit, first], merged=True)
+    # 1사에서 점수가 나고 반 이닝이 끝났다(아웃 둘) — 직전 상태 뒤 첫 투구 화면이 맞아 나갔고
+    # 그 뒤 해설이 안타라면 그 투구가 적시타, 아웃 둘은 하이라이트가 건너뛴 것이다(2025 한국시리즈
+    # 3차전 2회말 '좌익수 앞에 안타… 타점' 뒤 병살, 준플레이오프 1차전 4회초 '김지찬의 적시타' 뒤
+    # 아웃 둘). 희생플라이·땅볼 타점일 수 있어 해설이 안타일 때만, 첫 화면이 맞아 나간 것일 때만
+    # 첫 투구 화면은 직전 상태가 마지막으로 다시 읽힌 뒤부터 — 그 전 화면은 앞 타석 것이다
+    # (준플레이오프 1차전: 613초 삼진 뒤 같은 상태가 623초에 다시 읽히고 623.6초 적시타)
+    seen = max(tr.before.t, tr.before_seen if tr.before_seen is not None else tr.before.t)
+    first_seen = min((c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                      and seen < c.t <= tr.t), key=lambda c: c.t, default=None)
+    if (tr.half_change and tr.before.outs == 1 and first_seen is not None
+            and first_seen.kind == IN_PLAY and _scored_before_third_out(tr, skipped=True)):
+        # 직전 상태가 보인 때부터 새 상태가 보인 때까지의 말 — 이닝 사이 화면이 길어 판정 시각 근처
+        # 창 밖일 수 있다(준플레이오프 1차전: 적시타 해설 630초, 새 상태 652초)
+        # 직전 상태가 마지막으로 보인 뒤에 시작한 조각만, 폭투·포일·실책 득점이면 아니다(독립 리뷰)
+        told = [c for c in cues if seen < c.t <= tr.t]
+        not_hit = _speech(told, *SF_WORDS) or _speech(told, "폭투", "포일", "실책")
+        hit = None if not_hit else _speech(told, *HIT_WORDS)
+        if hit:
+            return make("result", "reach", 0.5, [hit, first_seen], merged=True)
 
     # 한 플레이로 설명이 안 되면(여러 플레이가 한 전이로 합쳐짐) 종류를 말하지 않는다
     if not one_play(tr):
@@ -1172,8 +1205,13 @@ def _in_progress_view(tr: Transition, cues: Sequence[Cue]) -> Optional[Cue]:
         return None
     # 타석이 끝난 전이인데 새 타자 카운트가 벌써 진행됐으면 진행 중인 투구는 새 타자 것이다(KS3:
     # 삼진 뒤 다음 타자 3-1에서야 읽힌 점수판이 그 투구 칸으로 가 삼진이 한 칸 밀림)
+    # 새 상태의 카운트를 그 시각보다 한참 뒤에 읽었으면(판독기가 시각을 주자·아웃이 바뀐 초로
+    # 앞당김) 그 카운트는 그 뒤 투구까지 담는다 — 진행된 카운트로 보지 않는다(2025 와일드카드
+    # 1차전 4회초 볼넷: 479초로 앞당긴 판독의 카운트 0-1은 다음 타자 첫 공 뒤 화면 값이라 볼넷이
+    # 앞 칸에 들어감)
     b, a = tr.before, tr.after
-    if (a.balls < b.balls or a.strikes < b.strikes) and (a.balls, a.strikes) != (0, 0):
+    a_count = (0, 0) if a.late_count() else (a.balls, a.strikes)
+    if (a_count[0] < b.balls or a_count[1] < b.strikes) and a_count != (0, 0):
         return None
     thrown = [c.t for c in cues if c.kind == PITCH_SEEN and tr.before.t < c.t < tr.t]
     if not thrown:
@@ -1198,7 +1236,7 @@ def _in_progress_view(tr: Transition, cues: Sequence[Cue]) -> Optional[Cue]:
         after_before = [c.t for c in cues if c.kind == VIEW_START and seen < c.t <= tr.t]
         later = [t for t in after_before if t <= tr.t - PITCH_WINDUP]
         if (len(after_before) == 1 and later and later[0] - seen <= VIEW_GAP
-                and (a.balls, a.strikes) == (0, 0)
+                and a_count == (0, 0)
                 and not any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
                             and seen < c.t < later[0] for c in cues)):
             starts = [later[0]]
@@ -1532,7 +1570,8 @@ def from_snapshot(snap: dict) -> tuple[list[Reading], list[Cue]]:
         bases = tuple(n in (r.get("bases") or []) for n in (1, 2, 3))
         readings.append(Reading(float(r["t"]), int(r["inning"]), r["half"], int(r["balls"]),
                                 int(r["strikes"]), int(r["outs"]), bases,  # type: ignore[arg-type]
-                                int(r["away"]), int(r["home"])))
+                                int(r["away"]), int(r["home"]),
+                                float(r["read_t"]) if r.get("read_t") is not None else None))
     cues = [Cue(float(e["t_start"]), e["event_type"], e.get("description", ""))
             for e in snap.get("events") or [] if e.get("event_type") in CUE_KINDS]
     cues += [Cue(float(s["t"]), "speech", s["text"]) for s in snap.get("speech") or []
