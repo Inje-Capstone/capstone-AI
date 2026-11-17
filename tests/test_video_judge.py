@@ -2362,3 +2362,26 @@ def test_a_blank_read_during_the_half_change_does_not_drop_the_reads_before_it()
     seen = [R(0)] + one + [R(20, balls=2, strikes=2), R(30, half="bot")]
     stable = stabilize(seen, min_repeat=1)
     assert [(r.t, r.outs, r.bases) for r in stable] == [(0.0, 0, E), (10.0, 1, first), (30.0, 0, E)]
+
+
+def test_check_swing_called_a_swing_at_two_strikes_is_a_strikeout():
+    """2025 준PO 4차전 2회초 — 3-2에서 체크스윙 비디오 판독 끝에 '스윙이군요. 스윙입니다'로 3아웃.
+    해설에 '삼진'이 없어 '아웃'이었다. '노스윙입니다'(받아쓰기 '너스윙')는 반대 판정이라 아니다."""
+    first = (True, False, False)
+    seen = [R(0, outs=2, balls=3, strikes=2, bases=first), R(14, half="bot")]
+    pitch = [Cue(3, "pitch_seen", ""), _view(6, "view_unknown")]
+    called = pitch + [Cue(6, "speech", "스윙이군요. 스윙입니다.")]
+
+    def codes(cues):
+        return [j.code for j in judge(seen, cues, min_repeat=1) if j.transition is not None]
+
+    assert codes(called) == ["strikeout"]
+    assert codes(pitch + [Cue(6, "speech", "판단 결과 노스윙입니다.")]) == ["out"]
+    # 말 첫머리의 판정만 — 스윙을 꾸미는 말·같은 조각의 반대 판정은 아니다(독립 리뷰)
+    for said in ("풀스윙입니다", "좋은 스윙입니다 2루수 땅볼 아웃", "큰 스윙입니다. 파울입니다",
+                 "스윙입니다. 판독 결과 노스윙입니다", "스윙 판정이 아닙니다",
+                 "좋은 스윙입니다. 스윙 판정 후 파울 처리",
+                 "공 쳤습니다. 스윙 판정은 없고 땅볼입니다"):
+        assert codes(pitch + [Cue(6, "speech", said)]) == ["out"], said
+    for said in ("체크스윙 비디오 판독 결과 스윙입니다", "- 배트가.- 스윙 판정입니다."):
+        assert codes(pitch + [Cue(6, "speech", said)]) == ["strikeout"], said

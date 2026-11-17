@@ -1,0 +1,45 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+UXHXNlgF4jU,30.8,none,False,,,,조용함,경기 전 라인업 화면
+UXHXNlgF4jU,36.0,none,False,,,,조용함,경기 전 라인업 화면
+UXHXNlgF4jU,43.3,none,False,,,,조용함,경기 전 라인업 화면
+UXHXNlgF4jU,49.3,none,False,,,,조용함,경기 전 화면
+UXHXNlgF4jU,55.8,none,False,,,,조용함,애국가
+UXHXNlgF4jU,74.1,none,False,,,,조용함,1회초 회차 카드 — 첫 아웃은 안 나옴
+UXHXNlgF4jU,76.6,strikeout,True,strikeout strikeout,confirmed refined,점수판 아웃+1 득점+0 주자 000→000; 해설 '지금 에레디아 최종 한유섬의 스윙 3진 연속 3점.' (80s) | 점수판 아웃+1 득점+0 주자 000→000; 해설 '탈삼진 1회를 3자범퇴로 시작을 하고 있는 후라도 선수입니다. 이제 타이에' (90s),맞음,"에레디아 헛스윙 삼진 2아웃(해설 '에레디아 최정 한유섬의 스윙 삼진'), 한유섬 삼진 3아웃도 이 칸"
+UXHXNlgF4jU,96.1,strikeout,True,strikeout,refined,점수판 아웃+1 득점+0 주자 000→000; 해설 '김광현의 3진 김성윤의 3진' (110s),맞음,1회말 회차 카드 뒤 김성윤 삼진·김광현 포스트시즌 100번째 탈삼진으로 1회 마무리(해설) — 점수판은 안 보임
+UXHXNlgF4jU,136.6,none,False,out walk,video_only conflict,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100; 영상은 볼넷 — 해설과 달라 보류,헛판정,2회초 1사 1루 최지훈 볼·스트라이크(고명준 볼넷은 이 칸 전)
+UXHXNlgF4jU,145.4,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→100,맞음,최지훈 중견수 다이빙 캐치(해설 '정말 멋진 수비') — 2사 1루
+UXHXNlgF4jU,164.4,strikeout,True,strikeout,refined,점수판 아웃+1 득점+0 주자 100→000; 해설 '-그런데 이 팀은 지금 이 팀이 어떻게 타자를 만들지. 볼렛입니다.-스윙.-스윙이군요. 스윙입니다.' (170s),맞음,김성욱 3-2 체크스윙 삼진 3아웃(해설 '스윙이군요. 스윙입니다')
+UXHXNlgF4jU,178.4,none,False,,,,조용함,3회초 회차 카드
+UXHXNlgF4jU,188.4,out_any,False,out strikeout,video_only video_only,점수판 아웃+3 득점+0 주자 000→000 | [점수판] 삼진 표시(K) (211s),맞음,"정준재 3-1 뒤 아웃(해설 '바깥쪽 루킹 스트라이크' — 루킹 삼진으로 보임) — 1사, 남은 두 아웃은 안 나옴"
+UXHXNlgF4jU,210.9,walk_or_hbp,False,walk,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,3회말 1사 전병우 3-2에서 출루(김광현 모자 벗음) — 1사 1루
+UXHXNlgF4jU,225.0,?,False,walk,video_only,점수판 아웃+0 득점+0 주자 100→110,제외,"김지찬 타석 중 1루 주자 2루로 — 김광현이 홈 커버(폭투·포일로 보임), 1사 1·2루"
+UXHXNlgF4jU,233.2,reach,True,out,video_only,점수판 아웃+1 득점+1 주자 110→101,틀림,"김지찬 중전 적시타 1-0(해설 '잘 받아친 타구 센터 쪽 안타', 홈 슬라이딩 세이프) — 다음 판독 2사 1·3루"
+UXHXNlgF4jU,263.2,none,False,,,,조용함,구자욱 2-2 파울
+UXHXNlgF4jU,273.8,walk_or_hbp,True,runner walk,video_only video_only,점수판 아웃+0 득점+0 주자 101→011 | 점수판 아웃+0 득점+0 주자 011→111,맞음,"구자욱 3-2에서 몸에 맞는 공으로 보임(타자 웅크림, 해설 '몸에 맞는 공 하나만') — 2사 만루. 디아즈 2루 땅볼 3아웃('2루 잡아서 1루 아웃 이닝 종료')도 이 칸"
+UXHXNlgF4jU,303.8,strikeout,False,out strikeout,video_only confirmed,점수판 아웃+1 득점+0 주자 111→000 | 점수판 아웃+1 득점+0 주자 000→000; 해설 '6번 탈삼진' (310s); [점수판] 삼진 표시(K) (311s),맞음,4회초 회차 카드 뒤 후라도 탈삼진(해설 '6번 탈삼진') — 4회초 아웃 대부분은 안 나옴
+UXHXNlgF4jU,327.3,strikeout,True,strikeout out,confirmed video_only,점수판 아웃+2 득점+0 주자 000→000; 해설 '- 김광현의 4번째 탈삼진.- 어쨌든 3위 김광현 선수가.' (330s); [점수판] 삼진 표시(K) (319s) | 점수판 아웃+2 득점+0 주자 000→000,맞음,"4회말 김광현 탈삼진 둘(해설 '4번째 탈삼진', '오늘 5개의 탈삼진')"
+UXHXNlgF4jU,351.3,strikeout,True,strikeout out,refined video_only,점수판 아웃+1 득점+0 주자 000→000; 해설 '- 두 투. 신삼진. 오늘 5개의 탈삼진. 역대 포트시즌 탈삼진 최다 기록도.' (340s) | 점수판 아웃+1 득점+0 주자 000→000,맞음,5회초 선두 타자 체크스윙 삼진 뒤 1루 송구 아웃(해설 '배트가 나가다 멈췄고 1루에 뿌리면서 원아웃')
+UXHXNlgF4jU,366.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,김성욱 내야 빠지는 안타(해설) — 1사 1루
+UXHXNlgF4jU,379.6,out,True,out out,video_only video_only,점수판 아웃+1 득점+0 주자 100→010 | 점수판 아웃+1 득점+0 주자 010→000,맞음,정준재 희생번트(해설 '맨손으로 잡아서 투아웃') + 대타 풀카운트 뜬공 3아웃('잡혔어요')
+UXHXNlgF4jU,419.9,none,False,,,,조용함,5회말 회차 카드
+UXHXNlgF4jU,422.4,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,전병우 좌익수 뜬공(해설 '워닝트랙 근처 에레디아가 잡으면서 2아웃')
+UXHXNlgF4jU,434.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,김지찬 2루 땅볼 3아웃(해설 '2루수가 잡아서 빠르게 3아웃')
+UXHXNlgF4jU,463.9,none,False,,,,조용함,6회말 회차 카드·노경은 등판
+UXHXNlgF4jU,466.4,none,False,,,,조용함,김성윤 볼·스트라이크(3-1)
+UXHXNlgF4jU,470.5,walk,True,walk walk,video_only conflict,점수판 아웃+0 득점+0 주자 000→100; [관절] 타자가 공을 그냥 보냄 (472s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (474s) | 점수판 아웃+0 득점+0 주자 100→110; 영상은 볼넷 — 해설과 달라 보류,맞음,김성윤 3-1 볼넷(해설 '볼넷이에요 선두타자 출루') — 구자욱 안타로 무사 1·2루도 이 칸
+UXHXNlgF4jU,494.5,reach,True,out,video_only,점수판 아웃+3 득점+1 주자 110→000,틀림,"디아즈 좌전 적시타 2-0(해설, 홈 비디오 판독 세이프 유지)"
+UXHXNlgF4jU,546.3,reach,True,walk,conflict,점수판 아웃+0 득점+0 주자 000→100; 영상은 볼넷 — 해설과 달라 보류,틀림,7회초 2사 최지훈 3-2에서 2루수 쪽 내야 안타(해설 '끝났다 생각했던 순간') — 2사 1루
+UXHXNlgF4jU,570.6,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→000,맞음,김성욱 땅볼 3아웃(후라도 주먹)
+UXHXNlgF4jU,588.1,none,False,,,,조용함,8회초 회차 카드
+UXHXNlgF4jU,590.6,none,False,,,,조용함,김태훈 볼·스트라이크
+UXHXNlgF4jU,594.6,walk_or_hbp,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,정준재 3-2에서 출루('오늘 8회 첫 선두 타자 출루') — 무사 1루
+UXHXNlgF4jU,605.1,reach,True,reach reach,video_only video_only,점수판 아웃+0 득점+0 주자 100→110 | 점수판 아웃+0 득점+0 주자 110→101,맞음,대타 오태곤 내야 빠지는 안타·박성한 좌중간 2타점 안타 2-2(해설)
+UXHXNlgF4jU,674.9,hbp,True,reach out hbp,video_only video_only refined,점수판 아웃+0 득점+2 주자 101→001 | 점수판 아웃+1 득점+0 주자 001→001 | 점수판 아웃+0 득점+0 주자 001→101; 해설 '몸에 맞는 공이 나왔어요. 퍼스트 시즌도 벌써 17번째 사고입니다 최정선. 원 투.' (690s),맞음,최정 몸에 맞는 공(해설 '몸에 맞는 공이 나왔어요… 최정') — 에레디아 삼진('1K')도 이 칸
+UXHXNlgF4jU,697.7,strikeout,True,out,video_only,점수판 아웃+1 득점+0 주자 101→101,틀림,한유섬 삼진 2아웃(해설 '삼진을 배찬승이 잡아냅니다')
+UXHXNlgF4jU,706.9,none,False,,,,조용함,고명준 볼·스트라이크
+UXHXNlgF4jU,715.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 101→000,맞음,고명준 좌익수 뜬공 3아웃(해설 '좌측으로 깊숙한 타구')
+UXHXNlgF4jU,733.0,none,False,,,,조용함,8회말 회차 카드
+UXHXNlgF4jU,735.5,homerun,True,out walk homerun homerun out,video_only conflict video_only confirmed video_only,점수판 아웃+2 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100; 영상은 볼넷 — 해설과 달라 보류 | 점수판 아웃+0 득점+2 주자 100→000 | 점수판 아웃+0 득점+1 주자 000→000; 해설 '-이것이 삼성 라이언스 파크. 홈런 2방으로 다시 5:2로 달아나는 삼성 라이언스입니다.' (830s) | 점수판 아웃+1 득점+0 주자 000→000,맞음,8회말 디아즈 홈런 등 홈런 두 방 5-2(해설 '홈런 2방으로 다시 5:2') — 스트레이트 볼넷도 이 칸
+UXHXNlgF4jU,864.1,strikeout,False,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '- 상대의 계를 잘 막았고 계를 잘 살리고 있고.- 승삼진.- 원 투.' (870s),맞음,9회초 이율예 삼진으로 보임(해설 '삼진. 원 투') — 1사
+UXHXNlgF4jU,877.1,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,3루 땅볼 2아웃(해설) — 경기 끝(마지막 아웃은 다음 판독 없음)
