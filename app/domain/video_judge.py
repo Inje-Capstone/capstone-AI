@@ -190,6 +190,13 @@ _HOMONYMS = {
     "섬진": ("섬진강",),  # 받아쓰기의 '삼진'(_ASR_WORDS) — 강 이름은 아니다
     "도루 저지": ("도루 저지율",), "도루 실패": ("도루 실패율",),  # 통계 이야기(독립 리뷰)
 }
+# 체크스윙을 스윙으로 판정했다는 말 — 2스트라이크면 삼진이다(2025 준PO 4차전 2회초 3-2 비디오
+# 판독 '-스윙.-스윙이군요. 스윙입니다'가 '아웃'으로). 말 첫머리의 '스윙'만 — '풀스윙입니다'·
+# '좋은 스윙입니다'는 판정이 아니다. 같은 조각에 반대 판정('노스윙', 받아쓰기 '너스윙')이나
+# '아닙니다'가 있으면 안 받는다(독립 리뷰)
+SWING_CALL = re.compile(r"(?:^|[.\-!?]\s*|결과,?\s*)스윙\s*"
+                        r"(?:입니다|이군요|이에요|판정\s*(?:입니다|이에요|이 났|났))")
+NOT_SWING_CALL = ("노스윙", "노 스윙", "너스윙", "논스윙", "아닙니다")
 
 
 def _without_homonyms(text: str, word: str) -> str:
@@ -506,7 +513,10 @@ def judge_transition(
             return make("call", "dropped_third_strike", 0.5, [dts], out=True)
         # 공이 맞아 나갔으면 삼진이 아니다 — 해설의 '삼진'은 앞 타자 말일 수 있다
         k = None if in_play else (
-            _has(near, "swing_miss") or _has(near, "strikeout") or _speech(near, "삼진"))
+            _has(near, "swing_miss") or _has(near, "strikeout") or _speech(near, "삼진")
+            or next((c for c in near if c.kind == "speech" and c.t > tr.before.t - ASR_LEAD
+                     and SWING_CALL.search(c.text)
+                     and not any(w in c.text for w in NOT_SWING_CALL)), None))
         if k:
             return make("result", "strikeout", 0.5, [k])
         took = _took_last_pitch(near, tr.t, tr.before.t)
