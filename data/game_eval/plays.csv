@@ -20,7 +20,7 @@
 3QYUP4AgNpI,406.6,?,False,runner,video_only,점수판 아웃+0 득점+0 주자 100→010,제외,주자 1→2루(점수판 화소) — 도루·폭투인지 못 봄
 3QYUP4AgNpI,413.6,reach,False,reach,video_only,점수판 아웃+0 득점+0 주자 010→101,맞음,강백호 안타로 보임
 3QYUP4AgNpI,426.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 101→000,맞음,노시환 3아웃(인플레이)
-3QYUP4AgNpI,443.2,?,False,out,video_only,점수판 아웃+3 득점+0 주자 000→000,제외,"이재현 — 1루 판정 다시보기, 결과 모름"
+3QYUP4AgNpI,443.2,?,False,out out,video_only video_only,점수판 아웃+1 득점+0 주자 000→000 | 점수판 아웃+2 득점+0 주자 000→000,제외,"이재현 — 1루 판정 다시보기, 결과 모름"
 3QYUP4AgNpI,477.5,out_any,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,김태연 아웃 — 해설은 헛스윙 삼진
 3QYUP4AgNpI,486.7,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,이도윤 2루타
 3QYUP4AgNpI,504.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,심우준 3아웃

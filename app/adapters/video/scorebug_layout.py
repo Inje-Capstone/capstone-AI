@@ -87,6 +87,10 @@ class Layout:
     # 바탕 색(panel)이 안 맞는 판독을 버리나. MBC 포스트시즌 상자는 회차 띠·전환 중에도 숫자가 맞는
     # 판독이 많아(버리면 한국시리즈 5차전 −2, 2차전 −1) false — panel은 표시 훑기·화소 상태에만 쓴다
     panel_drops: bool = True
+    # 삼진 표시가 뜬 초의 화소 상태(주자·아웃·볼카운트)를 버리나. 표시가 그 칸을 덮는 판만 참 —
+    # TVING 아래 띠는 표시가 회차 칸만 덮고 아웃 점은 표시와 같은 초에 바뀌어(와일드카드 1차전
+    # 3K: 419초 1아웃 → 420초 '3K'·2아웃 → 다시보기로 띠 사라짐) 버리면 판독을 앞당길 곳이 없다
+    mark_hides_state: bool = True
     balls: tuple[Point, ...] = ()  # 볼 점 중심들(점으로 그리는 점수판만)
     panel: tuple[tuple[float, float, float, float, float], ...] = ()  # 바탕 고정 색(x, y, r, g, b)
     strikes: tuple[Point, ...] = ()  # 스트라이크 점 중심들
@@ -143,6 +147,7 @@ class Layout:
             mark_off=tuple((float(x), float(y)) for x, y in raw.get("mark_off") or []),
             mark_dark=float(raw.get("mark_dark", DARK_VAL)),
             panel_drops=bool(raw.get("panel_drops", True)),
+            mark_hides_state=bool(raw.get("mark_hides_state", True)),
             balls=tuple((float(x), float(y)) for x, y in raw.get("balls") or []),
             strikes=tuple((float(x), float(y)) for x, y in raw.get("strikes") or []),
             panel=tuple(tuple(float(v) for v in pt) for pt in raw.get("panel") or []),  # type: ignore[misc]

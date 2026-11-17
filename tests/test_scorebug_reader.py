@@ -372,7 +372,8 @@ def test_pixel_states_skip_hidden_seconds_and_pad_a_short_stream(tmp_path, monke
 def test_reads_are_stamped_where_their_runners_and_outs_first_showed():
     """판독기 v5 — 8초마다 읽은 판독은 읽은 초에 찍힌다. 주자·아웃이 앞 판독과 달라진 판독은 그 화소
     상태가 끊기지 않고 보이기 시작한 초로 앞당긴다(준플레이오프 3차전: 아웃이 4초 늦게 찍혀 다음
-    타자의 안타 칸으로 갔다). 점수판이 가려진 초(None)에서 멈추고, 앞 판독보다 앞으로는 안 간다."""
+    타자의 안타 칸으로 갔다). 점수판이 가려진 초(None)에서 멈추고, 앞 판독보다 앞으로는 안 간다.
+    시각은 그 상태가 처음 보인 초의 끝(i + 1초)이다."""
     from app.adapters.video.scorebug_reader import restamp_to_states
 
     empty, one_out = ((), 0, None), ((), 1, None)
@@ -383,8 +384,8 @@ def test_reads_are_stamped_where_their_runners_and_outs_first_showed():
              {"t": 117.0, "bases": [], "outs": 1, "balls": 2, "strikes": 2},
              {"t": 125.0, "bases": [1], "outs": 1}]
     moved = restamp_to_states(reads, states, 100.0)
-    assert [r["t"] for r in reads] == [100.0, 110.0, 117.0, 121.0]
-    assert moved == [(116.0, 110.0), (125.0, 121.0)]
+    assert [r["t"] for r in reads] == [100.0, 111.0, 117.0, 122.0]
+    assert moved == [(116.0, 111.0), (125.0, 122.0)]
     # 그 초의 화소가 판독과 다르면(오독·전환) 옮기지 않는다. 삼진 표시가 덮은 판독은 건너뛴다
     # 1초 차이는 화소를 1초마다 읽는 간격 안이라 옮기지 않는다(PO 4차전: 투구 화면 끝 앞으로 넘어감)
     near = [{"t": 100.0, "bases": [], "outs": 0}, {"t": 111.0, "bases": [], "outs": 1}]
@@ -395,7 +396,7 @@ def test_reads_are_stamped_where_their_runners_and_outs_first_showed():
               {"t": 113.0, "bases": [], "outs": 0, "mark": "strikeout"},
               {"t": 115.0, "bases": [], "outs": 1}]
     restamp_to_states(marked, states, 100.0)
-    assert [r["t"] for r in marked] == [100.0, 113.0, 110.0]
+    assert [r["t"] for r in marked] == [100.0, 113.0, 111.0]
 
 
 def test_board_check_keeps_reads_when_the_layout_says_so():
@@ -411,3 +412,60 @@ def test_board_check_keeps_reads_when_the_layout_says_so():
     assert not _board_whole(drops, px, reading=True)
     assert _board_whole(keeps, px, reading=True)
     assert not _board_whole(keeps, px)  # 화소 상태는 그대로 거른다
+
+
+def test_restamp_crosses_a_hidden_stretch_back_to_the_same_runners_and_outs():
+    """와일드카드 1차전 3K — 419초에 2아웃·'3K'가 뜨고 다시보기로 띠가 18초 사라졌다가 438초에 같은
+    주자·아웃으로 돌아왔다. 가려진(None) 구간을 RESTAMP_GAP_SEC까지 건너 419초로 옮긴다. 가려진 구간
+    앞이 다른 상태거나, 앞 판독 전이거나, 구간이 너무 길면 건너지 않는다."""
+    from app.adapters.video.scorebug_reader import RESTAMP_GAP_SEC, restamp_to_states
+
+    one, two = ((1, 2, 3), 1, None), ((1, 2, 3), 2, None)
+    states = [one] * 19 + [two] + [None] * 18 + [two] * 3
+
+    def at(t, outs):
+        return {"t": t, "bases": [1, 2, 3], "outs": outs}
+
+    reads = [at(115.0, 1), at(138.0, 2)]
+    assert restamp_to_states(reads, states, 100.0) == [(138.0, 120.0)]
+    # 앞 판독이 가려진 구간 뒤면 그 앞으로는 안 간다
+    late = [at(125.0, 1), at(138.0, 2)]
+    assert restamp_to_states(late, states, 100.0) == []
+    # 가려진 구간 앞이 다른 상태면 멈춘다
+    other = [one] * 20 + [None] * 18 + [two] * 3
+    reads = [at(115.0, 1), at(138.0, 2)]
+    assert restamp_to_states(reads, other, 100.0) == [] and reads[1]["t"] == 138.0
+    # 너무 긴 구간은 건너지 않는다
+    long_gap = [one] * 2 + [two] + [None] * (RESTAMP_GAP_SEC + 2) + [two] * 3
+    t_after = 100.0 + 3 + RESTAMP_GAP_SEC + 2
+    reads = [at(100.0, 1), at(t_after, 2)]
+    assert restamp_to_states(reads, long_gap, 100.0) == [] and reads[1]["t"] == t_after
+
+
+def test_pixel_states_keep_the_state_under_a_mark_that_leaves_it_visible(tmp_path, monkeypatch):
+    """삼진 표시가 뜬 초 — 표시가 주자·아웃 칸을 덮는 판은 상태를 버리고, 회차 칸만 덮는 판(TVING,
+    mark_hides_state false)은 그대로 읽는다(아웃 점이 표시와 같은 초에 바뀐다)."""
+    import io
+    from dataclasses import replace
+
+    import app.adapters.video.scorebug_reader as sr
+
+    px = _token_pixels(monkeypatch, sr, {b"A": ([1], 2)})
+    stream = px(b"A") * 3
+
+    class FakeProc:
+        def __init__(self, *args, **kwargs):
+            self.stdout = io.BytesIO(stream)
+
+        def wait(self):
+            return 0
+
+    monkeypatch.setattr(sr.subprocess, "Popen", FakeProc)
+    monkeypatch.setattr(sr, "decode_mark", lambda *a: "strikeout")
+    hides = _bar_layout(tmp_path)
+    thumbs = [_thumb(50, 120), _thumb(200, 30), _thumb(50, 120)]
+    reader = sr.ScorebugReader("K", "http://x", "m", layout=hides)
+    assert reader.pixel_states("g.mp4", 0.0, 3.0, thumbs, 0) == [None, None, None]
+    reader = sr.ScorebugReader("K", "http://x", "m", layout=replace(hides, mark_hides_state=False))
+    state = ((1,), 2, None)
+    assert reader.pixel_states("g.mp4", 0.0, 3.0, thumbs, 0) == [state, None, state]

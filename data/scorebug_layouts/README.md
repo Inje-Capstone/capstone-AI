@@ -9,7 +9,7 @@
 | `sbs_sports_2026.json` | SBS Sports 2026 두 줄 가로 띠 | 3QYUP4AgNpI | 5/5 |
 | `bar_two_line.json` | 같은 SBS 띠를 따로 잰 것(좌표 0.001 안으로 같음) | p55O9v1xKRI | 2/2 |
 | `mbc_sports_plus.json` | MBC 스포츠+ 아래 띠(흰 주자 칸) | T93FGIYBM8E | 6/6, 초말 4/4 |
-| `tving_postseason.json` | 2026 포스트시즌 TVING 아래 띠 | wyC8BnovUUA | |
+| `tving_postseason.json` | 2026 포스트시즌 TVING 아래 띠 — 'nK' 표시는 회차 칸만 덮고 아웃 점은 같은 초에 바뀜(mark_hides_state false), panel에 아웃 점·주자 칸 사이 검은 바탕 두 곳(홈런 전환 효과·대타 소개 띠 거르기) | wyC8BnovUUA, luegoydhdxE, IT67rwYSXvA, wh-Ql5Lb9Ps, 41F-_WHq_hQ | 판독 1096장 중 98.2%가 검은 두 곳 맞음 |
 | `kbo_topleft_box.json` | 왼쪽 위 상자형 | zRqpvJdTybA | 10/10, 초말 5/5 |
 | `kbo_box_bottomright.json` | 같은 상자형이 오른쪽 아래(KBS N) | NVOfYTDrqlU | 2/2 |
 | `kbo_caster_box.json` | SPOTV 캐스터 이름 띠가 붙은 상자 | YiiGl9UUV2E | 2/2 |
@@ -42,6 +42,7 @@
 | `panel` | 점수판 바탕 고정 색 `[x, y, r, g, b]` 2~3곳 — 있으면 영상을 화소로 훑어 표시를 찾는다 | |
 | `mark_dark` | `mark_fill` dark·`mark_off`의 '어둡다' 기준(밝기, 기본 0.3) — 표시 띠와 같은 자리를 덮는 회색 띠를 가를 때 낮춘다 | |
 | `panel_drops` | 바탕 색이 안 맞는 판독을 버리나(기본 true) — 회차 띠·전환 중에도 숫자가 맞는 판은 false(panel은 표시 훑기·화소 상태에만) | |
+| `mark_hides_state` | 삼진 표시가 뜬 초의 화소 상태(주자·아웃)를 버리나(기본 true) — 표시가 주자·아웃 칸을 안 덮는 판은 false(TVING) | |
 | `prompt_note` | VLM 판독 지시에 덧붙이는 이 점수판만의 안내(영어) — 볼카운트를 'X-Y'로 그려 점수와 헷갈리는 판 | |
 | `half_pair` | ▲ 칸·▼ 칸 둘 `[[x0, y0, x1, y1], [x0, y0, x1, y1]]` — 평균 밝기가 0.12 넘게 어두운 쪽이 켜진 화살표(꺼진 칸은 0.8 이상). 화살표가 작고 회색이며 사이 회차 숫자가 더 검은 판 | |
 

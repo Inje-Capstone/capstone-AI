@@ -178,6 +178,14 @@ def plan_state_changes(states: Sequence[Optional[tuple]],
 
 
 RESTAMP_MIN_SEC = 2.0  # 판독 시각을 이만큼 이상 앞당길 때만 옮긴다(1초는 화소 판독 간격 안)
+# 점수판이 가려진(화소 상태 None) 구간을 이 초까지 건너 따라간다 — 삼진 뒤 다시보기로 띠가 18초
+# 사라졌다가 같은 주자·아웃으로 돌아왔다(와일드카드 1차전 3K: 419초 2아웃 → 438초 첫 판독)
+RESTAMP_GAP_SEC = 30
+# 앞당긴 시각은 그 상태가 처음 보인 초의 '끝'(i + 1초)으로 찍는다. 1초마다 뽑은 i번째 프레임은 그
+# 초의 앞이 아니라 중간 넘어서다(와일드카드 1차전: i=419 프레임에 뜬 '3K'가 419.0초 화면엔 없고
+# 420.0초에 있다). 시작(i초)으로 찍으면 점수판이 투구 화면 끝 1초 안에 바뀐 판독이 그 화면 앞 칸으로
+# 갔다(3K 419.0·화면 끝 419.9, 1K 705.0·705.7, 한국시리즈 4차전 898.0·898.9)
+RESTAMP_SEEN_SEC = 1.0
 
 
 def restamp_to_states(readings: Sequence[dict[str, Any]], states: Sequence[Optional[tuple]],
@@ -188,9 +196,10 @@ def restamp_to_states(readings: Sequence[dict[str, Any]], states: Sequence[Optio
     8초마다 읽는 판독(plan_periodic)은 읽은 초에 찍힌다 — 상태가 몇 초 전에 바뀌었어도.
     준플레이오프 3차전: 김도영의 아웃이 4초 늦게(다음 타자 투구 뒤에) 찍혀 그 타자의 안타 칸에
     '아웃'이 갔고, 볼넷·안타가 한 칸씩 밀렸다(2026-11-16). 화소 상태(1초마다, `pixel_states`)를
-    거꾸로 따라가 같은 주자·아웃이 끊기지 않고 보인 첫 초로 옮긴다 — 점수판이 가려졌거나(None)
-    다른 상태면 멈춘다. 바로 앞 판독보다 앞으로는 옮기지 않는다. 볼카운트·점수는 화소에 없어 그
-    판독의 값 그대로 둔다(주자·아웃이 같은 동안엔 카운트만 바뀐 판독은 옮기지 않는다).
+    거꾸로 따라가 같은 주자·아웃이 보인 첫 초로 옮긴다 — 다른 상태면 멈추고, 점수판이 가려진(None)
+    구간은 RESTAMP_GAP_SEC까지 건너되 그 앞도 같은 주자·아웃이고 앞 판독 뒤일 때만 넘어간다.
+    바로 앞 판독보다 앞으로는 옮기지 않는다. 볼카운트·점수는 화소에 없어 그 판독의 값 그대로 둔다
+    (주자·아웃이 같은 동안엔 카운트만 바뀐 판독은 옮기지 않는다).
     """
     moved: list[tuple[float, float]] = []
     prev: Optional[dict[str, Any]] = None
@@ -201,9 +210,18 @@ def restamp_to_states(readings: Sequence[dict[str, Any]], states: Sequence[Optio
         if prev is not None and (tuple(prev["bases"]), prev["outs"]) != key:
             i = int(r["t"] - start)
             if 0 <= i < len(states) and states[i] is not None and states[i][:2] == key:
-                while i - 1 >= 0 and states[i - 1] is not None and states[i - 1][:2] == key:
-                    i -= 1
-                new = round(start + i, 2)
+                while True:
+                    while i - 1 >= 0 and states[i - 1] is not None and states[i - 1][:2] == key:
+                        i -= 1
+                    j = i - 1
+                    while j >= 0 and states[j] is None and i - j <= RESTAMP_GAP_SEC:
+                        j -= 1
+                    if (j < i - 1 and j >= 0 and states[j] is not None and states[j][:2] == key
+                            and start + j > prev["t"]):
+                        i = j
+                        continue
+                    break
+                new = round(start + i + RESTAMP_SEEN_SEC, 2)
                 # 1초 차이는 화소를 1초마다 읽는 간격 안이다 — 늦게 찍힌 판독만
                 # (RESTAMP_MIN_SEC 이상) 옮긴다. 1초를 당기면 투구 화면 끝 앞으로 넘어가 판정이
                 # 앞 칸에 붙었다(PO 4차전)
@@ -456,9 +474,10 @@ class ScorebugReader:
                     break
                 i = len(states)
                 # 삼진 표시가 주자·아웃 칸을 덮은 초는 화소가 엉터리다 — 상태로 치지 않는다
-                # (독립 리뷰)
-                if not visible[i] or not _board_whole(self.layout, px) or decode_mark(
-                        self.layout, px, RGB_W, RGB_H):
+                # (독립 리뷰). 표시가 그 칸을 안 덮는 판(mark_hides_state false)은 그대로 읽는다
+                if not visible[i] or not _board_whole(self.layout, px) or (
+                        self.layout.mark_hides_state
+                        and decode_mark(self.layout, px, RGB_W, RGB_H)):
                     states.append(None)
                     continue
                 sample = rgb_sampler(px, RGB_W, RGB_H)
