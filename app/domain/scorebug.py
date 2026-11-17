@@ -271,6 +271,12 @@ def _drop_spikes(runs: list[tuple[Reading, int]]) -> list[tuple[Reading, int]]:
     for i, (r, n) in enumerate(runs):
         if out and i + 1 < len(runs):
             a, c = out[-1][0], runs[i + 1][0]
+            # 3아웃 순간 반 이닝이 바뀌는 효과 중에 '0아웃 주자 없음'으로 읽힌 한 장은 건너 그 다음
+            # (다음 반 이닝) 판독과 견준다 — 같은 반 이닝에서 아웃이 줄 수는 없다(와일드카드 1차전
+            # 2회초: 1사 1루 판독 셋이 직선타 병살 뒤 한 장 때문에 버려졌다)
+            if (_half_end_blank(r, c) and i + 2 < len(runs)
+                    and _half_order(runs[i + 2][0]) != _half_order(c)):
+                c = runs[i + 2][0]
             # 두 번 이상 읽혔고 앞뒤 모두 타석 여러 개를 건너뛴 것으로 설명되면 남긴다(하이라이트)
             if n >= 2 and _skippable(a, r) and _skippable(r, c):
                 out.append((r, n))
@@ -281,13 +287,46 @@ def _drop_spikes(runs: list[tuple[Reading, int]]) -> list[tuple[Reading, int]]:
             # 2차전 4회말). 같은 반 이닝이 이어지면 카운트 오독이다(같은 경기 '2-1' 한 장)
             ended = third_out_cleared(r, c) and (
                 i + 2 >= len(runs) or _half_order(runs[i + 2][0]) != _half_order(c))
-            spike = possible_step(a, c) and not (
-                possible_step(a, r) and (possible_step(r, c) or ended))
+            # 이 판독의 점수(VLM)가 앞과 같을 때만 다음 판독의 카운트 오독을 의심한다 — 점수까지
+            # 바뀌었으면 이 판독이 카운트를 점수로도 읽은 오독일 수 있다(삼성-LG '0:1 · 0-1')
+            same_score = (r.away, r.home) == (a.away, a.home)
+            # c 다음 판독이 c와 같은 주자·아웃이고 카운트가 이 판독(r)에서 이어지면 줄어든 c의
+            # 카운트가 오독이다 — 거꾸로 r의 카운트가 튄 한 장이면(1-0 → 3-2 → 1-1 → 2-1) 버린다
+            # (독립 리뷰)
+            after_c = runs[i + 2][0] if i + 2 < len(runs) else None
+            c_odd = (after_c is not None and _half_order(after_c) == _half_order(c)
+                     and (after_c.bases, after_c.outs) == (c.bases, c.outs)
+                     and after_c.balls >= r.balls and after_c.strikes >= r.strikes)
+            spike = possible_step(a, c) and not (possible_step(a, r) and (
+                possible_step(r, c) or (same_score and c_odd and _step_but_count(r, c))
+                or ended))
             if spike and not _next_is_spike(runs, i, a) and not (
                     n == 1 and (_starts_next_half(a, r, c) or _ends_half(a, r, c))):
                 continue
         out.append((r, n))
     return out
+
+
+def _half_end_blank(a: Reading, b: Reading) -> bool:
+    """b가 a와 같은 반 이닝인데 아웃이 0으로 줄고 주자가 다 사라졌나(점수 그대로) — 3아웃 순간의
+    전환 효과를 읽은 한 장이다."""
+    return (_half_order(a) == _half_order(b) and b.outs == 0 < a.outs and not any(b.bases)
+            and (b.away, b.home) == (a.away, a.home))
+
+
+def _step_but_count(a: Reading, b: Reading) -> bool:
+    """`possible_step`이거나, 주자만 옮겨 갔는데(도루·폭투 — 아웃·점수·주자 수 그대로) b의
+    볼카운트가 줄어 '타석이 끝났는데 아무도 안 늘었다'가 된 것 — b의 카운트 오독이다.
+
+    볼카운트는 VLM이 읽고 주자·아웃은 화소로 읽는다. 와일드카드 1차전 6회초: 뜬공 뒤 '2사 1루'를
+    읽은 판독이 다음 판독(도루 뒤 '2사 2루')의 카운트 오독('2-1'을 '0-0') 때문에 튄 판독으로
+    버려졌고, 뜬공 아웃과 도루가 한 전이('아웃')로 합쳐졌다. 주자 모양이 같으면 a는 카운트밖에 안
+    담아 예전대로 둔다. 튄 판독을 고를 때만 쓴다.
+    """
+    if possible_step(a, b):
+        return True
+    return (_half_order(a) == _half_order(b) and a.outs == b.outs and a.bases != b.bases
+            and (a.away, a.home) == (b.away, b.home) and a.runners() == b.runners())
 
 
 def _next_is_spike(runs: list[tuple[Reading, int]], i: int, a: Reading) -> bool:

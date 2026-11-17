@@ -5,7 +5,7 @@ IT67rwYSXvA,32.3,?,False,,,,제외,인트로·선발 소개
 IT67rwYSXvA,136.1,homerun,True,homerun out reach out balk reach out,video_only video_only video_only video_only video_only video_only video_only,점수판 아웃+0 득점+1 주자 000→000 | 점수판 아웃+2 득점+0 주자 000→000 | 점수판 아웃+0 득점+0 주자 000→100 | 점수판 아웃+1 득점+0 주자 100→100 | 점수판 아웃+0 득점+0 주자 100→010 | 점수판 아웃+0 득점+0 주자 010→110 | 점수판 아웃+1 득점+0 주자 110→110,맞음,솔로 홈런 1-0
 IT67rwYSXvA,147.6,same,False,,,,제외,홈런 다시보기·더그아웃
 IT67rwYSXvA,245.7,none,True,,,,조용함,관중
-IT67rwYSXvA,248.0,reach,True,reach runner reach reach,video_only video_only video_only video_only,점수판 아웃+0 득점+1 주자 110→111 | 점수판 아웃+0 득점+0 주자 111→101 | 점수판 아웃+0 득점+1 주자 101→110 | 점수판 아웃+0 득점+0 주자 110→111,맞음,2타점 적시타 1-2
+IT67rwYSXvA,248.0,reach,True,reach reach reach,video_only video_only video_only,점수판 아웃+0 득점+1 주자 110→101 | 점수판 아웃+0 득점+1 주자 101→110 | 점수판 아웃+0 득점+0 주자 110→111,맞음,2타점 적시타 1-2
 IT67rwYSXvA,295.8,same,False,,,,제외,적시타 뒤 관중·다시보기
 IT67rwYSXvA,320.3,none,True,,,,조용함,볼
 IT67rwYSXvA,331.8,walk,True,walk reach out,refined video_only video_only,점수판 아웃+0 득점+1 주자 111→111; 해설 '또 한 명의 좌타자가 들어갔고 밀어내기 못 맞는 볼입니다. 이러면 또 한 점을 내주게 되는 로건 앨런.' (330s) | 점수판 아웃+1 득점+3 주자 111→000 | 점수판 아웃+2 득점+0 주자 000→000,맞음,"밀어내기 볼넷 1-3(다시 보고 고침 — 해설 '밀어내기', 점수판 만루에서 1점. 처음엔 홈런으로 봄) — 뒤 안타 둘·3아웃·2회초 2아웃은 투구 화면 못 찾음"
@@ -55,7 +55,7 @@ IT67rwYSXvA,864.1,reach,True,reach,video_only,점수판 아웃+1 득점+2 주자
 IT67rwYSXvA,872.9,same,False,,,,제외,적시타 다시보기
 IT67rwYSXvA,883.1,same,False,,,,제외,관중·6회초 전환
 IT67rwYSXvA,891.4,out_any,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (899s); [점수판] 삼진 표시(K) (898s),맞음,아웃 — 삼진으로 보임
-IT67rwYSXvA,901.9,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '-준교한 슛점. 빠르게 따라 붙으면서 김지찬 선수가 처리를 해 줬습니다. 삼진 두 개와 준교한 슛 플라이. 이렇게 세 타자를 모두 아웃 카운트 처리하는' (920s); [점수판] 삼진 표시(K) (907s),맞음,삼진(3K 표시)
+IT67rwYSXvA,901.9,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [점수판] 삼진 표시(K) (907s),맞음,삼진(3K 표시)
 IT67rwYSXvA,915.1,none,True,,,,조용함,관중
 IT67rwYSXvA,916.4,none,True,,,,조용함,파울
 IT67rwYSXvA,921.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,뜬공 3아웃

@@ -1,14 +1,16 @@
 # 1080p 경기 하이라이트 채점
 
-> `python scripts/eval_games.py --snapshots <analyze_video 결과 폴더> [--ablation]`로 다시 만든다(조정용 3경기는 ../clips_private/game_eval_final_v5). 정답은 `labels.json`(사람이 투구 화면마다 매김), 칸별 결과는 `plays.csv`.
+> `python scripts/eval_games.py --snapshots <analyze_video 결과 폴더> [--ablation]`로 다시 만든다(조정용 3경기는 ../clips_private/game_eval_final_v7). 정답은 `labels.json`(사람이 투구 화면마다 매김), 칸별 결과는 `plays.csv`.
 
-> 11-10: 판독 시각을 판독기 v2(덩어리 판독을 주자·아웃 화소가 같아진 뒤로)대로 다시 찍은 스냅샷 `../clips_private/game_eval_final_v5`로 채점한 값이다 — 판독 내용은 그대로, 시각만(`data/analysis/LOG.md` 2026-11-10).
+> 11-10: 판독 시각을 판독기 v2(덩어리 판독을 주자·아웃 화소가 같아진 뒤로)대로 다시 찍은 스냅샷 `../clips_private/game_eval_final_v7`로 채점한 값이다 — 판독 내용은 그대로, 시각만(`data/analysis/LOG.md` 2026-11-10).
 
-> 11-15: 판독기 v4(화소 상태가 새로 이어진 구간에 판독이 없으면 한 장 더)의 추가 판독을 더한 스냅샷 `../clips_private/game_eval_final_v5`로 채점한 값이다 — 기존 판독은 그대로(`data/analysis/LOG.md` 2026-11-15).
+> 11-15: 판독기 v4(화소 상태가 새로 이어진 구간에 판독이 없으면 한 장 더)의 추가 판독을 더한 스냅샷 `../clips_private/game_eval_final_v7`로 채점한 값이다 — 기존 판독은 그대로(`data/analysis/LOG.md` 2026-11-15).
 
 > 11-16: 정답 점검 — T93FGIYBM8E 751.5초 '몸에 맞는 공' → '볼넷'(해설 '풀카운트 바깥쪽 빠지는군요', 직전 점수판 3-2; '몸을 숙임'은 보호대를 푸는 동작). 고치기 전 엔진은 이 칸을 사구로 냈다 — 고친 정답으로 main `6325ee5`는 112, 지금 113(`data/analysis/LOG.md` 2026-11-16).
 
-> 11-17: 판독기 v5(주자·아웃이 바뀐 판독의 시각을 그 화소 상태가 처음 보인 초로 2초 이상 앞당김)로 시각을 다시 찍고, 위치 파일에 표시·바탕이 있으면 삼진 표시를 다시 훑은 스냅샷 `../clips_private/game_eval_final_v5`로 채점한 값이다 — 판독 내용은 그대로, VLM 요청 없음(`data/analysis/LOG.md` 2026-11-17).
+> 11-17: 판독기 v5(주자·아웃이 바뀐 판독의 시각을 그 화소 상태가 처음 보인 초로 2초 이상 앞당김)로 시각을 다시 찍고, 위치 파일에 표시·바탕이 있으면 삼진 표시를 다시 훑은 스냅샷 `../clips_private/game_eval_final_v7`로 채점한 값이다 — 판독 내용은 그대로, VLM 요청 없음(`data/analysis/LOG.md` 2026-11-17).
+
+> 11-17(와일드카드 1차전): 판독기 v6(점수판이 가려진 구간을 건너 앞당기고, 앞당긴 시각은 그 상태가 처음 보인 초의 끝으로)과 TVING 바탕 검은 지점으로 처음 읽은 시각부터 다시 찍은 스냅샷 `../clips_private/game_eval_final_v7`로 채점한 값이다 — 판독 내용은 그대로, VLM 요청 없음.
 
 | 영상 | 채점 칸 | 맞음 | 틀림 | 놓침 | 헛판정/조용함 |
 |---|---|---|---|---|---|

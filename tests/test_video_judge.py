@@ -2322,3 +2322,43 @@ def test_view_gap_counts_from_the_last_read_of_the_before_state():
     once = first + twice(R(8, outs=2))
     (j,) = [j for j in judge(once, cues) if j.transition is not None]
     assert "pitch_t" not in j.detail
+
+
+def test_a_runner_state_survives_the_next_reads_count_misread():
+    """와일드카드 1차전 6회초 — 뜬공 뒤 '2사 1루'(2-0) 한 장이 다음 판독(도루 뒤 '2사 2루')의 카운트
+    오독('2-1'을 '0-0') 때문에 튄 판독으로 버려져 뜬공 아웃과 도루가 '아웃' 하나로 합쳐졌다. 다음
+    판독이 주자만 옮겨 갔고 그 뒤 판독이 이 카운트에서 이어지면 받는다. 거꾸로 이 판독의 카운트가 튄
+    한 장이면(독립 리뷰: 1-0 → 3-2 → 1-1 → 2-1) 예전처럼 버린다."""
+    first, second = (True, False, False), (False, True, False)
+    seen = [R(0, outs=1, bases=first), R(10, outs=2, balls=2, bases=first),
+            R(18, outs=2, bases=second), R(24, outs=2, balls=2, strikes=2, bases=second)]
+    # 카운트를 잘못 읽은 그 한 장(18초)은 제 차례에 버려진다
+    assert [(r.t, r.outs, r.bases) for r in stabilize(seen, min_repeat=1)] == [
+        (0.0, 1, first), (10.0, 2, first), (24.0, 2, second)]
+    # 뜬공 아웃과 주자 진루(단서가 없어 도루인지는 모른다)가 따로 난다
+    assert [j.code for j in judge(seen, [], min_repeat=1)] == ["out", "runner"]
+    odd = [R(0, outs=1, balls=1, bases=first), R(5, outs=1, balls=3, strikes=2, bases=first),
+           R(9, outs=1, balls=1, strikes=1, bases=second), R(14, outs=1, balls=2, strikes=1,
+                                                            bases=second)]
+    assert [r.t for r in stabilize(odd, min_repeat=1)] == [0.0, 9.0, 14.0]
+
+
+def test_asr_spelling_of_hit_by_pitch():
+    """와일드카드 1차전 7회초 — 받아쓰기가 '몸에 맞는 공'을 '못 맞는 공'으로 적어 2-2 사구가
+    '출루'였다."""
+    two_three, loaded = (False, True, True), (True, True, True)
+    seen = [R(0, outs=1, balls=2, strikes=2, bases=two_three), R(12, outs=1, bases=loaded)]
+    said = [Cue(10, "speech", "후반 두 이닝에서 못 맞는 공이 나와요. 비어있던 1루 마저도")]
+    assert [j.code for j in judge(seen, said, min_repeat=1) if j.transition is not None] == ["hbp"]
+    assert [j.code for j in judge(seen, [], min_repeat=1) if j.transition is not None] == ["reach"]
+
+
+def test_a_blank_read_during_the_half_change_does_not_drop_the_reads_before_it():
+    """와일드카드 1차전 2회초 — 직선타 병살로 반 이닝이 끝나는 순간 전환 효과를 '0아웃 주자
+    없음'으로 읽은 한 장 때문에 그 앞 '1사 1루' 판독 셋이 버려졌다(같은 반 이닝에서 아웃은 줄 수
+    없다). 그 한 장은 건너 다음 반 이닝 판독과 견준다."""
+    first = (True, False, False)
+    one = [R(t, outs=1, balls=2, strikes=2, bases=first) for t in (10, 11, 12)]
+    seen = [R(0)] + one + [R(20, balls=2, strikes=2), R(30, half="bot")]
+    stable = stabilize(seen, min_repeat=1)
+    assert [(r.t, r.outs, r.bases) for r in stable] == [(0.0, 0, E), (10.0, 1, first), (30.0, 0, E)]

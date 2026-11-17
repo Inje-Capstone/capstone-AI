@@ -462,3 +462,9 @@ def test_dark_mark_threshold_tells_the_strikeout_bar_from_a_name_strip():
     mbc = Layout.load(ROOT / "data" / "scorebug_layouts" / "mbc_postseason_box.json")
     assert mbc.mark_fill == "dark" and mbc.mark_dark == 0.11 and len(mbc.panel) == 4
     assert mbc.panel_drops is False  # 회차 띠·전환 중 판독도 숫자가 맞는 판
+    assert mbc.mark_hides_state is True
+    # TVING 아래 띠 — 표시는 회차 칸만 덮는다. 아웃 점과 주자 칸 사이 검은 바탕 두 곳도 panel
+    # (홈런 전환 효과·대타 소개 띠가 주자·아웃 칸을 덮은 프레임을 거른다)
+    tv = Layout.load(ROOT / "data" / "scorebug_layouts" / "tving_postseason.json")
+    assert tv.mark_hides_state is False and len(tv.panel) == 5
+    assert all(max(r, g, bl) < 0.1 for _x, _y, r, g, bl in tv.panel[3:])
