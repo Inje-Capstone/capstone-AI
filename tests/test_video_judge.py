@@ -981,6 +981,16 @@ def test_official_walk_stays_when_the_batter_seemed_to_swing():
     assert event.detail["observed"] == "swing_on_ball_four"
 
 
+def test_asr_spelling_of_walk():
+    """2025 한국시리즈 1차전 1회말 — 3-2 파울과 볼넷이 한 투구 화면으로 이어져 관절이 휘두름을
+    봤고, 받아쓰기가 '볼넷 출루'를 '본래 출루'로 적어 '출루'였다. '본래'는 보통 말이라
+    '출루' 앞·문장 끝만 받는다."""
+    walk_said = [Cue(5, "swing"), Cue(7, "speech", "다시 풀카운트. 벗어납니다 본래 출루 홍창기.")]
+    assert one(R(0, balls=3, strikes=2), R(10, bases=FIRST), walk_said).code == "walk"
+    other = [Cue(5, "swing"), Cue(7, "speech", "본래 컨택이 좋은 타자입니다")]
+    assert one(R(0, balls=3, strikes=2), R(10, bases=FIRST), other).code == "reach"
+
+
 def test_tag_seen_on_a_safe_steal_keeps_the_safe_call():
     cues = [Cue(5, "slide"), Cue(5.5, "slide_tag")]
     j = one(R(0, bases=FIRST), R(10, bases=SECOND, balls=1), cues)
@@ -2399,3 +2409,22 @@ def test_asr_spelling_of_steal():
 
     assert codes(said) == ["steal"]
     assert codes([]) == ["balk"]
+
+
+def test_strikeout_call_in_commentary():
+    """2025 한국시리즈 1차전 5회초·6회말 — 해설이 '삼진' 없이 '스윙 스트라이크 아웃'·
+    '루킹 스트라이크 아웃'(받아쓰기 '로킹 스트라이크아웃')으로만 말해 '아웃'이었다. 앞말 없는
+    '스트라이크 아웃'은 땅볼 이야기일 수 있다('땅볼을 유도했지만 스트라이크 아웃을 잡은 거나
+    진배없어요')."""
+    seen = [R(0, outs=2, balls=1, strikes=2, bases=(False, False, True)), R(14, half="bot")]
+    pitch = [Cue(3, "pitch_seen", ""), _view(6, "view_unknown")]
+
+    def codes(cues):
+        return [j.code for j in judge(seen, cues, min_repeat=1) if j.transition is not None]
+
+    assert codes(pitch) == ["out"]
+    for said in ("높은 공에 스윙 스트라이크 아웃. 위기 상황.", "- 들어갔어요. 로킹 스트라이크아웃.",
+                 "바깥쪽 변화골로 킹 스트라이크 아웃!"):
+        assert codes(pitch + [Cue(6, "speech", said)]) == ["strikeout"], said
+    said = "땅볼을 유도했지만 스트라이크 아웃을 잡은 거나 진배 없어요."
+    assert codes(pitch + [Cue(6, "speech", said)]) == ["out"]
