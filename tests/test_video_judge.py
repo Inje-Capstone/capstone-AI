@@ -2385,3 +2385,17 @@ def test_check_swing_called_a_swing_at_two_strikes_is_a_strikeout():
         assert codes(pitch + [Cue(6, "speech", said)]) == ["out"], said
     for said in ("체크스윙 비디오 판독 결과 스윙입니다", "- 배트가.- 스윙 판정입니다."):
         assert codes(pitch + [Cue(6, "speech", said)]) == ["strikeout"], said
+
+
+def test_asr_spelling_of_steal():
+    """2025 와일드카드 2차전 8회말 — 받아쓰기가 '기습 도루'를 '기습 토루'로 적어, 카운트가 그대로인
+    2루 주자의 3루 진루가 '보크'였다."""
+    second, third = (False, True, False), (False, False, True)
+    seen = [R(0, outs=1, balls=1, bases=second), R(6, outs=1, balls=1, bases=third)]
+    said = [Cue(3, "speech", "3루에 세이프! 김헌곤 선수의 기습 토루가 완벽하게 성공했고요.")]
+
+    def codes(cues):
+        return [j.code for j in judge(seen, cues, min_repeat=1) if j.transition is not None]
+
+    assert codes(said) == ["steal"]
+    assert codes([]) == ["balk"]
