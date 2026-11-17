@@ -694,6 +694,8 @@ class ScorebugReader:
                 failed += 1
                 continue
             r = normalize_reading(answer, start + first)
+            if r:  # 실제로 읽은 화면의 시각 — 판독 시각(t)을 앞당겨도 볼카운트는 이 화면 값이다
+                r["read_t"] = round(start + at + 0.5, 2)
             if r and self.layout is not None:
                 px = self._rgb(video, start + at + 0.5)
                 r["bases"], r["outs"] = decode(self.layout, rgb_sampler(px, RGB_W, RGB_H))

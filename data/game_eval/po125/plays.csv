@@ -27,7 +27,7 @@ LMEEAksEBuU,590.8,homerun,True,homerun out,confirmed video_only,점수판 아웃
 LMEEAksEBuU,624.1,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (630s),맞음,4회말 1사 리베라토 3-1에서 볼넷(해설 '바깥쪽 볼넷입니다') — 1사 1루
 LMEEAksEBuU,643.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→101,맞음,외야 안타로 1·3루 — 1사 1·3루
 LMEEAksEBuU,662.1,double_play,True,double_play,refined,점수판 아웃+2 득점+0 주자 101→000; 해설 '점화 당긴 타구 3루수 막아놓고 앞선 주자 그리고 1루 이어집니다 병살타' (660s),맞음,노시환 3루수 병살타(해설 '앞선 주자 그리고 1루 이어집니다 병살타') — 3아웃
-LMEEAksEBuU,681.2,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [점수판] 삼진 표시(K) (687s),맞음,"5회초 무사 김성윤 3-2 헛스윙 삼진(해설 '스윙 삼진', K 표시) — 1사"
+LMEEAksEBuU,681.2,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; 해설 '스프링 섬지! 스프링 섬지!' (680s); [점수판] 삼진 표시(K) (687s),맞음,"5회초 무사 김성윤 3-2 헛스윙 삼진(해설 '스윙 삼진', K 표시) — 1사"
 LMEEAksEBuU,688.9,strikeout,True,strikeout,video_only,점수판 아웃+2 득점+0 주자 000→000; [점수판] 삼진 표시(K) (693s),맞음,3-2 삼진(K 표시) — 다음은 6회말
 LMEEAksEBuU,699.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,6회말 선두 2루타(해설 '2루까지 힘차게') — 무사 2루
 LMEEAksEBuU,718.5,none,True,,,,조용함,볼·스트라이크·투수 교체(양창섭 → 배찬승)
@@ -35,12 +35,12 @@ LMEEAksEBuU,733.0,none,True,,,,조용함,파울·볼(체크스윙)
 LMEEAksEBuU,752.5,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→010,맞음,손아섭 우중간 적시 2루타 6-6(해설 '중견수 키를 넘깁니다') — 무사 2루
 LMEEAksEBuU,790.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 010→011,맞음,리베라토 우측 담장 맞는 안타(해설 '몬스터월을 때립니다') — 무사 2·3루
 LMEEAksEBuU,831.6,none,True,,,,조용함,볼·스트라이크
-LMEEAksEBuU,837.8,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 011→011; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (841s),맞음,문현빈 3-2 삼진(포수가 잡음) — 1사 2·3루
+LMEEAksEBuU,837.8,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 011→011; 해설 '스프링 선든' (850s),맞음,문현빈 3-2 삼진(포수가 잡음) — 1사 2·3루
 LMEEAksEBuU,846.3,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 011→011; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (858s); [점수판] 삼진 표시(K) (860s),맞음,노시환 헛스윙 삼진(해설 '스윙 삼진') — 2사 2·3루
 LMEEAksEBuU,863.6,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 011→010,맞음,채은성 우측 2타점 2루타 8-6(해설 '채은성의 2루타')
-LMEEAksEBuU,891.1,strikeout,False,strikeout,confirmed,점수판 아웃+1 득점+0 주자 010→000; 해설 '스윙 3진 원아웃' (930s); [점수판] 삼진 표시(K) (906s),맞음,6회말 3아웃 스윙 삼진으로 보임(해설 '스윙 삼진 이호성의 입장에선') — 투구 화면은 투수가 내려가는 장면
+LMEEAksEBuU,891.1,strikeout,False,strikeout,confirmed,점수판 아웃+1 득점+0 주자 010→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (906s); [점수판] 삼진 표시(K) (906s),맞음,6회말 3아웃 스윙 삼진으로 보임(해설 '스윙 삼진 이호성의 입장에선') — 투구 화면은 투수가 내려가는 장면
 LMEEAksEBuU,925.9,none,True,,,,조용함,7회초 볼·스트라이크(1-0 → 1-2)
-LMEEAksEBuU,931.9,strikeout,True,strikeout,conflict,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (936s); 영상은 삼진 — 해설과 달라 보류,맞음,1-2 헛스윙 삼진(해설 '스윙 삼진 원아웃') — 1사
+LMEEAksEBuU,931.9,strikeout,True,strikeout,conflict,점수판 아웃+1 득점+0 주자 000→000; 해설 '스윙 3진 원아웃' (930s); 영상은 삼진 — 해설과 달라 보류,맞음,1-2 헛스윙 삼진(해설 '스윙 삼진 원아웃') — 1사
 LMEEAksEBuU,945.4,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,대타 박병호 외야 뜬공 — 2사
 LMEEAksEBuU,955.4,none,True,,,,조용함,볼(162km) — 1-2
 LMEEAksEBuU,964.2,strikeout,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,틀림,"1-2 헛스윙 삼진, 공이 빠져 1루 송구 아웃(해설 '떨어지는 건 결국 참지 못했고') — 3아웃"

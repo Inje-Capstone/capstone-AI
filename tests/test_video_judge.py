@@ -1636,6 +1636,36 @@ def test_board_changed_during_the_pitch_view_is_that_pitch_result():
     assert "pitch_t" not in j.detail
 
 
+def test_a_count_read_long_after_the_restamped_time_does_not_block_the_pitch_view():
+    """2025 와일드카드 1차전 4회초 — 판독기가 시각을 주자가 바뀐 초(10)로 앞당긴 판독의 카운트
+    0-1은 실제로 읽은 화면(15초, 다음 타자 첫 공 뒤) 값이다. '새 타자 카운트가 벌써 진행'으로 보지
+    않고 그 투구 화면의 볼넷으로 둔다. 읽은 시각이 없거나 가까우면 예전대로."""
+    from dataclasses import replace
+
+    from app.domain.scorebug import Reading
+
+    def walk(read_t):
+        after = Reading(10, 3, "top", 0, 1, 1, (True, False, False), 0, 0, read_t)
+        return [R(0, outs=1, balls=3, strikes=1)] * 2 + [after, replace(after, t=11)]
+
+    (j,) = judge(walk(15.0), _pitch(8, 12))
+    assert j.code == "walk" and j.detail["pitch_t"] == 12
+    for read_t in (None, 11.0):
+        (j,) = judge(walk(read_t), _pitch(8, 12))
+        assert "pitch_t" not in j.detail
+
+
+def test_speech_over_a_new_half_pitch_does_not_name_the_last_out():
+    """2025 와일드카드 1차전 7회초 2사 만루 2-2 2루 포스아웃(3아웃) — 새 반 이닝이 보인 뒤(45초)
+    시작해 7회말 투구(53초)를 덮는 받아쓰기 조각 '스윙 삼진'이 3아웃을 '삼진'으로 만들었다.
+    새 반 이닝 투구가 없으면(관절 없음) 예전대로."""
+    loaded = (True, True, True)
+    seen = twice(R(0, outs=2, balls=2, strikes=2, bases=loaded), R(45, half="bot"))
+    said = [Cue(50, "speech", "결국 참아내지 못합니다 스윙 삼진")]
+    assert [j.code for j in judge(seen, said + [Cue(53, "pitch_seen", "")])] == ["out"]
+    assert [j.code for j in judge(seen, said)] == ["strikeout"]
+
+
 def test_in_progress_view_is_not_borrowed_after_a_batted_ball_or_across_halves():
     """독립 리뷰 — 직전 상태 뒤 공이 맞아 나간 화면이 이미 끝났으면 늦게 보인 그 타구의 결과다
     (다음 투구·다시보기 화면을 결정구로 잡아 출루를 사구로 냈다). 직전 상태가 보이기 전의
@@ -2404,6 +2434,25 @@ def test_a_hit_said_with_no_pitch_view_before_a_skipped_half():
     assert [j.code for j in judge(seen, wild, min_repeat=1)] == ["out"]
 
 
+def test_a_one_out_hit_before_two_skipped_outs():
+    """2025 한국시리즈 3차전 2회말·준플레이오프 1차전 4회초 — 1사에서 적시타 뒤 아웃 둘(병살 등)을
+    건너뛰고 다음 반 이닝으로 갔다. 첫 투구 화면이 맞아 나갔고 해설이 안타면 출루. 해설이 없거나
+    희생플라이면, 첫 화면이 공이 안 맞은 것이면 예전대로 '아웃'."""
+    on12 = (True, True, False)
+    seen = twice(R(0, outs=1, strikes=1, bases=on12), R(30, half="bot", away=1))
+    hit = [Cue(3, "pitch_seen", ""), _view(4, "in_play"),
+           Cue(10, "speech", "좌익수 앞에 안타 타점")]
+    assert [j.code for j in judge(seen, hit)] == ["reach"]
+    assert [j.code for j in judge(seen, hit[:2])] == ["out"]
+    sf = hit[:2] + [Cue(10, "speech", "희생플라이 안타 하나 없이 한 점")]
+    assert [j.code for j in judge(seen, sf)] == ["out"]
+    looked = [Cue(3, "pitch_seen", ""), _view(4, "no_play"), hit[2]]
+    assert [j.code for j in judge(seen, looked)] != ["reach"]
+    # 폭투·실책 득점 말이 있으면 안타 말이 있어도 아니다(독립 리뷰)
+    wild = hit + [Cue(12, "speech", "공이 빠졌어요 폭투로 들어옵니다")]
+    assert [j.code for j in judge(seen, wild)] == ["out"]
+
+
 def test_asr_spelling_of_hit_by_pitch():
     """와일드카드 1차전 7회초 — 받아쓰기가 '몸에 맞는 공'을 '못 맞는 공'으로 적어 2-2 사구가
     '출루'였다."""
@@ -2474,8 +2523,11 @@ def test_strikeout_call_in_commentary():
         return [j.code for j in judge(seen, cues, min_repeat=1) if j.transition is not None]
 
     assert codes(pitch) == ["out"]
+    # 받아쓰기의 '스윙 삼진' 다른 표기(2025 와일드카드 1차전·플레이오프 1차전·준PO 1차전)
     for said in ("높은 공에 스윙 스트라이크 아웃. 위기 상황.", "- 들어갔어요. 로킹 스트라이크아웃.",
-                 "바깥쪽 변화골로 킹 스트라이크 아웃!"):
+                 "바깥쪽 변화골로 킹 스트라이크 아웃!", "바깥쪽 볼입니다. 스윙 선진! 경기 끝!",
+                 "스프링 섬지! 스프링 섬지!", "가장 많이 승리를 거두는 투수입니다.- 6번째 탈삼."):
         assert codes(pitch + [Cue(6, "speech", said)]) == ["strikeout"], said
-    said = "땅볼을 유도했지만 스트라이크 아웃을 잡은 거나 진배 없어요."
-    assert codes(pitch + [Cue(6, "speech", said)]) == ["out"]
+    for said in ("땅볼을 유도했지만 스트라이크 아웃을 잡은 거나 진배 없어요.",
+                 "선진 야구를 보여 줍니다"):
+        assert codes(pitch + [Cue(6, "speech", said)]) == ["out"], said
