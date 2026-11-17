@@ -9293,6 +9293,396 @@
      "note": "3루 땅볼 2아웃(해설) — 경기 끝(마지막 아웃은 다음 판독 없음)"
     }
    ]
+  },
+  "velX0VMSLAQ": {
+   "title": "시험용 · 2025 KBO 와일드카드 결정전 2차전 NC-삼성(대구) 하이라이트 · TVING(MBC 중계)",
+   "layout": "mbc_postseason_box",
+   "plays": [
+    {
+     "t": 73.1,
+     "pitch_end": 78.6,
+     "end": 88.3,
+     "code": "strikeout",
+     "sure": true,
+     "note": "1회초 김주원 1-2 루킹 삼진(해설 '바깥쪽. 루킹 삼진')"
+    },
+    {
+     "t": 88.3,
+     "pitch_end": 92.3,
+     "end": 101.1,
+     "code": "strikeout",
+     "sure": true,
+     "note": "최원준 풀카운트 삼진 2아웃(해설 '연속 2개의 삼진') — 3아웃은 안 나옴"
+    },
+    {
+     "t": 101.1,
+     "pitch_end": 103.8,
+     "end": 109.1,
+     "code": "reach",
+     "sure": true,
+     "note": "1회말 이재현 3-2 안타(해설 '유격수 키를 넘기는 안타') — 무사 1루"
+    },
+    {
+     "t": 109.1,
+     "pitch_end": 111.8,
+     "end": 120.4,
+     "code": "out",
+     "sure": true,
+     "note": "김성윤 희생번트(해설 '희생번트 성공') — 1사 2루"
+    },
+    {
+     "t": 120.4,
+     "pitch_end": 125.6,
+     "end": 127.6,
+     "code": "walk_or_hbp",
+     "sure": true,
+     "note": "구자욱 3-1에서 출루 — 1사 1·2루"
+    },
+    {
+     "t": 127.6,
+     "pitch_end": 132.1,
+     "end": 135.1,
+     "code": "out",
+     "sure": true,
+     "note": "디아즈 우익수 뜬공(해설 '최원준이 잡아내며') — 2사 1·2루"
+    },
+    {
+     "t": 135.1,
+     "pitch_end": 139.4,
+     "end": 149.6,
+     "code": "walk",
+     "sure": true,
+     "note": "김영웅 볼넷(해설 '볼넷') — 2사 만루"
+    },
+    {
+     "t": 149.6,
+     "pitch_end": 154.4,
+     "end": 157.6,
+     "code": "none",
+     "sure": false,
+     "note": "이성규 2-2 볼·스트라이크"
+    },
+    {
+     "t": 157.6,
+     "pitch_end": 163.6,
+     "end": 177.7,
+     "code": "walk",
+     "sure": true,
+     "note": "이성규 3-2 밀어내기 볼넷 1-0(해설 '볼넷이 나왔고')"
+    },
+    {
+     "t": 177.7,
+     "pitch_end": 184.2,
+     "end": 203.4,
+     "code": "walk",
+     "sure": true,
+     "note": "강민호 풀카운트 밀어내기 볼넷 2-0"
+    },
+    {
+     "t": 203.4,
+     "pitch_end": 207.4,
+     "end": 220.5,
+     "code": "out",
+     "sure": true,
+     "note": "류지혁 1루 땅볼 3아웃(해설 '잡아서 베이스를 밟습니다. 이닝 종료')"
+    },
+    {
+     "t": 220.5,
+     "pitch_end": 225.7,
+     "end": 227.5,
+     "code": "strikeout",
+     "sure": true,
+     "note": "2회말 김헌곤 루킹 삼진(해설) — 1사"
+    },
+    {
+     "t": 227.5,
+     "pitch_end": 230.5,
+     "end": 246.2,
+     "code": "out",
+     "sure": true,
+     "note": "이재현 중견수 뜬공(해설 '최원준이 잡아냅니다') — 2사"
+    },
+    {
+     "t": 246.2,
+     "pitch_end": 248.2,
+     "end": 271.0,
+     "code": "out_any",
+     "sure": true,
+     "note": "김성윤 아웃 3아웃"
+    },
+    {
+     "t": 271.0,
+     "pitch_end": 274.5,
+     "end": 278.8,
+     "code": "none",
+     "sure": false,
+     "note": "3회초 김정호 볼·스트라이크"
+    },
+    {
+     "t": 278.8,
+     "pitch_end": 281.8,
+     "end": 284.8,
+     "code": "out_any",
+     "sure": true,
+     "note": "김정호 아웃(높은 공 타격) — 1사"
+    },
+    {
+     "t": 284.8,
+     "pitch_end": 288.8,
+     "end": 295.5,
+     "code": "out",
+     "sure": true,
+     "note": "김주원 좌익수 뜬공(해설 '좌익수! 잡아냅니다') — 2사"
+    },
+    {
+     "t": 295.5,
+     "pitch_end": 303.0,
+     "end": 312.3,
+     "code": "out",
+     "sure": true,
+     "note": "최원준 중견수 뜬공 3아웃(해설 '제자리에서 잡아내면서 스리아웃')"
+    },
+    {
+     "t": 312.3,
+     "pitch_end": 321.6,
+     "end": 326.6,
+     "code": "strikeout",
+     "sure": true,
+     "note": "3회말 구자욱 풀카운트 루킹 삼진(해설) — 다음 판독 2사(아웃 하나는 못 봄)"
+    },
+    {
+     "t": 326.6,
+     "pitch_end": 331.3,
+     "end": 339.8,
+     "code": "out_any",
+     "sure": false,
+     "note": "김영웅 2-2 뒤 3아웃"
+    },
+    {
+     "t": 339.8,
+     "pitch_end": 343.8,
+     "end": 351.8,
+     "code": "reach",
+     "sure": true,
+     "note": "4회초 박민우 2-2 우전 안타(해설) — 무사 1루"
+    },
+    {
+     "t": 351.8,
+     "pitch_end": 355.3,
+     "end": 360.6,
+     "code": "out",
+     "sure": true,
+     "note": "데이비슨 내야 뜬공(해설 '이재현이 처리') — 1사 1루"
+    },
+    {
+     "t": 360.6,
+     "pitch_end": 363.6,
+     "end": 372.4,
+     "code": "out",
+     "sure": true,
+     "note": "권희동 내야 뜬공(해설 '김영웅이 쫓아갑니다') — 2사 1루"
+    },
+    {
+     "t": 372.4,
+     "pitch_end": 375.1,
+     "end": 391.6,
+     "code": "reach",
+     "sure": true,
+     "note": "이우성 내야 안타(해설 '이렇게 살아납니다') — 2사 1·2루"
+    },
+    {
+     "t": 391.6,
+     "pitch_end": 395.1,
+     "end": 412.6,
+     "code": "out",
+     "sure": true,
+     "note": "대타 오영수 좌익수 뜬공 3아웃(해설)"
+    },
+    {
+     "t": 412.6,
+     "pitch_end": 417.9,
+     "end": 418.2,
+     "code": "strikeout",
+     "sure": true,
+     "note": "4회말 이성규 헛스윙 삼진(해설 '스윙 삼진!') — 1사"
+    },
+    {
+     "t": 418.2,
+     "pitch_end": 420.4,
+     "end": 438.7,
+     "code": "out",
+     "sure": true,
+     "note": "강민호 3루 땅볼(해설) — 3아웃은 안 나옴"
+    },
+    {
+     "t": 438.7,
+     "pitch_end": 442.7,
+     "end": 471.0,
+     "code": "out",
+     "sure": true,
+     "note": "5회초 2사 김주원 풀카운트 우익수 뜬공 3아웃(해설 '잡았네요')"
+    },
+    {
+     "t": 471.0,
+     "pitch_end": 473.5,
+     "end": 490.2,
+     "code": "out",
+     "sure": true,
+     "note": "5회말 김헌곤 땅볼(해설 '건져냈어요… 데이비슨') — 1사"
+    },
+    {
+     "t": 490.2,
+     "pitch_end": 494.5,
+     "end": 503.0,
+     "code": "out",
+     "sure": true,
+     "note": "이재현 중견수 뜬공(해설 '또다시 최원준에게 잡히는군요') — 2사"
+    },
+    {
+     "t": 503.0,
+     "pitch_end": 508.2,
+     "end": 517.0,
+     "code": "strikeout",
+     "sure": true,
+     "note": "김성윤 2-2 루킹 삼진 3아웃(해설)"
+    },
+    {
+     "t": 517.0,
+     "pitch_end": 521.5,
+     "end": 525.5,
+     "code": "walk_or_hbp",
+     "sure": true,
+     "note": "6회초 1사 박민우 3-1에서 출루(해설 '세 차례 모두 출루') — 1사 1루"
+    },
+    {
+     "t": 525.5,
+     "pitch_end": 529.5,
+     "end": 539.3,
+     "code": "?",
+     "sure": false,
+     "note": "데이비슨 1-2에서 출루 — 종류 못 봄, 1사 1·2루"
+    },
+    {
+     "t": 539.3,
+     "pitch_end": 546.0,
+     "end": 549.3,
+     "code": "none",
+     "sure": false,
+     "note": "대타 박건우 볼·스트라이크"
+    },
+    {
+     "t": 549.3,
+     "pitch_end": 555.8,
+     "end": 558.8,
+     "code": "strikeout",
+     "sure": true,
+     "note": "박건우 3-2 루킹 삼진(해설 '중앙에 꽂힙니다') — 2사 1·2루"
+    },
+    {
+     "t": 558.8,
+     "pitch_end": 562.0,
+     "end": 577.3,
+     "code": "none",
+     "sure": false,
+     "note": "이우성 볼"
+    },
+    {
+     "t": 577.3,
+     "pitch_end": 581.8,
+     "end": 604.3,
+     "code": "out",
+     "sure": true,
+     "note": "이우성 우익수 뜬공 3아웃(해설 '워닝 트랙 잡아내는군요 쓰리아웃')"
+    },
+    {
+     "t": 604.3,
+     "pitch_end": 607.1,
+     "end": 616.6,
+     "code": "out",
+     "sure": true,
+     "note": "6회말 디아즈 중견수 뜬공(해설 '잡아내서 투아웃')"
+    },
+    {
+     "t": 616.6,
+     "pitch_end": 618.6,
+     "end": 636.6,
+     "code": "strikeout",
+     "sure": true,
+     "note": "김영웅 삼진 3아웃(해설 '다시 삼진 잡은… 로건도 제 몫')"
+    },
+    {
+     "t": 636.6,
+     "pitch_end": 639.9,
+     "end": 680.7,
+     "code": "out_any",
+     "sure": false,
+     "note": "8회초 최원준 아웃 — 다음 판독 2사(아웃 하나는 못 봄)"
+    },
+    {
+     "t": 680.7,
+     "pitch_end": 693.7,
+     "end": 715.7,
+     "code": "strikeout",
+     "sure": false,
+     "note": "데이비슨 헛스윙 삼진으로 보임(해설 '헛스윙… 가라비토') — 3아웃"
+    },
+    {
+     "t": 715.7,
+     "pitch_end": 721.2,
+     "end": 724.0,
+     "code": "walk_or_hbp",
+     "sure": true,
+     "note": "8회말 김헌곤 3-1에서 출루(타자 웅크림) — 무사 1루"
+    },
+    {
+     "t": 724.0,
+     "pitch_end": 726.2,
+     "end": 745.2,
+     "code": "out",
+     "sure": true,
+     "note": "이재현 희생번트 — 1사 2루"
+    },
+    {
+     "t": 745.2,
+     "pitch_end": 747.2,
+     "end": 768.8,
+     "code": "steal",
+     "sure": true,
+     "note": "김헌곤 3루 도루(해설 '기습 도루가 완벽하게 성공') — 1사 3루"
+    },
+    {
+     "t": 768.8,
+     "pitch_end": 772.0,
+     "end": 809.0,
+     "code": "sac_fly",
+     "sure": true,
+     "note": "김성윤 좌익수 희생플라이 3-0(해설 '좌익수 잡았습니다') — 3아웃은 안 나옴"
+    },
+    {
+     "t": 809.0,
+     "pitch_end": 814.5,
+     "end": 816.8,
+     "code": "walk_or_hbp",
+     "sure": true,
+     "note": "9회초 천재환 3-2에서 출루 — 무사 1루"
+    },
+    {
+     "t": 816.8,
+     "pitch_end": 819.3,
+     "end": 829.1,
+     "code": "double_play",
+     "sure": true,
+     "note": "이우성 유격수 병살(해설 '유격수 정면… 더블 플레이') — 2사"
+    },
+    {
+     "t": 829.1,
+     "pitch_end": 831.3,
+     "end": 846.3,
+     "code": "out",
+     "sure": true,
+     "note": "도태훈 투수 굴절 땅볼 — 경기 끝(해설 '1루에. 이렇게 경기 종료')"
+    }
+   ]
   }
  },
  "_note": "1080p 경기 하이라이트의 정답 — 사람이 투구 화면마다 점수판(전·후)과 그 사이 장면을 보고 매겼다. t·pitch_end·end = 그 투구 화면 시작·끝·다음 투구 화면 시작(초). code: reach(안타·실책 출루), out(인플레이 아웃), strikeout, out_any(삼진인지 인플레이 아웃인지 못 가림), walk, homerun, sac_fly, none(점수판이 그 타석 안에서만 바뀜), ?(결과를 못 봄 — 채점 제외). sure=false는 확실하지 않은 정답."
