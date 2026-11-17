@@ -1,0 +1,59 @@
+﻿video,t,truth,sure,engine,check,evidence,verdict,note
+LMEEAksEBuU,82.6,strikeout,True,strikeout,refined,"점수판 아웃+1 득점+0 주자 000→000; 해설 '다승, 승률, 그리고 탈삼진 이렇게 투수 4관왕에 올랐던' (70s)",맞음,1회초 1사 0-2 뒤 파울팁 삼진(해설 '파울팁 삼진') — 2사
+LMEEAksEBuU,91.8,strikeout,True,strikeout,confirmed,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (96s),맞음,구자욱 3-2 삼진 3아웃(폰세가 소리치며 내려감)
+LMEEAksEBuU,113.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,2회초 무사 중견수 쪽 안타 — 무사 1루
+LMEEAksEBuU,124.9,reach,True,reach reach reach,video_only video_only video_only,점수판 아웃+0 득점+0 주자 100→011 | 점수판 아웃+0 득점+1 주자 011→010 | 점수판 아웃+0 득점+1 주자 010→001,맞음,"라인 안쪽 2루타(해설 '페어볼 디아즈 3루에서 멈춤') — 무사 2·3루, 이어 수비 실책으로 2-0"
+LMEEAksEBuU,181.4,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 001→001; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (186s),맞음,무사 3루 삼진(점수판 K 표시) — 1사 3루
+LMEEAksEBuU,190.4,sac_fly,True,sac_fly,refined,점수판 아웃+1 득점+1 주자 001→000; 해설 '3루자 태그업 홈으로 홈으로 옵니다 홈으로 홈으로 슬라이딩도 필요 없었습니다 이렇게 되면 불리한 카운트에서 가민우 선수가 자신의 역할을 다 해줬고 네' (200s),맞음,중견수 희생플라이 3-0(해설 '중견수 잡습니다… 3루주자 태그업 홈으로') — 2사
+LMEEAksEBuU,204.4,none,True,,,,조용함,더그아웃 장면 — 점수판 그대로
+LMEEAksEBuU,207.4,out_any,False,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,더그아웃 장면 뒤 2회초 3아웃(강민호) — 장면 없음
+LMEEAksEBuU,214.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,2회말 선두 하주석 우전 안타(해설) — 무사 1루
+LMEEAksEBuU,229.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→110,맞음,좌전 안타(해설 '연속 안타') — 무사 1·2루
+LMEEAksEBuU,241.5,out,True,out,video_only,점수판 아웃+1 득점+0 주자 110→011,맞음,희생번트 — 1사 2·3루
+LMEEAksEBuU,259.7,out,True,out,video_only,점수판 아웃+1 득점+0 주자 011→011,맞음,"3루수 땅볼, 3루 주자 런다운 아웃(해설 '홈으로 가장 앞선 주자가 걸렸습니다') — 2사 2·3루"
+LMEEAksEBuU,277.3,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 011→101,맞음,"땅볼 홈 송구 세이프(야수선택) 3-1, 비디오 판독 원심 유지(해설 '홈에서… 한화의 첫 득점') — 2사 1·3루"
+LMEEAksEBuU,311.5,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 101→111; [관절] 타자가 공을 그냥 보냄 (313s); [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (316s),맞음,3-1에서 볼넷(해설 '다시 빠집니다 볼넷') — 2사 만루
+LMEEAksEBuU,324.8,reach,True,reach reach runner,video_only video_only video_only,점수판 아웃+0 득점+2 주자 111→011 | 점수판 아웃+0 득점+1 주자 011→010 | 점수판 아웃+0 득점+0 주자 010→001,맞음,문현빈 주자 일소 3루타 4-3(해설 '1루주자까지… 4대3 역전') — 2사 3루
+LMEEAksEBuU,379.6,reach,True,reach reach out,video_only video_only video_only,점수판 아웃+0 득점+1 주자 001→001 | 점수판 아웃+0 득점+0 주자 001→100 | 점수판 아웃+1 득점+0 주자 100→000,맞음,노시환 적시타 5-3(해설 '3루주자 득점') — 3아웃은 안 나옴
+LMEEAksEBuU,406.1,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,3회초 무사 2-2 외야 안타 — 무사 1루
+LMEEAksEBuU,417.7,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→101,맞음,안타로 1·3루 — 무사 1·3루
+LMEEAksEBuU,434.4,none,True,,,,조용함,타자 클로즈업 — 점수판 그대로
+LMEEAksEBuU,439.4,none,True,,,,조용함,폰세 타임 요청 어필 — 점수판 그대로
+LMEEAksEBuU,478.2,none,True,,,,조용함,볼·스트라이크(1-0 → 1-2)
+LMEEAksEBuU,510.2,sac_fly,True,sac_fly,refined,점수판 아웃+1 득점+1 주자 101→100; 해설 '3점 차 따라 붙고 있는 삼성 라이언스 구자욱의 희생플라이' (520s),맞음,구자욱 좌익수 희생플라이 4-5(해설 '구자욱의 희생플라이') — 1사 1루
+LMEEAksEBuU,543.0,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 100→010; [점수판] 삼진 표시(K) (547s),맞음,3-2 삼진과 1루 주자 2루 도루(해설 '주자 뛰고 삼진') — 2사 2루
+LMEEAksEBuU,556.3,reach,True,reach,refined,점수판 아웃+1 득점+1 주자 010→000; 해설 '김영웅의 적시타가 터졌습니다. 동점타입니다. 대전 한화생명볼파크의 4분의1입니다.' (580s),맞음,김영웅 우전 적시타 5-5(해설 '김영웅의 적시타… 동점타')
+LMEEAksEBuU,590.8,homerun,True,homerun out,confirmed video_only,점수판 아웃+0 득점+1 주자 000→000; 해설 '김태훈의 역전 솔로 홈런 자신의 선발 기용의 이유를 역전 솔로홈런' (600s); [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (593s) | 점수판 아웃+3 득점+0 주자 000→000,맞음,4회초 김태훈 역전 솔로 홈런 6-5(해설)
+LMEEAksEBuU,624.1,walk,True,walk,video_only,점수판 아웃+0 득점+0 주자 000→100; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (630s),맞음,4회말 1사 리베라토 3-1에서 볼넷(해설 '바깥쪽 볼넷입니다') — 1사 1루
+LMEEAksEBuU,643.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→101,맞음,외야 안타로 1·3루 — 1사 1·3루
+LMEEAksEBuU,662.1,double_play,True,double_play,refined,점수판 아웃+2 득점+0 주자 101→000; 해설 '점화 당긴 타구 3루수 막아놓고 앞선 주자 그리고 1루 이어집니다 병살타' (660s),맞음,노시환 3루수 병살타(해설 '앞선 주자 그리고 1루 이어집니다 병살타') — 3아웃
+LMEEAksEBuU,681.2,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 000→000; [점수판] 삼진 표시(K) (687s),맞음,"5회초 무사 김성윤 3-2 헛스윙 삼진(해설 '스윙 삼진', K 표시) — 1사"
+LMEEAksEBuU,688.9,strikeout,True,strikeout,video_only,점수판 아웃+2 득점+0 주자 000→000; [점수판] 삼진 표시(K) (693s),맞음,3-2 삼진(K 표시) — 다음은 6회말
+LMEEAksEBuU,699.4,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→010,맞음,6회말 선두 2루타(해설 '2루까지 힘차게') — 무사 2루
+LMEEAksEBuU,718.5,none,True,,,,조용함,볼·스트라이크·투수 교체(양창섭 → 배찬승)
+LMEEAksEBuU,733.0,none,True,,,,조용함,파울·볼(체크스윙)
+LMEEAksEBuU,752.5,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→010,맞음,손아섭 우중간 적시 2루타 6-6(해설 '중견수 키를 넘깁니다') — 무사 2루
+LMEEAksEBuU,790.3,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 010→011,맞음,리베라토 우측 담장 맞는 안타(해설 '몬스터월을 때립니다') — 무사 2·3루
+LMEEAksEBuU,831.6,none,True,,,,조용함,볼·스트라이크
+LMEEAksEBuU,837.8,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 011→011; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (841s),맞음,문현빈 3-2 삼진(포수가 잡음) — 1사 2·3루
+LMEEAksEBuU,846.3,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 011→011; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (858s); [점수판] 삼진 표시(K) (860s),맞음,노시환 헛스윙 삼진(해설 '스윙 삼진') — 2사 2·3루
+LMEEAksEBuU,863.6,reach,True,reach,video_only,점수판 아웃+0 득점+2 주자 011→010,맞음,채은성 우측 2타점 2루타 8-6(해설 '채은성의 2루타')
+LMEEAksEBuU,891.1,strikeout,False,strikeout,confirmed,점수판 아웃+1 득점+0 주자 010→000; 해설 '스윙 3진 원아웃' (930s); [점수판] 삼진 표시(K) (906s),맞음,6회말 3아웃 스윙 삼진으로 보임(해설 '스윙 삼진 이호성의 입장에선') — 투구 화면은 투수가 내려가는 장면
+LMEEAksEBuU,925.9,none,True,,,,조용함,7회초 볼·스트라이크(1-0 → 1-2)
+LMEEAksEBuU,931.9,strikeout,True,strikeout,conflict,점수판 아웃+1 득점+0 주자 000→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (936s); 영상은 삼진 — 해설과 달라 보류,맞음,1-2 헛스윙 삼진(해설 '스윙 삼진 원아웃') — 1사
+LMEEAksEBuU,945.4,out,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,맞음,대타 박병호 외야 뜬공 — 2사
+LMEEAksEBuU,955.4,none,True,,,,조용함,볼(162km) — 1-2
+LMEEAksEBuU,964.2,strikeout,True,out,video_only,점수판 아웃+1 득점+0 주자 000→000,틀림,"1-2 헛스윙 삼진, 공이 빠져 1루 송구 아웃(해설 '떨어지는 건 결국 참지 못했고') — 3아웃"
+LMEEAksEBuU,991.5,none,True,,,,조용함,8회초 볼·스트라이크
+LMEEAksEBuU,1005.2,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 000→100,맞음,빗맞은 안타(해설 '좌익수와 유격수 사이에 떨어집니다… 안타 출루') — 무사 1루
+LMEEAksEBuU,1017.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,희생번트 — 1사 2루
+LMEEAksEBuU,1027.0,strikeout,True,strikeout,video_only,점수판 아웃+1 득점+0 주자 010→010; [점수판] 삼진 표시(K) (1031s),맞음,디아즈 2-2 삼진(K 표시) — 2사 2루
+LMEEAksEBuU,1033.3,strikeout,True,strikeout,conflict,점수판 아웃+1 득점+0 주자 010→000; [관절] 투구 뒤 선수 클로즈업 — 공이 안 맞음 (1040s); [점수판] 삼진 표시(K) (1041s); 영상은 삼진 — 해설과 달라 보류,맞음,삼진 3아웃(K 표시)
+LMEEAksEBuU,1058.3,walk,True,walk,confirmed,점수판 아웃+0 득점+0 주자 000→100; 해설 '타석에서 빠진 민현빈 선수입니다. 볼넷입니다.' (1060s),맞음,8회말 2사 문현빈 볼넷(해설 '볼넷입니다') — 2사 1루
+LMEEAksEBuU,1066.8,reach,True,reach,video_only,점수판 아웃+0 득점+0 주자 100→101,맞음,노시환 안타로 1·3루(해설 '3루까지') — 2사 1·3루
+LMEEAksEBuU,1089.6,reach,True,reach reach out,video_only video_only video_only,점수판 아웃+0 득점+1 주자 101→101 | 점수판 아웃+0 득점+0 주자 101→110 | 점수판 아웃+1 득점+0 주자 110→000,맞음,채은성 적시타 9-6(해설 '3루주자 불러들입니다… 석 점 차') — 3아웃은 안 나옴
+LMEEAksEBuU,1115.8,homerun,True,homerun reach,confirmed video_only,점수판 아웃+0 득점+1 주자 000→000; 해설 '오른쪽으로 공을 띄웠고 담장 쪽 넘어갑니다. 이재현이 밀어쳐서 홈런을 뗍니다.' (1120s); [관절] 투구 뒤 넓은 경기장 화면 — 공이 맞아 나감 (1118s) | 점수판 아웃+0 득점+0 주자 000→100,맞음,9회초 이재현 솔로 홈런 7-9(해설 '밀어쳐서 홈런') — 다음 타자 안타는 같은 칸
+LMEEAksEBuU,1161.9,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,"유격수 땅볼, 1루 주자 2루로(해설 '높은 바운드 유격수… 1루') — 1사 2루"
+LMEEAksEBuU,1172.7,reach,True,reach,video_only,점수판 아웃+0 득점+1 주자 010→100,맞음,좌전 적시타 8-9(해설 '잡아당깁니다 왼쪽') — 1사 1루
+LMEEAksEBuU,1212.2,out,True,out,video_only,점수판 아웃+1 득점+0 주자 100→010,맞음,"2루수 땅볼, 주자 2루로 — 2루 판독 세이프 유지(해설) — 2사 2루"
+LMEEAksEBuU,1224.0,out,True,out,video_only,점수판 아웃+1 득점+0 주자 010→000,맞음,중견수 뜬공 경기 끝 9-8(해설 '중견수 마지막 아웃 카운트… 경기 끝')

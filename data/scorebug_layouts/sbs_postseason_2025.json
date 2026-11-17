@@ -1,0 +1,154 @@
+{
+ "_note": "2025 포스트시즌 SBS 왼쪽 위 상자(플레이오프 1차전 LMEEAksEBuU) — 2026 SBS 상자(sbs_postseason_box)와 주자·아웃·볼·스트라이크·▲/▼·삼진 표시 자리가 같다(1080p에서 잼, 화소 상태 58칸 앞뒤가 정답 초안과 맞음). 다른 점: 제목 줄이 없고 바탕이 미색, 스트라이크 점이 주황. 볼(초록)·스트라이크(주황)가 같이 켜진 화면을 VLM이 늘 '점수판 없음'으로 답해(같은 그림 반복·배율 3·여백 0.01 모두) 판독 198장 중 71장을 잃었다 — vlm_mask로 점 칸(화소로 읽음)을 바탕색으로 칠해 보내면 회차·점수를 읽는다(못 읽던 5장 5/5).",
+ "name": "sbs_postseason_2025",
+ "crop": [
+  0.05,
+  0.0704,
+  0.1688,
+  0.0852
+ ],
+ "scale": 2.0,
+ "base_fill": "color",
+ "base_hue": [
+  30,
+  70
+ ],
+ "bases": {
+  "1": [
+   0.2025,
+   0.1169
+  ],
+  "2": [
+   0.1878,
+   0.1026
+  ],
+  "3": [
+   0.173,
+   0.1169
+  ]
+ },
+ "outs": [
+  [
+   0.1396,
+   0.1343
+  ],
+  [
+   0.1523,
+   0.1339
+  ]
+ ],
+ "balls": [
+  [
+   0.1395,
+   0.0923
+  ],
+  [
+   0.1523,
+   0.0923
+  ],
+  [
+   0.165,
+   0.0923
+  ]
+ ],
+ "strikes": [
+  [
+   0.1395,
+   0.1133
+  ],
+  [
+   0.1523,
+   0.1133
+  ]
+ ],
+ "half_pair": [
+  [
+   0.1229,
+   0.0815,
+   0.1292,
+   0.0954
+  ],
+  [
+   0.1229,
+   0.1269,
+   0.1302,
+   0.1417
+  ]
+ ],
+ "mark": [
+  0.0781,
+  0.1602,
+  0.0932,
+  0.1861
+ ],
+ "mark_hue": [
+  40,
+  70
+ ],
+ "mark_on": [
+  [
+   0.0799,
+   0.1731
+  ],
+  [
+   0.0901,
+   0.1824
+  ]
+ ],
+ "mark_off": [
+  [
+   0.0932,
+   0.1731
+  ],
+  [
+   0.0724,
+   0.1731
+  ],
+  [
+   0.1,
+   0.1731
+  ]
+ ],
+ "panel": [
+  [
+   0.2135,
+   0.0787,
+   0.88,
+   0.84,
+   0.77
+  ],
+  [
+   0.166,
+   0.1343,
+   0.95,
+   0.92,
+   0.85
+  ],
+  [
+   0.166,
+   0.078,
+   0.93,
+   0.89,
+   0.81
+  ],
+  [
+   0.2,
+   0.085,
+   0.91,
+   0.87,
+   0.8
+  ]
+ ],
+ "prompt_note": "Layout of this score bug: on the LEFT, two colored rows each with a team name and a large number - those two numbers are the SCORES (upper row = away, lower row = home). To the RIGHT of them is a white panel; its leftmost column has a small triangle on top, ONE digit (or two) in the middle, and a small triangle at the bottom - that middle number is the INNING, never a score. The dots right of it are balls, strikes and outs; do not put the inning into balls or strikes.",
+ "vlm_mask": [
+  0.1327,
+  0.0806,
+  0.1724,
+  0.1462
+ ],
+ "vlm_mask_rgb": [
+  0.91,
+  0.886,
+  0.824
+ ]
+}

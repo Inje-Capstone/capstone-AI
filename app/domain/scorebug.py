@@ -95,7 +95,12 @@ def third_out_cleared(a: Reading, b: Reading) -> bool:
     보이고 다음 반 이닝으로 넘어간다(준플레이오프 2차전 6회초 삼진·9회초 경기 끝 삼진). 타석은
     끝났는데 주자·아웃·득점이 안 늘어 `possible_step`으로는 '한 번에 바뀔 수 없는' 판독이다.
     """
-    return (_half_order(a) == _half_order(b) and a.outs == b.outs == 2 and a.bases == b.bases
+    return a.outs == 2 and count_cleared(a, b)
+
+
+def count_cleared(a: Reading, b: Reading) -> bool:
+    """카운트만 0-0으로 지워졌나 — 같은 반 이닝, 아웃·주자·점수 그대로."""
+    return (_half_order(a) == _half_order(b) and a.outs == b.outs and a.bases == b.bases
             and (a.away, a.home) == (b.away, b.home)
             and (b.balls, b.strikes) == (0, 0) != (a.balls, a.strikes))
 
@@ -297,9 +302,23 @@ def _drop_spikes(runs: list[tuple[Reading, int]]) -> list[tuple[Reading, int]]:
             c_odd = (after_c is not None and _half_order(after_c) == _half_order(c)
                      and (after_c.bases, after_c.outs) == (c.bases, c.outs)
                      and after_c.balls >= r.balls and after_c.strikes >= r.strikes)
+            # c가 이 판독(r)의 카운트만 지운 것이고 c 다음 판독에서 플레이 결과(주자·아웃·점수)가
+            # 보이면 c는 '타석이 끝나 카운트부터 지운' 판독이다 — SBS 상자는 타석이 끝나면 카운트를
+            # 먼저 0-0으로 지우고 주자·점수는 몇 초 뒤에 바꾼다(2025 플레이오프 1차전: 볼넷 뒤 다음
+            # 타자 1-2 판독, 진루타 뒤 다음 타자 1-1 판독이 뒤의 '0-0'·안타 때문에 버려져 볼넷이
+            # 다음 타자의 스윙으로 '출루', 진루타 아웃이 다음 칸으로 밀림). r이 앞 판독(a) 뒤 새
+            # 타석의 첫 판독일 때만 — 같은 타석의 카운트 진행(0-2)을 살리면 그 뒤 사구가
+            # '2스트라이크 출루'(낫아웃일 수도)로 바뀐다(플레이오프 4차전 사구 둘)
+            new_pa = ((r.outs, r.bases, r.away, r.home) != (a.outs, a.bases, a.away, a.home)
+                      or r.balls < a.balls or r.strikes < a.strikes)
+            cleared = (new_pa and count_cleared(r, c) and after_c is not None
+                       and _half_order(after_c) == _half_order(c)
+                       and (after_c.outs, after_c.bases, after_c.away, after_c.home)
+                       != (c.outs, c.bases, c.away, c.home)
+                       and possible_step(c, after_c))
             spike = possible_step(a, c) and not (possible_step(a, r) and (
                 possible_step(r, c) or (same_score and c_odd and _step_but_count(r, c))
-                or ended))
+                or ended or cleared))
             if spike and not _next_is_spike(runs, i, a) and not (
                     n == 1 and (_starts_next_half(a, r, c) or _ends_half(a, r, c))):
                 continue

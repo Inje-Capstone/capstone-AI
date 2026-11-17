@@ -10,6 +10,8 @@
 
 > 11-17(와일드카드 1차전): 판독기 v6(점수판이 가려진 구간을 건너 앞당기고, 앞당긴 시각은 그 상태가 처음 보인 초의 끝으로)과 TVING 바탕 검은 지점으로 처음 읽은 시각부터 다시 찍은 스냅샷 `../clips_private/ks1_final_v7`로 채점한 값이다 — 판독 내용은 그대로, VLM 요청 없음.
 
+> 11-17: 2025 플레이오프 1차전 측정 때 고친 판정(카운트부터 지우는 점수판의 새 타자 판독, 반 이닝이 바뀐 병살 해설 창, 투구 화면 없는 적시타)으로 다시 채점한 표다(`data/analysis/LOG.md` 2026-11-17).
+
 | 영상 | 채점 칸 | 맞음 | 틀림 | 놓침 | 헛판정/조용함 |
 |---|---|---|---|---|---|
 | luegoydhdxE (시험용 · 2026 KBO 한국시리즈 1차전 삼성-KT(수원) 하이라이트 · TVING) | 50 | 45 | 4 | 1 | 0/1 |
@@ -40,18 +42,18 @@
 | homerun | homerun out | 2 |
 | out | out | 7 |
 | out | out balk | 1 |
-| out_any | out | 6 |
+| out_any | out | 5 |
 | out_any | out strikeout | 1 |
-| out_any | strikeout | 3 |
+| out_any | strikeout | 4 |
 | reach | out | 1 |
-| reach | out reach | 1 |
-| reach | reach | 12 |
+| reach | reach | 13 |
 | reach | runner out | 1 |
 | steal | steal | 1 |
 | strikeout | strikeout | 4 |
 | walk | (없음) | 1 |
 | walk | hbp | 1 |
-| walk | walk | 4 |
+| walk | walk | 3 |
+| walk | walk out | 1 |
 | walk_or_hbp | walk | 1 |
 
 ## 입력별
@@ -59,6 +61,6 @@
 | 입력 | 맞음 | 틀림 | 놓침 | 헛판정 |
 |---|---|---|---|---|
 | 점수판+관절+해설 | 45 | 4 | 1 | 0 |
-| 점수판+관절(해설 없이) | 41 | 8 | 1 | 0 |
+| 점수판+관절(해설 없이) | 42 | 7 | 1 | 0 |
 | 점수판+해설(관절 없이) | 35 | 9 | 6 | 0 |
 | 점수판만 | 34 | 10 | 6 | 0 |

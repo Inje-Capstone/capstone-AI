@@ -2353,6 +2353,57 @@ def test_a_runner_state_survives_the_next_reads_count_misread():
     assert [r.t for r in stabilize(odd, min_repeat=1)] == [0.0, 9.0, 14.0]
 
 
+def test_new_batter_read_survives_the_board_clearing_the_count_first():
+    """2025 플레이오프 1차전 8회말 — SBS 상자는 타석이 끝나면 카운트부터 0-0으로 지우고 주자는
+    몇 초 뒤에 바꾼다. 볼넷 뒤 다음 타자 '2사 1루 1-2' 판독이, 그 타자의 안타로 카운트만 지운
+    '0-0' 판독 때문에 튄 판독으로 버려져 볼넷과 다음 타자의 스윙이 한 전이('출루')로 합쳐졌다.
+    같은 타석의 카운트 진행(0-2)은 예전처럼 버린다 — 살리면 뒤의 사구가 '2스트라이크 출루'가 된다
+    (플레이오프 4차전)."""
+    first, first_third = (True, False, False), (True, False, True)
+    seen = [R(0, outs=2, balls=3), R(8, outs=2, balls=1, strikes=2, bases=first),
+            R(16, outs=2, bases=first), R(17, outs=2, bases=first_third)]
+    assert [r.t for r in stabilize(seen, min_repeat=1)] == [0.0, 8.0, 17.0]
+    cues = [Cue(5, "speech", "볼넷입니다"), Cue(9, "swing"), Cue(9.4, "in_play")]
+    assert [j.code for j in judge(seen, cues, min_repeat=1) if j.transition] == ["walk", "reach"]
+    second, first_second = (False, True, False), (True, True, False)
+    same_pa = [R(0, outs=1, bases=second), R(4, outs=1, strikes=2, bases=second),
+               R(8, outs=1, bases=second), R(12, outs=1, bases=first_second)]
+    assert [r.t for r in stabilize(same_pa, min_repeat=1)] == [0.0, 12.0]
+
+
+def test_double_play_said_before_the_stale_board_across_the_half_change():
+    """2025 플레이오프 1차전 4회말 — 1사 1·3루 병살타 해설 조각(660초)이 병살 뒤에도 그대로인 직전
+    상태(667초)보다 앞서고, 새 상태는 이닝 사이 화면 뒤(681초)라 판정 시각 근처 창 밖이었다.
+    반 이닝이 바뀐 전이는 직전 상태 때의 조각부터 본다. 반 이닝이 안 바뀐 전이는 그대로."""
+    corners = (True, False, True)
+    seen = [R(7, outs=1, bases=corners, half="bot"), R(21, inning=4)]
+    said = [Cue(0, "speech", "당긴 타구 3루수 막아놓고 앞선 주자 그리고 1루 이어집니다 병살타")]
+    assert [j.code for j in judge(seen, said, min_repeat=1)] == ["double_play"]
+    assert [j.code for j in judge(seen, [], min_repeat=1)] == ["out"]
+    # 직전 상태가 보이기 10초 넘게 전의 조각은 앞 플레이 말이다(독립 리뷰)
+    late = [R(25, outs=1, bases=corners, half="bot"), R(30, outs=1, bases=corners, half="bot"),
+            R(50, inning=4)]
+    early = [Cue(12, "speech", "여기서 병살타 하나면 끝나요")]
+    assert [j.code for j in judge(late, early, min_repeat=1)] == ["out"]
+
+
+def test_a_hit_said_with_no_pitch_view_before_a_skipped_half():
+    """2025 플레이오프 1차전 3회초 2사 2루 — 적시타를 다시보기로만 보여 주고(투구 화면 없음) 3회말을
+    건너 4회초로 갔다. 2사에서 점수가 났으니 3아웃 전 플레이이고, 직전 상태 뒤 투구 화면이 없으니
+    안타 해설은 앞 반 이닝 것이다. 공이 안 맞은 투구 화면이 있으면 그대로 '아웃'."""
+    second = (False, True, False)
+    seen = [R(0, outs=2, strikes=2, bases=second, away=4, home=5), R(27, inning=4, away=5, home=5)]
+    said = [Cue(15, "speech", "김영웅의 적시타가 터졌습니다. 동점타입니다")]
+    assert [j.code for j in judge(seen, said, min_repeat=1)] == ["reach"]
+    no_hit = said + [Cue(3, "pitch_seen"), _view(4, "no_play")]
+    assert [j.code for j in judge(seen, no_hit, min_repeat=1)] == ["out"]
+    # 화면 단서가 없을 땐 새 상태가 보인 뒤의 말·폭투 득점 말은 안 쓴다(독립 리뷰)
+    after = [Cue(30, "speech", "선두 타자 안타로 출루합니다")]
+    assert [j.code for j in judge(seen, after, min_repeat=1)] == ["out"]
+    wild = said + [Cue(10, "speech", "폭투로 3루 주자가 들어왔습니다")]
+    assert [j.code for j in judge(seen, wild, min_repeat=1)] == ["out"]
+
+
 def test_asr_spelling_of_hit_by_pitch():
     """와일드카드 1차전 7회초 — 받아쓰기가 '몸에 맞는 공'을 '못 맞는 공'으로 적어 2-2 사구가
     '출루'였다."""
