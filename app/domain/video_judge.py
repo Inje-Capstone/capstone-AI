@@ -360,10 +360,20 @@ def judge_transition(
     # 이닝의 안타·투구를 앞 반 이닝 득점의 근거로 쓰지 않게(독립 리뷰). 말도 직전 상태 뒤의 것만
     first = min((c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
                  and tr.before.t < c.t <= tr.t), key=lambda c: c.t, default=None)
+    # 직전 상태 뒤 투구 화면이 하나도 없으면(안타를 다시보기로만 보여 줌) 해설만 — 새 반 이닝의
+    # 투구가 아직 없으니 그 말은 앞 반 이닝 것이다(2025 플레이오프 1차전 3회초 2사 2루 '김영웅의
+    # 적시타… 동점타' 뒤 3회말을 건너뛰고 4회초)
     if (tr.half_change and tr.before.outs == 2 and not any(a)
-            and first is not None and first.kind == IN_PLAY
+            and (first is None or first.kind == IN_PLAY)
             and _scored_before_third_out(tr, skipped=True)):
-        hit = _speech([c for c in near if c.t > tr.before.t], *HIT_WORDS)
+        told = [c for c in near if c.t > tr.before.t]
+        if first is None:
+            # 화면 단서가 없으면 말만 — 새 상태가 보이기 전의 말만, 폭투·포일·실책 득점이면 아니다
+            # (독립 리뷰)
+            told = [c for c in told if c.t <= tr.t]
+            if _speech(told, "폭투", "포일", "실책"):
+                told = []
+        hit = _speech(told, *HIT_WORDS)
         if hit:
             return make("result", "reach", 0.5, [hit, first], merged=True)
 
@@ -448,6 +458,14 @@ def judge_transition(
             return make("result", "strikeout", 0.5, [k])
         # 판정 시각 근처 말만 — 플레이 전의 '병살 노려야죠'를 병살로 받지 않는다(독립 리뷰)
         dp = _speech(near, *DP_WORDS)
+        if tr.half_change and not dp:
+            # 반 이닝이 바뀐 전이는 새 상태가 이닝 사이 화면 뒤에야 보여 병살 해설이 창 끝에
+            # 걸린다 — 창과 겹치는 받아쓰기 조각까지 본다(조각 시각은 시작이라 말은 ASR_LEAD까지
+            # 뒤에 있다. 2025 플레이오프 1차전 4회말 1사 1·3루 병살타: 조각 660초, 창 661초부터).
+            # 창보다 앞선 플레이 전의 '병살 노려야죠'는 그대로 안 본다. 직전 상태보다 ASR_LEAD 넘게
+            # 앞선 조각도 — 직전 상태가 보이기 전의 말은 앞 플레이 것이다(독립 리뷰)
+            lo = max(tr.t - window[0], tr.before.t) - ASR_LEAD
+            dp = _speech([c for c in cues if lo < c.t <= tr.t], *DP_WORDS)
         if tr.half_change and not dp and not tr.lost_runner:
             # 이닝이 바뀐 전이의 아웃 둘은 하이라이트에선 대개 여러 플레이가 합쳐진 것이다
             return make("result", "out", 0.5, merged=True)

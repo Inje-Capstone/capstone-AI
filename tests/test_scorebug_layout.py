@@ -275,6 +275,28 @@ def test_dark_lit_arrow_and_new_layouts_load():
         assert layout.mark is not None and len(layout.outs) == 2 and len(layout.bases) == 3
 
 
+def test_sbs_2025_layout_masks_dots_for_the_vlm(tmp_path):
+    """2025 SBS 상자 — 2026 상자와 점 자리가 같고, VLM 앞에서 가릴 점 칸(vlm_mask)은 점을
+    모두 덮는다. vlm_mask는 crop 없이 못 쓴다."""
+    import pytest
+
+    new = Layout.load(ROOT / "data" / "scorebug_layouts" / "sbs_postseason_2025.json")
+    old = Layout.load(ROOT / "data" / "scorebug_layouts" / "sbs_postseason_box.json")
+    assert (new.bases, new.outs) == (old.bases, old.outs)
+    assert (new.balls, new.strikes) == (old.balls, old.strikes)
+    assert old.vlm_mask is None and new.vlm_mask is not None
+    x0, y0, x1, y1 = new.vlm_mask
+    assert all(x0 < x < x1 and y0 < y < y1 for x, y in new.balls + new.strikes + new.outs)
+    bad = tmp_path / "bad.json"
+    crop = '"crop": [0, 0, 0.5, 0.5], '
+    for extra in ('"vlm_mask": [0, 0, 1, 1]',  # crop 없음
+                  crop + '"vlm_mask": [0.2, 0.1, 0.1, 0.3]',  # x,y,w,h로 잘못 씀(x1 < x0)
+                  crop + '"vlm_mask": [0.1, 0.1, 0.2, 0.2], "vlm_mask_rgb": [1, 1]'):
+        bad.write_text('{"name": "b", "bases": {}, "outs": [], ' + extra + '}', encoding="utf-8")
+        with pytest.raises(ValueError):
+            Layout.load(bad)
+
+
 def test_dot_count_is_read_from_pixels_only_when_the_layout_has_dots():
     """B●●● S●● 점수판 — 켜진 점 수가 볼·스트라이크. 점 위치가 없으면 None(VLM 숫자를 쓴다)."""
     from app.adapters.video.scorebug_layout import decode_count

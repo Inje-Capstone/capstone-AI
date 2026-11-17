@@ -102,11 +102,17 @@ class Layout:
     # 숫자가 더 검어 한 칸(half)으로는 못 가르는 판
     # (SBS 포스트시즌 상자: 켜짐 0.58~0.64, 꺼짐 0.88)
     half_pair: Optional[tuple[Box, Box]] = None
+    # VLM에 보내기 전에 바탕색(vlm_mask_rgb)으로 칠해 가리는 칸(x0, y0, x1, y1 화면 비율) —
+    # 화소로 읽는 볼·스트라이크·아웃 점. 2025 SBS 상자는 볼(초록)·스트라이크(주황)가 같이 켜진
+    # 화면을 VLM이 늘 '점수판 없음'으로 답해(같은 그림 반복·배율·여백을 바꿔도) 판독 198장 중
+    # 71장을 잃었다. 점을 가리면 회차·점수를 읽는다(5/5)
+    vlm_mask: Optional[Box] = None
+    vlm_mask_rgb: Rgb = (0.91, 0.886, 0.824)
 
     @classmethod
     def load(cls, path: Path) -> "Layout":
         raw = json.loads(Path(path).read_text(encoding="utf-8"))
-        for key in ("crop", "half", "mark"):
+        for key in ("crop", "half", "mark", "vlm_mask"):
             if raw.get(key) is not None and len(raw[key]) != 4:
                 raise ValueError(f"{path}: {key}는 숫자 4개(x0, y0, x1, y1 또는 x, y, w, h)다")
         if raw.get("half_by", "shape") not in ("shape", "position"):
@@ -128,6 +134,14 @@ class Layout:
                 raise ValueError(f"{path}: {key} 지점은 x, y 두 숫자다")
         crop = raw.get("crop")
         half = raw.get("half")
+        mask = raw.get("vlm_mask")
+        if mask and not crop:
+            raise ValueError(f"{path}: vlm_mask는 crop과 함께 적는다")
+        if mask and not (0 <= mask[0] < mask[2] <= 1 and 0 <= mask[1] < mask[3] <= 1):
+            raise ValueError(f"{path}: vlm_mask는 x0 < x1, y0 < y1인 0~1 비율 넷(x0, y0, x1, y1)")
+        rgb = raw.get("vlm_mask_rgb")
+        if rgb is not None and (len(rgb) != 3 or not all(0 <= float(v) <= 1 for v in rgb)):
+            raise ValueError(f"{path}: vlm_mask_rgb는 0~1 사이 숫자 셋(r, g, b)이다")
         return cls(
             name=str(raw["name"]),
             bases={int(k): (float(v[0]), float(v[1])) for k, v in raw["bases"].items()},
@@ -153,6 +167,9 @@ class Layout:
             panel=tuple(tuple(float(v) for v in pt) for pt in raw.get("panel") or []),  # type: ignore[misc]
             prompt_note=str(raw.get("prompt_note") or "").strip(),
             half_pair=_box_pair(raw.get("half_pair"), path),
+            vlm_mask=tuple(float(v) for v in mask) if mask else None,  # type: ignore[arg-type]
+            vlm_mask_rgb=tuple(float(v) for v in raw["vlm_mask_rgb"])  # type: ignore[arg-type]
+            if raw.get("vlm_mask_rgb") else (0.91, 0.886, 0.824),
         )
 
 

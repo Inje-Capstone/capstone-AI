@@ -51,6 +51,22 @@ def test_crop_filter_scales_corner():
     assert crop_filter("top_left").startswith("crop=iw*0.45:ih*0.32:iw*0.0:ih*0.0,scale=iw*3")
 
 
+def test_vlm_filter_paints_over_pixel_read_dots():
+    """2025 SBS 상자 — 볼·스트라이크 점이 같이 켜지면 VLM이 '점수판 없음'으로 답해 그 칸을
+    바탕색으로 칠해 보낸다. 칸은 화면 비율로 적고 잘린 그림 안의 비율로 바꾼다. 없으면 그대로."""
+    from app.adapters.video.scorebug_layout import Layout
+    from app.adapters.video.scorebug_reader import vlm_filter
+
+    crop = (0.1, 0.2, 0.4, 0.2)
+    masked = Layout("t", {}, (), crop=crop, scale=2.0, vlm_mask=(0.2, 0.25, 0.3, 0.35),
+                    vlm_mask_rgb=(1.0, 0.5, 0.0))
+    vf = vlm_filter(masked, crop, 2.0)
+    assert vf.startswith(crop_filter(crop, 2.0) + ",drawbox=")
+    assert "x=iw*0.2500:y=ih*0.2500:w=iw*0.2500:h=ih*0.5000:color=0xFF8000:t=fill" in vf
+    assert vlm_filter(Layout("t", {}, (), crop=crop), crop, 2.0) == crop_filter(crop, 2.0)
+    assert vlm_filter(None, "top_left", 3.0) == crop_filter("top_left", 3.0)
+
+
 def test_read_span_reports_video_time():
     """경기 영상은 VLM이 본 구간만 읽는다 — 판독 시각·프레임 시각은 구간 시작만큼 밀린다."""
     from app.adapters.video.scorebug_reader import ScorebugReader

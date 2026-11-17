@@ -106,6 +106,21 @@ def crop_filter(corner: Union[str, Region], scale: float = 3.0) -> str:
     return f"crop=iw*{w}:ih*{h}:iw*{x}:ih*{y},scale=iw*{scale}:-2:flags=lanczos"
 
 
+def vlm_filter(layout: Optional[Layout], corner: Union[str, Region], scale: float) -> str:
+    """VLM에 보낼 그림 — crop_filter에 위치 파일의 vlm_mask 칸(화소로 읽는 점)을 바탕색으로
+    칠한다."""
+    vf = crop_filter(corner, scale)
+    if layout is None or layout.vlm_mask is None:
+        return vf
+    x, y, w, h = region_of(corner)
+    x0, y0, x1, y1 = layout.vlm_mask
+    rx, ry = (x0 - x) / w, (y0 - y) / h
+    rw, rh = (x1 - x0) / w, (y1 - y0) / h
+    color = "0x" + "".join(f"{round(c * 255):02X}" for c in layout.vlm_mask_rgb)
+    return (f"{vf},drawbox=x=iw*{rx:.4f}:y=ih*{ry:.4f}:w=iw*{rw:.4f}:h=ih*{rh:.4f}"
+            f":color={color}:t=fill")
+
+
 def graphic_mask(thumbs: Sequence[bytes], ref: int) -> list[int]:
     """기준 프레임과 같은 밝기로 자주 나오는 화소 — 움직이는 화면 위에 고정된 그래픽."""
     base = thumbs[ref]
@@ -573,7 +588,8 @@ class ScorebugReader:
         if self.layout is None or self.layout.crop is None:
             raise VideoAnalyzerError("한 장 판독은 점수판 영역(crop)이 있는 위치 파일이 필요하다")
         try:
-            frame = self._frame(video, t, crop_filter(self.layout.crop, self.layout.scale))
+            frame = self._frame(video, t,
+                                vlm_filter(self.layout, self.layout.crop, self.layout.scale))
             r = normalize_reading(self._ask([frame], self.prompt, 256), t)
             if r:
                 px = self._rgb(video, t)
@@ -602,7 +618,8 @@ class ScorebugReader:
         assert self.layout is not None and self.layout.crop is not None
         for part in REF_TRIES + REF_MORE:
             t = start + min(max(0.0, duration * part), max(0.0, duration - 0.5))
-            frame = self._frame(video, t, crop_filter(self.layout.crop, self.layout.scale))
+            frame = self._frame(video, t,
+                                vlm_filter(self.layout, self.layout.crop, self.layout.scale))
             if normalize_reading(self._ask([frame], self.prompt, 256), t):
                 return self.layout.crop, t
         return None, 0.0
@@ -669,7 +686,7 @@ class ScorebugReader:
         for first, at in plan:
             try:  # 한 장 실패(503 등)로 클립 전체를 버리지 않는다
                 answer = self._ask(
-                    [self._frame(video, start + at + 0.5, crop_filter(corner, scale))],
+                    [self._frame(video, start + at + 0.5, vlm_filter(self.layout, corner, scale))],
                     self.prompt,
                     256,
                 )
