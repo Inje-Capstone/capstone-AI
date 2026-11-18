@@ -10,20 +10,24 @@
 
 from typing import Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Path, Query
 
-from app.api.deps import get_diagnostic_questions
+from app.adapters.quiz.bank import find_question, sample_questions
+from app.api.deps import get_diagnostic_questions, get_quiz_bank
 from app.api.schemas import (
     BackendDiagnosisIn,
     BackendDiagnosisOut,
     BackendOptionOut,
     BackendQuestionOut,
+    BackendQuizDetailOut,
+    BackendQuizQuestionOut,
     BackendWeightsOut,
 )
 from app.domain.diagnostic import grade
 from app.domain.profile import BACKEND_LEVEL_NAMES, weights_for
 
 router = APIRouter(prefix="/api/backend/onboarding", tags=["backend"])
+quiz_router = APIRouter(prefix="/api/backend/quiz", tags=["backend"])
 
 
 @router.get(
@@ -100,3 +104,47 @@ def backend_weights(
 ):
     """저장된 `User.learningLevel`이 바뀌었을 때(재진단·설정 변경) 다시 받아 가는 용도."""
     return weights_for(learningLevel, categories)
+
+
+def _options(q: dict) -> list[BackendOptionOut]:
+    return [BackendOptionOut(optionId=i + 1, text=text) for i, text in enumerate(q["options"])]
+
+
+@quiz_router.get(
+    "/questions",
+    response_model=list[BackendQuizQuestionOut],
+    summary="학습 퀴즈 문항 (백엔드 QuizQuestionResponse 모양 · 정답 없음)",
+)
+def backend_quiz_questions(
+    count: int = Query(5, ge=1, le=20, description="문항 수"),
+    seed: Optional[str] = Query(
+        None, max_length=100, description="같은 값이면 같은 문항 (예: 사용자ID+날짜)"
+    ),
+):
+    """고정 문제은행에서 `count`개. 번호는 바뀌지 않아 풀이 기록 키로 쓸 수 있다."""
+    return [
+        BackendQuizQuestionOut(
+            questionId=q["questionId"], termId=q["termId"], text=q["text"], options=_options(q)
+        )
+        for q in sample_questions(get_quiz_bank(), count, seed)
+    ]
+
+
+@quiz_router.get(
+    "/questions/{question_id}",
+    response_model=BackendQuizDetailOut,
+    summary="학습 퀴즈 한 문항 + 정답·해설 (백엔드 채점·풀이 기록 상세용)",
+)
+def backend_quiz_question(question_id: int = Path(..., ge=1)):
+    """정답이 들어 있다 — 백엔드가 채점에 쓰고, 프론트에 그대로 중계하지 않는다."""
+    q = find_question(get_quiz_bank(), question_id)
+    if q is None:
+        raise HTTPException(status_code=404, detail=f"없는 문항입니다: {question_id}")
+    return BackendQuizDetailOut(
+        questionId=q["questionId"],
+        termId=q["termId"],
+        text=q["text"],
+        options=_options(q),
+        correctOptionId=q["answerIndex"] + 1,
+        explanation=q["explanation"],
+    )

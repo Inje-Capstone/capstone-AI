@@ -440,3 +440,38 @@ class BackendDiagnosisOut(BaseModel):
     message: str = Field(description="결과 화면 문구")
     results: list[BackendQuestionResult]
     weights: BackendWeightsOut
+
+
+class BackendQuizQuestionOut(BaseModel):
+    """백엔드 `QuizQuestionResponse`(questionId·text·options)와 같은 모양 (+ termId). 정답 없음."""
+
+    questionId: int = Field(description="고정 문제은행 번호 — 풀이 기록의 키")
+    termId: str = Field(description="용어 사전 딥링크 키")
+    text: str
+    options: list[BackendOptionOut]
+
+
+class BackendQuizDetailOut(BackendQuizQuestionOut):
+    """채점·풀이 기록 상세용 — **정답이 들어 있다.** 백엔드만 부르고 프론트에 넘기지 않는다."""
+
+    correctOptionId: int = Field(description="1부터")
+    explanation: str
+
+
+class CheerSongOut(BaseModel):
+    """응원가 안내 — 곡명과 구단 공식 채널 링크만. 가사·음원은 담지 않는다(저작권)."""
+
+    team: str
+    player: Optional[str] = Field(default=None, description="없으면 팀 응원가")
+    title: str
+    url: str = Field(description="구단 공식 채널 등 https 링크")
+
+
+class GameCheerSongOut(BaseModel):
+    """지금 타석 타자의 응원가 (없으면 그 팀 응원가)."""
+
+    available: bool
+    unavailable_reason: Optional[str] = None
+    batter: Optional[str] = None
+    batting_team: Optional[str] = None
+    song: Optional[CheerSongOut] = None

@@ -5,9 +5,11 @@ from typing import Any, Optional
 
 from fastapi import Query
 
+from app.adapters.cheer.seed import load_cheer_songs
 from app.adapters.diagnostic.seed import load_diagnostic
 from app.adapters.glossary.seed import load_glossary, load_rules
 from app.adapters.llm import build_llm_client
+from app.adapters.quiz.bank import load_quiz_bank
 from app.adapters.relay.fixture import FixtureRelaySource
 from app.adapters.stats.fixture import FixtureStatsSource
 from app.adapters.video.notes import VideoNotes
@@ -90,6 +92,18 @@ def get_diagnostic_questions() -> list[dict[str, Any]]:
 
 
 @lru_cache(maxsize=1)
+def get_quiz_bank() -> list[dict[str, Any]]:
+    """학습 퀴즈 고정 문제은행 — 번호가 백엔드 풀이 기록의 키라 요청마다 만들지 않는다."""
+    return load_quiz_bank()
+
+
+@lru_cache(maxsize=1)
+def get_cheer_songs() -> list[dict[str, Any]]:
+    """응원가 안내(곡명·공식 링크). 팀이 직접 적은 파일."""
+    return load_cheer_songs()
+
+
+@lru_cache(maxsize=1)
 def get_moment_service() -> MomentService:
     settings = get_settings()
     return MomentService(
@@ -113,6 +127,8 @@ def reset_services() -> None:
         get_quiz_service,
         get_moment_service,
         get_diagnostic_questions,
+        get_quiz_bank,
+        get_cheer_songs,
     ):
         fn.cache_clear()
 

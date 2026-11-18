@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 from app.api import (
     routes_backend,
     routes_chat,
+    routes_cheer,
     routes_game,
     routes_glossary,
     routes_live,
@@ -53,6 +54,8 @@ app.include_router(routes_quiz.router)
 app.include_router(routes_onboarding.router)
 app.include_router(routes_live.router)
 app.include_router(routes_backend.router)
+app.include_router(routes_backend.quiz_router)
+app.include_router(routes_cheer.router)
 
 
 @app.exception_handler(Exception)
