@@ -11,7 +11,7 @@ import pytest
 
 PATH = Path(__file__).resolve().parents[1] / "data" / "stats" / "salaries_2026.json"
 TEAMS = {"한화", "삼성", "LG", "KIA", "SSG", "NC", "KT", "두산", "롯데", "키움"}
-KINDS = {None, "재계약", "FA", "다년"}
+KINDS = {None, "재계약", "FA", "다년", "육성"}
 FOREIGN_KINDS = {"외국인", "아시아쿼터"}
 
 
@@ -28,7 +28,10 @@ def test_every_row_cites_known_sources(data):
         assert set(row["sources"]) <= keys, row
     for src in data["sources"].values():
         assert src["url"].startswith("https://")
-        assert src["reliability"] in {"official", "press", "blog"}
+        assert src["reliability"] in {"official", "press", "blog", "wiki"}
+    for row in data["players"]:
+        if "NAMU" in row["sources"]:
+            assert (row.get("page_url") or "").startswith("https://namu.wiki/"), row
 
 
 def test_no_duplicate_players_and_teams_are_known(data):
@@ -54,11 +57,21 @@ def test_amounts_are_positive_integers_in_units(data):
         assert kbo is None or (isinstance(kbo, int) and kbo <= row["contract_total_usd"])
 
 
+def test_missing_players_are_not_also_recorded(data):
+    recorded = {(p["team"], p["name"]) for p in data["players"]}
+    for row in data.get("missing", []):
+        assert row["team"] in TEAMS
+        assert (row["team"], row["name"]) not in recorded, row
+    for row in data.get("conflicts", []):
+        assert (row["team"], row["name"]) in recorded, row
+
+
 def test_coverage_counts_match_rows(data):
     cov = data["coverage"]
     assert cov["recorded_domestic"] == len(data["players"])
     assert cov["recorded_foreign"] == len(data["foreign"])
-    assert cov["recorded_domestic"] + cov["recorded_foreign"] <= cov["registered_players"]
+    # 621명은 1월 31일 등록 마감 기준 — 육성선수·시즌 중 영입·이적은 그 뒤라 기록이 더 많을 수 있다
+    assert cov["missing_listed"] == len(data.get("missing", []))
     assert data["league"]["players"] == cov["salary_pool_players"]
 
 
