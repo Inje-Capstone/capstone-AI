@@ -91,6 +91,10 @@ curl localhost:8000/health
 | `GET /api/backend/onboarding/questions` | **백엔드용** 진단 문항 — 백엔드 `DiagnosisQuestionResponse` 모양(camelCase, `questionId`·`optionId` 1부터) |
 | `POST /api/backend/onboarding/diagnosis` | **백엔드용** 채점 — `DiagnosisSubmitRequest` 그대로 받아 `correctCount`·`totalCount`·`learningLevel` + 해설 + 개인화 가중치 |
 | `GET /api/backend/onboarding/weights?learningLevel=&categories=` | **백엔드용** 수준(+관심 카테고리)별 가중치 — 카테고리 배율·규칙별 점수·노출 여부 |
+| `GET /api/backend/quiz/questions?count=&seed=` | **백엔드용** 학습 퀴즈 — 고정 문제은행(`data/quiz_bank.json`)에서 `count`개, 백엔드 `QuizQuestionResponse` 모양. 정답 없음 |
+| `GET /api/backend/quiz/questions/{questionId}` | **백엔드용** 한 문항 + `correctOptionId`·`explanation` — 채점·풀이 기록 상세용. **프론트에 중계하지 않는다** |
+| `GET /api/cheer-songs?team=` | 응원가 안내 — 팀·선수·곡명·공식 채널 링크(가사·음원 없음) |
+| `GET /api/games/{id}/cheer-song?t=` | 지금 타석 타자의 응원가, 없으면 그 팀 응원가 |
 
 진단은 **보상 없는 자기 진단**이다(포인트는 하루 퀴즈 몫). 채점 응답은 답을 낸 문항의 정답·해설을
 함께 주므로 — 결과 화면이 그걸 보여줘야 한다 — 시험처럼 신뢰할 수 있는 관문으로 쓰지 말 것.
@@ -107,6 +111,18 @@ curl localhost:8000/health
 
 > 백엔드 측 맞출 것: AI 문제은행은 **보기 4개**라 `DiagnosisSubmitRequest`의 `optionId @Max(3)`을 `@Max(4)`로 풀거나,
 > 백엔드 임시 문항(`DiagnosisQuiz`) 대신 `GET /api/backend/onboarding/questions`를 받아 쓴다.
+
+### 백엔드 서버 연동 (2026-11-18)
+
+배포에서 프론트는 AI를 직접 부르지 않고 **백엔드 `/api/ai/**` 중계**로 부른다(공개 주소는 `api.injecapstone.com` 하나,
+AI는 백엔드 compose 내부망 `http://ai:8000`). 중계는 `/api/backend/**`(정답이 든 백엔드 전용)와 `/api/live/**`를 막는다.
+
+- 진단 퀴즈: 백엔드가 `/api/backend/onboarding/questions`·`/diagnosis`를 부른다 — 3문항 · 보기 4개
+- 학습 퀴즈: 백엔드가 `/api/backend/quiz/questions?seed=<사용자ID>-<날짜>`로 문항을, `/questions/{id}`로 정답·해설을 받아
+  **백엔드가 채점·기록**한다. `questionId`는 풀이 기록의 키라 바꾸지 않는다 — 용어가 늘면
+  `python scripts/build_quiz_bank.py`가 끝 번호 뒤에 덧붙인다(빠지면 `tests/test_backend_quiz.py` 실패)
+- 응원가: `data/cheer_songs.json`에 팀이 직접 적는다(곡명·구단 공식 링크만). KBO 공식 사이트는 승인 없는 자동 수집을
+  금지하므로(robots.txt) 수집 라이브러리는 쓰지 않는다. 매치업은 지금처럼 경기 데이터·기록 파일에서 읽는다
 
 `level`은 `입문 | 초보 | 익숙`(또는 `INTRODUCTORY | BEGINNER | FAMILIAR`), `category`는 반복 쿼리 파라미터(`기본 룰`, `구종 · 투구`,
 `전술 · 기록`, `응원 문화`). 온보딩 답변을 그대로 넘기면 된다 — 유저 DB는 백엔드 팀 소유다.
