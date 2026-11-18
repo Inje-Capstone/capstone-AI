@@ -91,6 +91,18 @@ def test_detail_has_answer_matching_bank(client):
     assert detail["explanation"] == entry["explanation"]
 
 
+def test_term_filter_limits_to_viewed_terms(client):
+    """오늘 본 용어만 — 본 용어가 3개면 5개를 달라고 해도 3문항, 모르는 용어뿐이면 빈 목록."""
+    viewed = ["balk", "infield_fly", "dropped_third_strike"]
+    res = client.get(f"{BASE}/questions", params={"count": 5, "seed": "s", "term_id": viewed})
+    assert res.status_code == 200
+    assert sorted(q["termId"] for q in res.json()) == sorted(viewed)
+    one = client.get(f"{BASE}/questions", params={"count": 5, "term_id": ["balk"]}).json()
+    assert [q["termId"] for q in one] == ["balk"]
+    none = client.get(f"{BASE}/questions", params={"count": 5, "term_id": ["no_such_term"]})
+    assert none.status_code == 200 and none.json() == []
+
+
 def test_unknown_question_is_404_and_bad_count_is_422(client):
     assert client.get(f"{BASE}/questions/99999").status_code == 404
     assert client.get(f"{BASE}/questions/0").status_code == 422
