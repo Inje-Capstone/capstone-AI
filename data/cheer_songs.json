@@ -1,4 +1,365 @@
 {
-  "_note": "응원가 안내 — 팀·선수·곡명·구단 공식 채널 링크만 적는다. 가사·음원 파일은 넣지 않는다(저작권). player가 null이면 팀 응원가. team은 중계 데이터의 팀 이름(한화·삼성·LG·KIA·SSG·NC·KT·두산·롯데·키움). url은 https만. 자동 수집 금지 — 팀이 직접 확인해 적는다.",
-  "songs": []
+  "_note": "응원가 안내 — 팀·선수·곡명·구단 공식 채널 링크만 적는다. 가사·음원 파일은 넣지 않는다(저작권). player가 null이면 팀 응원가. team은 중계 데이터의 팀 이름(한화·삼성·LG·KIA·SSG·NC·KT·두산·롯데·키움). url은 https만. 자동 수집 금지 — 팀이 직접 확인해 적는다. 2026-11-19 채움: 나무위키 구단별 '응원가' 문서에 연결된 영상 중 구단 공식 채널(_official_channels) 업로드만 골라, 링크마다 YouTube oEmbed로 올린 채널을 확인했다. 팬 채널 업로드는 넣지 않았다(공식 링크가 아니고 음원 저작권 문제). '사라진·과거·미사용·비공식' 문단의 곡과, 영상 제목이 곡과 맞지 않는 영상(하이라이트·응원단 소개 등)은 뺐다. 구단마다 팀 응원가를 먼저, 플레이리스트 영상을 끝에 두었다 — 타자 응원가가 없을 때 첫 줄이 대신 나간다. 선수 응원가는 공식 채널 링크를 확인하지 못해 비워 두었다(타자는 팀 응원가로 대체된다).",
+  "_official_channels": {
+    "LG": {
+      "name": "LGTWINSTV",
+      "youtube": "https://www.youtube.com/@LGTwinsTV"
+    },
+    "두산": {
+      "name": "BEARS TV",
+      "youtube": "https://www.youtube.com/@bearstv1982"
+    },
+    "한화": {
+      "name": "한화이글스 - Topic",
+      "youtube": "https://www.youtube.com/channel/UCBBWaTyXqKfNIe0XExza-3w"
+    },
+    "삼성": {
+      "name": "LionsTV",
+      "youtube": "https://www.youtube.com/@lionstv1982"
+    },
+    "KIA": {
+      "name": "기아타이거즈 KIA TIGERS(갸티비)",
+      "youtube": "https://www.youtube.com/@kiatigerstv"
+    },
+    "롯데": {
+      "name": "Giants TV",
+      "youtube": "https://www.youtube.com/@giantstv"
+    },
+    "SSG": {
+      "name": "SSG랜더스",
+      "youtube": "https://www.youtube.com/@SSGLANDERS"
+    },
+    "NC": {
+      "name": "NC 다이노스",
+      "youtube": "https://www.youtube.com/@ncdinos"
+    },
+    "KT": {
+      "name": "kt wiz - 위즈TV",
+      "youtube": "https://www.youtube.com/@ktwiztv"
+    },
+    "키움": {
+      "name": "키움히어로즈",
+      "youtube": "https://www.youtube.com/@heroesbaseballclub"
+    }
+  },
+  "songs": [
+    {
+      "team": "LG",
+      "player": null,
+      "title": "셀리오",
+      "url": "https://www.youtube.com/watch?v=8MkQDiv8QBs"
+    },
+    {
+      "team": "LG",
+      "player": null,
+      "title": "최후의 결투",
+      "url": "https://www.youtube.com/watch?v=ctCEN81Bit8",
+      "note": "2024 시즌 응원가 MV"
+    },
+    {
+      "team": "LG",
+      "player": null,
+      "title": "2026 시즌 응원가 모음",
+      "url": "https://www.youtube.com/watch?v=BhwoJFjkAf8",
+      "note": "구단 공식 플레이리스트 영상"
+    },
+    {
+      "team": "두산",
+      "player": null,
+      "title": "미라클 두산",
+      "url": "https://www.youtube.com/watch?v=DCjtMp6ileM",
+      "note": "2015 챔피언송(2015~)"
+    },
+    {
+      "team": "두산",
+      "player": null,
+      "title": "우리들의 두산",
+      "url": "https://www.youtube.com/watch?v=T5z1hsX0Or8",
+      "note": "2026~"
+    },
+    {
+      "team": "두산",
+      "player": null,
+      "title": "2026 시즌 응원가 모음",
+      "url": "https://www.youtube.com/watch?v=Cs6u1CZzkbE",
+      "note": "구단 공식 플레이리스트 영상"
+    },
+    {
+      "team": "한화",
+      "player": null,
+      "title": "This Is Our Song",
+      "url": "https://www.youtube.com/watch?v=08ExpJQgXzM",
+      "note": "유튜브 뮤직 자동 생성 채널(한화이글스 - Topic)의 정식 음원 — 구단 채널(Eagles TV)에 연결된 현재 팀 응원가 영상이 없다"
+    },
+    {
+      "team": "삼성",
+      "player": null,
+      "title": "나의 라이온즈",
+      "url": "https://www.youtube.com/watch?v=L-5aa-5xqOI",
+      "note": "2025~"
+    },
+    {
+      "team": "삼성",
+      "player": null,
+      "title": "TOGETHER",
+      "url": "https://www.youtube.com/watch?v=8HWQ980qLqA"
+    },
+    {
+      "team": "삼성",
+      "player": null,
+      "title": "푸른 함성",
+      "url": "https://www.youtube.com/watch?v=RGp3R3HpShA",
+      "note": "2025~"
+    },
+    {
+      "team": "삼성",
+      "player": null,
+      "title": "드림 오브 라이온즈",
+      "url": "https://www.youtube.com/watch?v=kaUXgZVf574",
+      "note": "치어리더 공식 응원가(경기 시작 전)"
+    },
+    {
+      "team": "삼성",
+      "player": null,
+      "title": "2026 시즌 응원가 모음",
+      "url": "https://www.youtube.com/watch?v=HAPsuHspHn8",
+      "note": "구단 공식 플레이리스트 영상"
+    },
+    {
+      "team": "KIA",
+      "player": null,
+      "title": "사랑한다 KIA",
+      "url": "https://www.youtube.com/watch?v=cGs5swSDvJ8"
+    },
+    {
+      "team": "KIA",
+      "player": null,
+      "title": "광주의 함성 (승리의 이름)",
+      "url": "https://www.youtube.com/watch?v=Rt5hikIULDE"
+    },
+    {
+      "team": "KIA",
+      "player": null,
+      "title": "우리는 하나",
+      "url": "https://www.youtube.com/watch?v=SowLIvc9lAM"
+    },
+    {
+      "team": "KIA",
+      "player": null,
+      "title": "붉은 노을",
+      "url": "https://www.youtube.com/watch?v=LVIXH2g5RY8"
+    },
+    {
+      "team": "KIA",
+      "player": null,
+      "title": "승리를 위해 함께 부르자",
+      "url": "https://www.youtube.com/watch?v=S-WV0dUw01w"
+    },
+    {
+      "team": "KIA",
+      "player": null,
+      "title": "승리를 위해",
+      "url": "https://www.youtube.com/watch?v=MtKPgo85Bq8",
+      "note": "2025~"
+    },
+    {
+      "team": "KIA",
+      "player": null,
+      "title": "오! 최강기아!",
+      "url": "https://www.youtube.com/watch?v=Hw0xWjbMLxo"
+    },
+    {
+      "team": "KIA",
+      "player": null,
+      "title": "라인업송",
+      "url": "https://www.youtube.com/watch?v=LUet73aVdm4"
+    },
+    {
+      "team": "KIA",
+      "player": null,
+      "title": "포스트시즌 응원가 모음",
+      "url": "https://www.youtube.com/watch?v=_muWreRr1t0",
+      "note": "구단 공식 응원가 안무 복습 영상(최신 버전)"
+    },
+    {
+      "team": "롯데",
+      "player": null,
+      "title": "부산 갈매기",
+      "url": "https://www.youtube.com/watch?v=V0b9WKYZ59s",
+      "note": "구장 떼창 영상"
+    },
+    {
+      "team": "롯데",
+      "player": null,
+      "title": "돌아와요 부산항에",
+      "url": "https://www.youtube.com/watch?v=62jAw0CHZKA",
+      "note": "구장 떼창 영상"
+    },
+    {
+      "team": "롯데",
+      "player": null,
+      "title": "소리높여 외쳐보자 (영원하라)",
+      "url": "https://www.youtube.com/watch?v=iex-80eWDXA",
+      "note": "국악 편곡 버전"
+    },
+    {
+      "team": "롯데",
+      "player": null,
+      "title": "우리들의 빛나는 이 순간",
+      "url": "https://www.youtube.com/watch?v=PEOfWnJ_xmA",
+      "note": "오르간 연주 버전"
+    },
+    {
+      "team": "롯데",
+      "player": null,
+      "title": "승리를 위한 전진",
+      "url": "https://www.youtube.com/watch?v=bjj3Kp13UVA",
+      "note": "2025 시즌 팀 응원가"
+    },
+    {
+      "team": "롯데",
+      "player": null,
+      "title": "2026 시즌 팀 응원가 모음",
+      "url": "https://www.youtube.com/watch?v=AtyqKrWmvGE",
+      "note": "구단 공식 플레이리스트 영상"
+    },
+    {
+      "team": "SSG",
+      "player": null,
+      "title": "We are the Landers!",
+      "url": "https://www.youtube.com/watch?v=zX7uot4biaQ",
+      "note": "하현우 보컬 MV"
+    },
+    {
+      "team": "SSG",
+      "player": null,
+      "title": "랜더스여",
+      "url": "https://www.youtube.com/watch?v=baseGQapOf0"
+    },
+    {
+      "team": "SSG",
+      "player": null,
+      "title": "되고송",
+      "url": "https://www.youtube.com/watch?v=-R_ImYufems"
+    },
+    {
+      "team": "SSG",
+      "player": null,
+      "title": "불꽃투혼 랜더스",
+      "url": "https://www.youtube.com/watch?v=Ygn_Ua41K_c",
+      "note": "2026 치어리딩 MV"
+    },
+    {
+      "team": "SSG",
+      "player": null,
+      "title": "연안부두",
+      "url": "https://www.youtube.com/watch?v=It4KMVKbZBk",
+      "note": "가요(김트리오) — 구장 떼창 영상"
+    },
+    {
+      "team": "SSG",
+      "player": null,
+      "title": "2026 시즌 응원가 모음",
+      "url": "https://www.youtube.com/watch?v=zPGEpmBj4iw",
+      "note": "구단 공식 플레이리스트 영상"
+    },
+    {
+      "team": "NC",
+      "player": null,
+      "title": "승리의 NC",
+      "url": "https://www.youtube.com/watch?v=w2NXgN7ovZQ",
+      "note": "2019~"
+    },
+    {
+      "team": "NC",
+      "player": null,
+      "title": "가을의 주인공",
+      "url": "https://www.youtube.com/watch?v=FMuOMoICED0"
+    },
+    {
+      "team": "NC",
+      "player": null,
+      "title": "폼",
+      "url": "https://www.youtube.com/watch?v=Pbhn2KI5PLw",
+      "note": "2023~, VANNER"
+    },
+    {
+      "team": "NC",
+      "player": null,
+      "title": "안타송",
+      "url": "https://www.youtube.com/watch?v=IH6C4cLRII8",
+      "note": "선수 공통 안타송"
+    },
+    {
+      "team": "NC",
+      "player": null,
+      "title": "2026 시즌 팀 응원가 모음",
+      "url": "https://www.youtube.com/watch?v=XvOb7Nx3co0",
+      "note": "구단 공식 플레이리스트 영상"
+    },
+    {
+      "team": "KT",
+      "player": null,
+      "title": "투혼가",
+      "url": "https://www.youtube.com/watch?v=bsWBORqEjpI",
+      "note": "2016 MV"
+    },
+    {
+      "team": "KT",
+      "player": null,
+      "title": "2026 시즌 응원가 전곡 모음",
+      "url": "https://www.youtube.com/watch?v=2kJf0pbtajA",
+      "note": "구단 공식 플레이리스트 영상"
+    },
+    {
+      "team": "키움",
+      "player": null,
+      "title": "영웅 출정가",
+      "url": "https://www.youtube.com/watch?v=antR6UYqZKk"
+    },
+    {
+      "team": "키움",
+      "player": null,
+      "title": "꿈이여 하나가 되자",
+      "url": "https://www.youtube.com/watch?v=jFkiL_xb5aU"
+    },
+    {
+      "team": "키움",
+      "player": null,
+      "title": "승리를 위하여",
+      "url": "https://www.youtube.com/watch?v=DqiP4UvS7CQ"
+    },
+    {
+      "team": "키움",
+      "player": null,
+      "title": "히어로즈의 노래",
+      "url": "https://www.youtube.com/watch?v=p6hN2g45Vrg",
+      "note": "2024~"
+    },
+    {
+      "team": "키움",
+      "player": null,
+      "title": "히어로",
+      "url": "https://www.youtube.com/watch?v=XrwKhoL8yUo"
+    },
+    {
+      "team": "키움",
+      "player": null,
+      "title": "WIN THE CHAMPIONSHIP",
+      "url": "https://www.youtube.com/watch?v=LrzbeyxFCSo"
+    },
+    {
+      "team": "키움",
+      "player": null,
+      "title": "히어로즈 만만세",
+      "url": "https://www.youtube.com/watch?v=6fCBQONYzQY"
+    },
+    {
+      "team": "키움",
+      "player": null,
+      "title": "응원가 모음",
+      "url": "https://www.youtube.com/watch?v=bGoso_4ibeo",
+      "note": "구단 공식 플레이리스트 영상"
+    }
+  ]
 }
