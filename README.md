@@ -123,6 +123,11 @@ AI는 백엔드 compose 내부망 `http://ai:8000`). 중계는 `/api/backend/**`
   `python scripts/build_quiz_bank.py`가 끝 번호 뒤에 덧붙인다(빠지면 `tests/test_backend_quiz.py` 실패)
 - 응원가: `data/cheer_songs.json`에 팀이 직접 적는다(곡명·구단 공식 링크만). KBO 공식 사이트는 승인 없는 자동 수집을
   금지하므로(robots.txt) 수집 라이브러리는 쓰지 않는다. 매치업은 지금처럼 경기 데이터·기록 파일에서 읽는다
+- 퀴즈 `seed`의 `<날짜>`는 **KST(Asia/Seoul) 자정 기준**(2026-09-30 합의) — 서버가 UTC로 날짜를 만들면 한국 오전 9시에
+  그날 문항이 바뀐다
+- **LLM 실패는 에러 코드가 아니라 `200` + 플래그로 온다** — 모델이 죽어도 화면을 살리려는 설계다. 카드 `degraded: true`,
+  챗봇 `ok: false`, 한 줄 요약 `source: "template"`. 예외가 아니라서 `GlobalExceptionHandler`에 걸리지 않으니 응답 필드로
+  분기한다. 에러 코드로 오는 건 `404`·`500` `{"detail": 문자열}`과 `422` `{"detail": [...]}`(배열) 둘뿐이다
 
 `level`은 `입문 | 초보 | 익숙`(또는 `INTRODUCTORY | BEGINNER | FAMILIAR`), `category`는 반복 쿼리 파라미터(`기본 룰`, `구종 · 투구`,
 `전술 · 기록`, `응원 문화`). 온보딩 답변을 그대로 넘기면 된다 — 유저 DB는 백엔드 팀 소유다.
