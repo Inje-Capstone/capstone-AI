@@ -1,5 +1,5 @@
 {
- "_note": "2026 KBO 선수 연봉 — 공개 보도와 나무위키 선수 문서로 확인된 것만 적는다(2026-11-18 수집). KBO 공식 사이트는 승인 없는 자동 수집을 금지해(robots.txt) 쓰지 않았다. 보도 출처 줄은 나무위키 값과 비교해 다른 게 없었다(conflicts 0). 나무위키 선수단 문서가 이미 2027 기준이라, missing에는 2027 신규로 보이는 선수(likely_2027_newcomer)와 시즌 뒤 방출된 선수(released)가 섞여 있다. 같은 이름이 두 구단에 있으면 대부분 다른 사람이고, 이형범·양수호는 KIA에서 한화로 옮긴 같은 사람이다. salary_10k·prev_salary_10k 단위는 만원, 외국인·아시아쿼터는 달러. reliability: official(구단·KBO 발표 원문), press(언론), blog(개인 블로그), wiki(나무위키 — 줄마다 page_url). 선수 한 줄의 sources가 여럿이면 앞의 것이 우선.",
+ "_note": "2026 KBO 선수 연봉 — 공개 보도와 나무위키 선수 문서로 확인된 것만 적는다(2026-11-18 수집). KBO 공식 사이트는 승인 없는 자동 수집을 금지해(robots.txt) 쓰지 않았다. 보도 출처 줄은 나무위키 값과 비교해 다른 게 없었다(conflicts 0). 나무위키 선수단 문서가 이미 2027 기준이라, missing에는 2027 신규로 보이는 선수(likely_2027_newcomer)와 시즌 뒤 방출된 선수(released)가 섞여 있다. 같은 이름이 두 구단에 있으면 대부분 다른 사람이고, 이형범·양수호는 KIA에서 한화로 옮긴 같은 사람이다. salary_10k·prev_salary_10k 단위는 만원, 외국인·아시아쿼터는 달러. reliability: official(구단·KBO 발표 원문), press(언론), blog(개인 블로그), wiki(나무위키 — 줄마다 page_url). 선수 한 줄의 sources가 여럿이면 앞의 것이 우선. 2026-11-19 공식 출처 보강: KBO 보도자료(연봉·등록) 원문 주소를 리그·구단 줄에, 구단 공식 발표(한화·키움) 본문에 금액이 나온 선수 15명을 첫 출처로 올렸다(금액은 그대로 — 모두 일치). 원문을 직접 읽은 출처만 첫 출처로 두고, robots.txt 때문에 열지 못한 KBO 원문은 색인으로 확인된 값(리그 평균, SSG·키움 구단 평균, 양의지·구창모)에만 첫 출처, 나머지 줄에는 '원문 참고'로 뒤에 붙였다. 나무위키 출처 줄은 CC BY-NC-SA 2.0 KR — 화면 노출 시 출처·라이선스 표기 필요.",
  "season": 2026,
  "collected_at": "2026-11-18",
  "coverage": {
@@ -101,7 +101,36 @@
    "title": "나무위키 선수 개별 문서 — 2026 연봉(2026-11-18 열람, 줄마다 page_url)",
    "url": "https://namu.wiki/",
    "date": "2026-11-18",
-   "reliability": "wiki"
+   "reliability": "wiki",
+   "note": "나무위키 본문은 CC BY-NC-SA 2.0 KR이다. 화면에 노출하면 문서 링크(page_url)와 라이선스를 함께 표기해야 한다. 공식 값이 필요하면 구단 발표·KBO 원문으로 대조한다(KBO 선수 페이지는 승인 없는 자동 수집 금지)"
+  },
+  "KBO_RELEASE": {
+   "title": "2026 KBO 리그 평균 연봉 '1억 7536만원' 역대 최고 기록 — KBO 보도자료",
+   "url": "https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=11861",
+   "date": "2026-03-18",
+   "reliability": "official",
+   "note": "KBO 공식 사이트는 robots.txt로 자동 접근을 전부 막아 원문을 직접 열지 않았다 — 제목·발표일·핵심 수치는 검색 색인으로 확인(2026-11-19). 화면 출처 표기와 사람이 대조할 때 쓰는 원문 주소. 색인에서 확인한 값: 신인·외국인·아시아쿼터 제외 529명 평균 1억 7,536만원, 구단 평균 1위 SSG 2억 783만원·최하위 키움, 최고 연봉 양의지 42억원, 최고 인상률 구창모 800%"
+  },
+  "KBO_REG": {
+   "title": "2026 KBO 리그, 소속 선수 621명 등록 — KBO 보도자료",
+   "url": "https://www.koreabaseball.com/MediaNews/Notice/View.aspx?bdSe=11831",
+   "date": "2026-02-10",
+   "reliability": "official",
+   "note": "KBO 공식 사이트는 robots.txt로 자동 접근을 전부 막아 원문을 직접 열지 않았다 — 제목·발표일·핵심 수치는 검색 색인으로 확인(2026-11-19). 화면 출처 표기와 사람이 대조할 때 쓰는 원문 주소"
+  },
+  "HANWHA_OFFICIAL": {
+   "title": "한화이글스 2026 연봉계약 완료 — 구단 공식 홈페이지",
+   "url": "https://www.hanwhaeagles.co.kr/FA/CN/PCFACN02.do?id=1817",
+   "date": "2026-01-21",
+   "reliability": "official",
+   "note": "2026-11-19 원문 열람. 재계약 대상 62명 — 본문에 9명 금액, 나머지는 연봉표 이미지(상위 13명). 본문 9명 중 기록에 있는 8명 금액 일치"
+  },
+  "KIWOOM_OFFICIAL": {
+   "title": "2026시즌 선수단 연봉 계약 완료 — 키움히어로즈 공식 홈페이지",
+   "url": "https://heroesbaseball.co.kr/mobile/story/heroesNews/view.do?num=22391",
+   "date": "2026-01-20",
+   "reliability": "official",
+   "note": "2026-11-19 원문 열람. 계약 대상 50명 — 본문에 7명 금액, 나머지는 연봉표 이미지. 본문 7명 금액 모두 기록과 일치"
   }
  },
  "league": {
@@ -110,6 +139,7 @@
   "total_salary_10k": 9276650,
   "players": 529,
   "sources": [
+   "KBO_RELEASE",
    "KBO",
    "KBO2"
   ]
@@ -122,6 +152,7 @@
    "total_salary_10k": 1247000,
    "recontract_players": 58,
    "sources": [
+    "KBO_RELEASE",
     "KBO",
     "SSG"
    ]
@@ -133,7 +164,8 @@
    "total_salary_10k": null,
    "recontract_players": null,
    "sources": [
-    "KBO"
+    "KBO",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -144,7 +176,8 @@
    "recontract_players": 48,
    "sources": [
     "KBO",
-    "LG"
+    "LG",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -155,7 +188,8 @@
    "recontract_players": 64,
    "sources": [
     "KBO",
-    "KT"
+    "KT",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -165,7 +199,8 @@
    "total_salary_10k": null,
    "recontract_players": 68,
    "sources": [
-    "KBO"
+    "KBO",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -176,7 +211,8 @@
    "recontract_players": 73,
    "sources": [
     "KBO",
-    "LOTTE"
+    "LOTTE",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -186,7 +222,8 @@
    "total_salary_10k": null,
    "recontract_players": null,
    "sources": [
-    "KBO"
+    "KBO",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -197,7 +234,8 @@
    "recontract_players": 48,
    "sources": [
     "KBO",
-    "KIA_OSEN"
+    "KIA_OSEN",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -208,7 +246,8 @@
    "recontract_players": 70,
    "sources": [
     "KBO",
-    "NC"
+    "NC",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -218,6 +257,7 @@
    "total_salary_10k": null,
    "recontract_players": 50,
    "sources": [
+    "KBO_RELEASE",
     "KBO",
     "KIWOOM"
    ]
@@ -233,6 +273,7 @@
    "prev_salary_10k": 160000,
    "note": "2026 리그 최고 연봉 · 역대 최고 인상액",
    "sources": [
+    "KBO_RELEASE",
     "KBO"
    ]
   },
@@ -269,7 +310,8 @@
    "prev_salary_10k": null,
    "note": "투수 1위 · 13년차 최고",
    "sources": [
-    "KBO"
+    "KBO",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -353,7 +395,8 @@
    "prev_salary_10k": null,
    "note": "야수 2위 · 22년차 최고",
    "sources": [
-    "KBO"
+    "KBO",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -485,7 +528,8 @@
    "prev_salary_10k": null,
    "note": "투수 공동 2위",
    "sources": [
-    "KBO"
+    "KBO",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -497,8 +541,10 @@
    "prev_salary_10k": 33000,
    "note": "8년차 최고(공동)",
    "sources": [
+    "HANWHA_OFFICIAL",
     "HANWHA",
-    "KBO"
+    "KBO",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -510,7 +556,8 @@
    "prev_salary_10k": null,
    "note": "9년차 최고",
    "sources": [
-    "KBO"
+    "KBO",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -522,6 +569,7 @@
    "prev_salary_10k": 8800,
    "note": null,
    "sources": [
+    "HANWHA_OFFICIAL",
     "HANWHA"
    ]
   },
@@ -534,6 +582,7 @@
    "prev_salary_10k": 10000,
    "note": null,
    "sources": [
+    "HANWHA_OFFICIAL",
     "HANWHA"
    ]
   },
@@ -546,6 +595,7 @@
    "prev_salary_10k": 5600,
    "note": "투수 최고 인상률",
    "sources": [
+    "HANWHA_OFFICIAL",
     "HANWHA"
    ]
   },
@@ -558,6 +608,7 @@
    "prev_salary_10k": 5500,
    "note": null,
    "sources": [
+    "HANWHA_OFFICIAL",
     "HANWHA"
    ]
   },
@@ -570,6 +621,7 @@
    "prev_salary_10k": 6200,
    "note": null,
    "sources": [
+    "HANWHA_OFFICIAL",
     "HANWHA"
    ]
   },
@@ -582,6 +634,7 @@
    "prev_salary_10k": 10000,
    "note": null,
    "sources": [
+    "HANWHA_OFFICIAL",
     "HANWHA"
    ]
   },
@@ -594,6 +647,7 @@
    "prev_salary_10k": null,
    "note": null,
    "sources": [
+    "HANWHA_OFFICIAL",
     "HANWHA"
    ]
   },
@@ -606,7 +660,8 @@
    "prev_salary_10k": null,
    "note": "투수 공동 2위",
    "sources": [
-    "KBO"
+    "KBO",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -750,7 +805,8 @@
    "prev_salary_10k": null,
    "note": "야수 3위",
    "sources": [
-    "KBO2"
+    "KBO2",
+    "KBO_RELEASE"
    ]
   },
   {
@@ -958,7 +1014,8 @@
    "sources": [
     "KBO",
     "SAMSUNG_BLOG",
-    "NAMU"
+    "NAMU",
+    "KBO_RELEASE"
    ],
    "page_url": "https://namu.wiki/w/원태인"
   },
@@ -1015,7 +1072,8 @@
    "sources": [
     "KBO",
     "SAMSUNG_BLOG",
-    "NAMU"
+    "NAMU",
+    "KBO_RELEASE"
    ],
    "page_url": "https://namu.wiki/w/최형우"
   },
@@ -1238,6 +1296,7 @@
    "prev_salary_10k": 10000,
    "note": "2026 인상률 1위 800%",
    "sources": [
+    "KBO_RELEASE",
     "KBO"
    ]
   },
@@ -1358,6 +1417,7 @@
    "prev_salary_10k": 48000,
    "note": "투수 최고 연봉 · 동결",
    "sources": [
+    "KIWOOM_OFFICIAL",
     "KIWOOM"
    ]
   },
@@ -1370,6 +1430,7 @@
    "prev_salary_10k": 16500,
    "note": null,
    "sources": [
+    "KIWOOM_OFFICIAL",
     "KIWOOM"
    ]
   },
@@ -1382,6 +1443,7 @@
    "prev_salary_10k": 11000,
    "note": null,
    "sources": [
+    "KIWOOM_OFFICIAL",
     "KIWOOM"
    ]
   },
@@ -1394,6 +1456,7 @@
    "prev_salary_10k": null,
    "note": "플레잉 코치",
    "sources": [
+    "KIWOOM_OFFICIAL",
     "KIWOOM"
    ]
   },
@@ -1406,6 +1469,7 @@
    "prev_salary_10k": 5800,
    "note": null,
    "sources": [
+    "KIWOOM_OFFICIAL",
     "KIWOOM"
    ]
   },
@@ -1418,6 +1482,7 @@
    "prev_salary_10k": null,
    "note": "100% 인상",
    "sources": [
+    "KIWOOM_OFFICIAL",
     "KIWOOM"
    ]
   },
@@ -1430,6 +1495,7 @@
    "prev_salary_10k": null,
    "note": "100% 인상",
    "sources": [
+    "KIWOOM_OFFICIAL",
     "KIWOOM"
    ]
   },
