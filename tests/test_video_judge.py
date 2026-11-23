@@ -2612,3 +2612,26 @@ def test_two_out_hit_said_long_before_a_skipped_half():
     # 직전 상태 뒤 30초 밖이고 판정 시각 근처 창(20초)도 밖인 말 — 그대로
     late = [Cue(430, "speech", "자 디아즈의 2루타")]
     assert [j.code for j in judge(seen, late)] == ["out"]
+
+
+def test_review_guards_for_po225_rules():
+    """독립 리뷰 — 30초 조각이면 조각 길이로 재고, '노림수를 꿰뚫은'은 안타 말이 아니고, 점수판이
+    늦은 타구 뒤에 다른 투구 순간이 있으면(파울 뒤 결정구) 그 타구로 안 본다."""
+    on12, loaded = (True, True, False), (True, True, True)
+    before, after = R(20, outs=2, balls=2, bases=on12), R(40, outs=2, bases=loaded)
+    pitch = [Cue(30, "pitch_seen", ""), _view(31, "no_play")]
+    # 30초 조각: 0초 조각(0~30초)은 직전 상태(20초) 뒤를 덮는다
+    pieces = [Cue(-30, "speech", "앞 이야기"), Cue(0, "speech", "몸에 맞는 공이에요")]
+    j = one(before, after, pieces + pitch)
+    assert j is not None and j.code == "hbp"
+    on23 = (False, True, True)
+    seen = twice(R(290, outs=1, strikes=1, bases=on23, away=2, home=1),
+                 R(298, outs=1, strikes=1, bases=on23, away=2, home=1),
+                 R(327, half="bot", away=4, home=1))
+    said = Cue(290, "speech", "타자의 노림수를 꿰뚫은 볼배합이었죠. 3루 주자 들어옵니다")
+    assert [j.code for j in judge(seen, [Cue(295.4, "pitch_seen", ""), _view(295.8, "in_play"),
+                                         said])] == ["out"]
+    hit = Cue(290, "speech", "1, 2간을 꿰뚫습니다. 3루 주자 들어옵니다")
+    lag = [Cue(295.4, "pitch_seen", ""), _view(295.8, "in_play"), hit]
+    assert [j.code for j in judge(seen, lag)] == ["reach"]
+    assert [j.code for j in judge(seen, lag + [Cue(310, "pitch_seen", "")])] == ["out"]

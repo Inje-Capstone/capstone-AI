@@ -308,6 +308,13 @@ def _late_board_slide(tr: Transition, cues: Sequence[Cue]) -> Optional[Cue]:
     return next((c for c in late if c.kind == "slide"), None)
 
 
+def _piece_sec(cues: Sequence[Cue]) -> float:
+    """받아쓰기 조각 길이 — 조각 시작 시각의 가장 짧은 간격(10초보다 짧게는 안 본다)."""
+    starts = sorted({c.t for c in cues if c.kind == "speech"})
+    gaps = [b - a for a, b in zip(starts, starts[1:])]
+    return max(ASR_LEAD, min(gaps)) if gaps else ASR_LEAD
+
+
 def judge_transition(
     tr: Transition, cues: Sequence[Cue], window: tuple[float, float] = (CUE_BEFORE, CUE_AFTER)
 ) -> Optional[Judgment]:
@@ -318,7 +325,9 @@ def judge_transition(
     # 직전 상태가 처음 보이기 전에 끝난 받아쓰기 조각은 앞 플레이 말이다 — 이 플레이는 직전 상태가
     # 보인 뒤에 일어났다(준플레이오프 1차전 3회초: 480초 '골렛입니다'(앞 타자 볼넷) 조각이 491초에
     # 보인 상태 뒤의 사구를 '볼넷'으로)
-    near = [c for c in near if c.kind != "speech" or c.t + ASR_LEAD > tr.before.t]
+    # 조각 길이는 받아쓰기 설정마다 다르다(10초·30초) — 조각 시작 간격으로 잰다(독립 리뷰)
+    piece = _piece_sec(cues)
+    near = [c for c in near if c.kind != "speech" or c.t + piece > tr.before.t]
     if tr.half_change:
         # 새 반 이닝이 보인 뒤에 시작해 새 반 이닝의 투구 순간을 덮는 받아쓰기 조각은 그 투구 말이다
         # — 2025 와일드카드 1차전 7회초 2사 만루 2루 포스아웃(3아웃)이 7회말 투구의 '스윙 삼진'으로
@@ -408,7 +417,7 @@ def judge_transition(
                      and last_seen < c.t <= min(tr.t, last_seen + CAUGHT_SEC)]
             if _speech(told, "폭투", "포일", "실책"):
                 told = []
-        hit = _speech(told, *HIT_WORDS)
+        hit = _hit_said(told)
         if hit:
             return make("result", "reach", 0.5, [hit, first], merged=True)
     # 1사에서 점수가 나고 반 이닝이 끝났다(아웃 둘) — 직전 상태 뒤 첫 투구 화면이 맞아 나갔고
@@ -429,7 +438,9 @@ def judge_transition(
         # 덮는 조각부터
         last = max((c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
                     and tr.before.t < c.t <= seen), key=lambda c: c.t, default=None)
-        if last is not None and last.kind == IN_PLAY and seen - last.t <= BOARD_LAG_SEC:
+        # 그 뒤 다른 투구 순간이 있으면(파울 뒤 결정구의 화면 단서만 빠짐) 아니다(독립 리뷰)
+        if (last is not None and last.kind == IN_PLAY and seen - last.t <= BOARD_LAG_SEC
+                and not any(c.kind == PITCH_SEEN and last.t < c.t <= tr.t for c in cues)):
             first_seen, talk_from = last, last.t - ASR_LEAD
     if (tr.half_change and tr.before.outs == 1 and first_seen is not None
             and first_seen.kind == IN_PLAY and _scored_before_third_out(tr, skipped=True)):
@@ -438,7 +449,7 @@ def judge_transition(
         # 직전 상태가 마지막으로 보인 뒤에 시작한 조각만, 폭투·포일·실책 득점이면 아니다(독립 리뷰)
         told = [c for c in cues if talk_from < c.t <= tr.t]
         not_hit = _speech(told, *SF_WORDS) or _speech(told, "폭투", "포일", "실책")
-        hit = None if not_hit else _speech(told, *HIT_WORDS)
+        hit = None if not_hit else _hit_said(told)
         if hit:
             return make("result", "reach", 0.5, [hit, first_seen], merged=True)
 
@@ -669,9 +680,18 @@ SPLIT_SEC = 25.0  # 점수판이 아웃과 득점을 나눠 반영하는 간격(
 HR_TALK_SEC = 20.0  # 홈런 말을 새 점수판 뒤 이만큼까지 듣는다(다시보기)
 NEW_HALF_LEAD = 3.0  # 새 반 이닝 첫 투구의 스윙이 그 투구 화면 단서보다 앞서는 시간(실측 약 1초)
 OUTS_SPLIT_SEC = 8.0  # 병살 아웃을 하나씩 올리는 간격(실측 4초) — 다음 투구까지는 15초 넘게 걸린다
+HIT_WORDS = ("안타", "적시타", "2루타", "3루타", "투베이스", "쓰리베이스")
 # '내야를 관통합니다'·'1·2간을 꿰뚫습니다' — 받아쓰기 전체(2026-11-23)에서 7번 모두 안타 묘사였다.
-# '빠져나가'는 '다리 사이를 빠져나가는군요'(실책)도 있어 안 넣는다
-HIT_WORDS = ("안타", "적시타", "2루타", "3루타", "투베이스", "쓰리베이스", "관통", "꿰뚫")
+# '노림수를 꿰뚫은'·'시리즈를 관통하는' 같은 보통 말과 안 겹치게 내야·n·n간 말이 앞에 올 때만
+# (받아쓰기 변형 '내안'·'내열'·'1, 2강'). '다리 사이를 관통·빠져나가'는 실책이라 안 받는다
+# (독립 리뷰)
+HIT_THROUGH = re.compile(r"(?:간|강|내야|내안|내열)[을를]?\s*(?:관통|꿰뚫)")
+
+
+def _hit_said(cues: Sequence[Cue]) -> Optional[Cue]:
+    """해설이 안타라고 했나 — 안타 낱말 또는 '내야를 관통' 같은 안타 묘사."""
+    return _speech(cues, *HIT_WORDS) or next(
+        (c for c in cues if c.kind == "speech" and HIT_THROUGH.search(c.text)), None)
 # 점수판이 타구보다 늦게 바뀌는 시간 — 주자가 홈을 밟을 때까지 직전 상태가 남는다(2025 플레이오프
 # 2차전 3회초: 295.4초 적시타 뒤 298.5초 판독도 직전 상태)
 BOARD_LAG_SEC = 5.0
