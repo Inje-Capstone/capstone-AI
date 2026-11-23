@@ -91,7 +91,7 @@ curl localhost:8000/health
 | `GET /api/backend/onboarding/questions` | **백엔드용** 진단 문항 — 백엔드 `DiagnosisQuestionResponse` 모양(camelCase, `questionId`·`optionId` 1부터) |
 | `POST /api/backend/onboarding/diagnosis` | **백엔드용** 채점 — `DiagnosisSubmitRequest` 그대로 받아 `correctCount`·`totalCount`·`learningLevel` + 해설 + 개인화 가중치 |
 | `GET /api/backend/onboarding/weights?learningLevel=&categories=` | **백엔드용** 수준(+관심 카테고리)별 가중치 — 카테고리 배율·규칙별 점수·노출 여부 |
-| `GET /api/backend/quiz/questions?count=&seed=` | **백엔드용** 학습 퀴즈 — 고정 문제은행(`data/quiz_bank.json`)에서 `count`개, 백엔드 `QuizQuestionResponse` 모양. 정답 없음 |
+| `GET /api/backend/quiz/questions?count=&seed=&term_id=` | **백엔드용** 학습 퀴즈 — 고정 문제은행(`data/quiz_bank.json`)에서 `count`개, 백엔드 `QuizQuestionResponse` 모양. 정답 없음. `term_id`(반복)를 주면 그 용어 문항만(오늘 본 룰) |
 | `GET /api/backend/quiz/questions/{questionId}` | **백엔드용** 한 문항 + `correctOptionId`·`explanation` — 채점·풀이 기록 상세용. **프론트에 중계하지 않는다** |
 | `GET /api/cheer-songs?team=` | 응원가 안내 — 팀·선수·곡명·공식 채널 링크(가사·음원 없음) |
 | `GET /api/games/{id}/cheer-song?t=` | 지금 타석 타자의 응원가, 없으면 그 팀 응원가 |
@@ -118,7 +118,8 @@ curl localhost:8000/health
 AI는 백엔드 compose 내부망 `http://ai:8000`). 중계는 `/api/backend/**`(정답이 든 백엔드 전용)와 `/api/live/**`를 막는다.
 
 - 진단 퀴즈: 백엔드가 `/api/backend/onboarding/questions`·`/diagnosis`를 부른다 — 3문항 · 보기 4개
-- 학습 퀴즈: 백엔드가 `/api/backend/quiz/questions?seed=<사용자ID>-<날짜>`로 문항을, `/questions/{id}`로 정답·해설을 받아
+- 학습 퀴즈(오늘 본 룰): 백엔드가 시청 기록마다 `/api/games/{id}/today-rules?t=&level=`로 본 용어를 받아 저장하고,
+  `/api/backend/quiz/questions?seed=<사용자ID>-<날짜>&term_id=…`로 그 용어 문항을, `/questions/{id}`로 정답·해설을 받아
   **백엔드가 채점·기록**한다. `questionId`는 풀이 기록의 키라 바꾸지 않는다 — 용어가 늘면
   `python scripts/build_quiz_bank.py`가 끝 번호 뒤에 덧붙인다(빠지면 `tests/test_backend_quiz.py` 실패)
 - 응원가: `data/cheer_songs.json`에 팀이 직접 적는다(곡명·구단 공식 링크만). KBO 공식 사이트는 승인 없는 자동 수집을

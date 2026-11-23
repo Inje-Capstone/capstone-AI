@@ -120,13 +120,25 @@ def backend_quiz_questions(
     seed: Optional[str] = Query(
         None, max_length=100, description="같은 값이면 같은 문항 (예: 사용자ID+날짜)"
     ),
+    term_id: Optional[list[str]] = Query(
+        None, max_length=200,
+        description="오늘 본 용어 키(반복 파라미터) — 주면 그 용어 문항만. 없으면 빈 목록",
+    ),
 ):
-    """고정 문제은행에서 `count`개. 번호는 바뀌지 않아 풀이 기록 키로 쓸 수 있다."""
+    """고정 문제은행에서 `count`개. 번호는 바뀌지 않아 풀이 기록 키로 쓸 수 있다.
+
+    '오늘 본 룰 퀴즈': 백엔드가 그날 시청 기록의 용어(`today-rules`의 term_ids)를
+    `term_id`로 넘긴다.
+    """
+    bank = get_quiz_bank()
+    if term_id is not None:
+        wanted = set(term_id)
+        bank = [q for q in bank if q["termId"] in wanted]
     return [
         BackendQuizQuestionOut(
             questionId=q["questionId"], termId=q["termId"], text=q["text"], options=_options(q)
         )
-        for q in sample_questions(get_quiz_bank(), count, seed)
+        for q in sample_questions(bank, count, seed)
     ]
 
 
