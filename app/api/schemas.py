@@ -475,3 +475,33 @@ class GameCheerSongOut(BaseModel):
     batter: Optional[str] = None
     batting_team: Optional[str] = None
     song: Optional[CheerSongOut] = None
+
+
+class WatchRangeIn(BaseModel):
+    start: int = Field(ge=0, le=86_400, description="본 구간 시작(영상 초)")
+    end: int = Field(ge=0, le=86_400, description="본 구간 끝(영상 초, 포함 안 함)")
+
+
+class InningsWatchedIn(BaseModel):
+    """사용자가 본 영상 구간들. 겹쳐도 된다(한 번만 센다)."""
+
+    ranges: list[WatchRangeIn] = Field(default_factory=list, max_length=500)
+
+
+class HalfInningWatchOut(BaseModel):
+    inning: int
+    half: str = Field(description="top | bot")
+    video_start: int
+    video_end: int
+    watched_sec: int
+    counted: bool = Field(description="그 반 이닝 구간의 절반 이상을 봤나")
+
+
+class InningsWatchedOut(BaseModel):
+    """이닝 시청 분석 — 포인트(이닝당 1점·하루 상한)는 백엔드가 계산한다."""
+
+    game_id: str
+    innings: list[int] = Field(description="본 이닝 번호(올림: 초·말 중 하나라도 봤으면 그 이닝)")
+    innings_count: int
+    halves: list[HalfInningWatchOut]
+    rule: str
