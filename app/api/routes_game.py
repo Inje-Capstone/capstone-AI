@@ -14,8 +14,19 @@ from app.api.deps import (
     get_video_notes,
     profile_params,
 )
-from app.api.schemas import CardOut, CardsOut, GameOut, MatchupOut, MomentOut, StateOut
+from app.api.schemas import (
+    CardOut,
+    CardsOut,
+    GameOut,
+    HalfInningWatchOut,
+    InningsWatchedIn,
+    InningsWatchedOut,
+    MatchupOut,
+    MomentOut,
+    StateOut,
+)
 from app.domain.game_state import replay
+from app.domain.innings import half_spans, innings_watched, watch
 from app.domain.models import Card, ExplainProfile
 from app.domain.profile import select
 from app.domain.timeline import Timeline
@@ -103,6 +114,42 @@ def game_moment(
 def game_matchup(game_id: str = Path(...), t: Optional[int] = _T_QUERY):
     feed = _load(game_id)
     return MatchupOut.of(get_matchup_service().matchup(feed.meta.id, t))
+
+
+INNINGS_RULE = (
+    "반 이닝 구간의 절반 이상을 봤으면 그 반 이닝을 봤다. 이닝은 올림 — 초·말 중 하나라도 봤으면 "
+    "그 이닝(5회초 우천 취소도 5회초를 봤으면 5회)."
+)
+
+
+@router.post(
+    "/{game_id}/innings-watched",
+    response_model=InningsWatchedOut,
+    summary="이닝 시청 분석 — 본 영상 구간이 덮은 이닝(포인트 계산용)",
+)
+def game_innings_watched(payload: InningsWatchedIn, game_id: str = Path(...)):
+    """본 구간(영상 초)을 받아 반 이닝마다 본 초와 본 이닝 번호를 준다.
+
+    포인트(이닝당 1점)·하루 상한은 백엔드가 계산한다.
+    """
+    feed = _load(game_id)
+    timeline = Timeline(feed.meta.relay_video_offset_sec)
+    spans = half_spans(feed.events, timeline, feed.meta.video_duration_sec or None)
+    halves = watch(spans, [(r.start, r.end) for r in payload.ranges])
+    innings = innings_watched(halves)
+    return InningsWatchedOut(
+        game_id=feed.meta.id,
+        innings=innings,
+        innings_count=len(innings),
+        halves=[
+            HalfInningWatchOut(
+                inning=h.span.inning, half=h.span.half, video_start=h.span.start,
+                video_end=h.span.end, watched_sec=h.watched_sec, counted=h.counted,
+            )
+            for h in halves
+        ],
+        rule=INNINGS_RULE,
+    )
 
 
 def _load(game_id: str):

@@ -983,6 +983,102 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HalfInningWatchOut": {
+        "properties": {
+          "counted": {
+            "description": "그 반 이닝 구간의 절반 이상을 봤나",
+            "title": "Counted",
+            "type": "boolean"
+          },
+          "half": {
+            "description": "top | bot",
+            "title": "Half",
+            "type": "string"
+          },
+          "inning": {
+            "title": "Inning",
+            "type": "integer"
+          },
+          "video_end": {
+            "title": "Video End",
+            "type": "integer"
+          },
+          "video_start": {
+            "title": "Video Start",
+            "type": "integer"
+          },
+          "watched_sec": {
+            "title": "Watched Sec",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "inning",
+          "half",
+          "video_start",
+          "video_end",
+          "watched_sec",
+          "counted"
+        ],
+        "title": "HalfInningWatchOut",
+        "type": "object"
+      },
+      "InningsWatchedIn": {
+        "description": "사용자가 본 영상 구간들. 겹쳐도 된다(한 번만 센다).",
+        "properties": {
+          "ranges": {
+            "items": {
+              "$ref": "#/components/schemas/WatchRangeIn"
+            },
+            "maxItems": 500,
+            "title": "Ranges",
+            "type": "array"
+          }
+        },
+        "title": "InningsWatchedIn",
+        "type": "object"
+      },
+      "InningsWatchedOut": {
+        "description": "이닝 시청 분석 — 포인트(이닝당 1점·하루 상한)는 백엔드가 계산한다.",
+        "properties": {
+          "game_id": {
+            "title": "Game Id",
+            "type": "string"
+          },
+          "halves": {
+            "items": {
+              "$ref": "#/components/schemas/HalfInningWatchOut"
+            },
+            "title": "Halves",
+            "type": "array"
+          },
+          "innings": {
+            "description": "본 이닝 번호(올림: 초·말 중 하나라도 봤으면 그 이닝)",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Innings",
+            "type": "array"
+          },
+          "innings_count": {
+            "title": "Innings Count",
+            "type": "integer"
+          },
+          "rule": {
+            "title": "Rule",
+            "type": "string"
+          }
+        },
+        "required": [
+          "game_id",
+          "innings",
+          "innings_count",
+          "halves",
+          "rule"
+        ],
+        "title": "InningsWatchedOut",
+        "type": "object"
+      },
       "LiveDataIn": {
         "description": "경기 데이터(네이버 중계를 변환한 이벤트 전체 + 팀 맥락). 보낼 때마다 전체를 바꿔 끼운다.\n\n선수 이름·구종·기록만 영상 판정에 붙는다. 데이터의 플레이 결과는 화면에 쓰지 않는다.",
         "properties": {
@@ -1744,6 +1840,30 @@
         ],
         "title": "ValidationError",
         "type": "object"
+      },
+      "WatchRangeIn": {
+        "properties": {
+          "end": {
+            "description": "본 구간 끝(영상 초, 포함 안 함)",
+            "maximum": 86400.0,
+            "minimum": 0.0,
+            "title": "End",
+            "type": "integer"
+          },
+          "start": {
+            "description": "본 구간 시작(영상 초)",
+            "maximum": 86400.0,
+            "minimum": 0.0,
+            "title": "Start",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "WatchRangeIn",
+        "type": "object"
       }
     }
   },
@@ -2430,6 +2550,59 @@
         "summary": "지금 타석 타자의 응원가 (없으면 팀 응원가)",
         "tags": [
           "cheer"
+        ]
+      }
+    },
+    "/api/games/{game_id}/innings-watched": {
+      "post": {
+        "description": "본 구간(영상 초)을 받아 반 이닝마다 본 초와 본 이닝 번호를 준다.\n\n포인트(이닝당 1점)·하루 상한은 백엔드가 계산한다.",
+        "operationId": "game_innings_watched_api_games__game_id__innings_watched_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game_id",
+            "required": true,
+            "schema": {
+              "title": "Game Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InningsWatchedIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InningsWatchedOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "이닝 시청 분석 — 본 영상 구간이 덮은 이닝(포인트 계산용)",
+        "tags": [
+          "game"
         ]
       }
     },

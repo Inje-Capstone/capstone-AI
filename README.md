@@ -79,6 +79,7 @@ curl localhost:8000/health
 | `GET /api/games/{id}/cards?t=&level=&category=` | S4 우상단 AI 설명 카드 스택 |
 | `POST /api/games/{id}/cards/{card_id}/simplify` | S4 "더 쉽게 설명" |
 | `GET /api/games/{id}/matchup?t=` | S4 우하단 선수·매치업 분석 |
+| `POST /api/games/{id}/innings-watched` | 이닝 시청 분석 — 본 영상 구간(`ranges: [{start, end}]`, 영상 초)이 덮은 반 이닝별 본 초와 본 이닝 번호. 반 이닝은 구간 절반 이상을 봐야, 이닝은 올림(초·말 중 하나 — 5회초 우천 취소도 5회). 포인트·하루 상한은 백엔드 |
 | `POST /api/games/{id}/chat` | S4 하단 챗봇 |
 | `GET /api/glossary?q=&category=` | S5 용어 사전 목록·검색 |
 | `GET /api/glossary/{term_id}?level=` | S5 용어 상세 (카드 `term_id` 딥링크) |
