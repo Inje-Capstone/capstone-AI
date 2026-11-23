@@ -2531,3 +2531,84 @@ def test_strikeout_call_in_commentary():
     for said in ("땅볼을 유도했지만 스트라이크 아웃을 잡은 거나 진배 없어요.",
                  "선진 야구를 보여 줍니다"):
         assert codes(pitch + [Cue(6, "speech", said)]) == ["out"], said
+
+
+def test_asr_spellings_from_po225():
+    """2025 플레이오프 2차전 — 받아쓰기가 '신삼진'을 '신성진!'·'신상진.'으로, '몸에 맞는 공'을
+    '몸을 맞는 공'으로, '볼넷'을 '골렛'으로 적어 삼진·사구·볼넷이 '아웃'·'출루'였다."""
+    seen_k = [R(0, outs=2, balls=1, strikes=2, bases=(False, False, True)), R(14, half="bot")]
+    pitch = [Cue(3, "pitch_seen", ""), _view(6, "view_unknown")]
+
+    def codes(seen, cues):
+        return [j.code for j in judge(seen, cues, min_repeat=1) if j.transition is not None]
+
+    for said in ("신성진! 자, 강민호 선수가 노련하네요.", "구구째. 신상진. 끈질기게 승부했던"):
+        assert codes(seen_k, pitch + [Cue(6, "speech", said)]) == ["strikeout"], said
+    two_three, loaded = (False, True, True), (True, True, True)
+    seen_hbp = [R(0, outs=1, balls=1, strikes=2, bases=two_three), R(12, outs=1, bases=loaded)]
+    assert codes(seen_hbp, [Cue(10, "speech", "-몸을 맞는 공.")]) == ["hbp"]
+    second, on12 = (False, True, False), (True, True, False)
+    seen_bb = [R(0, outs=1, balls=2, strikes=2, bases=second), R(12, outs=1, strikes=1, bases=on12)]
+    assert codes(seen_bb, []) == ["reach"]
+    for said in ("풀카운트 다시 빠지네요 또 빠져요 골렛", "선두타자에게 볼렛 내줍니다",
+                 "1루까지 골넷으로 출루"):
+        assert codes(seen_bb, [Cue(8, "speech", said)]) == ["walk"], said
+
+
+def test_speech_that_ended_before_the_state_is_an_earlier_play():
+    """준플레이오프 1차전 3회초 — 앞 타자 볼넷 말('골렛입니다', 480초 조각)이 491초에 보인 상태
+    뒤의 사구 전이(493초)에서 '볼넷'이 됐다. 직전 상태가 보이기 전에 끝난 조각은 앞 플레이
+    말이다."""
+    on12, loaded = (True, True, False), (True, True, True)
+    before, after = R(20, outs=2, balls=2, bases=on12), R(30, outs=2, bases=loaded)
+    pitch = [Cue(26, "pitch_seen", ""), _view(27, "no_play")]
+    # 판정 시각 근처 창(20초) 안이지만 직전 상태(20초)가 보이기 전에 끝난 조각(10~20초)
+    j = one(before, after, [Cue(10, "speech", "3번 스트리트. 골렛입니다.")] + pitch)
+    assert j is not None and j.code != "walk"
+    # 직전 상태가 보인 뒤에 걸친 조각은 그대로 쓴다
+    j = one(before, after, [Cue(15, "speech", "또 빠져요 골렛입니다.")] + pitch)
+    assert j is not None and j.code == "walk"
+
+
+def test_strikeout_speech_starting_when_the_state_is_seen():
+    """2025 플레이오프 2차전 5회초 — 상태 500.0초 1사 만루 0-0(하이라이트가 카운트를 건너뜀),
+    '신상진.' 조각도 500.0초에 시작, 휘두른 공이 안 맞고 아웃. 그 조각은 직전 상태 뒤의 말이다."""
+    loaded = (True, True, True)
+    seen = [R(500, outs=1, bases=loaded), R(511, outs=2, balls=2, strikes=2, bases=loaded)]
+    cues = [Cue(500, "speech", "주자가 꽉 찹니다. 투투. 구구째. 신상진."),
+            Cue(503.8, "swing", ""), Cue(503.8, "pitch_seen", ""), _view(505.7, "no_play")]
+    codes = [j.code for j in judge(seen, cues, min_repeat=1) if j.transition is not None]
+    assert codes == ["strikeout"]
+
+
+def test_one_out_hit_when_the_board_updates_after_the_runners_score():
+    """2025 플레이오프 2차전 3회초 1사 2·3루 — 295.4초 김영웅 2타점 적시타('내야를 관통합니다')
+    뒤에도
+    점수판은 298.5초까지 직전 상태였고, 아웃 둘을 건너뛰고 3회말. 직전 상태가 보인 동안의 마지막
+    투구가 맞아 나갔고 그 뒤 다른 투구가 없으면 그 투구다. 그 투구가 5초보다 앞이면 아니다."""
+    on23 = (False, True, True)
+    seen = twice(R(290, outs=1, strikes=1, bases=on23, away=2, home=1),
+                 R(298, outs=1, strikes=1, bases=on23, away=2, home=1),
+                 R(327, half="bot", away=4, home=1))
+    hit = [Cue(295.4, "pitch_seen", ""), _view(295.8, "in_play"),
+           Cue(290, "speech", "이 타구는 빠르게 내야를 관통합니다. 3루 주자 들어옵니다")]
+    assert [j.code for j in judge(seen, hit)] == ["reach"]
+    early = [Cue(291.4, "pitch_seen", ""), _view(291.8, "in_play"), hit[2]]
+    assert [j.code for j in judge(seen, early)] == ["out"]
+    assert [j.code for j in judge(seen, hit[:2])] == ["out"]
+
+
+def test_two_out_hit_said_long_before_a_skipped_half():
+    """2025 플레이오프 2차전 4회초 2사 1·3루 — 디아즈 적시 2루타('안타요' 400초, '2루타' 430초),
+    1루 주자 홈에서 아웃으로 3아웃, 4회말을 건너뛰고 5회초 상태가 457초에. 투구 화면 단서가 없으면
+    직전 상태가 마지막으로 보인 뒤 30초 안의 말도 본다."""
+    on13 = (True, False, True)
+    seen = twice(R(395, outs=2, balls=1, strikes=1, bases=on13, away=4, home=1, inning=4),
+                 R(457, balls=3, away=5, home=1, inning=5))
+    said = [Cue(400, "speech", "초구. 옳죠. 안타요. 라인 안쪽에 들어왔어요."),
+            Cue(430, "speech", "디아즈의 2루타. 한 점을 더 추가했는데 구자욱 선수가 잡혔어요")]
+    assert [j.code for j in judge(seen, said)] == ["reach"]
+    assert [j.code for j in judge(seen, [])] == ["out"]
+    # 직전 상태 뒤 30초 밖이고 판정 시각 근처 창(20초)도 밖인 말 — 그대로
+    late = [Cue(430, "speech", "자 디아즈의 2루타")]
+    assert [j.code for j in judge(seen, late)] == ["out"]

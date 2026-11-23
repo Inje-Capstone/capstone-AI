@@ -185,20 +185,29 @@ STRIKEOUT_CALLS = tuple(f"{a} {b}" for a in ("킹", "스윙")
 SWING_K_SPELLINGS = ("스윙 선진", "스프링 섬지", "스프링 선든",
                      # '6번째 탈삼.'(조각 끝에서 잘린 '탈삼진', 준플레이오프 1차전) — '통산 탈삼'
                      # 같은 기록 말과 안 겹치게 'n번째'를 붙인 꼴만(독립 리뷰)
-                     "번째 탈삼")
+                     "번째 탈삼",
+                     # '신삼진'(스윙 삼진)을 '신성진!'·'신상진.'으로(2025 플레이오프 2차전
+                     # 3회말 손아섭,
+                     # 5회초 류지혁) — 받아쓰기 전체에서 이 두 말은 삼진 콜에만 나왔다
+                     "신성진", "신상진")
 # 받아쓰기(Whisper)가 숫자로 적는 말 — '삼진'을 '3진'으로(2026-11-07 하이라이트 실측: "4타자 연속
 # 3진"). '3진루' 같은 말은 해설에 없다. '스윙 섬진', '고의사고를 해 주는 거죠'(준플레이오프 2차전)
 _ASR_WORDS = {"삼진": ("3진", "섬진", *STRIKEOUT_CALLS, *SWING_K_SPELLINGS),
               "고의사구": ("고의사고",), "태그업": ("탭업",),
               # 받아쓰기가 '몸에 맞는 공'을 '못 맞는 공'으로, '선제 투런'을 '선자 투럼'으로 적었다
               # (와일드카드 1차전 7회초 사구, 1회말 오스틴 홈런)
-              "몸에 맞": ("못 맞는 공",), "투런": ("투럼",),
+              # '몸을 맞는 공'(2025 플레이오프 2차전 5회초 강민호 사구)
+              "몸에 맞": ("못 맞는 공", "몸을 맞는 공"), "투런": ("투럼",),
               # '기습 도루'를 '기습 토루'로(2025 와일드카드 2차전 8회말 3루 도루)
               "도루": ("토루",),
               # '볼넷 출루'를 '본래 출루'로(2025 한국시리즈 1차전 1회말 홍창기 — 3-2 파울과 볼넷이
               # 한 투구 화면으로 이어져 관절이 '휘두름'을 봤다), '리즈 역시 볼넷'을 '리즈 역은
               # 본래.'로(조정용 경기). 문장 끝·'출루' 앞만 — '본래'는 보통 말이다
-              "볼넷": ("본래 출루", "본래.")}
+              "볼넷": ("본래 출루", "본래.",
+                       # '볼렛'·'골렛'·'골넷'(받아쓰기 전체 2026-11-23: 30번 모두 볼넷 —
+                       # 2025 플레이오프
+                       # 2차전 2회말 '또 빠져요 골렛' 3-2 볼넷이 '출루'였다)
+                       "볼렛", "골렛", "골넷")}
 
 
 # 같은 글자의 다른 말 — '사구(死球)'는 몸에 맞는 공인데 '고의사구(四球)'는 고의4구다.
@@ -306,6 +315,10 @@ def judge_transition(
     if is_count_only(tr):
         return None
     near = _near(cues, tr.t, *window)
+    # 직전 상태가 처음 보이기 전에 끝난 받아쓰기 조각은 앞 플레이 말이다 — 이 플레이는 직전 상태가
+    # 보인 뒤에 일어났다(준플레이오프 1차전 3회초: 480초 '골렛입니다'(앞 타자 볼넷) 조각이 491초에
+    # 보인 상태 뒤의 사구를 '볼넷'으로)
+    near = [c for c in near if c.kind != "speech" or c.t + ASR_LEAD > tr.before.t]
     if tr.half_change:
         # 새 반 이닝이 보인 뒤에 시작해 새 반 이닝의 투구 순간을 덮는 받아쓰기 조각은 그 투구 말이다
         # — 2025 와일드카드 1차전 7회초 2사 만루 2루 포스아웃(3아웃)이 7회말 투구의 '스윙 삼진'으로
@@ -385,6 +398,14 @@ def judge_transition(
             # 화면 단서가 없으면 말만 — 새 상태가 보이기 전의 말만, 폭투·포일·실책 득점이면 아니다
             # (독립 리뷰)
             told = [c for c in told if c.t <= tr.t]
+            # 반 이닝을 건너뛰어 새 상태가 한참 뒤에 보이면 판정 시각 근처 창에는 그 플레이 말이
+            # 없다
+            # — 직전 상태가 마지막으로 보인 뒤 CAUGHT_SEC 안의 말도 본다(2025 플레이오프 2차전 4회초
+            # 2사 1·3루 디아즈 적시 2루타 '안타요'·'2루타' 400~430초, 새 상태 457초)
+            last_seen = max(tr.before.t, tr.before_seen if tr.before_seen is not None
+                            else tr.before.t)
+            told += [c for c in cues if c.kind == "speech" and c not in told
+                     and last_seen < c.t <= min(tr.t, last_seen + CAUGHT_SEC)]
             if _speech(told, "폭투", "포일", "실책"):
                 told = []
         hit = _speech(told, *HIT_WORDS)
@@ -399,12 +420,23 @@ def judge_transition(
     seen = max(tr.before.t, tr.before_seen if tr.before_seen is not None else tr.before.t)
     first_seen = min((c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
                       and seen < c.t <= tr.t), key=lambda c: c.t, default=None)
+    talk_from = seen
+    if first_seen is None:
+        # 점수판이 늦게 바뀌어(주자가 홈을 밟을 때까지) 타구 뒤에도 직전 상태가 다시 읽혔다 — 직전
+        # 상태가 보인 동안의 마지막 투구가 맞아 나갔고 그 뒤 새 상태까지 다른 투구가 없으면 그
+        # 투구다
+        # (2025 플레이오프 2차전 3회초 1사 2·3루 김영웅 2타점 적시타 뒤 아웃 둘). 말은 그 투구를
+        # 덮는 조각부터
+        last = max((c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                    and tr.before.t < c.t <= seen), key=lambda c: c.t, default=None)
+        if last is not None and last.kind == IN_PLAY and seen - last.t <= BOARD_LAG_SEC:
+            first_seen, talk_from = last, last.t - ASR_LEAD
     if (tr.half_change and tr.before.outs == 1 and first_seen is not None
             and first_seen.kind == IN_PLAY and _scored_before_third_out(tr, skipped=True)):
         # 직전 상태가 보인 때부터 새 상태가 보인 때까지의 말 — 이닝 사이 화면이 길어 판정 시각 근처
         # 창 밖일 수 있다(준플레이오프 1차전: 적시타 해설 630초, 새 상태 652초)
         # 직전 상태가 마지막으로 보인 뒤에 시작한 조각만, 폭투·포일·실책 득점이면 아니다(독립 리뷰)
-        told = [c for c in cues if seen < c.t <= tr.t]
+        told = [c for c in cues if talk_from < c.t <= tr.t]
         not_hit = _speech(told, *SF_WORDS) or _speech(told, "폭투", "포일", "실책")
         hit = None if not_hit else _speech(told, *HIT_WORDS)
         if hit:
@@ -606,7 +638,9 @@ def judge_transition(
         # 직전 상태가 이미 타석 중간(카운트가 0-0 아님)일 때만 — 타석이 막 시작했으면 그 조각은
         # 앞 타자 말일 수 있다
         mid_pa = tr.before.strikes >= 1  # 회상('삼진 여섯 개째')을 덜 받게 — 독립 리뷰
-        k = _speech([c for c in near if c.t > tr.before.t
+        # 직전 상태가 보인 순간에 시작한 조각은 그 뒤의 말이다(2025 플레이오프 2차전 5회초: 상태
+        # 500.0초 0-0, '신상진' 조각 500.0초 — 하이라이트가 카운트를 건너뛰고 2-2 삼진)
+        k = _speech([c for c in near if c.t >= tr.before.t
                      or (mid_pa and tr.before.t - c.t < ASR_LEAD)], "삼진")
         if swung and k and not _has(near, "contact"):
             return make("result", "strikeout", 0.5, [k, swung])
@@ -635,7 +669,12 @@ SPLIT_SEC = 25.0  # 점수판이 아웃과 득점을 나눠 반영하는 간격(
 HR_TALK_SEC = 20.0  # 홈런 말을 새 점수판 뒤 이만큼까지 듣는다(다시보기)
 NEW_HALF_LEAD = 3.0  # 새 반 이닝 첫 투구의 스윙이 그 투구 화면 단서보다 앞서는 시간(실측 약 1초)
 OUTS_SPLIT_SEC = 8.0  # 병살 아웃을 하나씩 올리는 간격(실측 4초) — 다음 투구까지는 15초 넘게 걸린다
-HIT_WORDS = ("안타", "적시타", "2루타", "3루타", "투베이스", "쓰리베이스")
+# '내야를 관통합니다'·'1·2간을 꿰뚫습니다' — 받아쓰기 전체(2026-11-23)에서 7번 모두 안타 묘사였다.
+# '빠져나가'는 '다리 사이를 빠져나가는군요'(실책)도 있어 안 넣는다
+HIT_WORDS = ("안타", "적시타", "2루타", "3루타", "투베이스", "쓰리베이스", "관통", "꿰뚫")
+# 점수판이 타구보다 늦게 바뀌는 시간 — 주자가 홈을 밟을 때까지 직전 상태가 남는다(2025 플레이오프
+# 2차전 3회초: 295.4초 적시타 뒤 298.5초 판독도 직전 상태)
+BOARD_LAG_SEC = 5.0
 LOST_RUNNER_SEC = 60.0  # 사라진 주자의 아웃이 다음 판독(다음 반 이닝일 수도)에 올라오기까지
 DP_SAID_SEC = 30.0  # 해설이 병살이라 할 때 두 아웃을 합치는 최대 간격(KS2 실측 18초)
 DP_WORDS = ("병살", "더블플레이", "더블 플레이")
