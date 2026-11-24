@@ -12,6 +12,7 @@ from app.adapters.llm import build_llm_client
 from app.adapters.quiz.bank import load_quiz_bank
 from app.adapters.relay.fixture import FixtureRelaySource
 from app.adapters.stats.fixture import FixtureStatsSource
+from app.adapters.stats.team_season import load_salaries, load_team_season
 from app.adapters.video.notes import VideoNotes
 from app.config import get_settings
 from app.domain.models import ExplainProfile
@@ -104,6 +105,18 @@ def get_cheer_songs() -> list[dict[str, Any]]:
 
 
 @lru_cache(maxsize=1)
+def get_team_season() -> dict[str, Any]:
+    """2026 구단 성적·상대 전적·주전 기록(나무위키)."""
+    return load_team_season()
+
+
+@lru_cache(maxsize=1)
+def get_salaries() -> dict[str, Any]:
+    """2026 선수 연봉(공개 보도·나무위키)."""
+    return load_salaries()
+
+
+@lru_cache(maxsize=1)
 def get_moment_service() -> MomentService:
     settings = get_settings()
     return MomentService(
@@ -129,6 +142,8 @@ def reset_services() -> None:
         get_diagnostic_questions,
         get_quiz_bank,
         get_cheer_songs,
+        get_team_season,
+        get_salaries,
     ):
         fn.cache_clear()
 
