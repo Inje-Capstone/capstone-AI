@@ -30,6 +30,10 @@ class Settings:
             os.getenv("ROOKIE_SUMMARY_MODEL", DEFAULT_SUMMARY_MODEL).strip()
             or DEFAULT_SUMMARY_MODEL
         )
+        # 티켓 사진 읽기(비전). 짧은 판독이라 가장 싼 모델로 충분했다(2026-11-24 시험).
+        self.ticket_model = (
+            os.getenv("ROOKIE_TICKET_MODEL", "claude-haiku-5-5").strip() or "claude-haiku-5-5"
+        )
         # auto | claude | mock | fail
         self.llm_backend = os.getenv("ROOKIE_LLM_BACKEND", "auto").strip().lower()
         self.fixture_dir = Path(os.getenv("ROOKIE_FIXTURE_DIR", str(ROOT / "data" / "fixtures")))
