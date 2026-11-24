@@ -505,3 +505,72 @@ class InningsWatchedOut(BaseModel):
     innings_count: int
     halves: list[HalfInningWatchOut]
     rule: str
+
+
+class PlayerValueOut(BaseModel):
+    """주전 한 명의 연봉 대비 활약. 순위·판정은 같은 구단 주전(국내 선수)끼리 비교한 것."""
+
+    name: str
+    group: str = Field(description="타자 | 투수")
+    spot: Optional[str] = Field(default=None, description="포지션 또는 보직")
+    line: str = Field(description="시즌 기록 한 줄")
+    war: Optional[float] = Field(default=None, description="sWAR(나무위키 표기)")
+    salary_10k: Optional[int] = Field(default=None, description="2026 연봉(만원, 국내 선수)")
+    contract_usd: Optional[int] = Field(default=None, description="외국인 계약 총액(달러)")
+    war_per_eok: Optional[float] = Field(default=None, description="연봉 1억당 WAR")
+    salary_rank: Optional[int] = None
+    war_rank: Optional[int] = None
+    verdict: Optional[str] = Field(
+        default=None, description="연봉보다 활약 | 연봉만큼 | 연봉보다 아쉬움 (비교 불가면 없음)"
+    )
+    page_url: Optional[str] = None
+
+
+class HeadToHeadOut(BaseModel):
+    opponent: str
+    wins: Optional[int] = None
+    losses: Optional[int] = None
+    draws: Optional[int] = None
+
+
+class PitchMixOut(BaseModel):
+    name: str
+    role: Optional[str] = None
+    pitches: list[str]
+    line: str
+
+
+class TeamAnalysisOut(BaseModel):
+    """팀 분석 — 순위표에 없는 것(연봉 대비 활약·맞대결·주전 투수 구종).
+
+    출처는 공개 보도·나무위키.
+    """
+
+    team: str
+    available: bool
+    unavailable_reason: Optional[str] = None
+    season: Optional[int] = None
+    rank: Optional[int] = Field(default=None, description="정규시즌 승률 순위")
+    wins: Optional[int] = None
+    losses: Optional[int] = None
+    draws: Optional[int] = None
+    win_pct: Optional[float] = None
+    avg_salary_10k: Optional[int] = None
+    top29_avg_salary_10k: Optional[int] = None
+    total_salary_10k: Optional[int] = None
+    league_avg_salary_10k: Optional[int] = None
+    values: list[PlayerValueOut] = Field(default_factory=list)
+    head_to_head: list[HeadToHeadOut] = Field(default_factory=list)
+    pitchers: list[PitchMixOut] = Field(default_factory=list)
+    source: str = "공개 보도·나무위키(2026 시즌)"
+
+
+class GameTeamAnalysisOut(BaseModel):
+    """경기 화면용 — 두 팀 분석 + 둘의 올 시즌 맞대결(원정 팀 쪽에서 본 승·패·무)."""
+
+    game_id: str
+    away: TeamAnalysisOut
+    home: TeamAnalysisOut
+    season_head_to_head: Optional[HeadToHeadOut] = Field(
+        default=None, description="원정 팀 기준 상대 전적(opponent = 홈 팀)"
+    )

@@ -970,6 +970,39 @@
         "title": "GameOut",
         "type": "object"
       },
+      "GameTeamAnalysisOut": {
+        "description": "경기 화면용 — 두 팀 분석 + 둘의 올 시즌 맞대결(원정 팀 쪽에서 본 승·패·무).",
+        "properties": {
+          "away": {
+            "$ref": "#/components/schemas/TeamAnalysisOut"
+          },
+          "game_id": {
+            "title": "Game Id",
+            "type": "string"
+          },
+          "home": {
+            "$ref": "#/components/schemas/TeamAnalysisOut"
+          },
+          "season_head_to_head": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HeadToHeadOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "원정 팀 기준 상대 전적(opponent = 홈 팀)"
+          }
+        },
+        "required": [
+          "game_id",
+          "away",
+          "home"
+        ],
+        "title": "GameTeamAnalysisOut",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1021,6 +1054,52 @@
           "counted"
         ],
         "title": "HalfInningWatchOut",
+        "type": "object"
+      },
+      "HeadToHeadOut": {
+        "properties": {
+          "draws": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draws"
+          },
+          "losses": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Losses"
+          },
+          "opponent": {
+            "title": "Opponent",
+            "type": "string"
+          },
+          "wins": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wins"
+          }
+        },
+        "required": [
+          "opponent"
+        ],
+        "title": "HeadToHeadOut",
         "type": "object"
       },
       "InningsWatchedIn": {
@@ -1320,6 +1399,174 @@
         "title": "MomentOut",
         "type": "object"
       },
+      "PitchMixOut": {
+        "properties": {
+          "line": {
+            "title": "Line",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "pitches": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Pitches",
+            "type": "array"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          }
+        },
+        "required": [
+          "name",
+          "pitches",
+          "line"
+        ],
+        "title": "PitchMixOut",
+        "type": "object"
+      },
+      "PlayerValueOut": {
+        "description": "주전 한 명의 연봉 대비 활약. 순위·판정은 같은 구단 주전(국내 선수)끼리 비교한 것.",
+        "properties": {
+          "contract_usd": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "외국인 계약 총액(달러)",
+            "title": "Contract Usd"
+          },
+          "group": {
+            "description": "타자 | 투수",
+            "title": "Group",
+            "type": "string"
+          },
+          "line": {
+            "description": "시즌 기록 한 줄",
+            "title": "Line",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "page_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Url"
+          },
+          "salary_10k": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "2026 연봉(만원, 국내 선수)",
+            "title": "Salary 10K"
+          },
+          "salary_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salary Rank"
+          },
+          "spot": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "포지션 또는 보직",
+            "title": "Spot"
+          },
+          "verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "연봉보다 활약 | 연봉만큼 | 연봉보다 아쉬움 (비교 불가면 없음)",
+            "title": "Verdict"
+          },
+          "war": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "sWAR(나무위키 표기)",
+            "title": "War"
+          },
+          "war_per_eok": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "연봉 1억당 WAR",
+            "title": "War Per Eok"
+          },
+          "war_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "War Rank"
+          }
+        },
+        "required": [
+          "name",
+          "group",
+          "line"
+        ],
+        "title": "PlayerValueOut",
+        "type": "object"
+      },
       "QuizIn": {
         "description": "하루 5문제. 백엔드가 그날 본 term_ids를 모아(여러 경기 합산) 넘긴다.",
         "properties": {
@@ -1590,6 +1837,173 @@
           "game_over"
         ],
         "title": "StateOut",
+        "type": "object"
+      },
+      "TeamAnalysisOut": {
+        "description": "팀 분석 — 순위표에 없는 것(연봉 대비 활약·맞대결·주전 투수 구종).\n\n출처는 공개 보도·나무위키.",
+        "properties": {
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "avg_salary_10k": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Salary 10K"
+          },
+          "draws": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draws"
+          },
+          "head_to_head": {
+            "items": {
+              "$ref": "#/components/schemas/HeadToHeadOut"
+            },
+            "title": "Head To Head",
+            "type": "array"
+          },
+          "league_avg_salary_10k": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "League Avg Salary 10K"
+          },
+          "losses": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Losses"
+          },
+          "pitchers": {
+            "items": {
+              "$ref": "#/components/schemas/PitchMixOut"
+            },
+            "title": "Pitchers",
+            "type": "array"
+          },
+          "rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "정규시즌 승률 순위",
+            "title": "Rank"
+          },
+          "season": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Season"
+          },
+          "source": {
+            "default": "공개 보도·나무위키(2026 시즌)",
+            "title": "Source",
+            "type": "string"
+          },
+          "team": {
+            "title": "Team",
+            "type": "string"
+          },
+          "top29_avg_salary_10k": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top29 Avg Salary 10K"
+          },
+          "total_salary_10k": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Salary 10K"
+          },
+          "unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unavailable Reason"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerValueOut"
+            },
+            "title": "Values",
+            "type": "array"
+          },
+          "win_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Win Pct"
+          },
+          "wins": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wins"
+          }
+        },
+        "required": [
+          "team",
+          "available"
+        ],
+        "title": "TeamAnalysisOut",
         "type": "object"
       },
       "TermOut": {
@@ -2841,6 +3255,48 @@
         ]
       }
     },
+    "/api/games/{game_id}/team-analysis": {
+      "get": {
+        "operationId": "game_team_analysis_api_games__game_id__team_analysis_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game_id",
+            "required": true,
+            "schema": {
+              "title": "Game Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameTeamAnalysisOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "경기 두 팀 분석 + 올 시즌 맞대결",
+        "tags": [
+          "team"
+        ]
+      }
+    },
     "/api/games/{game_id}/today-rules": {
       "get": {
         "description": "카드와 같은 선택 규칙(프로필 가중치)을 그대로 쓴다 — 화면에 뜬 카드 = 퀴즈 재료.\n\nLLM을 부르지 않는다. 카드 생성이 죽어 있어도 목록은 나온다.",
@@ -3571,6 +4027,50 @@
         "summary": "규칙 목록 — 버튼별, 이름순 (S5)",
         "tags": [
           "rules"
+        ]
+      }
+    },
+    "/api/teams/{team}/analysis": {
+      "get": {
+        "operationId": "team_analysis_api_teams__team__analysis_get",
+        "parameters": [
+          {
+            "description": "한화·삼성·LG·KIA·SSG·NC·KT·두산·롯데·키움",
+            "in": "path",
+            "name": "team",
+            "required": true,
+            "schema": {
+              "description": "한화·삼성·LG·KIA·SSG·NC·KT·두산·롯데·키움",
+              "title": "Team",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamAnalysisOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "팀 분석",
+        "tags": [
+          "team"
         ]
       }
     },
