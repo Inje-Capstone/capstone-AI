@@ -7,6 +7,7 @@
 import base64
 import binascii
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 
@@ -34,7 +35,7 @@ SNIFF = (
 )
 
 
-def sniff_media_type(image: bytes) -> str | None:
+def sniff_media_type(image: bytes) -> Optional[str]:
     for magic, media in SNIFF:
         if image.startswith(magic):
             return media
