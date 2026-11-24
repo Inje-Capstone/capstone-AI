@@ -574,3 +574,50 @@ class GameTeamAnalysisOut(BaseModel):
     season_head_to_head: Optional[HeadToHeadOut] = Field(
         default=None, description="원정 팀 기준 상대 전적(opponent = 홈 팀)"
     )
+
+
+class BackendTicketReadIn(BaseModel):
+    """티켓 사진 1장(base64). 사진은 저장하지 않는다."""
+
+    # 길이 제한은 라우트에서 건다 — 여기서 걸면 FastAPI 422 응답이 사진 전체를 되돌려 보낸다.
+    imageBase64: str = Field(description="이미지 바이트의 base64(줄바꿈 없음). 원본 3.75MB 이하")
+    mediaType: Optional[str] = Field(
+        default=None,
+        description="image/jpeg | image/png | image/webp | image/gif — 실제 형식은 바이트로 판단",
+    )
+
+
+class BackendTicketCheckOut(BaseModel):
+    name: str = Field(description="is_ticket | not_sample | date | stadium | teams | seat")
+    ok: bool
+    detail: str
+
+
+class BackendTicketSeatOut(BaseModel):
+    section: Optional[str] = None
+    block: Optional[str] = None
+    row: Optional[str] = None
+    number: Optional[str] = None
+
+
+class BackendTicketReadOut(BaseModel):
+    """티켓 판독 + 검사. 중복(같은 seatKey)·주 2회·포인트는 백엔드가 판단한다."""
+
+    ok: bool = Field(description="검사를 모두 통과했나")
+    reasons: list[str] = Field(description="통과 못 한 이유(사용자에게 보여도 되는 말)")
+    gameDate: Optional[str] = None
+    stadium: Optional[str] = Field(default=None, description="구장 키(잠실·고척·인천 …)")
+    stadiumText: Optional[str] = Field(default=None, description="사진에서 읽은 구장 이름")
+    homeTeam: Optional[str] = None
+    awayTeam: Optional[str] = None
+    seat: BackendTicketSeatOut
+    kind: str = Field(description="online | paper | unknown")
+    seatKey: Optional[str] = Field(
+        default=None, description="중복 판단 키 '일자|구장|구역|블록|열|번호' — ok일 때만"
+    )
+    checks: list[BackendTicketCheckOut]
+    scheduleChecked: bool = Field(
+        default=False,
+        description="그날 실제 경기가 있었는지 일정과 대조했나(일정 데이터 없음 → false)",
+    )
+    model: str

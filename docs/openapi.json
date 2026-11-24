@@ -368,6 +368,229 @@
         "title": "BackendRuleWeight",
         "type": "object"
       },
+      "BackendTicketCheckOut": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "name": {
+            "description": "is_ticket | not_sample | date | stadium | teams | seat",
+            "title": "Name",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "ok",
+          "detail"
+        ],
+        "title": "BackendTicketCheckOut",
+        "type": "object"
+      },
+      "BackendTicketReadIn": {
+        "description": "티켓 사진 1장(base64). 사진은 저장하지 않는다.",
+        "properties": {
+          "imageBase64": {
+            "description": "이미지 바이트의 base64(줄바꿈 없음). 원본 3.75MB 이하",
+            "title": "Imagebase64",
+            "type": "string"
+          },
+          "mediaType": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "image/jpeg | image/png | image/webp | image/gif — 실제 형식은 바이트로 판단",
+            "title": "Mediatype"
+          }
+        },
+        "required": [
+          "imageBase64"
+        ],
+        "title": "BackendTicketReadIn",
+        "type": "object"
+      },
+      "BackendTicketReadOut": {
+        "description": "티켓 판독 + 검사. 중복(같은 seatKey)·주 2회·포인트는 백엔드가 판단한다.",
+        "properties": {
+          "awayTeam": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Awayteam"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/BackendTicketCheckOut"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "gameDate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gamedate"
+          },
+          "homeTeam": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hometeam"
+          },
+          "kind": {
+            "description": "online | paper | unknown",
+            "title": "Kind",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "ok": {
+            "description": "검사를 모두 통과했나",
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "reasons": {
+            "description": "통과 못 한 이유(사용자에게 보여도 되는 말)",
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "scheduleChecked": {
+            "default": false,
+            "description": "그날 실제 경기가 있었는지 일정과 대조했나(일정 데이터 없음 → false)",
+            "title": "Schedulechecked",
+            "type": "boolean"
+          },
+          "seat": {
+            "$ref": "#/components/schemas/BackendTicketSeatOut"
+          },
+          "seatKey": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "중복 판단 키 '일자|구장|구역|블록|열|번호' — ok일 때만",
+            "title": "Seatkey"
+          },
+          "stadium": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "구장 키(잠실·고척·인천 …)",
+            "title": "Stadium"
+          },
+          "stadiumText": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "사진에서 읽은 구장 이름",
+            "title": "Stadiumtext"
+          }
+        },
+        "required": [
+          "ok",
+          "reasons",
+          "seat",
+          "kind",
+          "checks",
+          "model"
+        ],
+        "title": "BackendTicketReadOut",
+        "type": "object"
+      },
+      "BackendTicketSeatOut": {
+        "properties": {
+          "block": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Block"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "row": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Row"
+          },
+          "section": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section"
+          }
+        },
+        "title": "BackendTicketSeatOut",
+        "type": "object"
+      },
       "BackendWeightsOut": {
         "description": "개인화 가중치. 카드 노출 점수 = 중요도 × 관심도 × 난이도 배율, threshold 이상만 노출.",
         "properties": {
@@ -2555,6 +2778,47 @@
           }
         },
         "summary": "학습 퀴즈 한 문항 + 정답·해설 (백엔드 채점·풀이 기록 상세용)",
+        "tags": [
+          "backend"
+        ]
+      }
+    },
+    "/api/backend/tickets/read": {
+      "post": {
+        "operationId": "read_ticket_api_backend_tickets_read_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackendTicketReadIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackendTicketReadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "티켓 사진 판독·검사",
         "tags": [
           "backend"
         ]

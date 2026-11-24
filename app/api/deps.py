@@ -14,6 +14,7 @@ from app.adapters.relay.fixture import FixtureRelaySource
 from app.adapters.stats.fixture import FixtureStatsSource
 from app.adapters.stats.team_season import load_salaries, load_team_season
 from app.adapters.video.notes import VideoNotes
+from app.adapters.vision.ticket import TicketReader, build_ticket_reader
 from app.config import get_settings
 from app.domain.models import ExplainProfile
 from app.domain.profile import profile_from_onboarding
@@ -117,6 +118,12 @@ def get_salaries() -> dict[str, Any]:
 
 
 @lru_cache(maxsize=1)
+def get_ticket_reader() -> TicketReader:
+    """티켓 사진 판독기. 키가 없으면 읽지 않는다(가짜 통과 없음)."""
+    return build_ticket_reader()
+
+
+@lru_cache(maxsize=1)
 def get_moment_service() -> MomentService:
     settings = get_settings()
     return MomentService(
@@ -144,6 +151,7 @@ def reset_services() -> None:
         get_cheer_songs,
         get_team_season,
         get_salaries,
+        get_ticket_reader,
     ):
         fn.cache_clear()
 

@@ -21,6 +21,7 @@ from app.api import (
     routes_quiz,
     routes_rules,
     routes_team,
+    routes_ticket,
 )
 from app.api.deps import get_relay_source
 from app.config import get_settings
@@ -58,6 +59,7 @@ app.include_router(routes_backend.router)
 app.include_router(routes_backend.quiz_router)
 app.include_router(routes_cheer.router)
 app.include_router(routes_team.router)
+app.include_router(routes_ticket.router)
 
 
 @app.exception_handler(Exception)
