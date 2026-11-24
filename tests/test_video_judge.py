@@ -2635,3 +2635,91 @@ def test_review_guards_for_po225_rules():
     lag = [Cue(295.4, "pitch_seen", ""), _view(295.8, "in_play"), hit]
     assert [j.code for j in judge(seen, lag)] == ["reach"]
     assert [j.code for j in judge(seen, lag + [Cue(310, "pitch_seen", "")])] == ["out"]
+
+
+def test_fence_words_misheard_by_asr_still_mean_a_home_run():
+    """'담장 넘어갑니다'를 받아쓰기가 '탑자'·'탐정'·'당장'으로 적는다 — 2025 플레이오프 3차전
+    5회초 2사 3루 재역전 투런('탑자 넘어갑니다. 최역전 수렴')이 반 이닝을 건너 '출루'였다."""
+    (tr,) = transitions(stabilize(twice(R(0, outs=2, bases=(False, False, True)),
+                                        R(10, inning=4, away=2))))
+    for said in ("탑자 넘어갑니다. 최역전 수렴.", "넘게 오른쪽. 탐정. 넘어갑니다.",
+                 "오른쪽 멀리 가던 타구. 당장 넘어갑니다."):
+        assert judge_transition(tr, [Cue(6, "speech", said)]).code == "homerun", said
+    # 주자가 베이스를 넘어간 말은 아니다
+    assert judge_transition(tr, [Cue(6, "speech", "2루를 지나서 3루까지 넘어갑니다")]).code \
+        != "homerun"
+
+
+def test_runner_going_without_the_word_steal_is_a_steal():
+    """'도루' 낱말 없이 — '달리고. 던지지 못했습니다'·'1루주자(받아쓰기 1루지자) 스타트 2루까지'
+    (2025 플레이오프 3차전 4회초·7회말). '퀄리티 스타트'는 아니다."""
+    before = R(0, bases=(True, False, False), strikes=2)
+    after = R(10, bases=(False, True, False), balls=1, strikes=2)
+    for said in ("꿈쩍하지 않습니다. 달리고. 던지지 못했습니다. 주자 2루로 바뀝니다.",
+                 "1루지자 스타트 2루까지 들어갑니다.", "갔어요. 자 스타트 2루."):
+        assert one(before, after, [Cue(8, "speech", said)]).code == "steal", said
+    assert one(before, after, [Cue(8, "speech", "퀄리티 스타트를 달성합니다")]).code != "steal"
+    assert one(before, after, [Cue(8, "speech", "주자 스타트. 폭투")]).code == "wild_pitch"
+
+
+def test_walk_word_after_a_late_board_does_not_turn_a_hit_into_a_walk():
+    """2025 플레이오프 3차전 4회말 1사 구자욱 2-2 안타(17초 타구) — 점수판은 20초에야 직전
+    상태로 처음 읽혔고, 새 상태(30초) 판독 조각의 '볼넷'은 다음 타자 말이었다."""
+    reads = twice(R(20, outs=1, balls=2, strikes=2),
+                  R(30, outs=1, balls=3, strikes=2, bases=(True, False, False)))
+    said = [Cue(30, "speech", "벗어났습니다 볼렛 주자 2명으로 불어납니다")]
+    hit = [Cue(16.3, "pitch_seen", ""), _view(17, "in_play")]
+    (tr,) = transitions(stabilize(reads))
+    assert judge_transition(tr, hit + said).code == "reach"
+    assert judge_transition(tr, said).code == "walk"  # 타구 화면이 없으면 예전대로
+    # 타구 뒤 직전 상태가 보이는 동안 또 투구했으면 그 투구가 결정구다 — 볼넷 말을 받는다
+    later = hit + [Cue(23, "pitch_seen", "")]
+    assert judge_transition(tr, later + said).code == "walk"
+
+
+def test_strikeout_mark_after_a_later_pitch_beats_an_earlier_batted_ball_view():
+    """2025 플레이오프 3차전 8회말 김태훈 — 앞 공(스트라이크) 뒤 넓은 화면을 관절이 '맞아 나감'으로
+    봤고, 다음 공 뒤 점수판이 3K를 띄웠다. 그 삼진은 마지막 투구 화면 칸이다(`pitch_t`)."""
+    k = twice(R(0, outs=1, balls=1, strikes=2, bases=(False, True, False)),
+              R(8, outs=2, bases=(False, True, False)))
+    first = [Cue(3.3, "pitch_seen", ""), _view(3.8, "in_play")]
+    last = [Cue(6.1, "pitch_seen", ""), _view(9.5, "no_play")]
+    mark = [Cue(8.8, "k_mark", "[점수판] 삼진 표시(K)")]
+    (j,) = [j for j in judge(k, first + last + mark) if j.transition is not None]
+    assert j.code == "strikeout" and j.detail.get("pitch_t") == 9.5
+    # 표시가 없으면 예전대로 — 앞 타구가 늦게 보인 것일 수 있다(독립 리뷰)
+    (j,) = [j for j in judge(k, first + last) if j.transition is not None]
+    assert "pitch_t" not in j.detail
+
+
+def test_misheard_fence_words_need_a_clearing_verb():
+    """독립 리뷰 — '담장 쪽으로 넘어지면서 잡아냅니다'는 포구다. 변형 말은 '넘어가·넘습' 꼴만."""
+    (tr,) = transitions(stabilize(twice(R(0, outs=2, bases=(False, False, True)),
+                                        R(10, inning=4, away=2))))
+    caught = judge_transition(tr, [Cue(6, "speech", "좌익수 담장 쪽으로 넘어지면서 잡아냅니다.")])
+    assert caught.code != "homerun"
+    assert judge_transition(tr, [Cue(6, "speech", "담장 쪽으로 넘어갑니다")]).code == "homerun"
+
+
+def test_runner_words_with_a_pickoff_error_are_not_a_steal():
+    """독립 리뷰 — '스타트가 좋은 선수라 견제… 견제 악송구! 2루까지'는 도루가 아니다. 뛴 말은
+    더블스틸 근거로도 안 쓴다."""
+    one_base = (R(0, bases=(True, False, False), balls=1, strikes=1),
+                R(10, bases=(False, True, False), balls=1, strikes=1))
+    said = "1루 주자가 스타트가 좋은 선수라 견제를 하는데요. 아 견제 악송구! 2루까지"
+    assert one(*one_base, [Cue(8, "speech", said)]).code != "steal"
+    double = (R(0, bases=(True, True, False), balls=1, strikes=1),
+              R(10, bases=(False, True, True), balls=2, strikes=1))
+    loose = "2루 주자 스타트 3루까지. 공이 뒤로 빠졌어요"
+    assert one(*double, [Cue(8, "speech", loose)]).code != "steal"
+
+
+def test_intentional_walk_after_a_double_keeps_the_walk():
+    """독립 리뷰 — 앞 타자 2루타(17초 타구) 뒤 직전 상태(1사 2루 0-0)가 20초에 처음 읽히고,
+    투구 없는 자동 고의4구. 새 타석(0-0)의 직전 상태는 그 타구가 만든 것일 수 있어 볼넷 말을
+    지우지 않는다."""
+    reads = twice(R(0, outs=1), R(20, outs=1, bases=(False, True, False)),
+                  R(40, outs=1, bases=(True, True, False)))
+    cues = [Cue(16.3, "pitch_seen", ""), _view(17, "in_play"),
+            Cue(30, "speech", "자동 고의4구로 내보냅니다")]
+    assert [j.code for j in judge(reads, cues)] == ["reach", "walk"]

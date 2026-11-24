@@ -207,7 +207,15 @@ _ASR_WORDS = {"삼진": ("3진", "섬진", *STRIKEOUT_CALLS, *SWING_K_SPELLINGS)
                        # '볼렛'·'골렛'·'골넷'(받아쓰기 전체 2026-11-23: 30번 모두 볼넷 —
                        # 2025 플레이오프
                        # 2차전 2회말 '또 빠져요 골렛' 3-2 볼넷이 '출루'였다)
-                       "볼렛", "골렛", "골넷")}
+                       "볼렛", "골렛", "골넷"),
+              # '담장 넘어갑니다'를 '당장'·'탐작'·'탑자'·'탐정'으로(받아쓰기 전체 2026-11-25: 11번
+              # 모두 홈런 — 2025 플레이오프 3차전 5회초 노시환 재역전 투런 '탑자 넘어갑니다. 최역전
+              # 수렴'이 '출루'였다). '담장 쪽(으로) 넘어갑니다'도 같은 말. '넘어가·넘습' 꼴만 —
+              # '담장 쪽으로 넘어지면서 잡아냅니다'는 포구다(독립 리뷰)
+              "담장 넘": tuple(f"{w} {end}"
+                              for w in ("당장", "탐작", "탑자", "탐정", "탐정.", "탐장",
+                                        "담장 쪽", "담장 쪽으로")
+                              for end in ("넘어가", "넘어갑", "넘어갔", "넘습"))}
 
 
 # 같은 글자의 다른 말 — '사구(死球)'는 몸에 맞는 공인데 '고의사구(四球)'는 고의4구다.
@@ -482,6 +490,13 @@ def judge_transition(
         if advanced_all_one_base(b, a) and balk_cue and (same_count or _speech(near, "보크")):
             return make("call", "balk", 0.5, [balk_cue, _speech(near, "보크")])
         steal_cue = _has(near, "slide") or _speech(near, "도루") or _late_board_slide(tr, cues)
+        # '도루' 없이 뛴 말은 주자 하나가 간 전이에서만, 견제·악송구·실책 말이 없을 때 —
+        # '1루 주자가 스타트가 좋은 선수라 견제를… 견제 악송구'는 도루가 아니다(독립 리뷰).
+        # 카운트가 바뀌었는지는 안 본다 — 점수판이 카운트를 먼저 바꾸고 주자는 8초 뒤에
+        # 옮겼다(2025 PO 3차전 4회초)
+        if (steal_cue is None and single_runner_advance(b, a)
+                and not _speech(near, *NOT_STEAL_RUN)):
+            steal_cue = _steal_said(near)
         if single_runner_advance(b, a) and steal_cue and not _speech(near, "폭투", "포일"):
             # 세이프인데 태그가 닿아 보였다 — 베이스가 먼저였을 수도 있다. 관측만 남긴다
             seen = {"observed": OBSERVED_TAG_ON_SAFE} if _has(near, "slide_tag") else {}
@@ -580,8 +595,9 @@ def judge_transition(
             prior = 0.5 if tr.before.strikes == 2 else 0.3
             return make("call", "dropped_third_strike", prior,
                         [dts, _speech(near, "낫아웃", "낫 아웃")])
-        # 공이 맞아 나갔으면(넓은 경기장 화면) 볼넷이 아니다 — 해설의 '볼넷'은 다른 타석 말이다
-        walk_speech = None if in_play or not forced else (
+        # 공이 맞아 나갔으면(넓은 경기장 화면) 볼넷이 아니다 — 해설의 '볼넷'은 다른 타석 말이다.
+        # 점수판이 타구 뒤에야 직전 상태로 처음 읽혔어도 같다(_lag_in_play)
+        walk_speech = None if in_play or _lag_in_play(cues, tr) or not forced else (
             _speech(near, *WALK_WORDS) or _has(near, "ball_four"))
         swung = _swung_last_pitch(near, tr.t, tr.before.t)
         batted = _has(near, "contact") or swung or in_play
@@ -686,6 +702,23 @@ HIT_WORDS = ("안타", "적시타", "2루타", "3루타", "투베이스", "쓰�
 # (받아쓰기 변형 '내안'·'내열'·'1, 2강'). '다리 사이를 관통·빠져나가'는 실책이라 안 받는다
 # (독립 리뷰)
 HIT_THROUGH = re.compile(r"(?:간|강|내야|내안|내열)[을를]?\s*(?:관통|꿰뚫)")
+
+
+# 주자가 뛰었다는 말 — '도루' 낱말 없이 도루를 전한다(2025 플레이오프 3차전 4회초 '달리고. 던지지
+# 못했습니다. 주자 2루로', 7회말 '1루주자(받아쓰기 1루지자) 스타트 2루까지'). 공이 안 맞았는데
+# 주자 하나만 간 전이에서만 쓴다 — '주자 스타트… 때렸습니다'(치고 달리기)·'퀄리티 스타트'와 겹친다
+STEAL_RUN = re.compile(r"(?:주자|[123]루\s*[주지]자)[는가]?\s*스타트"
+                       r"|스타트[!.]?\s*[23]루|달리고[.,]?\s*던지지\s*못")
+
+
+# 뛴 말이 있어도 도루가 아닌 말 — 견제 악송구·실책으로 간 진루(독립 리뷰). 거르는 데만 쓰는
+# 낱말이라 _speech 호출에 바로 적지 않는다 — 규칙 카탈로그(scripts/build_rules_catalog.py)가
+# '알아듣는 말'로 센다
+NOT_STEAL_RUN = ("견제", "악송구", "실책")
+
+
+def _steal_said(cues: Sequence[Cue]) -> Optional[Cue]:
+    return next((c for c in cues if c.kind == "speech" and STEAL_RUN.search(c.text)), None)
 
 
 def _hit_said(cues: Sequence[Cue]) -> Optional[Cue]:
@@ -960,6 +993,33 @@ def _judge_spending_words(
                 spent[(c, j.code)] += 1
             return j
         pool = [c for c in pool if c not in over]
+
+
+def _lag_in_play(cues: Sequence[Cue], tr: Transition) -> Optional[Cue]:
+    """직전 상태가 처음 읽히기 직전(BOARD_LAG_SEC 안)에 공이 맞아 나간 화면이 있고, 그 뒤 새 상태가
+    보일 때까지 다른 투구가 없으면 그 타구 화면.
+
+    판독은 8초마다라 카운트가 바뀐 점수판을 늦게 읽는다 — 2025 플레이오프 3차전 4회말 1사 구자욱
+    2-2 안타(277초 타구)의 점수판을 280초에야 '1사 2-2 주자 없음'으로 처음 읽고, 290초 '1사 1루'
+    판독 조각의 '볼넷 주자 2명으로'(다음 타자 디아즈 볼넷 말)로 그 안타를 볼넷이라 했다. 직전 상태가
+    보인 뒤의 투구 화면이 하나도 없을 때만 — 있으면 그 화면이 이 플레이다.
+    """
+    # 직전 상태가 새 타석(0-0)이면 그 타구가 직전 상태를 만든 앞 타자 것일 수 있다 — 앞 타자 2루타
+    # 뒤 자동 고의4구(투구 없음)의 볼넷을 지웠다(독립 리뷰). 카운트가 진행된 상태만 본다
+    if (tr.before.balls, tr.before.strikes) == (0, 0):
+        return None
+    if _speech(_near(cues, tr.t), "고의"):
+        return None
+    if any(c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN) and tr.before.t < c.t <= tr.t for c in cues):
+        return None
+    last = max((c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                and tr.before.t - BOARD_LAG_SEC <= c.t <= tr.before.t), key=lambda c: c.t,
+               default=None)
+    if last is None or last.kind != IN_PLAY:
+        return None
+    if any(c.kind == PITCH_SEEN and last.t < c.t <= tr.t for c in cues):
+        return None
+    return last
 
 
 def _pitch_view(cues: Sequence[Cue], tr: Transition) -> Optional[Cue]:
@@ -1316,7 +1376,14 @@ def _in_progress_view(tr: Transition, cues: Sequence[Cue]) -> Optional[Cue]:
         marker = PITCH_SEEN
     pitch = max(thrown)
     views = [c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)]
-    if any(c.kind == IN_PLAY and tr.before.t < c.t <= tr.t for c in views):
+    batted = [c for c in views if c.kind == IN_PLAY and tr.before.t < c.t <= tr.t]
+    # 앞 투구 뒤 '맞아 나감'이 있어도, 마지막 투구 뒤 점수판이 삼진 표시를 띄웠으면 그 투구가
+    # 결정구다
+    # — 2025 플레이오프 3차전 8회말 김태훈: 777초 스트라이크 뒤 넓은 화면(2루 주자를 비춤)을 관절이
+    # '맞아 나감'으로 봐 780초 헛스윙 삼진(782.8초 3K)이 앞 칸 '아웃'으로 갔다
+    marked = batted and max(c.t for c in batted) < pitch and any(
+        c.kind == K_MARK and pitch < c.t <= pitch + K_MARK_SEC for c in cues)
+    if batted and not marked:
         return None
     ends = [c for c in views if c.t > pitch]
     end = min(ends, key=lambda c: c.t) if ends else None
