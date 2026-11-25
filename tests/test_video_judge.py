@@ -2819,3 +2819,37 @@ def test_review_cases_for_strikeout_marks():
     cues = [Cue(0, "speech", "스윙 삼진."), Cue(6, "k_mark", "K"), Cue(6.03, "k_mark", "K"),
             Cue(10, "speech", "방망이 돌았습니다. 삼진.")]
     assert codes(two, cues) == ["strikeout", "strikeout"]
+
+
+def test_hit_before_skipped_half_innings_ignores_the_view_of_the_pitch_that_made_the_state():
+    """2025 한국시리즈 2차전 4회말 2사 만루 — 만루를 만든 볼넷 공의 화면이 직전 상태가 보인 0.3초
+    뒤에 끝나 '직전 상태 뒤 첫 화면'으로 잡혔고, 다음 공의 주자 일소 2루타(점수판은 5회초를 건너
+    5회말 1사에야)가 '아웃'이었다."""
+    # 비디오 판독으로 점수판이 2루타 뒤에도 한참 2사 만루로 남았다(20초에 다시 읽힘)
+    loaded = dict(inning=4, half="bot", outs=2, bases=(True, True, True), away=5, home=7)
+    reads = twice(R(0, **loaded), R(20, **loaded),
+                  R(50, inning=5, half="bot", outs=1, away=5, home=10))
+    cues = [Cue(-3.4, "pitch_seen", ""), _view(0.3, "no_play"),
+            Cue(14, "swing", "[관절] 타자가 배트를 휘두름"), Cue(14, "pitch_seen", ""),
+            _view(15, "in_play"),
+            Cue(34, "speech", "주자 3명 싹쓸이는 확정이고"), Cue(44, "speech", "2루타")]
+    (j,) = [j for j in judge(reads, cues) if j.transition is not None]
+    assert j.code == "reach"
+    # 직전 상태 뒤 첫 공이 안 맞았으면(그 공의 화면) 예전대로 말하지 않는다
+    calm = [Cue(-3.4, "pitch_seen", ""), _view(0.3, "no_play"), Cue(14, "pitch_seen", ""),
+            _view(15, "no_play"), Cue(44, "speech", "2루타")]
+    (j,) = [j for j in judge(reads, calm) if j.transition is not None]
+    assert j.code != "reach"
+    # 직전 상태가 그 공 전에 이미 점수판에서 사라졌으면(다시 안 읽힘) 그 공은 다음 반 이닝 것일 수
+    # 있다 — 다음 반 이닝의 안타를 앞 반 이닝 득점으로 쓰지 않는다(독립 리뷰)
+    once = twice(R(0, **loaded), R(50, inning=5, half="bot", outs=1, away=5, home=10))
+    (j,) = [j for j in judge(once, cues) if j.transition is not None]
+    assert j.code != "reach"
+    # 공이 맞아 나간 화면은 직전 상태가 늦게 읽혀도 뺄 수 없다(결정타일 수 있다)
+    late = twice(R(0, inning=4, half="bot", outs=2, bases=(False, False, True), away=5, home=7),
+                 R(25, inning=5, half="bot", outs=1, away=5, home=8))
+    hit = [Cue(-1, "pitch_seen", ""), _view(3, "in_play"),
+           Cue(8, "speech", "좌익수 앞에 떨어지는 안타"), Cue(18, "pitch_seen", ""),
+           _view(20, "no_play")]
+    (j,) = [j for j in judge(late, hit) if j.transition is not None]
+    assert j.code == "reach"

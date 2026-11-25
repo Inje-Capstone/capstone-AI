@@ -402,8 +402,24 @@ def judge_transition(
     # 그 점수는 3아웃 전 안타다(한국시리즈 2차전 4회말 2사 3루 '좌익수 앞에 떨어지는 안타' 뒤 6회초)
     # 새 반 이닝 첫 판독에 주자가 없고, 직전 상태 뒤 첫 투구 화면이 맞아 나간 것일 때만 — 새 반
     # 이닝의 안타·투구를 앞 반 이닝 득점의 근거로 쓰지 않게(독립 리뷰). 말도 직전 상태 뒤의 것만
+    # 직전 상태를 만든 공(투구 순간이 직전 상태보다 앞)의 화면은 빼고 — 그 화면이 직전 상태가 보인
+    # 0.3초 뒤에 끝나 첫 화면으로 잡혀 다음 공의 주자 일소 2루타를 못 봤다(2025 한국시리즈 2차전
+    # 4회말: 2사 만루 볼넷 화면 뒤 문보경 2루타, 점수판은 5회말 1사에야)
     first = min((c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
                  and tr.before.t < c.t <= tr.t), key=lambda c: c.t, default=None)
+    # 공이 안 맞은 그 화면만 빼고(맞아 나간 화면은 점수판을 늦게 읽어도 결정타일 수 있다), 대신
+    # 들어온 화면의 공은 직전 상태가 아직 점수판에 있을 때 던진 것이어야 한다 — 다음 반 이닝의
+    # 안타가 들어오지 않게(독립 리뷰)
+    if first is not None and first.kind != IN_PLAY and _view_of_earlier_pitch(
+            cues, first, tr.before.t):
+        later = min((c for c in cues if c.kind in (IN_PLAY, NO_PLAY, VIEW_UNKNOWN)
+                     and first.t < c.t <= tr.t), key=lambda c: c.t, default=None)
+        on_board = max(tr.before.t, tr.before_seen if tr.before_seen is not None
+                       else tr.before.t)
+        pitch = (max((c.t for c in cues if c.kind == PITCH_SEEN and c.t <= later.t),
+                     default=None) if later is not None else None)
+        if later is not None and pitch is not None and tr.before.t < pitch <= on_board:
+            first = later
     # 직전 상태 뒤 투구 화면이 하나도 없으면(안타를 다시보기로만 보여 줌) 해설만 — 새 반 이닝의
     # 투구가 아직 없으니 그 말은 앞 반 이닝 것이다(2025 플레이오프 1차전 3회초 2사 2루 '김영웅의
     # 적시타… 동점타' 뒤 3회말을 건너뛰고 4회초)
@@ -1066,6 +1082,12 @@ def _mark_start(cues: Sequence[Cue], m: Cue) -> float:
         else:
             break
     return start
+
+
+def _view_of_earlier_pitch(cues: Sequence[Cue], view: Cue, since: float) -> bool:
+    """투구 뒤 화면 view가 since 전에 던진 공의 것인가 — view 바로 앞 투구 순간이 since보다 앞."""
+    pitch = max((c.t for c in cues if c.kind == PITCH_SEEN and c.t <= view.t), default=None)
+    return pitch is not None and pitch <= since
 
 
 def _lag_in_play(cues: Sequence[Cue], tr: Transition) -> Optional[Cue]:
