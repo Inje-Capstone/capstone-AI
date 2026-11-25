@@ -2723,3 +2723,99 @@ def test_intentional_walk_after_a_double_keeps_the_walk():
     cues = [Cue(16.3, "pitch_seen", ""), _view(17, "in_play"),
             Cue(30, "speech", "자동 고의4구로 내보냅니다")]
     assert [j.code for j in judge(reads, cues)] == ["reach", "walk"]
+
+
+def test_taken_ball_four_with_a_wide_view_is_a_walk():
+    """2025 준PO 2차전 5회말 2사 1루 최정 3-2 — 관절은 그 공을 '그냥 보냄'으로 봤는데 뒤이은 넓은
+    화면(밀려 가는 주자)을 '맞아 나감'으로 봐 '출루'였다. 휘둘렀으면 예전대로 출루."""
+    reads = twice(R(0, outs=2, balls=3, strikes=2, bases=(True, False, False)),
+                  R(10, outs=2, bases=(True, True, False)))
+    took = [Cue(3, "no_swing", "[관절] 타자가 공을 그냥 보냄"), Cue(3, "pitch_seen", ""),
+            _view(7, "in_play")]
+    assert [j.code for j in judge(reads, took)] == ["walk"]
+    swung = [Cue(3, "swing", "[관절] 타자가 배트를 휘두름"), Cue(3, "pitch_seen", ""),
+             _view(7, "in_play")]
+    assert [j.code for j in judge(reads, swung)] == ["reach"]
+
+
+def test_caught_stealing_said_as_runner_going_with_a_tag():
+    """2025 준PO 2차전 7회초 2사 1루 — '주자가 뜹니다 … 2루에서 아웃'(받아쓰기 '1호 1호에서 아우')에
+    미끄러진 주자 태그가 보이고 반 이닝이 끝났다. 태그가 없으면 '도루 실패'라 하지 않는다."""
+    reads = twice(R(0, outs=2, balls=2, strikes=2, bases=(True, False, False)),
+                  R(16, half="bot"))
+    said = Cue(-1, "speech", "주자가 뜹니다 1호 1호에서 아우")
+    tag = [Cue(-0.1, "slide", "[관절] 슬라이딩"), Cue(-0.1, "slide_tag", "[관절] 태그")]
+    (j,) = judge(reads, [said] + tag)
+    assert j.code == "caught_stealing"
+    (j,) = judge(reads, [said])
+    assert j.code != "caught_stealing"
+
+
+def test_strikeout_marks_leave_the_word_for_the_strikeout_it_describes():
+    """2025 준PO 2차전 1회초 — 삼진 셋. 앞 둘은 점수판 표시(K)가 있고 셋째는 '스윙! 삼진!'뿐이다.
+    표시로 낸 삼진이 다음 조각의 '삼진' 말을 쓰면 셋째가 '아웃'이 됐다. 표시는 그 시각을 덮는
+    조각의 말만 쓴다."""
+    reads = twice(R(0, strikes=2), R(10, outs=1, strikes=2), R(20, outs=2, strikes=2),
+                  R(30, half="bot"))
+    cues = [Cue(0, "speech", "첫 타자를 삼제도로 돌려세웁니다"), Cue(8, "k_mark", "K"),
+            Cue(10, "speech", "루킹 스트라이크 아웃."), Cue(18, "k_mark", "K"),
+            Cue(20, "speech", "스윙! 삼진! 아웃 카운트 3개 모두")]
+    assert [j.code for j in judge(reads, cues) if j.transition is not None] == ["strikeout"] * 3
+
+
+def test_strikeout_mark_right_after_the_before_state_belongs_to_the_last_strikeout():
+    """2025 와일드카드 2차전 2회말 — 아웃을 먼저 올리고 0.7초 뒤 띄운 김헌곤 삼진 표시와 그 조각의
+    '루킹 삼진'이 다음 이재현 뜬공(관절 없음)을 '삼진'으로 만들었다."""
+    reads = twice(R(0, outs=0, strikes=2), R(10, outs=1, strikes=2), R(22, outs=2))
+    cues = [Cue(10.7, "k_mark", "K"), Cue(10, "speech", "바깥쪽 루킹 삼진입니다")]
+    codes = [j.code for j in judge(reads, cues) if j.transition is not None]
+    assert codes == ["strikeout", "out"]
+
+
+def test_review_cases_for_taken_pitch_tag_and_runner_words():
+    """독립 리뷰 — 바꾼 규칙이 예전에 맞던 판정을 바꾸지 않는다."""
+    def codes(reads, cues):
+        return [j.code for j in judge(reads, cues) if j.transition is not None]
+
+    single = twice(R(0, balls=3, strikes=1), R(14, bases=(True, False, False)))
+    # 느린 다시보기의 '안 침'(타구 뒤) — 3-1 안타는 안타
+    replay = [Cue(3, "swing", "[관절] 타자가 배트를 휘두름"), Cue(3, "pitch_seen", ""),
+              _view(5, "in_play"), Cue(12, "no_swing", "[관절] 타자가 공을 그냥 보냄")]
+    assert codes(single, replay) == ["reach"]
+    # 앞 공을 그냥 보냈고 다음 공(휘두름 단서 없음)이 맞아 나감 — 안타
+    earlier = [Cue(3, "no_swing", "[관절] 타자가 공을 그냥 보냄"), Cue(3, "pitch_seen", ""),
+               _view(5, "no_play"), Cue(10, "pitch_seen", ""), _view(12, "in_play")]
+    assert codes(single, earlier) == ["reach"]
+    # 직전 상태를 만든 도루 성공의 태그 + 뒤에 땅볼로 반 이닝 끝 — 도루 실패가 아니다
+    steal = twice(R(0, outs=2, balls=1, strikes=1, bases=(True, False, False)),
+                  R(12, outs=2, balls=1, strikes=1, bases=(False, True, False)),
+                  R(60, half="bot"))
+    cues = [Cue(5, "speech", "1루 주자가 뜁니다 2루에서 세이프"),
+            Cue(10, "slide", "[관절] 슬라이딩"), Cue(10, "slide_tag", "[관절] 태그"),
+            Cue(50, "pitch_seen", ""), _view(52, "in_play")]
+    assert codes(steal, cues) == ["steal", "out"]
+    # '주자 뜁니다 공이 뒤로 빠졌어요' — 도루 카드가 아니다
+    loose = twice(R(0, balls=1, strikes=1, bases=(True, False, False)),
+                  R(12, balls=2, strikes=1, bases=(False, True, False)))
+    assert codes(loose, [Cue(3, "speech", "1루 주자 뜁니다 공이 뒤로 빠졌어요")]) != ["steal"]
+
+
+def test_review_cases_for_strikeout_marks():
+    """독립 리뷰 — 표시를 덮는 조각에 '삼진'이 없으면 바로 다음 조각의 말을 쓰고, 같은 띠를 두 번
+    읽은 표시는 첫 표시 시각으로 본다. 표시 둘이 든 판정도 말은 한 번만."""
+    def codes(reads, cues):
+        return [j.code for j in judge(reads, cues) if j.transition is not None]
+
+    late_word = twice(R(0, strikes=2), R(10, outs=1), R(18, outs=1, strikes=2), R(28, outs=2))
+    cues = [Cue(0, "speech", "바깥쪽 꽉 찬 공"), Cue(8, "k_mark", "K"),
+            Cue(10, "speech", "루킹 삼진입니다"), Cue(20, "speech", "높이 뜬 공")]
+    assert codes(late_word, cues) == ["strikeout", "out"]
+    reread = twice(R(0, strikes=2), R(10, outs=1, strikes=2), R(22, outs=2))
+    cues = [Cue(0, "speech", "바깥쪽 루킹 삼진입니다"), Cue(10.7, "k_mark", "K"),
+            Cue(13.5, "k_mark", "K")]
+    assert codes(reread, cues) == ["strikeout", "out"]
+    # 같은 띠 표시 둘(0.03초 차) — 다음 타자 삼진의 말은 남는다(2025 PO 3차전 6회말)
+    two = twice(R(0, outs=1, strikes=2), R(10, outs=2, strikes=2), R(20, half="bot"))
+    cues = [Cue(0, "speech", "스윙 삼진."), Cue(6, "k_mark", "K"), Cue(6.03, "k_mark", "K"),
+            Cue(10, "speech", "방망이 돌았습니다. 삼진.")]
+    assert codes(two, cues) == ["strikeout", "strikeout"]

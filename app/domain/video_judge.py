@@ -531,6 +531,17 @@ def judge_transition(
         around = [c for c in cues
                   if tr.before.t - ASR_LEAD <= c.t <= min(tr.t, tr.before.t + CAUGHT_SEC)]
         said = _speech(around, *CAUGHT_WORDS)
+        # '도루 실패' 낱말 없이 '주자가 뜁니다… 2루에서 아웃'(받아쓰기 '1호 1호에서 아우')이라도
+        # 미끄러진 주자에게 태그가 보였으면 같은 말이다(2025 준PO 2차전 7회초 3아웃)
+        # 그 태그가 직전 상태를 만든 도루 성공일 수도 있다 — 뛴 말로 낼 때는 직전 상태 뒤에 공이
+        # 맞아 나간 화면이 아예 없고(3아웃이 타구가 아님) '세이프' 말이 없을 때만(독립 리뷰)
+        touched = next((c for c in around if c.kind == "slide_tag"
+                        and c.t >= tr.before.t - CAUGHT_TAG_LEAD), None)
+        if said is None and touched is not None and not any(
+                c.kind == IN_PLAY and tr.before.t < c.t <= tr.t for c in cues):
+            go = next((c for c in around if c.kind == "speech" and RUNNER_GO.search(c.text)
+                       and "세이프" not in c.text and "세잎" not in c.text), None)
+            said = go
         batted = any(c.kind == IN_PLAY and c.t > tr.before.t for c in around)
         # 2스트라이크에서 공이 안 맞아 나갔거나 헛스윙이 보였으면 삼진이 먼저다(아래 타석 결과)
         k_seen = (_speech(around, "삼진") or _has(around, "swing_miss")
@@ -596,11 +607,20 @@ def judge_transition(
             return make("call", "dropped_third_strike", prior,
                         [dts, _speech(near, "낫아웃", "낫 아웃")])
         # 공이 맞아 나갔으면(넓은 경기장 화면) 볼넷이 아니다 — 해설의 '볼넷'은 다른 타석 말이다.
-        # 점수판이 타구 뒤에야 직전 상태로 처음 읽혔어도 같다(_lag_in_play)
-        walk_speech = None if in_play or _lag_in_play(cues, tr) or not forced else (
+        # 점수판이 타구 뒤에야 직전 상태로 처음 읽혔어도 같다(_lag_in_play). 마지막 공을 그냥
+        # 보냈으면(관절) 넓은 화면은 타구가 아니다 — 볼넷 뒤 밀려 가는 주자를 비춘다(2025 준PO
+        # 2차전 5회말 2사 1루 최정 3-2 볼넷이 '출루')
+        took = _took_last_pitch(near, tr.t, tr.before.t)
+        # 같은 공일 때만 — '그냥 보냄'이 넓은 화면보다 앞이고 사이에 다른 투구가 없어야 한다(느린
+        # 다시보기의 '안 침'·앞 공의 '안 침'이 안타를 볼넷으로 바꾸지 않게, 독립 리뷰)
+        same_pitch = (took is not None and in_play is not None and took.t <= in_play.t
+                      and not any(c.kind == PITCH_SEEN and took.t < c.t < in_play.t
+                                  for c in cues))
+        played = None if same_pitch else in_play
+        walk_speech = None if played or _lag_in_play(cues, tr) or not forced else (
             _speech(near, *WALK_WORDS) or _has(near, "ball_four"))
         swung = _swung_last_pitch(near, tr.t, tr.before.t)
-        batted = _has(near, "contact") or swung or in_play
+        batted = _has(near, "contact") or swung or played
         if forced and tr.before.balls == 3 and not batted:
             return make("result", "walk", 0.6,
                         [walk_speech, _took_last_pitch(near, tr.t, tr.before.t), no_play])
@@ -635,8 +655,18 @@ def judge_transition(
         if dts and dts_possible(tr.before):  # 낫아웃 상황이었지만 1루에서 아웃
             return make("call", "dropped_third_strike", 0.5, [dts], out=True)
         # 공이 맞아 나갔으면 삼진이 아니다 — 해설의 '삼진'은 앞 타자 말일 수 있다
+        # 점수판 삼진 표시가 이 전이 안에 떴으면 그것을 먼저 근거로 — 해설의 '삼진' 한 마디는 삼진
+        # 하나만 설명해(_judge_spending_words) 표시로 충분한 삼진이 말을 쓰면 다음 삼진이 말을 못
+        # 쓴다(2025 준PO 2차전 1회초: 이재현 삼진이 김성윤의 '루킹 스트라이크 아웃'을, 김성윤 삼진이
+        # 구자욱의 '스윙! 삼진!'을 써 구자욱 삼진 3아웃이 '아웃')
+        # 직전 상태가 보이고 K_MARK_LAG 안에 뜬 표시는 앞 전이(그 상태를 만든 삼진)의 것이다 —
+        # 아웃을 먼저 올리고 1초 뒤 표시를 띄우는 판(2025 와일드카드 2차전 2회말: 김헌곤 삼진 표시가
+        # 다음 이재현 뜬공을 삼진으로)
+        mark = next((c for c in near if c.kind == K_MARK
+                     and tr.before.t + K_MARK_LAG < _mark_start(cues, c) <= tr.t + K_MARK_LAG),
+                    None)
         k = None if in_play else (
-            _has(near, "swing_miss") or _has(near, "strikeout") or _speech(near, "삼진")
+            _has(near, "swing_miss") or _has(near, "strikeout") or mark or _speech(near, "삼진")
             or next((c for c in near if c.kind == "speech" and c.t > tr.before.t - ASR_LEAD
                      and SWING_CALL.search(c.text)
                      and not any(w in c.text for w in NOT_SWING_CALL)), None))
@@ -709,12 +739,15 @@ HIT_THROUGH = re.compile(r"(?:간|강|내야|내안|내열)[을를]?\s*(?:관통
 # 주자 하나만 간 전이에서만 쓴다 — '주자 스타트… 때렸습니다'(치고 달리기)·'퀄리티 스타트'와 겹친다
 STEAL_RUN = re.compile(r"(?:주자|[123]루\s*[주지]자)[는가]?\s*스타트"
                        r"|스타트[!.]?\s*[23]루|달리고[.,]?\s*던지지\s*못")
+# 주자가 뛰었다는 말 넓게 — 반 이닝이 끝난 도루 실패(태그가 보일 때)에만 쓴다. '주자가 뜁니다'는
+# 공이 빠진 진루에도 쓰여(독립 리뷰) 도루 성공 규칙에는 안 넣는다. 받아쓰기는 '뜹니다'로도 적었다
+RUNNER_GO = re.compile(STEAL_RUN.pattern + r"|주자[가는]?\s*[뜁뜹]니다")
 
 
 # 뛴 말이 있어도 도루가 아닌 말 — 견제 악송구·실책으로 간 진루(독립 리뷰). 거르는 데만 쓰는
 # 낱말이라 _speech 호출에 바로 적지 않는다 — 규칙 카탈로그(scripts/build_rules_catalog.py)가
 # '알아듣는 말'로 센다
-NOT_STEAL_RUN = ("견제", "악송구", "실책")
+NOT_STEAL_RUN = ("견제", "악송구", "실책", "뒤로 빠", "공이 빠")
 
 
 def _steal_said(cues: Sequence[Cue]) -> Optional[Cue]:
@@ -991,8 +1024,48 @@ def _judge_spending_words(
         if not over:
             for c in said:
                 spent[(c, j.code)] += 1
+            # 삼진 표시로 낸 삼진도 표시 시각을 덮는 조각의 '삼진' 한 마디는 이 삼진 말이다 —
+            # 남겨 두면 다음 아웃이 그 말로 삼진이 된다(2025 와일드카드 2차전 2회말 김헌곤 삼진
+            # 뒤 이재현 뜬공)
+            if j.code == "strikeout" and not said:
+                piece = _piece_sec(pool)
+                marks = [c.t for c in pool if c.kind == K_MARK]
+                # 판정 하나는 삼진 하나 — 같은 띠를 여러 번 읽은 표시가 근거에 여럿 들어도 말은
+                # 한 번만 쓴다(2025 PO 3차전 6회말: 이재현 삼진 표시 둘이 다음 김태훈의 '삼진'까지
+                # 씀)
+                for m in [c for c in pool if c.kind == K_MARK and _ev(c) in j.evidence][:1]:
+                    pieces = sorted((c for c in pool if c.kind == "speech"
+                                     and c.t <= m.t + piece and m.t < c.t + piece),
+                                    key=lambda c: c.t)
+                    # 표시를 덮는 조각, 그 조각에 '삼진'이 없으면 다음 조각 — 다음 조각이 다른
+                    # 표시(다음 삼진)를 덮으면 그 조각은 다음 삼진 말이다(2025 준PO 2차전 1회초,
+                    # 독립 리뷰)
+                    for c in pieces:
+                        other = any(t != m.t and abs(t - m.t) > K_MARK_BAR
+                                    and c.t <= t < c.t + piece for t in marks)
+                        if c.t > m.t and other:
+                            break
+                        if _speech([c], "삼진") and spent[(c, j.code)] < _mentions(c, j.code):
+                            spent[(c, j.code)] += 1
+                            break
             return j
         pool = [c for c in pool if c not in over]
+
+
+def _mark_start(cues: Sequence[Cue], m: Cue) -> float:
+    """삼진 표시 m이 속한 띠가 처음 읽힌 시각.
+
+    띠는 2~3초 떠 있어 한 삼진이 여러 번 읽힌다(화소 훑기·판독 각각). K_MARK_BAR 안에 이어진 표시는
+    같은 띠다(독립 리뷰: 다시 읽힌 띠가 다음 뜬공을 삼진으로).
+    """
+    marks = sorted(c.t for c in cues if c.kind == K_MARK and c.t <= m.t)
+    start = m.t
+    for t in reversed(marks):
+        if start - t <= K_MARK_BAR:
+            start = t
+        else:
+            break
+    return start
 
 
 def _lag_in_play(cues: Sequence[Cue], tr: Transition) -> Optional[Cue]:
